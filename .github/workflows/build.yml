@@ -1,0 +1,134 @@
+name: Build
+on:
+  push:
+  pull_request:
+env:
+  CARGO_TERM_COLOR: always
+  RUST_NIGHTLY_VERSION: nightly
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      version: ${{ steps.update_meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Override rust-toolchain for CI
+        run: |
+          (Get-Content src-tauri/rust-toolchain.toml) -replace 'channel = "nightly"', 'channel = "${{ env.RUST_NIGHTLY_VERSION }}"' | Set-Content src-tauri/rust-toolchain.toml
+      - run: rustup toolchain install ${{ env.RUST_NIGHTLY_VERSION }} --profile minimal && rustup component add rust-src --toolchain ${{ env.RUST_NIGHTLY_VERSION }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-targets: false
+          workspaces: 'src-tauri'
+      - uses: pnpm/action-setup@v4.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install NPM Dependencies
+        run: pnpm i
+      - name: Update Meta
+        id: update_meta
+        run: |
+          $tag = git describe --tags --abbrev=0 2>$null
+          if (-not $tag) { $tag = "0.0.0" }
+          $TAG = $tag -replace '^v', ''
+          $PKGVER = "r$(git rev-list --count HEAD).$(git rev-parse --short HEAD)"
+          $cstTimeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("China Standard Time")
+          $utcNow = [System.DateTime]::UtcNow
+          $cstTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($utcNow, $cstTimeZone)
+          $BUILDMETA = $cstTime.ToString("yyMMddHHmm")
+          (Get-Content ./src-tauri/Cargo.toml -Raw) -replace '(?m)^(version = "\d+\.\d+\.\d+)', "version = `"$TAG-$PKGVER+$BUILDMETA" | Set-Content ./src-tauri/Cargo.toml -Encoding utf8
+          echo "version=$TAG-$PKGVER+$BUILDMETA" >> $env:GITHUB_OUTPUT
+      - name: Build
+        run: pnpm build
+      - name: Copy Binary
+        run: copy src-tauri/target/x86_64-win7-windows-msvc/release/kachina-builder.exe kachina-builder.exe
+      - name: Artifact
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          path: |
+            src-tauri/target/x86_64-win7-windows-msvc/release/*.exe
+            src-tauri/target/x86_64-win7-windows-msvc/release/*.pdb
+  release:
+    needs: [build, test]
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install NPM Dependencies
+        run: pnpm i
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Copy Binary
+        run: Copy-Item "artifacts/artifact/kachina-builder.exe" "kachina-builder.exe" -Force
+      - name: Sentry upload
+        continue-on-error: true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: yuehaiteam
+          SENTRY_PROJECT: kachina-installer
+          SENTRY_URL: ${{ secrets.SENTRY_URL }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:SENTRY_LOG_LEVEL = "info"
+          echo "Creating Sentry release for version ${{ needs.build.outputs.version }}"
+          pnpm exec sentry-cli releases new "${{ needs.build.outputs.version }}"
+          echo "Setting release metadata for version ${{ needs.build.outputs.version }}"
+          pnpm exec sentry-cli releases set-commits --auto "${{ needs.build.outputs.version }}"
+          echo "Uploading debug files for version ${{ needs.build.outputs.version }}"
+          pnpm exec sentry-cli debug-files upload ./artifacts/artifact/kachina_installer.pdb
+          echo "Finalizing release for version ${{ needs.build.outputs.version }}"
+          pnpm exec sentry-cli releases finalize "${{ needs.build.outputs.version }}"
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: kachina-builder.exe
+          make_latest: true
+          body: "${{ needs.build.outputs.version }}"
+
+  test:
+    needs: build
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        test: [offline-install, online-install, offline-update, online-update]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install NPM Dependencies
+        run: pnpm i
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Setup test environment
+        run: |
+          # 复制构建的二进制文件到正确位置
+          New-Item -ItemType Directory -Force -Path "src-tauri/target/release"
+          New-Item -ItemType Directory -Force -Path "src-tauri/target/x86_64-win7-windows-msvc/release"
+          Copy-Item "artifacts/artifact/*.exe" "src-tauri/target/x86_64-win7-windows-msvc/release/" -Force
+          Copy-Item "artifacts/artifact/*.pdb" "src-tauri/target/x86_64-win7-windows-msvc/release/" -Force
+          Copy-Item "artifacts/artifact/*.exe" "src-tauri/target/release/" -Force
+          Copy-Item "artifacts/artifact/*.pdb" "src-tauri/target/release/" -Force
+      - name: Prepare test fixtures
+        run: npm run test:prepare
+        continue-on-error: true
+      - name: Run ${{ matrix.test }} test
+        run: npm run test:${{ matrix.test }}
+        timeout-minutes: 10
