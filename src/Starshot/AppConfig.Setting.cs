@@ -50,21 +50,57 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 启用自定义壁纸（开则关 Mica，铺壁纸 + 亚克力隔层）
+    /// 壁纸模式：0=无，1=指定图片(复制到 bg/)，2=文件夹随机(读源)，3=指定视频(读源)
     /// </summary>
-    public static bool EnableWallpaper
+    public static int WallpaperMode
     {
-        get => !string.IsNullOrWhiteSpace(WallpaperFile);
+        get => GetValue(0);
+        set => SetValue(value);
     }
 
 
     /// <summary>
-    /// 壁纸文件名（拷贝在 CacheFolder/bg/ 下），空=null=无壁纸
+    /// 壁纸文件名（模式 1，拷贝在 CacheFolder/bg/ 下），空=null=无
     /// </summary>
     public static string? WallpaperFile
     {
         get => GetValue<string>();
         set => SetValue(value);
+    }
+
+
+    /// <summary>
+    /// 壁纸源文件夹（模式 2，读源不复制），空=null=无
+    /// </summary>
+    public static string? WallpaperFolder
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
+    /// 壁纸源视频文件（模式 3，读源不复制），空=null=无
+    /// </summary>
+    public static string? WallpaperVideoFile
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
+    /// 启用自定义壁纸（开则关 Mica，铺壁纸 + 亚克力隔层）。模式 0=无 → false；1/2/3 看对应路径。
+    /// </summary>
+    public static bool EnableWallpaper
+    {
+        get => WallpaperMode switch
+        {
+            1 => !string.IsNullOrWhiteSpace(WallpaperFile),
+            2 => !string.IsNullOrWhiteSpace(WallpaperFolder),
+            3 => !string.IsNullOrWhiteSpace(WallpaperVideoFile),
+            _ => false,
+        };
     }
 
 

@@ -97,36 +97,88 @@ public sealed partial class AppearanceSetting : PageBase
 
     public Visibility AccentFromWallpaperVisibility => AppConfig.EnableWallpaper ? Visibility.Visible : Visibility.Collapsed;
 
+    public Visibility WallpaperRowVisibility => AppConfig.WallpaperMode == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-    public string WallpaperFileName { get; set => SetProperty(ref field, value); } =
-        string.IsNullOrWhiteSpace(AppConfig.WallpaperFile) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFile!;
+
+    public int WallpaperMode
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.WallpaperMode = value;
+                OnPropertyChanged(nameof(WallpaperChooseLabel));
+                OnPropertyChanged(nameof(WallpaperValue));
+                OnPropertyChanged(nameof(WallpaperRowVisibility));
+                OnPropertyChanged(nameof(AccentFromWallpaperVisibility));
+                WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
+            }
+        }
+    } = AppConfig.WallpaperMode;
+
+
+    public string WallpaperChooseLabel => AppConfig.WallpaperMode switch
+    {
+        2 => Lang.Starshot_WallpaperChooseFolder,
+        3 => Lang.Starshot_WallpaperChooseVideo,
+        _ => Lang.Starshot_WallpaperChooseImage,
+    };
+
+
+    public string WallpaperValue => AppConfig.WallpaperMode switch
+    {
+        2 => string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFolder!,
+        3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperVideoFile!,
+        _ => string.IsNullOrWhiteSpace(AppConfig.WallpaperFile) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFile!,
+    };
+
+
+    private static readonly (string, string)[] ImageFilters =
+    {
+        ("Images", ".jpg"), ("Images", ".jpeg"), ("Images", ".png"),
+        ("Images", ".bmp"), ("Images", ".webp"), ("Images", ".gif"),
+    };
+
+    private static readonly (string, string)[] VideoFilters =
+    {
+        ("Videos", ".mp4"), ("Videos", ".mkv"), ("Videos", ".mov"), ("Videos", ".avi"), ("Videos", ".webm"),
+    };
 
 
     [RelayCommand]
-    private async Task ChooseWallpaperFile()
+    private async Task ChooseWallpaper()
     {
         try
         {
-            (string, string)[] filters =
+            switch (AppConfig.WallpaperMode)
             {
-                ("Images", ".jpg"), ("Images", ".jpeg"), ("Images", ".png"),
-                ("Images", ".bmp"), ("Images", ".webp"), ("Images", ".gif"),
-                ("Videos", ".mp4"), ("Videos", ".mkv"), ("Videos", ".mov"), ("Videos", ".webm"),
-            };
-            string? path = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot, filters);
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
-            {
-                return;
+                case 2:  // 文件夹随机 → 读源
+                {
+                    string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
+                    if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return;
+                    AppConfig.WallpaperFolder = folder;
+                    break;
+                }
+                case 3:  // 指定视频 → 读源
+                {
+                    string? path = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot, VideoFilters);
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+                    AppConfig.WallpaperVideoFile = path;
+                    break;
+                }
+                default:  // 1 指定图片 → 复制到 bg/
+                {
+                    string? path = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot, ImageFilters);
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+                    string fileName = Path.GetFileName(path);
+                    string bgDir = Path.Combine(AppConfig.CacheFolder, "bg");
+                    Directory.CreateDirectory(bgDir);
+                    File.Copy(path, Path.Combine(bgDir, fileName), overwrite: true);
+                    AppConfig.WallpaperFile = fileName;
+                    break;
+                }
             }
-
-            string fileName = Path.GetFileName(path);
-            string bgDir = Path.Combine(AppConfig.CacheFolder, "bg");
-            Directory.CreateDirectory(bgDir);
-            File.Copy(path, Path.Combine(bgDir, fileName), overwrite: true);
-
-            AppConfig.WallpaperFile = fileName;
-            WallpaperFileName = fileName;
-            OnPropertyChanged(nameof(AccentFromWallpaperVisibility));
+            RefreshWallpaperBindings();
             WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
         }
         catch
@@ -136,27 +188,30 @@ public sealed partial class AppearanceSetting : PageBase
 
 
     [RelayCommand]
-    private void RemoveWallpaper()
-    {
-        AppConfig.WallpaperFile = null;
-        WallpaperFileName = Lang.Starshot_WallpaperNone;
-        OnPropertyChanged(nameof(AccentFromWallpaperVisibility));
-        WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
-    }
-
-
-    [RelayCommand]
     private async Task OpenWallpaperFolder()
     {
         try
         {
-            string bgDir = Path.Combine(AppConfig.CacheFolder, "bg");
-            Directory.CreateDirectory(bgDir);
-            await Launcher.LaunchFolderPathAsync(bgDir);
+            string? target = AppConfig.WallpaperMode switch
+            {
+                2 => AppConfig.WallpaperFolder,
+                3 => string.IsNullOrEmpty(AppConfig.WallpaperVideoFile) ? null : Path.GetDirectoryName(AppConfig.WallpaperVideoFile),
+                _ => Path.Combine(AppConfig.CacheFolder, "bg"),
+            };
+            if (string.IsNullOrEmpty(target)) return;
+            Directory.CreateDirectory(target);
+            await Launcher.LaunchFolderPathAsync(target);
         }
         catch
         {
         }
+    }
+
+
+    private void RefreshWallpaperBindings()
+    {
+        OnPropertyChanged(nameof(WallpaperValue));
+        OnPropertyChanged(nameof(AccentFromWallpaperVisibility));
     }
 
 

@@ -10,7 +10,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Starshot.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
@@ -108,14 +110,47 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    private static readonly HashSet<string> WallpaperImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".gif",
+    };
+
+
+    /// <summary>
+    /// 按模式解析当前要加载的壁纸文件路径。
+    /// 模式 0=无；1：CacheFolder/bg/WallpaperFile（复制件）；2：枚举 WallpaperFolder 随机抽一张图（读源）；
+    /// 3：WallpaperVideoFile（读源）。模式 2/3 不复制。
+    /// </summary>
     private static string? ResolveWallpaperPath()
     {
-        string? f = AppConfig.WallpaperFile;
-        if (string.IsNullOrWhiteSpace(f))
+        return AppConfig.WallpaperMode switch
+        {
+            1 => AppConfig.WallpaperFile is { Length: > 0 } f ? Path.Combine(AppConfig.CacheFolder, "bg", f) : null,
+            2 => PickRandomImageFromFolder(AppConfig.WallpaperFolder),
+            3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? null : AppConfig.WallpaperVideoFile,
+            _ => null,
+        };
+    }
+
+
+    private static string? PickRandomImageFromFolder(string? folder)
+    {
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
         {
             return null;
         }
-        return Path.Combine(AppConfig.CacheFolder, "bg", f);
+        try
+        {
+            var imgs = Directory.EnumerateFiles(folder)
+                .Where(f => WallpaperImageExtensions.Contains(Path.GetExtension(f)))
+                .ToList();
+            if (imgs.Count == 0) return null;
+            return imgs[Random.Shared.Next(imgs.Count)];
+        }
+        catch
+        {
+            return null;
+        }
     }
 
 

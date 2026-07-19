@@ -2753,6 +2753,13 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_ApplyCurrentColor" xml:space="preserve"><value>Custom color</value></data>
   <data name="Starshot_Wallpaper" xml:space="preserve"><value>Wallpaper</value></data>
   <data name="Starshot_WallpaperChooseFile" xml:space="preserve"><value>Choose file</value></data>
+  <data name="Starshot_WallpaperModeNone" xml:space="preserve"><value>None</value></data>
+  <data name="Starshot_WallpaperModeImage" xml:space="preserve"><value>Single image</value></data>
+  <data name="Starshot_WallpaperModeFolder" xml:space="preserve"><value>Folder random</value></data>
+  <data name="Starshot_WallpaperModeVideo" xml:space="preserve"><value>Specified video</value></data>
+  <data name="Starshot_WallpaperChooseImage" xml:space="preserve"><value>Choose image</value></data>
+  <data name="Starshot_WallpaperChooseFolder" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="Starshot_WallpaperChooseVideo" xml:space="preserve"><value>Choose video</value></data>
   <data name="Starshot_WallpaperOpenFolder" xml:space="preserve"><value>Open folder</value></data>
   <data name="Starshot_WallpaperRemove" xml:space="preserve"><value>Remove wallpaper</value></data>
   <data name="Starshot_WallpaperNone" xml:space="preserve"><value>None</value></data>

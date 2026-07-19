@@ -2753,6 +2753,13 @@
   <data name="Starshot_ApplyCurrentColor" xml:space="preserve"><value>自定义颜色</value></data>
   <data name="Starshot_Wallpaper" xml:space="preserve"><value>壁纸</value></data>
   <data name="Starshot_WallpaperChooseFile" xml:space="preserve"><value>选择文件</value></data>
+  <data name="Starshot_WallpaperModeNone" xml:space="preserve"><value>无</value></data>
+  <data name="Starshot_WallpaperModeImage" xml:space="preserve"><value>指定图片</value></data>
+  <data name="Starshot_WallpaperModeFolder" xml:space="preserve"><value>文件夹随机</value></data>
+  <data name="Starshot_WallpaperModeVideo" xml:space="preserve"><value>指定视频</value></data>
+  <data name="Starshot_WallpaperChooseImage" xml:space="preserve"><value>选择图片</value></data>
+  <data name="Starshot_WallpaperChooseFolder" xml:space="preserve"><value>选择文件夹</value></data>
+  <data name="Starshot_WallpaperChooseVideo" xml:space="preserve"><value>选择视频</value></data>
   <data name="Starshot_WallpaperOpenFolder" xml:space="preserve"><value>打开文件夹</value></data>
   <data name="Starshot_WallpaperRemove" xml:space="preserve"><value>移除壁纸</value></data>
   <data name="Starshot_WallpaperNone" xml:space="preserve"><value>无</value></data>

@@ -7833,6 +7833,13 @@ namespace Starshot.Language {
         public static string Starshot_ApplyCurrentColor { get { return ResourceManager.GetString("Starshot_ApplyCurrentColor", resourceCulture); } }
         public static string Starshot_Wallpaper { get { return ResourceManager.GetString("Starshot_Wallpaper", resourceCulture); } }
         public static string Starshot_WallpaperChooseFile { get { return ResourceManager.GetString("Starshot_WallpaperChooseFile", resourceCulture); } }
+        public static string Starshot_WallpaperModeNone { get { return ResourceManager.GetString("Starshot_WallpaperModeNone", resourceCulture); } }
+        public static string Starshot_WallpaperModeImage { get { return ResourceManager.GetString("Starshot_WallpaperModeImage", resourceCulture); } }
+        public static string Starshot_WallpaperModeFolder { get { return ResourceManager.GetString("Starshot_WallpaperModeFolder", resourceCulture); } }
+        public static string Starshot_WallpaperModeVideo { get { return ResourceManager.GetString("Starshot_WallpaperModeVideo", resourceCulture); } }
+        public static string Starshot_WallpaperChooseImage { get { return ResourceManager.GetString("Starshot_WallpaperChooseImage", resourceCulture); } }
+        public static string Starshot_WallpaperChooseFolder { get { return ResourceManager.GetString("Starshot_WallpaperChooseFolder", resourceCulture); } }
+        public static string Starshot_WallpaperChooseVideo { get { return ResourceManager.GetString("Starshot_WallpaperChooseVideo", resourceCulture); } }
         public static string Starshot_WallpaperOpenFolder { get { return ResourceManager.GetString("Starshot_WallpaperOpenFolder", resourceCulture); } }
         public static string Starshot_WallpaperRemove { get { return ResourceManager.GetString("Starshot_WallpaperRemove", resourceCulture); } }
         public static string Starshot_WallpaperNone { get { return ResourceManager.GetString("Starshot_WallpaperNone", resourceCulture); } }

@@ -23,7 +23,13 @@
             <!--  壁纸  -->
             <StackPanel Spacing="8">
                 <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Wallpaper}" />
-                <Grid ColumnSpacing="0">
+                <cwc:Segmented SelectedIndex="{x:Bind WallpaperMode, Mode=TwoWay}">
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeNone}" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeImage}" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeFolder}" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeVideo}" />
+                </cwc:Segmented>
+                <Grid ColumnSpacing="0" Visibility="{x:Bind WallpaperRowVisibility}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
@@ -32,12 +38,12 @@
                             Height="40"
                             Padding="16,0,16,0"
                             BorderThickness="0"
-                            Command="{x:Bind ChooseWallpaperFileCommand}"
+                            Command="{x:Bind ChooseWallpaperCommand}"
                             CornerRadius="8,20,20,8"
                             Style="{ThemeResource AccentButtonStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE8DE;" />
-                            <TextBlock Text="{x:Bind lang:Lang.Starshot_WallpaperChooseFile}" />
+                            <TextBlock Text="{x:Bind WallpaperChooseLabel}" />
                         </StackPanel>
                     </Button>
                     <Button Grid.Column="1"
@@ -46,13 +52,8 @@
                             Padding="20,0,20,1"
                             HorizontalContentAlignment="Left"
                             BorderThickness="0"
+                            Command="{x:Bind OpenWallpaperFolderCommand}"
                             CornerRadius="20">
-                        <Button.Flyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Command="{x:Bind OpenWallpaperFolderCommand}" Text="{x:Bind lang:Lang.Starshot_WallpaperOpenFolder}" />
-                                <MenuFlyoutItem Command="{x:Bind RemoveWallpaperCommand}" Text="{x:Bind lang:Lang.Starshot_WallpaperRemove}" />
-                            </MenuFlyout>
-                        </Button.Flyout>
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -62,7 +63,7 @@
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
                                        MaxLines="2"
-                                       Text="{x:Bind WallpaperFileName}"
+                                       Text="{x:Bind WallpaperValue}"
                                        TextTrimming="CharacterEllipsis"
                                        TextWrapping="Wrap" />
                             <FontIcon Grid.Column="1"
