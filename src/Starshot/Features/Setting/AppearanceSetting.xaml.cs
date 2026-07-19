@@ -7,6 +7,7 @@ using Starshot.Features.Background;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.System;
@@ -112,6 +113,11 @@ public sealed partial class AppearanceSetting : PageBase
                 OnPropertyChanged(nameof(WallpaperRowVisibility));
                 OnPropertyChanged(nameof(AccentFromWallpaperVisibility));
                 WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
+                // 开着自动取色：切换模式后强制重新从新壁纸取色（避免 _lastFile 短路 / 视频模式不取色）
+                if (AppConfig.EnableAccentFromWallpaper)
+                {
+                    WeakReferenceMessenger.Default.Send(new AccentRefreshRequestedMessage());
+                }
             }
         }
     } = AppConfig.WallpaperMode;
@@ -119,16 +125,16 @@ public sealed partial class AppearanceSetting : PageBase
 
     public string WallpaperChooseLabel => AppConfig.WallpaperMode switch
     {
-        2 => Lang.Starshot_WallpaperChooseFolder,
-        3 => Lang.Starshot_WallpaperChooseVideo,
+        2 => Lang.Starshot_WallpaperChooseVideo,
+        3 => Lang.Starshot_WallpaperChooseFolder,
         _ => Lang.Starshot_WallpaperChooseImage,
     };
 
 
     public string WallpaperValue => AppConfig.WallpaperMode switch
     {
-        2 => string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFolder!,
-        3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperVideoFile!,
+        2 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperVideoFile!,
+        3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFolder!,
         _ => string.IsNullOrWhiteSpace(AppConfig.WallpaperFile) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFile!,
     };
 
@@ -152,18 +158,18 @@ public sealed partial class AppearanceSetting : PageBase
         {
             switch (AppConfig.WallpaperMode)
             {
-                case 2:  // 文件夹随机 → 读源
-                {
-                    string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
-                    if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return;
-                    AppConfig.WallpaperFolder = folder;
-                    break;
-                }
-                case 3:  // 指定视频 → 读源
+                case 2:  // 指定视频 → 读源
                 {
                     string? path = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot, VideoFilters);
                     if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
                     AppConfig.WallpaperVideoFile = path;
+                    break;
+                }
+                case 3:  // 文件夹随机（图/视频混合）→ 读源
+                {
+                    string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
+                    if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return;
+                    AppConfig.WallpaperFolder = folder;
                     break;
                 }
                 default:  // 1 指定图片 → 复制到 bg/
@@ -192,19 +198,43 @@ public sealed partial class AppearanceSetting : PageBase
     {
         try
         {
-            string? target = AppConfig.WallpaperMode switch
+            // 模式 3 = 文件夹 → 直接打开文件夹；模式 1/2 = 文件 → explorer 选中文件（不是开父目录）
+            switch (AppConfig.WallpaperMode)
             {
-                2 => AppConfig.WallpaperFolder,
-                3 => string.IsNullOrEmpty(AppConfig.WallpaperVideoFile) ? null : Path.GetDirectoryName(AppConfig.WallpaperVideoFile),
-                _ => Path.Combine(AppConfig.CacheFolder, "bg"),
-            };
-            if (string.IsNullOrEmpty(target)) return;
-            Directory.CreateDirectory(target);
-            await Launcher.LaunchFolderPathAsync(target);
+                case 3:
+                {
+                    string? folder = AppConfig.WallpaperFolder;
+                    if (!string.IsNullOrEmpty(folder)) await Launcher.LaunchFolderPathAsync(folder);
+                    break;
+                }
+                case 2:
+                {
+                    string? file = AppConfig.WallpaperVideoFile;
+                    if (!string.IsNullOrEmpty(file) && File.Exists(file)) SelectInExplorer(file);
+                    break;
+                }
+                default:  // 1
+                {
+                    string? f = AppConfig.WallpaperFile;
+                    if (!string.IsNullOrEmpty(f))
+                    {
+                        string path = Path.Combine(AppConfig.CacheFolder, "bg", f);
+                        if (File.Exists(path)) SelectInExplorer(path);
+                    }
+                    break;
+                }
+            }
         }
         catch
         {
         }
+    }
+
+
+    /// <summary>explorer 打开并选中指定文件。</summary>
+    private static void SelectInExplorer(string filePath)
+    {
+        Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{filePath}\"") { UseShellExecute = true });
     }
 
 

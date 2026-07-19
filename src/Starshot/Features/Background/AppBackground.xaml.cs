@@ -47,6 +47,7 @@ public sealed partial class AppBackground : UserControl
     private CanvasRenderTarget? _videoSurface;
     private CanvasImageSource? _videoImageSource;
     private readonly SemaphoreSlim _videoSemaphore = new(1, 1);
+    private bool _videoAccentExtracted;  // 视频首帧取色标志（取一次，避免每帧取导致强调色乱跳）
 
 
     public AppBackground()
@@ -54,12 +55,38 @@ public sealed partial class AppBackground : UserControl
         InitializeComponent();
         WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => _ = UpdateBackgroundAsync());
         WeakReferenceMessenger.Default.Register<AccentRefreshRequestedMessage>(this, (_, _) => _ = RefreshAccentAsync());
+        WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnWindowStateChanged);
         Loaded += (_, _) => _ = UpdateBackgroundAsync();
         Unloaded += (_, _) =>
         {
             DisposeVideoResource();
             WeakReferenceMessenger.Default.UnregisterAll(this);
         };
+    }
+
+
+    /// <summary>
+    /// 窗口隐藏 → 暂停视频壁纸；激活 → 续播。避免不可见时占 GPU。
+    /// </summary>
+    private void OnWindowStateChanged(object _, MainWindowStateChangedMessage m)
+    {
+        if (_mediaPlayer is null)
+        {
+            return;
+        }
+        try
+        {
+            var state = _mediaPlayer.PlaybackSession.PlaybackState;
+            if (m.Hide)
+            {
+                _mediaPlayer.Pause();
+            }
+            else if (m.Activate && state is not MediaPlaybackState.Playing)
+            {
+                _mediaPlayer.Play();
+            }
+        }
+        catch { }
     }
 
 
@@ -110,30 +137,31 @@ public sealed partial class AppBackground : UserControl
     }
 
 
-    private static readonly HashSet<string> WallpaperImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> WallpaperMediaExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".gif",
+        ".mp4", ".mkv", ".mov", ".avi", ".webm",
     };
 
 
     /// <summary>
     /// 按模式解析当前要加载的壁纸文件路径。
-    /// 模式 0=无；1：CacheFolder/bg/WallpaperFile（复制件）；2：枚举 WallpaperFolder 随机抽一张图（读源）；
-    /// 3：WallpaperVideoFile（读源）。模式 2/3 不复制。
+    /// 模式 0=无；1：CacheFolder/bg/WallpaperFile（复制件）；2：WallpaperVideoFile（读源）；
+    /// 3：枚举 WallpaperFolder 随机抽一个图/视频（读源，混合）。模式 2/3 不复制。
     /// </summary>
     private static string? ResolveWallpaperPath()
     {
         return AppConfig.WallpaperMode switch
         {
             1 => AppConfig.WallpaperFile is { Length: > 0 } f ? Path.Combine(AppConfig.CacheFolder, "bg", f) : null,
-            2 => PickRandomImageFromFolder(AppConfig.WallpaperFolder),
-            3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? null : AppConfig.WallpaperVideoFile,
+            2 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? null : AppConfig.WallpaperVideoFile,
+            3 => PickRandomFromFolder(AppConfig.WallpaperFolder),
             _ => null,
         };
     }
 
 
-    private static string? PickRandomImageFromFolder(string? folder)
+    private static string? PickRandomFromFolder(string? folder)
     {
         if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
         {
@@ -141,11 +169,11 @@ public sealed partial class AppBackground : UserControl
         }
         try
         {
-            var imgs = Directory.EnumerateFiles(folder)
-                .Where(f => WallpaperImageExtensions.Contains(Path.GetExtension(f)))
+            var files = Directory.EnumerateFiles(folder)
+                .Where(f => WallpaperMediaExtensions.Contains(Path.GetExtension(f)))
                 .ToList();
-            if (imgs.Count == 0) return null;
-            return imgs[Random.Shared.Next(imgs.Count)];
+            if (files.Count == 0) return null;
+            return files[Random.Shared.Next(files.Count)];
         }
         catch
         {
@@ -222,8 +250,14 @@ public sealed partial class AppBackground : UserControl
     public async Task RefreshAccentAsync()
     {
         string? file = ResolveWallpaperPath();
-        if (string.IsNullOrEmpty(file) || !File.Exists(file) || IsSupportedVideo(file))
+        if (string.IsNullOrEmpty(file) || !File.Exists(file))
         {
+            return;
+        }
+        // 视频：重置首帧取色标志，下一帧到达时重新取色（解决切换模式到视频时 _lastFile 短路不重载的问题）
+        if (IsSupportedVideo(file))
+        {
+            _videoAccentExtracted = false;
             return;
         }
         try
@@ -260,6 +294,7 @@ public sealed partial class AppBackground : UserControl
         _mediaPlayer.SystemMediaTransportControls.IsEnabled = false;
         _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
         _mediaPlayer.MediaFailed += (_, a) => _logger.LogError(a.ExtendedErrorCode, "MediaPlayer failed");
+        _videoAccentExtracted = false;  // 新视频重置取色标志
         _mediaPlayer.Play();
     }
 
@@ -287,6 +322,25 @@ public sealed partial class AppBackground : UserControl
                 sender.CopyFrameToVideoSurface(_videoSurface);
                 using var ds = _videoImageSource.CreateDrawingSession(Colors.Transparent);
                 ds.DrawImage(_videoSurface);
+                // 视频首帧取一次色（自动取色开时）。不每帧取，否则强调色随帧乱跳。
+                if (!_videoAccentExtracted && AppConfig.EnableAccentFromWallpaper)
+                {
+                    _videoAccentExtracted = true;
+                    try
+                    {
+                        var color = AccentColorHelper.GetAccentColor(_videoSurface.GetPixelBytes(),
+                            (int)_videoSurface.SizeInPixels.Width, (int)_videoSurface.SizeInPixels.Height);
+                        if (color is not null)
+                        {
+                            AccentColorHelper.ChangeAppAccentColor(color);
+                            AppConfig.AccentColor = color?.ToHex();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Accent from video first frame");
+                    }
+                }
             }
             catch { }
             finally

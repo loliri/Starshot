@@ -50,7 +50,7 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 壁纸模式：0=无，1=指定图片(复制到 bg/)，2=文件夹随机(读源)，3=指定视频(读源)
+    /// 壁纸模式：0=无，1=指定图片(复制到 bg/)，2=指定视频(读源)，3=文件夹随机(读源)
     /// </summary>
     public static int WallpaperMode
     {
@@ -70,7 +70,7 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 壁纸源文件夹（模式 2，读源不复制），空=null=无
+    /// 壁纸源文件夹（模式 3，读源不复制），空=null=无
     /// </summary>
     public static string? WallpaperFolder
     {
@@ -80,7 +80,7 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 壁纸源视频文件（模式 3，读源不复制），空=null=无
+    /// 壁纸源视频文件（模式 2，读源不复制），空=null=无
     /// </summary>
     public static string? WallpaperVideoFile
     {
@@ -97,8 +97,8 @@ public static partial class AppConfig
         get => WallpaperMode switch
         {
             1 => !string.IsNullOrWhiteSpace(WallpaperFile),
-            2 => !string.IsNullOrWhiteSpace(WallpaperFolder),
-            3 => !string.IsNullOrWhiteSpace(WallpaperVideoFile),
+            2 => !string.IsNullOrWhiteSpace(WallpaperVideoFile),
+            3 => !string.IsNullOrWhiteSpace(WallpaperFolder),
             _ => false,
         };
     }

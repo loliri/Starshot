@@ -11,7 +11,7 @@
              mc:Ignorable="d">
 
     <ScrollViewer Padding="0">
-        <StackPanel MaxWidth="820"
+        <StackPanel Width="820"
                     Padding="36,24,36,36"
                     Spacing="20">
 
@@ -26,8 +26,8 @@
                 <cwc:Segmented SelectedIndex="{x:Bind WallpaperMode, Mode=TwoWay}">
                     <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeNone}" />
                     <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeImage}" />
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeFolder}" />
                     <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeVideo}" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeFolder}" />
                 </cwc:Segmented>
                 <Grid ColumnSpacing="0" Visibility="{x:Bind WallpaperRowVisibility}">
                     <Grid.ColumnDefinitions>

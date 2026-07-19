@@ -153,7 +153,26 @@ public sealed partial class MainWindow : WindowEx
                 ScreenCaptureService.CaptureRegionCopyOnly();
             }
         }
+        else if (uMsg == (uint)User32.WindowMessage.WM_ACTIVATE)
+        {
+            // LOWORD = 激活状态：1=WA_ACTIVE, 2=WA_CLICKACTIVE（0=WA_INACTIVE 不发）
+            int lo = (int)((long)wParam & 0xFFFF);
+            if (lo is 1 or 2)
+            {
+                WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Activate = true });
+            }
+        }
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
+    }
+
+
+    /// <summary>
+    /// 重写 Hide：隐藏后通知 AppBackground 暂停视频壁纸（避免不可见时占 GPU）。
+    /// </summary>
+    public override void Hide()
+    {
+        base.Hide();
+        WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Hide = true });
     }
 
 
