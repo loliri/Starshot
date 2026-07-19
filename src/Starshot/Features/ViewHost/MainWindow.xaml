@@ -148,6 +148,23 @@
             </mxi:Interaction.Behaviors>
         </StackPanel>
 
+        <!--  启动 splash：盖住亚克力/壁纸加载期，Loaded 后固定延迟淡出  -->
+        <Border x:Name="SplashOverlay"
+                Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                Visibility="Visible">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="16">
+                <Image Width="96"
+                       Height="96"
+                       Source="ms-appx:///Assets/logo.png" />
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Text="Starshot" />
+            </StackPanel>
+        </Border>
+
     </Grid>
 
 </sf:WindowEx>

@@ -3,12 +3,15 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Starshot.Features.About;
 using Starshot.Features.Background;
 using Starshot.Features.Screenshot;
 using Starshot.Features.Setting;
 using Starshot.Frameworks;
 using Starshot.Helpers;
+using System;
+using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Windows.Graphics;
 using Windows.UI;
@@ -49,6 +52,24 @@ public sealed partial class MainWindow : WindowEx
         WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => ApplyBackdrop());
         Activated += MainWindow_Activated;
         AppWindow.Closing += AppWindow_Closing;
+        ((FrameworkElement)Content).Loaded += MainWindow_Loaded;
+    }
+
+
+    /// <summary>
+    /// 启动 splash：Loaded 后固定延迟 700ms，淡出 400ms，露出就绪 UI。每个窗口实例只触发一次（托盘恢复不重播）。
+    /// </summary>
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        ((FrameworkElement)sender).Loaded -= MainWindow_Loaded;
+        await Task.Delay(700);
+        var fade = new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromMilliseconds(400) };
+        Storyboard.SetTarget(fade, SplashOverlay);
+        Storyboard.SetTargetProperty(fade, "Opacity");
+        var sb = new Storyboard();
+        sb.Children.Add(fade);
+        sb.Completed += (_, _) => SplashOverlay.Visibility = Visibility.Collapsed;
+        sb.Begin();
     }
 
 
