@@ -248,6 +248,15 @@ public sealed partial class RegionCaptureWindow : WindowEx
             if (keep) result.Add(rect);
         }
         _windowRects = result;
+
+        // 窗口列表就绪后，立即对初始光标位置做悬停命中——不必等第一次 PointerMoved
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (!_isClosed)
+            {
+                UpdateHover(_currentMousePos);
+            }
+        });
     }
 
 
