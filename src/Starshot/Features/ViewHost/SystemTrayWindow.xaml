@@ -30,7 +30,7 @@
                     <FontIcon HorizontalAlignment="Center"
                               FontSize="16"
                               Glyph="&#xE80F;" />
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.MainPage_Launcer}" />
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.MainPage_Launcher}" />
                 </StackPanel>
             </Button>
             <Button Height="36"

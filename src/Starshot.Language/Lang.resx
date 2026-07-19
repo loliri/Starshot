@@ -641,7 +641,7 @@ closing the program during decompression will cause game file corruption.</value
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>Click the right mouse button on the game icon on the left.</value>
   </data>
-  <data name="MainPage_Launcer" xml:space="preserve">
+  <data name="MainPage_Launcher" xml:space="preserve">
     <value>Launcher</value>
   </data>
   <data name="MainPage_GameScreenshot" xml:space="preserve">

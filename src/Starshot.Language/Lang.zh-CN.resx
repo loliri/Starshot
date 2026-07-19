@@ -641,7 +641,7 @@
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>在左侧的游戏图标上点击鼠标右键</value>
   </data>
-  <data name="MainPage_Launcer" xml:space="preserve">
+  <data name="MainPage_Launcher" xml:space="preserve">
     <value>主页面</value>
   </data>
   <data name="MainPage_GameScreenshot" xml:space="preserve">

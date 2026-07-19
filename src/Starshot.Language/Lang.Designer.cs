@@ -5285,9 +5285,9 @@ namespace Starshot.Language {
         /// <summary>
         ///   查找类似 Launcher 的本地化字符串。
         /// </summary>
-        public static string MainPage_Launcer {
+        public static string MainPage_Launcher {
             get {
-                return ResourceManager.GetString("MainPage_Launcer", resourceCulture);
+                return ResourceManager.GetString("MainPage_Launcher", resourceCulture);
             }
         }
         

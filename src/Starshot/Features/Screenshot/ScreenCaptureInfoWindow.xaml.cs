@@ -247,7 +247,7 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         bool complete = _finishedImageCount == _captureImageCount;
         if (_isCopy)
         {
-            TextBlock_State.Text = "已复制到剪贴板";
+            TextBlock_State.Text = Lang.Common_CopiedToClipboard;
             ProgressRing_Process.Visibility = Visibility.Collapsed;
             FontIcon_Complete.Visibility = Visibility.Collapsed;
             TextBlock_Repeat.Visibility = Visibility.Collapsed;
