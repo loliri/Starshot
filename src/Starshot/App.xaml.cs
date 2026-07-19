@@ -1,5 +1,6 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using Starshot.Features.ViewHost;
 using System;
@@ -7,6 +8,7 @@ using System.Collections;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI;
 
 namespace Starshot;
 

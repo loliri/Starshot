@@ -38,6 +38,19 @@ public sealed partial class AppearanceSetting : PageBase
     } = AppConfig.Theme;
 
 
+    public bool EnableAcrylic
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.EnableAcrylic = value;
+                App.Current.MainWindow?.ApplyBackdrop();
+            }
+        }
+    } = AppConfig.EnableAcrylic;
+
+
     public Windows.UI.Color AccentColorValue { get; set => SetProperty(ref field, value); } = ParseAccentHex(AppConfig.AccentColor);
 
 

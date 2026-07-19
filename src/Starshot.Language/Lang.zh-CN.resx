@@ -2748,6 +2748,7 @@
   <data name="Starshot_Theme" xml:space="preserve"><value>主题</value></data>
   <data name="Starshot_ThemeLight" xml:space="preserve"><value>浅色</value></data>
   <data name="Starshot_ThemeDark" xml:space="preserve"><value>深色</value></data>
+  <data name="Starshot_Acrylic" xml:space="preserve"><value>亚克力效果</value></data>
   <data name="Starshot_AccentColor" xml:space="preserve"><value>主题色</value></data>
   <data name="Starshot_ApplyCurrentColor" xml:space="preserve"><value>自定义颜色</value></data>
   <data name="Starshot_Wallpaper" xml:space="preserve"><value>壁纸</value></data>

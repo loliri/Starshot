@@ -84,6 +84,9 @@
                     <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_ThemeLight}" />
                     <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_ThemeDark}" />
                 </cwc:Segmented>
+                <ToggleSwitch IsOn="{x:Bind EnableAcrylic, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_Acrylic}"
+                              OnContent="{x:Bind lang:Lang.Starshot_Acrylic}" />
             </StackPanel>
 
 

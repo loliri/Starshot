@@ -40,6 +40,16 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 启用亚克力效果（导航栏/内容覆盖层/弹窗的磨砂玻璃）。关则用纯色背景。
+    /// </summary>
+    public static bool EnableAcrylic
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
     /// 启用自定义壁纸（开则关 Mica，铺壁纸 + 亚克力隔层）
     /// </summary>
     public static bool EnableWallpaper

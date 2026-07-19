@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Starshot.Features.About;
 using Starshot.Features.Background;
 using Starshot.Features.Screenshot;
@@ -10,6 +11,7 @@ using Starshot.Frameworks;
 using Starshot.Helpers;
 using Vanara.PInvoke;
 using Windows.Graphics;
+using Windows.UI;
 
 namespace Starshot.Features.ViewHost;
 
@@ -25,6 +27,10 @@ public sealed partial class MainWindow : WindowEx
     public bool ForceExit;
 
     private SystemBackdropHelper? _backdropHelper;
+
+    private Brush? _overlayAcrylicBrush;  // 首次 ApplyBackdrop 时捕获 XAML 设的亚克力（用于亚克力开关还原）
+
+    private static readonly Brush _transparentBrush = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
 
 
     public MainWindow()
@@ -47,14 +53,16 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
-    /// 壁纸开：关 Mica + overlay 隔层显；壁纸关：Mica + overlay 隐。
+    /// 壁纸开：关 Mica + overlay 隔层显（亚克力开=磨砂，关=透明让壁纸直接透出）；壁纸关：Mica + overlay 隐。
     /// 壁纸渲染本身由 AppBackground 据 EnableWallpaper 自管。
     /// </summary>
-    private void ApplyBackdrop()
+    public void ApplyBackdrop()
     {
         if (AppConfig.EnableWallpaper)
         {
             _backdropHelper?.ResetBackdrop();
+            _overlayAcrylicBrush ??= Border_OverlayMask.Background;  // 首次捕获 XAML 亚克力
+            Border_OverlayMask.Background = AppConfig.EnableAcrylic ? _overlayAcrylicBrush! : _transparentBrush;
             Border_OverlayMask.Opacity = 1;
         }
         else
