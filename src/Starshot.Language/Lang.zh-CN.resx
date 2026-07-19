@@ -2744,6 +2744,7 @@
   <data name="Starshot_Nav_Storage" xml:space="preserve"><value>存储</value></data>
   <data name="Starshot_Nav_Settings" xml:space="preserve"><value>设置</value></data>
   <data name="Starshot_Nav_About" xml:space="preserve"><value>关于</value></data>
+  <data name="Starshot_SplashTagline" xml:space="preserve"><value>新一代 Windows 原生 HDR 截图工具</value></data>
 
   <data name="Starshot_Theme" xml:space="preserve"><value>主题</value></data>
   <data name="Starshot_ThemeLight" xml:space="preserve"><value>浅色</value></data>

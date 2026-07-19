@@ -162,6 +162,10 @@
                            FontSize="28"
                            FontWeight="Bold"
                            Text="Starshot" />
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="13"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.Starshot_SplashTagline}" />
             </StackPanel>
         </Border>
 

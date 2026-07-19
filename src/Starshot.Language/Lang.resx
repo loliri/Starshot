@@ -2744,6 +2744,7 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_Nav_Storage" xml:space="preserve"><value>Storage</value></data>
   <data name="Starshot_Nav_Settings" xml:space="preserve"><value>Settings</value></data>
   <data name="Starshot_Nav_About" xml:space="preserve"><value>About</value></data>
+  <data name="Starshot_SplashTagline" xml:space="preserve"><value>Next-generation Windows-native HDR Screenshot Tool</value></data>
 
   <data name="Starshot_Theme" xml:space="preserve"><value>Theme</value></data>
   <data name="Starshot_ThemeLight" xml:space="preserve"><value>Light</value></data>
