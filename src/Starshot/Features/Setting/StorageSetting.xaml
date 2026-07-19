@@ -198,12 +198,16 @@
                         <LineBreak />
                         <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsImageCache}" />
                         <LineBreak />
+                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsWallpaper}" />
+                        <LineBreak />
                         <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsLog}" />
                     </TextBlock>
                     <TextBlock>
                         <Run Text="{x:Bind ScreenshotFolderSize}" />
                         <LineBreak />
                         <Run Text="{x:Bind ImageCacheSize}" />
+                        <LineBreak />
+                        <Run Text="{x:Bind WallpaperSize}" />
                         <LineBreak />
                         <Run Text="{x:Bind LogSize}" />
                     </TextBlock>
@@ -213,12 +217,12 @@
                         Padding="16,0,16,0"
                         HorizontalAlignment="Left"
                         BorderThickness="0"
-                        Command="{x:Bind ClearThumbnailCacheCommand}"
+                        Command="{x:Bind ClearCacheCommand}"
                         CornerRadius="8,20,20,8"
                         Style="{ThemeResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xEA99;" />
-                        <TextBlock Text="{x:Bind lang:Lang.ScreenshotSetting_ClearThumbnailCache}" />
+                        <TextBlock Text="{x:Bind lang:Lang.Starshot_ClearCache}" />
                     </StackPanel>
                 </Button>
             </StackPanel>

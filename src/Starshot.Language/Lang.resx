@@ -1437,9 +1437,6 @@ Do you accept the risk and continue to use it?</value>
   <data name="HoyolabToolboxPage_ApocalypticShadow" xml:space="preserve">
     <value>Apocalyptic Shadow</value>
   </data>
-  <data name="GameBizSelector_AutoSearch" xml:space="preserve">
-    <value>Auto Search</value>
-  </data>
   <data name="GachaLogService_SignalSearchRecords" xml:space="preserve">
     <value>Signal Search Records</value>
   </data>
@@ -2752,7 +2749,13 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_ThemeLight" xml:space="preserve"><value>Light</value></data>
   <data name="Starshot_ThemeDark" xml:space="preserve"><value>Dark</value></data>
   <data name="Starshot_AccentColor" xml:space="preserve"><value>Accent color</value></data>
-  <data name="Starshot_ApplyCurrentColor" xml:space="preserve"><value>Apply current color</value></data>
+  <data name="Starshot_ApplyCurrentColor" xml:space="preserve"><value>Custom color</value></data>
+  <data name="Starshot_Wallpaper" xml:space="preserve"><value>Wallpaper</value></data>
+  <data name="Starshot_WallpaperChooseFile" xml:space="preserve"><value>Choose file</value></data>
+  <data name="Starshot_WallpaperOpenFolder" xml:space="preserve"><value>Open folder</value></data>
+  <data name="Starshot_WallpaperRemove" xml:space="preserve"><value>Remove wallpaper</value></data>
+  <data name="Starshot_WallpaperNone" xml:space="preserve"><value>None</value></data>
+  <data name="Starshot_AccentFromWallpaper" xml:space="preserve"><value>Accent from wallpaper</value></data>
 
   <data name="Starshot_HotkeyScreenshot" xml:space="preserve"><value>Screenshot</value></data>
   <data name="Starshot_HotkeyRegion" xml:space="preserve"><value>Region capture</value></data>
@@ -2767,7 +2770,7 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_ColorManagementDesc" xml:space="preserve"><value>Reads the monitor's ICC profile to parse the real color gamut and writes the cICP/ICC chunk into the file. HDR is always BT2020; for SDR, on = real gamut from ICC, off = BT709.</value></data>
   <data name="Starshot_AutoConvertSDRDesc" xml:space="preserve"><value>HDR screenshots also save an SDR copy (Ultra HDR JPEG).</value></data>
   <data name="Starshot_DeleteHDRIfSDR" xml:space="preserve"><value>Delete HDR if SDR content</value></data>
-  <data name="Starshot_DeleteHDRIfSDRDesc" xml:space="preserve"><value>When an HDR-format frame is actually SDR content (maxCLL below threshold), automatically convert to SDR and delete the HDR file. Overrides the auto-convert option above.</value></data>
+  <data name="Starshot_DeleteHDRIfSDRDesc" xml:space="preserve"><value>When an HDR-format frame is actually SDR content (maxCLL below threshold), automatically convert to SDR and delete the HDR file. The format follows the SDR storage format.</value></data>
   <data name="Starshot_MonitorSource" xml:space="preserve"><value>Capture monitor</value></data>
   <data name="Starshot_MonitorForeground" xml:space="preserve"><value>Foreground window</value></data>
   <data name="Starshot_MonitorCursor" xml:space="preserve"><value>Cursor position</value></data>
@@ -2781,9 +2784,11 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_LogFolderRestartTip" xml:space="preserve"><value>Restart to take effect</value></data>
   <data name="Starshot_Change" xml:space="preserve"><value>Change</value></data>
   <data name="Starshot_StorageStats" xml:space="preserve"><value>Storage usage</value></data>
+  <data name="Starshot_ClearCache" xml:space="preserve"><value>Clear cache</value></data>
   <data name="Starshot_StatsScreenshots" xml:space="preserve"><value>Screenshots</value></data>
   <data name="Starshot_StatsFiles" xml:space="preserve"><value>Files</value></data>
   <data name="Starshot_StatsImageCache" xml:space="preserve"><value>Thumbnail cache</value></data>
+  <data name="Starshot_StatsWallpaper" xml:space="preserve"><value>Wallpaper</value></data>
   <data name="Starshot_StatsLog" xml:space="preserve"><value>Log</value></data>
   <data name="Starshot_Calculating" xml:space="preserve"><value>Calculating…</value></data>
 

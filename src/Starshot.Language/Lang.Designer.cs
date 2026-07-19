@@ -2519,14 +2519,7 @@ namespace Starshot.Language {
             }
         }
         
-        /// <summary>
-        ///   查找类似 Auto Search 的本地化字符串。
-        /// </summary>
-        public static string GameBizSelector_AutoSearch {
-            get {
-                return ResourceManager.GetString("GameBizSelector_AutoSearch", resourceCulture);
-            }
-        }
+
         
         /// <summary>
         ///   查找类似 Details &gt; 的本地化字符串。
@@ -7837,6 +7830,12 @@ namespace Starshot.Language {
         public static string Starshot_ThemeDark { get { return ResourceManager.GetString("Starshot_ThemeDark", resourceCulture); } }
         public static string Starshot_AccentColor { get { return ResourceManager.GetString("Starshot_AccentColor", resourceCulture); } }
         public static string Starshot_ApplyCurrentColor { get { return ResourceManager.GetString("Starshot_ApplyCurrentColor", resourceCulture); } }
+        public static string Starshot_Wallpaper { get { return ResourceManager.GetString("Starshot_Wallpaper", resourceCulture); } }
+        public static string Starshot_WallpaperChooseFile { get { return ResourceManager.GetString("Starshot_WallpaperChooseFile", resourceCulture); } }
+        public static string Starshot_WallpaperOpenFolder { get { return ResourceManager.GetString("Starshot_WallpaperOpenFolder", resourceCulture); } }
+        public static string Starshot_WallpaperRemove { get { return ResourceManager.GetString("Starshot_WallpaperRemove", resourceCulture); } }
+        public static string Starshot_WallpaperNone { get { return ResourceManager.GetString("Starshot_WallpaperNone", resourceCulture); } }
+        public static string Starshot_AccentFromWallpaper { get { return ResourceManager.GetString("Starshot_AccentFromWallpaper", resourceCulture); } }
 
         public static string Starshot_HotkeyScreenshot { get { return ResourceManager.GetString("Starshot_HotkeyScreenshot", resourceCulture); } }
         public static string Starshot_HotkeyRegion { get { return ResourceManager.GetString("Starshot_HotkeyRegion", resourceCulture); } }
@@ -7865,9 +7864,11 @@ namespace Starshot.Language {
         public static string Starshot_LogFolderRestartTip { get { return ResourceManager.GetString("Starshot_LogFolderRestartTip", resourceCulture); } }
         public static string Starshot_Change { get { return ResourceManager.GetString("Starshot_Change", resourceCulture); } }
         public static string Starshot_StorageStats { get { return ResourceManager.GetString("Starshot_StorageStats", resourceCulture); } }
+        public static string Starshot_ClearCache { get { return ResourceManager.GetString("Starshot_ClearCache", resourceCulture); } }
         public static string Starshot_StatsScreenshots { get { return ResourceManager.GetString("Starshot_StatsScreenshots", resourceCulture); } }
         public static string Starshot_StatsFiles { get { return ResourceManager.GetString("Starshot_StatsFiles", resourceCulture); } }
         public static string Starshot_StatsImageCache { get { return ResourceManager.GetString("Starshot_StatsImageCache", resourceCulture); } }
+        public static string Starshot_StatsWallpaper { get { return ResourceManager.GetString("Starshot_StatsWallpaper", resourceCulture); } }
         public static string Starshot_StatsLog { get { return ResourceManager.GetString("Starshot_StatsLog", resourceCulture); } }
         public static string Starshot_Calculating { get { return ResourceManager.GetString("Starshot_Calculating", resourceCulture); } }
 

@@ -2,6 +2,7 @@
 <sf:WindowEx x:Class="Starshot.Features.ViewHost.MainWindow"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:background="using:Starshot.Features.Background"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lang="using:Starshot.Language"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -11,6 +12,16 @@
              mc:Ignorable="d">
 
     <Grid Background="Transparent">
+
+        <background:AppBackground />
+
+        <Border x:Name="Border_OverlayMask"
+                Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                Opacity="0">
+            <Border.OpacityTransition>
+                <ScalarTransition />
+            </Border.OpacityTransition>
+        </Border>
 
         <NavigationView x:Name="NavView"
                         IsBackButtonVisible="Collapsed"

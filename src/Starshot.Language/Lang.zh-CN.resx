@@ -1437,9 +1437,6 @@
   <data name="HoyolabToolboxPage_ApocalypticShadow" xml:space="preserve">
     <value>末日幻影</value>
   </data>
-  <data name="GameBizSelector_AutoSearch" xml:space="preserve">
-    <value>自动查找</value>
-  </data>
   <data name="GachaLogService_SignalSearchRecords" xml:space="preserve">
     <value>调频记录</value>
   </data>
@@ -2752,7 +2749,13 @@
   <data name="Starshot_ThemeLight" xml:space="preserve"><value>浅色</value></data>
   <data name="Starshot_ThemeDark" xml:space="preserve"><value>深色</value></data>
   <data name="Starshot_AccentColor" xml:space="preserve"><value>主题色</value></data>
-  <data name="Starshot_ApplyCurrentColor" xml:space="preserve"><value>应用当前颜色</value></data>
+  <data name="Starshot_ApplyCurrentColor" xml:space="preserve"><value>自定义颜色</value></data>
+  <data name="Starshot_Wallpaper" xml:space="preserve"><value>壁纸</value></data>
+  <data name="Starshot_WallpaperChooseFile" xml:space="preserve"><value>选择文件</value></data>
+  <data name="Starshot_WallpaperOpenFolder" xml:space="preserve"><value>打开文件夹</value></data>
+  <data name="Starshot_WallpaperRemove" xml:space="preserve"><value>移除壁纸</value></data>
+  <data name="Starshot_WallpaperNone" xml:space="preserve"><value>无</value></data>
+  <data name="Starshot_AccentFromWallpaper" xml:space="preserve"><value>自动从壁纸取色</value></data>
 
   <data name="Starshot_HotkeyScreenshot" xml:space="preserve"><value>全屏截图</value></data>
   <data name="Starshot_HotkeyRegion" xml:space="preserve"><value>区域截图</value></data>
@@ -2767,7 +2770,7 @@
   <data name="Starshot_ColorManagementDesc" xml:space="preserve"><value>读取显示器 ICC profile 解析真实色域基色，写入文件的 cICP/ICC chunk。HDR 强制 BT2020；SDR 可开关（开 = 读 ICC 真实色域，关 = BT709）。</value></data>
   <data name="Starshot_AutoConvertSDRDesc" xml:space="preserve"><value>HDR 截图同时保存一份 SDR（Ultra HDR JPEG）。</value></data>
   <data name="Starshot_DeleteHDRIfSDR" xml:space="preserve"><value>SDR 内容删 HDR</value></data>
-  <data name="Starshot_DeleteHDRIfSDRDesc" xml:space="preserve"><value>HDR 格式但内容为 SDR（maxCLL 不达标）时，自动转 SDR 并删除 HDR 文件，无视上方的自动转开关。</value></data>
+  <data name="Starshot_DeleteHDRIfSDRDesc" xml:space="preserve"><value>HDR 格式但内容为 SDR（maxCLL 不达标）时，自动转 SDR 并删除 HDR 文件，无视上方的自动转换开关。格式遵循 SDR 存储格式。</value></data>
   <data name="Starshot_MonitorSource" xml:space="preserve"><value>捕获显示器</value></data>
   <data name="Starshot_MonitorForeground" xml:space="preserve"><value>前台窗口</value></data>
   <data name="Starshot_MonitorCursor" xml:space="preserve"><value>光标位置</value></data>
@@ -2781,9 +2784,11 @@
   <data name="Starshot_LogFolderRestartTip" xml:space="preserve"><value>重启后生效</value></data>
   <data name="Starshot_Change" xml:space="preserve"><value>更改</value></data>
   <data name="Starshot_StorageStats" xml:space="preserve"><value>存储占用</value></data>
+  <data name="Starshot_ClearCache" xml:space="preserve"><value>清理缓存</value></data>
   <data name="Starshot_StatsScreenshots" xml:space="preserve"><value>截图</value></data>
   <data name="Starshot_StatsFiles" xml:space="preserve"><value>文件数</value></data>
   <data name="Starshot_StatsImageCache" xml:space="preserve"><value>缩略图缓存</value></data>
+  <data name="Starshot_StatsWallpaper" xml:space="preserve"><value>壁纸</value></data>
   <data name="Starshot_StatsLog" xml:space="preserve"><value>日志</value></data>
   <data name="Starshot_Calculating" xml:space="preserve"><value>计算中…</value></data>
 

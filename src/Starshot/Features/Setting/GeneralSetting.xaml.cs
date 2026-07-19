@@ -17,6 +17,12 @@ public sealed partial class GeneralSetting : PageBase
     private readonly ILogger<GeneralSetting> _logger = AppConfig.GetLogger<GeneralSetting>();
 
 
+    public GeneralSetting()
+    {
+        InitializeComponent();
+    }
+
+
     public bool EnableSystemTrayIcon
     {
         get;
@@ -119,22 +125,6 @@ public sealed partial class GeneralSetting : PageBase
         string rootDir = Path.GetDirectoryName(appDir) ?? "";
         string launcher = Path.Combine(rootDir, "Starshot.exe");
         return File.Exists(launcher) ? launcher : exePath;
-    }
-
-
-    [RelayCommand]
-    private void ClearThumbnailCache()
-    {
-        try
-        {
-            ImageThumbnail.ClearThumbnailCache();
-            InAppToast.MainWindow?.Success(Lang.ScreenshotSetting_ClearSuccessfully);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to clear thumbnail cache");
-            InAppToast.MainWindow?.Error(ex, Lang.ScreenshotSetting_ClearFailed);
-        }
     }
 
 

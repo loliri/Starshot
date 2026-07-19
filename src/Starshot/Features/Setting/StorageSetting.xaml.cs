@@ -205,6 +205,9 @@ public sealed partial class StorageSetting : PageBase
     public string ImageCacheSize { get; set => SetProperty(ref field, value); } = "—";
 
 
+    public string WallpaperSize { get; set => SetProperty(ref field, value); } = "—";
+
+
     public string LogSize { get; set => SetProperty(ref field, value); } = "—";
 
 
@@ -216,17 +219,30 @@ public sealed partial class StorageSetting : PageBase
 
 
     [RelayCommand]
-    private void ClearThumbnailCache()
+    private void ClearCache()
     {
         try
         {
             ImageThumbnail.ClearThumbnailCache();
+            // 删除未使用的壁纸文件（保留当前在用的）
+            string bgDir = Path.Combine(AppConfig.CacheFolder, "bg");
+            if (Directory.Exists(bgDir))
+            {
+                string? current = AppConfig.WallpaperFile;
+                foreach (var f in Directory.EnumerateFiles(bgDir))
+                {
+                    if (!string.Equals(Path.GetFileName(f), current, StringComparison.OrdinalIgnoreCase))
+                    {
+                        try { File.Delete(f); } catch { }
+                    }
+                }
+            }
             InAppToast.MainWindow?.Success(Lang.ScreenshotSetting_ClearSuccessfully);
             _ = RefreshStatsAsync();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to clear thumbnail cache");
+            _logger.LogError(ex, "Failed to clear cache");
             InAppToast.MainWindow?.Error(ex, Lang.ScreenshotSetting_ClearFailed);
         }
     }
@@ -238,18 +254,21 @@ public sealed partial class StorageSetting : PageBase
         {
             string ssFolder = ScreenshotFolder;
             string cache = AppConfig.CacheFolder;
+            string bgDir = Path.Combine(cache, "bg");
             string logDir = Path.Combine(AppConfig.LogFolder, "log");
 
-            var (ssSize, cacheSize, logSize) = await Task.Run(() =>
+            var (ssSize, cacheSize, bgSize, logSize) = await Task.Run(() =>
             {
                 long s = StorageStatsHelper.GetDirectorySize(ssFolder);
-                long cc = StorageStatsHelper.GetDirectorySize(cache);
+                long bg = StorageStatsHelper.GetDirectorySize(bgDir);
+                long cc = StorageStatsHelper.GetDirectorySize(cache) - bg;  // 缓存不含壁纸，避免重复计数
                 long ll = StorageStatsHelper.GetDirectorySize(logDir);
-                return (s, cc, ll);
+                return (s, cc, bg, ll);
             });
 
             ScreenshotFolderSize = StorageStatsHelper.FormatSize(ssSize);
             ImageCacheSize = StorageStatsHelper.FormatSize(cacheSize);
+            WallpaperSize = StorageStatsHelper.FormatSize(bgSize);
             LogSize = StorageStatsHelper.FormatSize(logSize);
         }
         catch (Exception ex)

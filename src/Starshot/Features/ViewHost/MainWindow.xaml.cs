@@ -3,6 +3,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starshot.Features.About;
+using Starshot.Features.Background;
 using Starshot.Features.Screenshot;
 using Starshot.Features.Setting;
 using Starshot.Frameworks;
@@ -23,6 +24,8 @@ public sealed partial class MainWindow : WindowEx
 
     public bool ForceExit;
 
+    private SystemBackdropHelper? _backdropHelper;
+
 
     public MainWindow()
     {
@@ -33,12 +36,33 @@ public sealed partial class MainWindow : WindowEx
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         AdaptTitleBarButtonColorToActuallTheme();
         SetDragRectangles(new RectInt32(0, 0, 100000, (int)(48 * UIScale)));
-        new SystemBackdropHelper(this).TrySetMica();
+        ApplyBackdrop();
         ApplyTheme();
         HotkeyManager.InitializeHotkey(WindowHandle);
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, (_, _) => OnAccentChanged());
+        WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => ApplyBackdrop());
         Activated += MainWindow_Activated;
         AppWindow.Closing += AppWindow_Closing;
+    }
+
+
+    /// <summary>
+    /// 壁纸开：关 Mica + overlay 隔层显；壁纸关：Mica + overlay 隐。
+    /// 壁纸渲染本身由 AppBackground 据 EnableWallpaper 自管。
+    /// </summary>
+    private void ApplyBackdrop()
+    {
+        if (AppConfig.EnableWallpaper)
+        {
+            _backdropHelper?.ResetBackdrop();
+            Border_OverlayMask.Opacity = 1;
+        }
+        else
+        {
+            _backdropHelper ??= new SystemBackdropHelper(this);
+            _backdropHelper.TrySetMica();
+            Border_OverlayMask.Opacity = 0;
+        }
     }
 
 
@@ -105,12 +129,15 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
-    /// 应用主题（0跟随系统 / 1浅色 / 2深色）
+    /// 应用主题（0跟随系统 / 1浅色 / 2深色）。先 toggle 再设回，强制 WinUI 重新解析主题资源
+    /// ——运行时改 accent/字体后，已存在的 UI 立即跟着变。
     /// </summary>
     public void ApplyTheme()
     {
         if (Content is FrameworkElement root)
         {
+            var t = root.ActualTheme;
+            root.RequestedTheme = t is ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
             root.RequestedTheme = (ElementTheme)AppConfig.Theme;
             AdaptTitleBarButtonColorToActuallTheme();
         }
@@ -118,16 +145,11 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
-    /// 强调色变更后，切换主题强制 WinUI 重解析主题资源
+    /// 强调色变更后切换主题强制 WinUI 重解析主题资源
     /// </summary>
     private void OnAccentChanged()
     {
-        if (Content is FrameworkElement root)
-        {
-            var t = root.ActualTheme;
-            root.RequestedTheme = t is ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
-            root.RequestedTheme = (ElementTheme)AppConfig.Theme;
-        }
+        ApplyTheme();
     }
 
 

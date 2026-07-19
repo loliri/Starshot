@@ -40,6 +40,35 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 启用自定义壁纸（开则关 Mica，铺壁纸 + 亚克力隔层）
+    /// </summary>
+    public static bool EnableWallpaper
+    {
+        get => !string.IsNullOrWhiteSpace(WallpaperFile);
+    }
+
+
+    /// <summary>
+    /// 壁纸文件名（拷贝在 CacheFolder/bg/ 下），空=null=无壁纸
+    /// </summary>
+    public static string? WallpaperFile
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
+    /// 从壁纸自动取色应用为强调色
+    /// </summary>
+    public static bool EnableAccentFromWallpaper
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
     /// 语言代码（如 en-US, zh-CN），空=跟随系统
     /// </summary>
     public static string? Language
