@@ -411,11 +411,38 @@ internal class ScreenCaptureService
 
         bool contentIsHDR = hdr && maxCLL > sdrWhiteLevel + 5;
         bool deleteHDR = hdr && AppConfig.DeleteHDRIfSDRContent && !contentIsHDR;
-        bool produceSDR = hdr && (deleteHDR || AppConfig.AutoConvertScreenshotToSDR);
+        bool autoConvertSDR = hdr && AppConfig.AutoConvertScreenshotToSDR && !deleteHDR;
+        bool produceSDR = deleteHDR || autoConvertSDR;
 
         string? sdrPath = null;
-        if (produceSDR)
+        if (deleteHDR)
         {
+            // 内容实为 SDR：tonemap 到 R8G8B8A8，按用户 SDR 格式存（BT709），稍后删 HDR 文件
+            using CanvasRenderTarget sdrBitmap = TonemapToSdr(bitmap, sdrWhiteLevel);
+            string sdrExt = AppConfig.ScreenCaptureSDRFormat switch { 1 => "avif", 2 => "jxl", _ => "png" };
+            sdrPath = Path.ChangeExtension(filePath, sdrExt);
+            using var ms2 = new MemoryStream();
+            await _encodeSlim.WaitAsync();
+            try
+            {
+                if (sdrExt is "png")
+                    await ImageSaver.SaveAsPngAsync(sdrBitmap, ms2, ColorPrimaries.BT709, xmpData, false);
+                else if (sdrExt is "avif")
+                    await ImageSaver.SaveAsAvifAsync(sdrBitmap, ms2, ColorPrimaries.BT709, quality, xmpData, false);
+                else
+                    await ImageSaver.SaveAsJxlAsync(sdrBitmap, ms2, ColorPrimaries.BT709, distance, xmpData, false);
+            }
+            finally
+            {
+                _encodeSlim.Release();
+            }
+            ms2.Position = 0;
+            using var fs2 = File.Create(sdrPath);
+            await ms2.CopyToAsync(fs2);
+        }
+        else if (autoConvertSDR)
+        {
+            // 内容真为 HDR：额外存一份 UHDR JPEG（SDR 基图 + HDR gain map）
             using var ms2 = new MemoryStream();
             await ImageSaver.SaveAsUhdrAsync(bitmap, ms2, maxCLL, sdrWhiteLevel);
             ms2.Position = 0;
@@ -439,6 +466,37 @@ internal class ScreenCaptureService
         }
 
         _infoWindow?.CaptureSuccess(displayId, bitmap, finalFile, maxCLL);
+    }
+
+
+    /// <summary>
+    /// HDR（R16G16B16A16Float scRGB）→ SDR（R8G8B8A8）色调映射。
+    /// WhiteLevelAdjustment(80→sdrWhiteLevel) + SrgbGamma(OETF)，与覆盖层显示用 tonemap 同逻辑。
+    /// </summary>
+    private static CanvasRenderTarget TonemapToSdr(CanvasBitmap hdrBitmap, float sdrWhiteLevel)
+    {
+        var device = CanvasDevice.GetSharedDevice();
+        int w = (int)hdrBitmap.SizeInPixels.Width;
+        int h = (int)hdrBitmap.SizeInPixels.Height;
+        var sdr = new CanvasRenderTarget(device, w, h, 96, DirectXPixelFormat.R8G8B8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+        using (var ds = sdr.CreateDrawingSession())
+        {
+            var wle = new WhiteLevelAdjustmentEffect
+            {
+                Source = hdrBitmap,
+                InputWhiteLevel = 80,
+                OutputWhiteLevel = sdrWhiteLevel,
+                BufferPrecision = CanvasBufferPrecision.Precision16Float,
+            };
+            var gamma = new SrgbGammaEffect
+            {
+                Source = wle,
+                GammaMode = SrgbGammaMode.OETF,
+                BufferPrecision = CanvasBufferPrecision.Precision16Float,
+            };
+            ds.DrawImage(gamma);
+        }
+        return sdr;
     }
 
 
