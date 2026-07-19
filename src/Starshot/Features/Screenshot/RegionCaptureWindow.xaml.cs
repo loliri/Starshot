@@ -107,6 +107,12 @@ public sealed partial class RegionCaptureWindow : WindowEx
         User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE, (nint)style);
         User32.SetWindowPos(WindowHandle, IntPtr.Zero, vx, vy, vw, vh, (User32.SetWindowPosFlags)0x0020 | User32.SetWindowPosFlags.SWP_NOZORDER);
 
+        // 首帧前用当前光标位置初始化 _currentMousePos，否则放大镜/坐标框会画在 (0,0) 直到第一次 PointerMoved
+        if (User32.GetCursorPos(out var initCursor))
+        {
+            _currentMousePos = new Point((initCursor.x - _vx) / _scale, (initCursor.y - _vy) / _scale);
+        }
+
         PointerCursor.SetCursorShape(Canvas, InputSystemCursorShape.Cross);
 
         _ = Task.Run(DetectWindows);
