@@ -96,8 +96,7 @@
                 <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_AccentColor}" />
                 <ToggleSwitch IsOn="{x:Bind EnableAccentFromWallpaper, Mode=TwoWay}"
                               OffContent="{x:Bind lang:Lang.Starshot_AccentFromWallpaper}"
-                              OnContent="{x:Bind lang:Lang.Starshot_AccentFromWallpaper}"
-                              Visibility="{x:Bind AccentFromWallpaperVisibility}" />
+                              OnContent="{x:Bind lang:Lang.Starshot_AccentFromWallpaper}" />
                 <Button Height="40"
                         Padding="16,0,16,0"
                         BorderThickness="0"

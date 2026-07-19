@@ -96,8 +96,6 @@ public sealed partial class AppearanceSetting : PageBase
     } = AppConfig.EnableAccentFromWallpaper;
 
 
-    public Visibility AccentFromWallpaperVisibility => AppConfig.EnableWallpaper ? Visibility.Visible : Visibility.Collapsed;
-
     public Visibility WallpaperRowVisibility => AppConfig.WallpaperMode == 0 ? Visibility.Collapsed : Visibility.Visible;
 
 
@@ -108,10 +106,28 @@ public sealed partial class AppearanceSetting : PageBase
             if (SetProperty(ref field, value))
             {
                 AppConfig.WallpaperMode = value;
+                // 切换模式时检查目标路径是否还在；不在就清空配置项（不提示、不回退到无）
+                switch (value)
+                {
+                    case 1:
+                        if (!string.IsNullOrEmpty(AppConfig.WallpaperFile)
+                            && !File.Exists(Path.Combine(AppConfig.CacheFolder, "bg", AppConfig.WallpaperFile)))
+                            AppConfig.WallpaperFile = null;
+                        break;
+                    case 2:
+                        if (!string.IsNullOrEmpty(AppConfig.WallpaperVideoFile)
+                            && !File.Exists(AppConfig.WallpaperVideoFile))
+                            AppConfig.WallpaperVideoFile = null;
+                        break;
+                    case 3:
+                        if (!string.IsNullOrEmpty(AppConfig.WallpaperFolder)
+                            && !Directory.Exists(AppConfig.WallpaperFolder))
+                            AppConfig.WallpaperFolder = null;
+                        break;
+                }
                 OnPropertyChanged(nameof(WallpaperChooseLabel));
                 OnPropertyChanged(nameof(WallpaperValue));
                 OnPropertyChanged(nameof(WallpaperRowVisibility));
-                OnPropertyChanged(nameof(AccentFromWallpaperVisibility));
                 WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
                 // 开着自动取色：切换模式后强制重新从新壁纸取色（避免 _lastFile 短路 / 视频模式不取色）
                 if (AppConfig.EnableAccentFromWallpaper)
@@ -241,7 +257,6 @@ public sealed partial class AppearanceSetting : PageBase
     private void RefreshWallpaperBindings()
     {
         OnPropertyChanged(nameof(WallpaperValue));
-        OnPropertyChanged(nameof(AccentFromWallpaperVisibility));
     }
 
 

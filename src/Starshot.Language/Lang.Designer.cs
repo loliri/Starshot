@@ -7825,6 +7825,7 @@ namespace Starshot.Language {
         public static string Starshot_Nav_Settings { get { return ResourceManager.GetString("Starshot_Nav_Settings", resourceCulture); } }
         public static string Starshot_Nav_About { get { return ResourceManager.GetString("Starshot_Nav_About", resourceCulture); } }
         public static string Starshot_SplashTagline { get { return ResourceManager.GetString("Starshot_SplashTagline", resourceCulture); } }
+        public static string Starshot_WallpaperNotFound { get { return ResourceManager.GetString("Starshot_WallpaperNotFound", resourceCulture); } }
 
         public static string Starshot_Theme { get { return ResourceManager.GetString("Starshot_Theme", resourceCulture); } }
         public static string Starshot_ThemeLight { get { return ResourceManager.GetString("Starshot_ThemeLight", resourceCulture); } }

@@ -99,6 +99,18 @@ public sealed partial class AppBackground : UserControl
             _cts = new CancellationTokenSource();
             CancellationToken ct = _cts.Token;
 
+            // 启动/刷新时检查源是否丢失（区分"未配置"和"配置了但文件没了"）
+            if (IsWallpaperSourceMissing())
+            {
+                ClearWallpaperConfigForCurrentMode();
+                AppConfig.WallpaperMode = 0;
+                InAppToast.MainWindow?.Warning(null, Lang.Starshot_WallpaperNotFound, 5000);
+                DisposeVideoResource();
+                BackgroundImageSource = null;
+                _lastFile = null;
+                return;
+            }
+
             string? file = ResolveWallpaperPath();
             if (!AppConfig.EnableWallpaper || string.IsNullOrEmpty(file) || !File.Exists(file))
             {
@@ -186,6 +198,38 @@ public sealed partial class AppBackground : UserControl
     {
         string? ext = Path.GetExtension(file)?.ToLowerInvariant();
         return ext is ".mp4" or ".mkv" or ".mov" or ".avi" or ".webm";
+    }
+
+
+    /// <summary>
+    /// 检查当前模式的壁纸源是否存在（配置了但文件/文件夹丢失）。
+    /// </summary>
+    private static bool IsWallpaperSourceMissing()
+    {
+        return AppConfig.WallpaperMode switch
+        {
+            1 => !string.IsNullOrWhiteSpace(AppConfig.WallpaperFile)
+                 && !File.Exists(Path.Combine(AppConfig.CacheFolder, "bg", AppConfig.WallpaperFile)),
+            2 => !string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile)
+                 && !File.Exists(AppConfig.WallpaperVideoFile),
+            3 => !string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder)
+                 && !Directory.Exists(AppConfig.WallpaperFolder),
+            _ => false,
+        };
+    }
+
+
+    /// <summary>
+    /// 清空当前模式的壁纸配置项（文件/文件夹路径置 null）。
+    /// </summary>
+    private static void ClearWallpaperConfigForCurrentMode()
+    {
+        switch (AppConfig.WallpaperMode)
+        {
+            case 1: AppConfig.WallpaperFile = null; break;
+            case 2: AppConfig.WallpaperVideoFile = null; break;
+            case 3: AppConfig.WallpaperFolder = null; break;
+        }
     }
 
 
