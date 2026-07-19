@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:WindowEx x:Class="Starshot.Features.Screenshot.RegionCaptureWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mgcux="using:Microsoft.Graphics.Canvas.UI.Xaml"
+             xmlns:sf="using:Starshot.Frameworks"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid"
+          Background="Transparent"
+          KeyDown="RootGrid_KeyDown">
+        <mgcux:CanvasControl x:Name="Canvas"
+                             CreateResources="Canvas_CreateResources"
+                             Draw="Canvas_Draw"
+                             PointerPressed="Canvas_PointerPressed"
+                             PointerMoved="Canvas_PointerMoved"
+                             PointerReleased="Canvas_PointerReleased" />
+    </Grid>
+
+</sf:WindowEx>

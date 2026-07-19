@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:PageBase x:Class="Starshot.Features.Setting.HotkeySetting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
+             xmlns:local="using:Starshot.Features.Setting"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starshot.Frameworks"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <ScrollViewer Padding="0">
+        <StackPanel MaxWidth="820"
+                    Padding="36,24,36,36"
+                    Spacing="20">
+
+            <TextBlock FontSize="28"
+                       FontWeight="Bold"
+                       Text="{x:Bind lang:Lang.Starshot_Nav_Hotkey}" />
+
+            <!--  快捷键列表  -->
+            <StackPanel Spacing="16">
+
+                <!--  全屏截图  -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  图标  -->
+                        <Border Grid.Row="0"
+                                Grid.RowSpan="2"
+                                Width="48"
+                                Height="48"
+                                Margin="0,0,16,0"
+                                Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                CornerRadius="8">
+                            <FontIcon FontSize="24"
+                                      Foreground="White"
+                                      Glyph="&#xE7C4;" />
+                        </Border>
+
+                        <!--  标题和描述  -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Bind lang:Lang.Starshot_HotkeyScreenshot}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   FontSize="13"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.Starshot_HotkeyScreenshotDesc}"
+                                   TextWrapping="Wrap" />
+
+                        <!--  快捷键输入  -->
+                        <local:HotkeyInput x:Name="HotkeyInput_ScreenshotCapture"
+                                           Grid.Row="2"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="2"
+                                           MinWidth="240"
+                                           HorizontalAlignment="Left"
+                                           HotkeyDeleted="HotkeyInput_HotkeyDeleted"
+                                           HotkeyEditFinished="HotkeyInput_HotkeyEditFinished"
+                                           HotkeyEditing="HotkeyInput_HotkeyEditing"
+                                           HotkeyId="44445"
+                                           WindowHandle="{x:Bind WindowHandle}" />
+                    </Grid>
+                </Border>
+
+                <!--  区域截图  -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  图标  -->
+                        <Border Grid.Row="0"
+                                Grid.RowSpan="2"
+                                Width="48"
+                                Height="48"
+                                Margin="0,0,16,0"
+                                Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                CornerRadius="8">
+                            <FontIcon FontSize="24"
+                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                      Glyph="&#xE73F;" />
+                        </Border>
+
+                        <!--  标题和描述  -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Bind lang:Lang.Starshot_HotkeyRegion}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   FontSize="13"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.Starshot_HotkeyRegionDesc}"
+                                   TextWrapping="Wrap" />
+
+                        <!--  快捷键输入  -->
+                        <local:HotkeyInput x:Name="HotkeyInput_RegionCapture"
+                                           Grid.Row="2"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="2"
+                                           MinWidth="240"
+                                           HorizontalAlignment="Left"
+                                           HotkeyDeleted="HotkeyInput_HotkeyDeleted"
+                                           HotkeyEditFinished="HotkeyInput_HotkeyEditFinished"
+                                           HotkeyEditing="HotkeyInput_HotkeyEditing"
+                                           HotkeyId="44446"
+                                           WindowHandle="{x:Bind WindowHandle}" />
+                    </Grid>
+                </Border>
+
+                <!--  区域仅复制  -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  图标  -->
+                        <Border Grid.Row="0"
+                                Grid.RowSpan="2"
+                                Width="48"
+                                Height="48"
+                                Margin="0,0,16,0"
+                                Background="{ThemeResource AccentFillColorTertiaryBrush}"
+                                CornerRadius="8">
+                            <FontIcon FontSize="24"
+                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                      Glyph="&#xE8C8;" />
+                        </Border>
+
+                        <!--  标题和描述  -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Bind lang:Lang.Starshot_HotkeyRegionCopy}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   FontSize="13"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.Starshot_HotkeyRegionCopyDesc}"
+                                   TextWrapping="Wrap" />
+
+                        <!--  快捷键输入  -->
+                        <local:HotkeyInput x:Name="HotkeyInput_RegionCopy"
+                                           Grid.Row="2"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="2"
+                                           MinWidth="240"
+                                           HorizontalAlignment="Left"
+                                           HotkeyDeleted="HotkeyInput_HotkeyDeleted"
+                                           HotkeyEditFinished="HotkeyInput_HotkeyEditFinished"
+                                           HotkeyEditing="HotkeyInput_HotkeyEditing"
+                                           HotkeyId="44447"
+                                           WindowHandle="{x:Bind WindowHandle}" />
+                    </Grid>
+                </Border>
+
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</sf:PageBase>

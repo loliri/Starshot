@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:WindowEx x:Class="Starshot.Features.Screenshot.ScreenCaptureInfoWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
+             xmlns:local="using:Starshot.Features.Screenshot"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starshot.Frameworks"
+             Title="ScreenCaptureInfoWindow"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid"
+          Padding="10"
+          Background="#D0202020"
+          ColumnSpacing="16"
+          CornerRadius="8,0,0,8"
+          Translation="320,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+
+        <!--  截图  -->
+        <Border Width="72"
+                Height="72"
+                Margin="4,0,0,0"
+                VerticalAlignment="Center"
+                CornerRadius="4"
+                Visibility="{x:Bind IsSuccess}">
+            <Image x:Name="ThumbnailImage"
+                   Width="72"
+                   Height="72" />
+        </Border>
+        <!--  已保存  -->
+        <StackPanel Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Spacing="4"
+                    Visibility="{x:Bind IsSuccess}">
+            <TextBlock x:Name="TextBlock_State"
+                       IsTextScaleFactorEnabled="False"
+                       TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <ProgressRing x:Name="ProgressRing_Process"
+                              Width="12"
+                              Height="12"
+                              IsIndeterminate="True"
+                              Visibility="Collapsed" />
+                <FontIcon x:Name="FontIcon_Complete"
+                          FontSize="16"
+                          Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                          Glyph="&#xE930;"
+                          IsTextScaleFactorEnabled="False"
+                          Visibility="Collapsed" />
+                <TextBlock x:Name="TextBlock_Repeat"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Visibility="Collapsed" />
+            </StackPanel>
+        </StackPanel>
+        <!--  打开  -->
+        <Button x:Name="Button_OpenImage"
+                Grid.Column="2"
+                Click="Button_OpenImage_Click"
+                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                UseSystemFocusVisuals="False"
+                Visibility="Collapsed">
+            <StackPanel Spacing="8">
+                <FontIcon HorizontalAlignment="Center"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE8A7;"
+                          IsTextScaleFactorEnabled="False" />
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind lang:Lang.Common_Open}" />
+            </StackPanel>
+        </Button>
+        <!--  已复制（仅复制模式，代替打开按钮）  -->
+        <StackPanel x:Name="StackPanel_CopyStatus"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Spacing="8"
+                    Visibility="Collapsed">
+            <FontIcon HorizontalAlignment="Center"
+                      Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                      Glyph="&#xE8C8;"
+                      IsTextScaleFactorEnabled="False" />
+            <TextBlock HorizontalAlignment="Center"
+                       FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       IsTextScaleFactorEnabled="False"
+                       Text="已复制" />
+        </StackPanel>
+
+
+        <!--  截图失败提示  -->
+        <Image Width="72"
+               Height="72"
+               Margin="4,0,0,0"
+               VerticalAlignment="Center"
+               Visibility="{x:Bind IsError}" />
+        <!--  错误提醒  -->
+        <StackPanel Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Spacing="2"
+                    Visibility="{x:Bind IsError}">
+            <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                       IsTextScaleFactorEnabled="False"
+                       Text="{x:Bind lang:Lang.ScreenCaptureInfoWindow_ScreenshotFailed}"
+                       TextWrapping="Wrap" />
+            <TextBlock FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       IsTextScaleFactorEnabled="False"
+                       Text="{x:Bind lang:Lang.ScreenCaptureInfoWindow_CheckTheLogForMoreInformation}"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+        <!--  打开  -->
+        <Button x:Name="Button_OpenLog"
+                Grid.Column="2"
+                Click="Button_OpenLog_Click"
+                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                UseSystemFocusVisuals="False"
+                Visibility="{x:Bind IsError}">
+            <StackPanel Spacing="8">
+                <FontIcon HorizontalAlignment="Center"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE8A7;"
+                          IsTextScaleFactorEnabled="False" />
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind lang:Lang.Common_Open}" />
+            </StackPanel>
+        </Button>
+
+
+    </Grid>
+
+</sf:WindowEx>

@@ -1,0 +1,58 @@
+<Application x:Class="Starshot.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Starshot">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ThemeShadow x:Key="ThemeShadow" />
+
+            <AcrylicBrush x:Key="CustomAcrylicBrush"
+                          FallbackColor="#F52C2C2C"
+                          TintColor="{ThemeResource ControlOnImageFillColorDefault}"
+                          TintOpacity="0.6" />
+            <AcrylicBrush x:Key="CustomOverlayAcrylicBrush"
+                          FallbackColor="#F52C2C2C"
+                          TintColor="{ThemeResource ControlOnImageFillColorDefault}"
+                          TintOpacity="0.4" />
+
+            <Thickness x:Key="NavigationViewBorderThickness">0</Thickness>
+            <StaticResource x:Key="NavigationViewDefaultPaneBackground" ResourceKey="CustomAcrylicBrush" />
+            <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="ControlFillColorTransparentBrush" />
+
+            <Style BasedOn="{StaticResource DefaultContentDialogStyle}" TargetType="ContentDialog">
+                <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
+            </Style>
+
+            <Style BasedOn="{StaticResource DefaultFlyoutPresenterStyle}" TargetType="FlyoutPresenter">
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
+            </Style>
+
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <Color x:Key="SystemAccentColor">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorLight1">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorLight2">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorLight3">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorDark1">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorDark2">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorDark3">#2DBE9C</Color>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <Color x:Key="SystemAccentColor">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorLight1">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorLight2">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorLight3">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorDark1">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorDark2">#2DBE9C</Color>
+                    <Color x:Key="SystemAccentColorDark3">#2DBE9C</Color>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:PageBase x:Class="Starshot.Features.Setting.GeneralSetting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starshot.Frameworks"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <ScrollViewer Padding="0">
+        <StackPanel MaxWidth="820"
+                    Padding="36,24,36,36"
+                    Spacing="20">
+
+            <TextBlock FontSize="28"
+                       FontWeight="Bold"
+                       Text="{x:Bind lang:Lang.Starshot_Nav_Settings}" />
+
+
+            <!--  语言  -->
+            <StackPanel Spacing="8">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.SettingPage_Language}" />
+                <ComboBox MinWidth="240"
+                          SelectedIndex="{x:Bind LanguageIndex, Mode=TwoWay}">
+                    <ComboBoxItem Content="{x:Bind lang:Lang.SettingPage_FollowSystem}" />
+                    <ComboBoxItem Content="English" />
+                    <ComboBoxItem Content="简体中文" />
+                </ComboBox>
+            </StackPanel>
+
+
+            <!--  系统托盘  -->
+            <ToggleSwitch IsOn="{x:Bind EnableSystemTrayIcon, Mode=TwoWay}"
+                          OffContent="{x:Bind lang:Lang.Starshot_SystemTray}"
+                          OnContent="{x:Bind lang:Lang.Starshot_SystemTray}" />
+
+
+            <!--  开机自启  -->
+            <StackPanel Spacing="8">
+                <ToggleSwitch IsOn="{x:Bind EnableAutoStart, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_AutoStart}"
+                              OnContent="{x:Bind lang:Lang.Starshot_AutoStart}" />
+                <ToggleSwitch IsOn="{x:Bind AutoStartMinimized, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_AutoStartMinimized}"
+                              OnContent="{x:Bind lang:Lang.Starshot_AutoStartMinimized}"
+                              Visibility="{x:Bind AutoStartMinimizedVisibility}" />
+            </StackPanel>
+
+
+            <!--  清除缩略图缓存  -->
+            <Button Height="40"
+                    Padding="16,0,16,0"
+                    BorderThickness="0"
+                    Command="{x:Bind ClearThumbnailCacheCommand}"
+                    CornerRadius="8,20,20,8"
+                    Style="{ThemeResource AccentButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xEA99;" />
+                    <TextBlock Text="{x:Bind lang:Lang.ScreenshotSetting_ClearThumbnailCache}" />
+                </StackPanel>
+            </Button>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</sf:PageBase>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:WindowEx x:Class="Starshot.Features.ViewHost.MainWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mxi="using:Microsoft.Xaml.Interactivity"
+             xmlns:sf="using:Starshot.Frameworks"
+             xmlns:sh="using:Starshot.Helpers"
+             mc:Ignorable="d">
+
+    <Grid Background="Transparent">
+
+        <NavigationView x:Name="NavView"
+                        IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
+                        IsSettingsVisible="False"
+                        OpenPaneLength="260"
+                        PaneDisplayMode="Left"
+                        SelectionChanged="NavView_SelectionChanged">
+            <NavigationView.Resources>
+                <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+                <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
+            </NavigationView.Resources>
+
+            <NavigationView.PaneHeader>
+                <Grid Height="48">
+                    <StackPanel Margin="20,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="10">
+                        <Image Width="22"
+                               Height="22"
+                               Source="ms-appx:///Assets/logo.png" />
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Text="Starshot" />
+                    </StackPanel>
+                </Grid>
+            </NavigationView.PaneHeader>
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem Tag="Gallery">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontSize="20" Glyph="&#xE91B;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_Nav_Gallery}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+
+                <NavigationViewItemSeparator />
+
+                <NavigationViewItem Tag="Hotkey">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontSize="20" Glyph="&#xEDA7;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_Nav_Hotkey}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="Screenshot">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontSize="20" Glyph="&#xE722;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_Nav_Screenshot}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="Storage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontSize="20" Glyph="&#xE8F1;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_Nav_Storage}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="Appearance">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontSize="20" Glyph="&#xE771;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_Nav_Appearance}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="Settings">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontSize="20" Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_Nav_Settings}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Tag="About">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontSize="20" Glyph="&#xE946;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_Nav_About}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <Frame x:Name="ContentFrame" Margin="0,48,0,0" />
+        </NavigationView>
+
+        <StackPanel MaxWidth="600"
+                    Margin="24,72,24,72"
+                    VerticalAlignment="Bottom">
+            <StackPanel.Transitions>
+                <TransitionCollection>
+                    <AddDeleteThemeTransition />
+                </TransitionCollection>
+            </StackPanel.Transitions>
+            <mxi:Interaction.Behaviors>
+                <sh:InAppToast Tag="MainWindow" />
+            </mxi:Interaction.Behaviors>
+        </StackPanel>
+
+    </Grid>
+
+</sf:WindowEx>

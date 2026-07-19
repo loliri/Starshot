@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:PageBase x:Class="Starshot.Features.Setting.StorageSetting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starshot.Frameworks"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <ScrollViewer Padding="0">
+        <StackPanel MaxWidth="820"
+                    Padding="36,24,36,36"
+                    Spacing="20">
+
+            <TextBlock FontSize="28"
+                       FontWeight="Bold"
+                       Text="{x:Bind lang:Lang.Starshot_Nav_Storage}" />
+
+
+            <!--  全屏文件名模板  -->
+            <StackPanel Spacing="6">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_FilenameTemplate}" />
+                <TextBox HorizontalAlignment="Stretch"
+                         Text="{x:Bind FileNamePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                           Text="{x:Bind FileNamePreview}"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+
+
+            <!--  区域文件名模板  -->
+            <StackPanel Spacing="6">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_RegionFilenameTemplate}" />
+                <TextBox HorizontalAlignment="Stretch"
+                         Text="{x:Bind RegionFileNamePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                           Text="{x:Bind RegionFileNamePreview}"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+
+
+            <!--  占位符 + 标题截断  -->
+            <TextBlock FontSize="11"
+                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                       Text="{x:Bind lang:Lang.Starshot_FilenamePlaceholders}"
+                       TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.Starshot_TitleMaxLength}" />
+                <NumberBox Minimum="0"
+                           Maximum="200"
+                           SmallChange="5"
+                           Value="{x:Bind FileNameTitleMaxLength, Mode=TwoWay}" />
+            </StackPanel>
+
+
+            <!--  截图文件夹  -->
+            <StackPanel Spacing="8">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_ScreenshotFolder}" />
+                <Grid ColumnSpacing="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0"
+                            Height="40"
+                            Padding="16,0,16,0"
+                            BorderThickness="0"
+                            Command="{x:Bind ChangeScreenshotFolderCommand}"
+                            CornerRadius="8,20,20,8"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8DE;" />
+                            <TextBlock Text="{x:Bind lang:Lang.Starshot_Change}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1"
+                            Height="40"
+                            Margin="16,0,0,0"
+                            Padding="20,0,20,1"
+                            HorizontalContentAlignment="Left"
+                            BorderThickness="0"
+                            Command="{x:Bind OpenScreenshotFolderCommand}"
+                            CornerRadius="20">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                                       MaxLines="2"
+                                       Text="{x:Bind ScreenshotFolder}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" />
+                            <FontIcon Grid.Column="1"
+                                      Margin="0,2,2,0"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE8A7;" />
+                        </Grid>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+
+            <!--  日志文件夹  -->
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_LogFolder}" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_LogFolderRestartTip}" />
+                </StackPanel>
+                <Grid ColumnSpacing="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0"
+                            Height="40"
+                            Padding="16,0,16,0"
+                            BorderThickness="0"
+                            Command="{x:Bind ChangeLogFolderCommand}"
+                            CornerRadius="8,20,20,8"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8DE;" />
+                            <TextBlock Text="{x:Bind lang:Lang.Starshot_Change}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1"
+                            Height="40"
+                            Margin="16,0,0,0"
+                            Padding="20,0,20,1"
+                            HorizontalContentAlignment="Left"
+                            BorderThickness="0"
+                            Command="{x:Bind OpenLogFolderCommand}"
+                            CornerRadius="20">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                                       MaxLines="2"
+                                       Text="{x:Bind LogFolder}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" />
+                            <FontIcon Grid.Column="1"
+                                      Margin="0,2,2,0"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE8A7;" />
+                        </Grid>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+
+            <!--  存储占用  -->
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="20"
+                               Text="{x:Bind lang:Lang.Starshot_StorageStats}" />
+                    <Button VerticalAlignment="Center"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Command="{x:Bind RefreshStatsCommand}"
+                            CornerRadius="4"
+                            ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Refresh}">
+                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                    </Button>
+                    <ProgressRing Width="20"
+                                  Height="20"
+                                  VerticalAlignment="Center"
+                                  IsActive="{x:Bind RefreshStatsCommand.IsRunning}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <TextBlock>
+                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsScreenshots}" />
+                        <LineBreak />
+                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsImageCache}" />
+                        <LineBreak />
+                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsLog}" />
+                    </TextBlock>
+                    <TextBlock>
+                        <Run Text="{x:Bind ScreenshotFolderSize}" />
+                        <LineBreak />
+                        <Run Text="{x:Bind ImageCacheSize}" />
+                        <LineBreak />
+                        <Run Text="{x:Bind LogSize}" />
+                    </TextBlock>
+                </StackPanel>
+                <Button Height="40"
+                        Margin="0,4,0,0"
+                        Padding="16,0,16,0"
+                        HorizontalAlignment="Left"
+                        BorderThickness="0"
+                        Command="{x:Bind ClearThumbnailCacheCommand}"
+                        CornerRadius="8,20,20,8"
+                        Style="{ThemeResource AccentButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xEA99;" />
+                        <TextBlock Text="{x:Bind lang:Lang.ScreenshotSetting_ClearThumbnailCache}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</sf:PageBase>

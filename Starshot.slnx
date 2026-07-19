@@ -1,0 +1,12 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/Starshot/Starshot.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/Starshot.Language/Starshot.Language.csproj" />
+    <Project Path="src/Starshot.Launcher/Starshot.Launcher.vcxproj" Id="a1b2c3d4-e5f6-4789-9abc-def012345678" />
+  </Folder>
+</Solution>

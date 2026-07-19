@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:PageBase x:Class="Starshot.Features.Setting.ScreenshotSetting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starshot.Frameworks"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <ScrollViewer Padding="0">
+        <StackPanel MaxWidth="820"
+                    Padding="36,24,36,36"
+                    Spacing="20">
+
+            <TextBlock FontSize="28"
+                       FontWeight="Bold"
+                       Text="{x:Bind lang:Lang.Starshot_Nav_Screenshot}" />
+
+
+            <!--  格式与质量  -->
+            <StackPanel Spacing="12">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_SDRFormat}" />
+                <cwc:Segmented SelectedIndex="{x:Bind ScreenshotSDRFormat, Mode=TwoWay}">
+                    <cwc:SegmentedItem Content="PNG" />
+                    <cwc:SegmentedItem Content="AVIF" />
+                    <cwc:SegmentedItem Content="JPEG XL" />
+                </cwc:Segmented>
+            </StackPanel>
+
+            <StackPanel Spacing="12">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_HDRFormat}" />
+                <cwc:Segmented SelectedIndex="{x:Bind ScreenshotHDRFormat, Mode=TwoWay}">
+                    <cwc:SegmentedItem Content="AVIF" />
+                    <cwc:SegmentedItem Content="JPEG XL" />
+                </cwc:Segmented>
+            </StackPanel>
+
+            <StackPanel Spacing="12">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Quality}" />
+                <cwc:Segmented SelectedIndex="{x:Bind ScreenshotQuality, Mode=TwoWay}">
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.GameSettingPage_Medium}" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.GameSettingPage_High}" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.ScreenshotSetting_Lossless}" />
+                </cwc:Segmented>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <ToggleSwitch IsOn="{x:Bind EnableScreenshotColorManagement, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.ScreenshotSetting_ColorManagement}"
+                              OnContent="{x:Bind lang:Lang.ScreenshotSetting_ColorManagement}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.Starshot_ColorManagementDesc}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+
+
+            <!--  HDR 处理  -->
+            <StackPanel Spacing="12">
+                <ToggleSwitch IsOn="{x:Bind AutoConvertScreenshotToSDR, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.ScreenshotSetting_AutoConvertToSDRImage}"
+                              OnContent="{x:Bind lang:Lang.ScreenshotSetting_AutoConvertToSDRImage}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.Starshot_AutoConvertSDRDesc}"
+                           TextWrapping="Wrap" />
+                <ToggleSwitch IsOn="{x:Bind DeleteHDRIfSDRContent, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_DeleteHDRIfSDR}"
+                              OnContent="{x:Bind lang:Lang.Starshot_DeleteHDRIfSDR}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.Starshot_DeleteHDRIfSDRDesc}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+
+
+            <!--  自动复制  -->
+            <ToggleSwitch IsOn="{x:Bind AutoCopyScreenshotToClipboard, Mode=TwoWay}"
+                          OffContent="{x:Bind lang:Lang.ScreenshotSetting_AutoCopyScreenshotFile}"
+                          OnContent="{x:Bind lang:Lang.ScreenshotSetting_AutoCopyScreenshotFile}" />
+
+
+            <!--  捕获显示器  -->
+            <StackPanel Spacing="12">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_MonitorSource}" />
+                <cwc:Segmented SelectedIndex="{x:Bind CaptureMonitorSource, Mode=TwoWay}">
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_MonitorForeground}" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_MonitorCursor}" />
+                </cwc:Segmented>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</sf:PageBase>
