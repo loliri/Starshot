@@ -16,8 +16,15 @@ int wmain(int argc, wchar_t* argv[])
         STARTUPINFOW si{};
         si.cb = sizeof(si);
         PROCESS_INFORMATION pi{};
-        std::wstring arg = std::wstring(GetCommandLine()).substr(std::wstring(argv[0]).length() + 2);
-        CreateProcess(target_exe.c_str(), (LPWSTR)arg.c_str(), NULL, NULL, false, 0, NULL, NULL, &si, &pi);
+        // Rebuild from argv[1..] so quoting does not depend on GetCommandLine format
+        std::wstring cmdline = L"\"" + target_exe.wstring() + L"\"";
+        for (int i = 1; i < argc; ++i)
+        {
+            cmdline += L" \"";
+            cmdline += argv[i];
+            cmdline += L"\"";
+        }
+        CreateProcess(target_exe.c_str(), (LPWSTR)cmdline.c_str(), NULL, NULL, false, 0, NULL, NULL, &si, &pi);
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
     }
