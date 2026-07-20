@@ -24,9 +24,6 @@ public sealed partial class SystemTrayWindow : WindowEx
 
     private const int HOTKEY_REGION_COPY = 44447;
 
-    // 首次 Show 调用来自 InitializeWindow 的初始化路径，跳过光标定位避免闪烁
-    private bool _isInitializing = true;
-
 
 
     public SystemTrayWindow()
@@ -91,12 +88,14 @@ public sealed partial class SystemTrayWindow : WindowEx
         DwmApi.DwmSetWindowAttribute(WindowHandle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE, (nint)(&p), sizeof(DwmApi.DWM_WINDOW_CORNER_PREFERENCE));
 
         // 托盘窗口必须 Show 一次以初始化托盘图标和 XAML 树（否则图标不出现、菜单打不开）。
-        // 先移到屏幕外，Show() 首次调用时 _isInitializing=true 会跳过光标定位，让窗口在屏外完成初始化。
-        // 之后右键托盘 Show() 走正常光标定位。
-        var size = AppWindow.Size;
-        User32.MoveWindow(WindowHandle, -32000, -32000, size.Width, size.Height, false);
-        Show();
+        // WS_EX_LAYERED + alpha=0 让窗口透明不可见地完成初始化，base.Show 绕过 override 的光标定位。
+        var exStyle = User32.GetWindowLongPtr(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE);
+        User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE, exStyle | (nint)User32.WindowStylesEx.WS_EX_LAYERED);
+        User32.SetLayeredWindowAttributes(WindowHandle, 0, 0, User32.LayeredWindowAttributes.LWA_ALPHA);
+        base.Show();
         Hide();
+        // 摘掉 LAYERED，恢复正常渲染（否则以后每次 Show 都是透明的）
+        User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE, exStyle);
     }
 
 
@@ -130,14 +129,6 @@ public sealed partial class SystemTrayWindow : WindowEx
     {
         RootGrid.RequestedTheme = ShouldSystemUseDarkMode() ? ElementTheme.Dark : ElementTheme.Light;
         RootGrid.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        if (_isInitializing)
-        {
-            // 首次调用来自 InitializeWindow：窗口已被移到屏外，跳过光标定位，
-            // 仅 base.Show 触发托盘图标/XAML 树初始化（屏外不可见），随后 Hide。
-            _isInitializing = false;
-            base.Show();
-            return;
-        }
         SIZE windowSize = new()
         {
             Width = (int)(RootGrid.DesiredSize.Width * UIScale),
