@@ -78,6 +78,11 @@ public sealed partial class MainWindow : WindowEx
             SplashOverlay.Visibility = Visibility.Collapsed;
             InAppToast.FlushPending();
             HotkeyManager.ShowRegistrationErrors();
+            if (AppConfig.AutoStartInvalid)
+            {
+                AppConfig.AutoStartInvalid = false;
+                InAppToast.MainWindow?.Warning(null, Lang.Starshot_AutoStartInvalidCleared, 5000);
+            }
         };
         sb.Begin();
     }

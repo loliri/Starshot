@@ -7868,6 +7868,8 @@ namespace Starshot.Language {
         public static string Starshot_FilenameTemplate { get { return ResourceManager.GetString("Starshot_FilenameTemplate", resourceCulture); } }
         public static string Starshot_RegionFilenameTemplate { get { return ResourceManager.GetString("Starshot_RegionFilenameTemplate", resourceCulture); } }
         public static string Starshot_FilenamePlaceholders { get { return ResourceManager.GetString("Starshot_FilenamePlaceholders", resourceCulture); } }
+        public static string Starshot_ClickToInsert { get { return ResourceManager.GetString("Starshot_ClickToInsert", resourceCulture); } }
+        public static string Starshot_AutoStartInvalidCleared { get { return ResourceManager.GetString("Starshot_AutoStartInvalidCleared", resourceCulture); } }
         public static string Starshot_TitleMaxLength { get { return ResourceManager.GetString("Starshot_TitleMaxLength", resourceCulture); } }
         public static string Starshot_ScreenshotFolder { get { return ResourceManager.GetString("Starshot_ScreenshotFolder", resourceCulture); } }
         public static string Starshot_LogFolder { get { return ResourceManager.GetString("Starshot_LogFolder", resourceCulture); } }

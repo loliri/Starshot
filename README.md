@@ -233,6 +233,8 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 - 注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`，指向启动器（根目录 `Starshot.exe`）
 - 可选 `--hide` 最小化到托盘启动（需托盘已开启）
+- 开关实时读注册表（不缓存数据库）：任务管理器禁用只动 StartupApproved、不删 Run 项，开关仍显示开
+- 启动时检测自启项指向的 exe 是否存在，不存在则自动清除启动项并 toast 提示
 
 ## 架构
 

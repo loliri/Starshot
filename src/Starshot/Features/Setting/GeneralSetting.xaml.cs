@@ -47,8 +47,7 @@ public sealed partial class GeneralSetting : PageBase
         {
             if (SetProperty(ref field, value))
             {
-                AppConfig.EnableAutoStart = value;
-                UpdateAutoStartRegistry();
+                UpdateAutoStartRegistry(value);
                 OnPropertyChanged(nameof(AutoStartMinimizedVisibility));
             }
         }
@@ -63,7 +62,7 @@ public sealed partial class GeneralSetting : PageBase
             if (SetProperty(ref field, value))
             {
                 AppConfig.AutoStartMinimized = value;
-                UpdateAutoStartRegistry();
+                if (AppConfig.EnableAutoStart) UpdateAutoStartRegistry(true);
             }
         }
     } = AppConfig.AutoStartMinimized;
@@ -93,14 +92,14 @@ public sealed partial class GeneralSetting : PageBase
     private const string RunValueName = "Starshot";
 
 
-    private void UpdateAutoStartRegistry()
+    private void UpdateAutoStartRegistry(bool enable)
     {
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: true);
             if (key is null) return;
 
-            if (AppConfig.EnableAutoStart)
+            if (enable)
             {
                 string launcherPath = GetLauncherPath();
                 string args = (AppConfig.AutoStartMinimized && AppConfig.EnableSystemTrayIcon) ? " --hide" : "";

@@ -135,12 +135,56 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 开机自启
+    /// 开机自启：实时读注册表 HKCU\...\Run\Starshot 是否存在（用户可能在外部禁用，不能缓存到 DB）
     /// </summary>
     public static bool EnableAutoStart
     {
-        get => GetValue(false);
-        set => SetValue(value);
+        get
+        {
+            try
+            {
+                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+                return key?.GetValue("Starshot") is not null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 启动检测：自启项指向的 exe 不存在则清除（不判断是否本程序，单纯文件不存在就清）；为 true 时 MainWindow 打开后 toast 提示
+    /// </summary>
+    public static bool AutoStartInvalid;
+
+    public static void CheckAutoStartValidity()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+            string? cmd = key?.GetValue("Starshot") as string;
+            if (string.IsNullOrWhiteSpace(cmd)) return;
+            string exePath = cmd.Trim();
+            if (exePath.StartsWith('"'))
+            {
+                int end = exePath.IndexOf('"', 1);
+                exePath = end > 0 ? exePath[1..end] : exePath.Trim('"');
+            }
+            else
+            {
+                int space = exePath.IndexOf(' ');
+                if (space > 0) exePath = exePath[..space];
+            }
+            if (!File.Exists(exePath))
+            {
+                using var wkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: true);
+                wkey?.DeleteValue("Starshot", throwOnMissingValue: false);
+                AutoStartInvalid = true;
+            }
+        }
+        catch { }
     }
 
 

@@ -67,6 +67,9 @@ public partial class App : Application
             Environment.Exit(0);
         }
 
+        // 主实例：检测自启项指向的 exe 是否存在，不存在则清除
+        AppConfig.CheckAutoStartValidity();
+
         bool startHidden = Environment.GetCommandLineArgs().Contains("--hide", StringComparer.OrdinalIgnoreCase)
                            && AppConfig.EnableSystemTrayIcon;
 
