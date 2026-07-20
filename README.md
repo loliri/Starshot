@@ -255,6 +255,12 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 C++ 原生程序（~400KB），目前写死 `app/Starshot.exe`。未来可加 `version.ini` 支持版本化目录 + 自动清理旧版本。
 
+### 托盘与后台启动
+
+- `--hide` 自启时不创建 MainWindow，全局热键注册到 SystemTrayWindow 的 hwnd（托盘窗口作为常驻宿主）
+- H.NotifyIcon.WinUI 的 TaskbarIcon 依赖 Window 的一次 Show 触发 `Loaded` 才注册图标；初始化时套 `WS_EX_LAYERED + alpha=0` 让窗口透明地完成这次 Show，避免 `--hide` 自启时可见闪烁
+- C++ 启动器用 `argv[1..]` 重新拼接透传命令行，不依赖 `GetCommandLine` 的引号格式（裸 cmd 调用不会吃字符）
+
 ### 技术栈
 
 | 层             | 技术                                                              |
