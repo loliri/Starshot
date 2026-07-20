@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Xaml.Interactivity;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Starshot.Helpers;
@@ -24,6 +25,11 @@ public class InAppToast : Behavior<StackPanel>
 
 
     public static InAppToast? MainWindow { get; private set; }
+
+    // 启动期间 splash 盖住窗口，toast 入队；MainWindow Loaded + splash 完成后调 FlushPending 依次显示
+    private static bool _deferring = true;
+
+    private static readonly List<Action> _pendingToasts = new();
 
 
 
@@ -54,6 +60,20 @@ public class InAppToast : Behavior<StackPanel>
         {
             MainWindow = null;
         }
+    }
+
+
+    /// <summary>
+    /// splash 完成后调：停止 defer，依次显示启动期间累积的 toast。
+    /// </summary>
+    public static void FlushPending()
+    {
+        _deferring = false;
+        foreach (var action in _pendingToasts)
+        {
+            action();
+        }
+        _pendingToasts.Clear();
     }
 
 
@@ -111,7 +131,7 @@ public class InAppToast : Behavior<StackPanel>
 
     private void AddInfoBar(InfoBarSeverity severity, string? title, string? message, int duration = 0)
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void core() => DispatcherQueue.TryEnqueue(() =>
         {
             var infoBar = new InfoBar
             {
@@ -126,6 +146,8 @@ public class InAppToast : Behavior<StackPanel>
             }
             Show(infoBar, duration);
         });
+        if (_deferring) _pendingToasts.Add(core);
+        else core();
     }
 
 
@@ -175,11 +197,13 @@ public class InAppToast : Behavior<StackPanel>
 
     public void ShowWithButton(InfoBarSeverity severity, string? title, string? message, string buttonContent, Action buttonAction, Action? closedAction = null, int duration = 0)
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void core() => DispatcherQueue.TryEnqueue(() =>
         {
             var infoBar = Create(severity, title, message, buttonContent, buttonAction, closedAction);
             Show(infoBar, duration);
         });
+        if (_deferring) _pendingToasts.Add(core);
+        else core();
     }
 
 

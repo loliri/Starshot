@@ -47,7 +47,12 @@ public sealed partial class MainWindow : WindowEx
         SetDragRectangles(new RectInt32(0, 0, 100000, (int)(48 * UIScale)));
         ApplyBackdrop();
         ApplyTheme();
-        HotkeyManager.InitializeHotkey(WindowHandle);
+        // 托盘开启时由 SystemTrayWindow 注册热键（--hide 场景它唯一常驻）；托盘关闭时才由本窗口注册，
+        // 否则两个窗口都注册同一组热键，被占用时各弹一遍 toast（3×2=6 个）
+        if (!AppConfig.EnableSystemTrayIcon)
+        {
+            HotkeyManager.InitializeHotkey(WindowHandle);
+        }
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, (_, _) => OnAccentChanged());
         WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => ApplyBackdrop());
         Activated += MainWindow_Activated;
@@ -68,7 +73,12 @@ public sealed partial class MainWindow : WindowEx
         Storyboard.SetTargetProperty(fade, "Opacity");
         var sb = new Storyboard();
         sb.Children.Add(fade);
-        sb.Completed += (_, _) => SplashOverlay.Visibility = Visibility.Collapsed;
+        sb.Completed += (_, _) =>
+        {
+            SplashOverlay.Visibility = Visibility.Collapsed;
+            InAppToast.FlushPending();
+            HotkeyManager.ShowRegistrationErrors();
+        };
         sb.Begin();
     }
 

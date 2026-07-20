@@ -46,16 +46,17 @@ internal static class HotkeyManager
                 item.Modifiers = modifiers;
                 item.Key = key;
                 Win32Error error = RegisterHotkey(hwnd, item.Id, modifiers, key);
-                if (error.Failed)
+                if (error.Failed && InAppToast.MainWindow is not null)
                 {
+                    item.ErrorShown = true;
                     hotkey = HotkeyInput.GetHotkeyText((uint)modifiers, (uint)key);
                     if (error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
                     {
-                        InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 0);
+                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 0);
                     }
                     else
                     {
-                        InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 0);
+                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 0);
                     }
                 }
             }
@@ -66,6 +67,24 @@ internal static class HotkeyManager
         }
     }
 
+
+
+    /// <summary>
+    /// 补弹注册失败提示：--hide 启动时 MainWindow 未建、toast 无宿主；MainWindow 打开后调此补弹未显示的错误。
+    /// </summary>
+    public static void ShowRegistrationErrors()
+    {
+        foreach (var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly })
+        {
+            if (item.ErrorShown || item.Error.Succeeded) continue;
+            item.ErrorShown = true;
+            string hotkey = HotkeyInput.GetHotkeyText((uint)item.Modifiers, (uint)item.Key);
+            if (item.Error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
+                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 0);
+            else
+                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 0);
+        }
+    }
 
 
     public static Win32Error RegisterHotkey(nint hwnd, int id, User32.HotKeyModifiers modifiers, User32.VK key)
@@ -189,6 +208,8 @@ internal static class HotkeyManager
         public User32.VK Key { get; set; }
 
         public bool IsRegistered { get; set; }
+
+        public bool ErrorShown { get; set; }
 
         public Win32Error Error { get; set; }
 

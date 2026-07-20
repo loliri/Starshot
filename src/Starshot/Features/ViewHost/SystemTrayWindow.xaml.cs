@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Starshot.Features.Screenshot;
@@ -32,8 +33,9 @@ public sealed partial class SystemTrayWindow : WindowEx
         InitializeWindow();
         SetTrayIcon();
         // 托盘窗口生命周期 = App 生命周期；--hide 启动时它是唯一窗口，必须由它注册热键。
-        // 非隐藏启动时 MainWindow 已先注册，IsRegistered 守卫会让这里跳过，不会重复注册。
-        HotkeyManager.InitializeHotkey(WindowHandle);
+        // 延迟到 DispatcherQueue 下一轮：非隐藏启动时等 MainWindow Loaded 设好 InAppToast.MainWindow，
+        // 这样注册失败（被占用）时 toast 才能弹出来；MainWindow 已先注册时 IsRegistered 守卫会跳过。
+        DispatcherQueue.GetForCurrentThread().TryEnqueue(() => HotkeyManager.InitializeHotkey(WindowHandle));
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
     }
 
