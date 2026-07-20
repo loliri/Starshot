@@ -240,15 +240,25 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 开关实时读注册表（不缓存数据库）：任务管理器禁用只动 StartupApproved、不删 Run 项，开关仍显示开
 - 启动时检测自启项指向的 exe 是否存在，不存在则自动清除启动项并 toast 提示
 
+### 检查更新
+
+- 启动时节流检查（≥24h + 开关开启）GitHub Releases 最新版，或 About 页手动检查
+- `Version` 比对当前版本，发现新版本弹窗（红绿版本对比 + 进度条 + 立即更新 / 稍后 / 跳过此版本）
+- 立即更新用 SharpCompress 真流式解压（网络流直连，不落 zip），逐 entry 直接写到根目录
+- `version.ini` 备份 `.bak`，失败还原 + 清残缺 `app-{new}/`，重启启动器带 `--cleanup-old` 清旧
+- 仅 CI/CD release 检查（读 version.ini 版本号）；本地构建无版本号（AppVersion=Local），不触发
+
 ## 架构
 
 ### 目录结构
 
 ```
 根目录/
-  Starshot.exe            ← C++ 启动器（~400KB，启动 app/ 主程序）
+  Starshot.exe            ← C++ 启动器（读 version.ini 决定启哪个 app 目录）
   StarshotDatabase.db     ← SQLite 设置数据库
-  app/
+  version.ini             ← 版本号（仅 CI/CD release 有，本地构建无）
+  app-{version}/          ← 主程序目录（CI/CD release 版本化）
+  app/                    ← 主程序目录（本地构建；无 version.ini 时启动器走这里）
     Starshot.exe          ← 主程序（WinUI 3 / .NET 10）
     *.dll                 ← 依赖库
     avifenc.exe 等        ← 编解码工具（来自 Starward.Codec NuGet）
@@ -259,7 +269,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 ### 启动器
 
-C++ 原生程序（~400KB），目前写死 `app/Starshot.exe`。未来可加 `version.ini` 支持版本化目录 + 自动清理旧版本。
+C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Starshot.exe`（无 version.ini 则 `app/`，debug/local 构建）。带 `--cleanup-old` 参数启动时遍历 `app-*` 目录删除非当前版本（更新流程触发，普通启动不清）。
 
 ### 托盘与后台启动
 
@@ -342,7 +352,6 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - 区域截图覆盖层 HDR 帧显示为 SDR（WinUI CanvasControl 走 SDR 交换链）；保存的文件不受影响
 - 自定义壁纸按 `UniformToFill` 铺满，但 WinUI 的裁剪不居中，目前是**左上**对齐，比如窄（竖向）壁纸在宽窗口里会只显示上半部分（从顶部裁剪而非居中）
 - 区域截图覆盖层打开瞬间，光标仍是系统默认形状，**需移动一次鼠标后十字光标才出现**（WinUI `ProtectedCursor` 对已在元素上的静止指针不立即生效，移动一次触发 pointer 事件后即正常）
-- 暂无版本管理 / 自动更新
 
 ## 开发说明
 
@@ -366,7 +375,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - **HEVC Video Extensions**
 - **Webp Image Extensions**
 
-更新后重启 Starshot。如果问题持续，请[提交 Issue](../../issues/new) 并附上截图。
+更新后重启 Starshot。如果问题持续，请 [提交 Issue](../../issues/new) 并附上截图。
 
 </details>
 
