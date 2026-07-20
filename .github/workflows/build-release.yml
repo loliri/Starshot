@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g. v1.0.0)'
+        description: 'Version (e.g. 0.1.0; spaces allowed, auto-turned into -, e.g. "0.1.0 preview 1" -> 0.1.0-preview-1)'
         required: true
-        default: 'v1.0.0'
+        default: '0.1.0'
 
 permissions:
   contents: write
@@ -27,26 +27,39 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = "${{ github.event.inputs.version }}".Replace(' ', '-')
+          "v=$v" >> $env:GITHUB_OUTPUT
+
       - name: Build launcher
         run: msbuild src/Starshot.Launcher/Starshot.Launcher.vcxproj -p:Configuration=Release -p:Platform=x64
 
       - name: Publish main app
         run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 
+      - name: Version layout
+        run: |
+          $v = "${{ steps.ver.outputs.v }}"
+          Move-Item build/release/app "build/release/app-$v" -Force
+          "version=$v" | Set-Content -Path build/release/version.ini -Encoding UTF8
+
       - name: Zip release
-        run: Compress-Archive -Path build/release/* -DestinationPath Starshot-${{ github.event.inputs.version }}-win-x64.zip
+        run: Compress-Archive -Path build/release/* -DestinationPath "Starshot-${{ steps.ver.outputs.v }}-win-x64.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Starshot-${{ github.event.inputs.version }}-win-x64
-          path: Starshot-${{ github.event.inputs.version }}-win-x64.zip
+          name: Starshot-${{ steps.ver.outputs.v }}-win-x64
+          path: Starshot-${{ steps.ver.outputs.v }}-win-x64.zip
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          name: Starshot ${{ github.event.inputs.version }}
-          files: Starshot-${{ github.event.inputs.version }}-win-x64.zip
+          tag_name: ${{ steps.ver.outputs.v }}
+          name: ${{ github.event.inputs.version }}
+          files: Starshot-${{ steps.ver.outputs.v }}-win-x64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
