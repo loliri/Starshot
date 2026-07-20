@@ -2791,6 +2791,16 @@
   <data name="Starshot_ClickToInsert" xml:space="preserve"><value>点击按钮在光标处添加模板，具体功能参见 </value></data>
   <data name="Starshot_AutoStartInvalidCleared" xml:space="preserve"><value>自启项指向的 exe 已不存在，已自动清除</value></data>
   <data name="Starshot_ClickToInsertSuffix" xml:space="preserve"><value> 文件名模板</value></data>
+  <data name="Starshot_CheckUpdate" xml:space="preserve"><value>检查更新</value></data>
+  <data name="Starshot_UpdateAvailable" xml:space="preserve"><value>发现新版本 {0}，当前 {1}</value></data>
+  <data name="Starshot_UpdateAvailableTitle" xml:space="preserve"><value>发现新版本！</value></data>
+  <data name="Starshot_UpdateNow" xml:space="preserve"><value>立即更新</value></data>
+  <data name="Starshot_RemindLater" xml:space="preserve"><value>稍后提醒</value></data>
+  <data name="Starshot_IgnoreThisVersion" xml:space="preserve"><value>跳过此版本</value></data>
+  <data name="Starshot_LatestVersion" xml:space="preserve"><value>已是最新版本</value></data>
+  <data name="Starshot_UpdateDownloading" xml:space="preserve"><value>下载中… {0}%</value></data>
+  <data name="Starshot_UpdateExtracting" xml:space="preserve"><value>正在解压…</value></data>
+  <data name="Starshot_UpdateFailed" xml:space="preserve"><value>更新失败</value></data>
   <data name="Starshot_TitleMaxLength" xml:space="preserve"><value>标题最大字符数（0=不截断）</value></data>
   <data name="Starshot_ScreenshotFolder" xml:space="preserve"><value>截图文件夹</value></data>
   <data name="Starshot_LogFolder" xml:space="preserve"><value>日志文件夹</value></data>

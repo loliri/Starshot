@@ -7871,6 +7871,16 @@ namespace Starshot.Language {
         public static string Starshot_ClickToInsert { get { return ResourceManager.GetString("Starshot_ClickToInsert", resourceCulture); } }
         public static string Starshot_AutoStartInvalidCleared { get { return ResourceManager.GetString("Starshot_AutoStartInvalidCleared", resourceCulture); } }
         public static string Starshot_ClickToInsertSuffix { get { return ResourceManager.GetString("Starshot_ClickToInsertSuffix", resourceCulture); } }
+        public static string Starshot_CheckUpdate { get { return ResourceManager.GetString("Starshot_CheckUpdate", resourceCulture); } }
+        public static string Starshot_UpdateAvailable { get { return ResourceManager.GetString("Starshot_UpdateAvailable", resourceCulture); } }
+        public static string Starshot_UpdateAvailableTitle { get { return ResourceManager.GetString("Starshot_UpdateAvailableTitle", resourceCulture); } }
+        public static string Starshot_UpdateNow { get { return ResourceManager.GetString("Starshot_UpdateNow", resourceCulture); } }
+        public static string Starshot_RemindLater { get { return ResourceManager.GetString("Starshot_RemindLater", resourceCulture); } }
+        public static string Starshot_IgnoreThisVersion { get { return ResourceManager.GetString("Starshot_IgnoreThisVersion", resourceCulture); } }
+        public static string Starshot_LatestVersion { get { return ResourceManager.GetString("Starshot_LatestVersion", resourceCulture); } }
+        public static string Starshot_UpdateDownloading { get { return ResourceManager.GetString("Starshot_UpdateDownloading", resourceCulture); } }
+        public static string Starshot_UpdateExtracting { get { return ResourceManager.GetString("Starshot_UpdateExtracting", resourceCulture); } }
+        public static string Starshot_UpdateFailed { get { return ResourceManager.GetString("Starshot_UpdateFailed", resourceCulture); } }
         public static string Starshot_TitleMaxLength { get { return ResourceManager.GetString("Starshot_TitleMaxLength", resourceCulture); } }
         public static string Starshot_ScreenshotFolder { get { return ResourceManager.GetString("Starshot_ScreenshotFolder", resourceCulture); } }
         public static string Starshot_LogFolder { get { return ResourceManager.GetString("Starshot_LogFolder", resourceCulture); } }

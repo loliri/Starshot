@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:WindowEx x:Class="Starshot.Features.Update.UpdateWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starshot.Frameworks"
+             mc:Ignorable="d">
+
+    <Grid Background="Transparent" Padding="32">
+        <StackPanel Spacing="20">
+
+            <TextBlock x:Name="TitleText"
+                       FontSize="28"
+                       FontWeight="Bold" />
+
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock x:Name="CurrentVersionText"
+                           FontSize="20"
+                           Foreground="#C50500" />
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="20"
+                           Text="→" />
+                <TextBlock x:Name="NewVersionText"
+                           FontSize="20"
+                           Foreground="#107C10" />
+            </StackPanel>
+
+            <ProgressBar x:Name="Progress"
+                         MinWidth="300"
+                         Visibility="Collapsed" />
+
+            <TextBlock x:Name="StatusText"
+                       FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       TextWrapping="Wrap" />
+
+            <StackPanel HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                <Button x:Name="IgnoreButton"
+                        Command="{x:Bind IgnoreCommand}"
+                        Content="{x:Bind lang:Lang.Starshot_IgnoreThisVersion}" />
+                <Button x:Name="RemindButton"
+                        Command="{x:Bind RemindLaterCommand}"
+                        Content="{x:Bind lang:Lang.Starshot_RemindLater}" />
+                <Button x:Name="UpdateButton"
+                        Command="{x:Bind UpdateNowCommand}"
+                        Style="{ThemeResource AccentButtonStyle}"
+                        Content="{x:Bind lang:Lang.Starshot_UpdateNow}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+
+</sf:WindowEx>

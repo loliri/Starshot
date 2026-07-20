@@ -2791,6 +2791,16 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_ClickToInsert" xml:space="preserve"><value>Click to insert at cursor; see </value></data>
   <data name="Starshot_AutoStartInvalidCleared" xml:space="preserve"><value>Auto-start entry pointed to a missing exe and has been removed</value></data>
   <data name="Starshot_ClickToInsertSuffix" xml:space="preserve"><value> filename templates</value></data>
+  <data name="Starshot_CheckUpdate" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="Starshot_UpdateAvailable" xml:space="preserve"><value>New version {0} available (current {1})</value></data>
+  <data name="Starshot_UpdateAvailableTitle" xml:space="preserve"><value>New version available!</value></data>
+  <data name="Starshot_UpdateNow" xml:space="preserve"><value>Update now</value></data>
+  <data name="Starshot_RemindLater" xml:space="preserve"><value>Remind me later</value></data>
+  <data name="Starshot_IgnoreThisVersion" xml:space="preserve"><value>Skip this version</value></data>
+  <data name="Starshot_LatestVersion" xml:space="preserve"><value>You're on the latest version</value></data>
+  <data name="Starshot_UpdateDownloading" xml:space="preserve"><value>Downloading… {0}%</value></data>
+  <data name="Starshot_UpdateExtracting" xml:space="preserve"><value>Extracting…</value></data>
+  <data name="Starshot_UpdateFailed" xml:space="preserve"><value>Update failed</value></data>
   <data name="Starshot_TitleMaxLength" xml:space="preserve"><value>Title max length (0 = no truncation)</value></data>
   <data name="Starshot_ScreenshotFolder" xml:space="preserve"><value>Screenshot folder</value></data>
   <data name="Starshot_LogFolder" xml:space="preserve"><value>Log folder</value></data>

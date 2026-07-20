@@ -8,6 +8,7 @@ using Starshot.Features.About;
 using Starshot.Features.Background;
 using Starshot.Features.Screenshot;
 using Starshot.Features.Setting;
+using Starshot.Features.Update;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using System;
@@ -83,8 +84,28 @@ public sealed partial class MainWindow : WindowEx
                 AppConfig.AutoStartInvalid = false;
                 InAppToast.MainWindow?.Warning(null, Lang.Starshot_AutoStartInvalidCleared, 5000);
             }
+            _ = TryCheckUpdateOnStartupAsync();
         };
         sb.Begin();
+    }
+
+
+    private static async Task TryCheckUpdateOnStartupAsync()
+    {
+#if !DEBUG
+        try
+        {
+            if (!AppConfig.EnableAutoUpdateCheck) return;
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (now - AppConfig.LastCheckUpdateTime < 86400) return;
+            AppConfig.LastCheckUpdateTime = now;
+            var release = await UpdateService.CheckUpdateAsync();
+            if (release is null) return;
+            var window = new UpdateWindow();
+            window.SetRelease(release);
+        }
+        catch { }
+#endif
     }
 
 

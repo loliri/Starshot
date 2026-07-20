@@ -199,6 +199,24 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 启动时自动检查更新（节流 24h）
+    /// </summary>
+    public static bool EnableAutoUpdateCheck { get => GetValue(true); set => SetValue(value); }
+
+
+    /// <summary>
+    /// 跳过的更新版本（用户点「跳过此版本」）
+    /// </summary>
+    public static string? IgnoreVersion { get => GetValue<string?>(); set => SetValue(value); }
+
+
+    /// <summary>
+    /// 上次检查更新的 Unix 时间戳（秒），用于节流
+    /// </summary>
+    public static long LastCheckUpdateTime { get => GetValue(0L); set => SetValue(value); }
+
+
+    /// <summary>
     /// 日志/缓存文件夹，默认 %LOCALAPPDATA%\Starshot
     /// </summary>
     public static string LogFolder

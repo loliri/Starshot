@@ -11,6 +11,13 @@ int wmain(int argc, wchar_t* argv[])
 {
     const std::filesystem::path base_folder = std::filesystem::path(argv[0]).parent_path();
 
+    // --cleanup-old is passed by UpdateService after an update; only then do we wipe old app-*
+    bool cleanup = false;
+    for (int i = 1; i < argc; ++i)
+    {
+        if (std::wstring(argv[i]) == L"--cleanup-old") { cleanup = true; break; }
+    }
+
     // version.ini decides app dir: CI/CD release has it -> app-{version}; missing -> app (debug/local)
     std::filesystem::path target_exe = base_folder / "app" / "Starshot.exe";
     const std::filesystem::path version_ini = base_folder / "version.ini";
@@ -50,6 +57,22 @@ int wmain(int argc, wchar_t* argv[])
         CreateProcess(target_exe.c_str(), (LPWSTR)cmdline.c_str(), NULL, NULL, false, 0, NULL, NULL, &si, &pi);
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
+
+        if (cleanup)
+        {
+            // Clean up old app-* directories (keep only the one we just launched)
+            std::filesystem::path current_app_dir = target_exe.parent_path();
+            std::error_code ec;
+            for (const auto& entry : std::filesystem::directory_iterator(base_folder, ec))
+            {
+                if (ec) break;
+                if (!entry.is_directory()) continue;
+                const std::wstring name = entry.path().filename().wstring();
+                if (name.rfind(L"app-", 0) != 0) continue;
+                if (entry.path() == current_app_dir) continue;
+                std::filesystem::remove_all(entry.path(), ec);
+            }
+        }
     }
     else
     {
