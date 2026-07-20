@@ -48,6 +48,87 @@
                               Visibility="{x:Bind AutoStartMinimizedVisibility}" />
             </StackPanel>
 
+
+            <!--  调试：流式解压测试  -->
+            <Expander Header="调试：流式解压测试"
+                      IsExpanded="True"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch">
+                <StackPanel Spacing="8">
+                    <TextBox x:Name="DebugUrlBox"
+                             Header="Zip URL"
+                             PlaceholderText="https://..." />
+                    <Grid ColumnSpacing="0" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                Height="40"
+                                Padding="16,0,16,0"
+                                BorderThickness="0"
+                                Command="{x:Bind BrowseDestCommand}"
+                                CornerRadius="8,20,20,8"
+                                Style="{ThemeResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="14" Glyph="&#xE8DE;" />
+                                <TextBlock Text="选择" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1"
+                                Height="40"
+                                Margin="16,0,0,0"
+                                Padding="20,0,20,1"
+                                HorizontalContentAlignment="Left"
+                                BorderThickness="0"
+                                Command="{x:Bind OpenDestCommand}"
+                                CornerRadius="20">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Text="{x:Bind DebugDestDisplay, Mode=OneWay}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <FontIcon Grid.Column="1"
+                                          Margin="0,2,2,0"
+                                          FontSize="14"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE8A7;" />
+                            </Grid>
+                        </Button>
+                    </Grid>
+                    <Button HorizontalAlignment="Left"
+                            Height="40"
+                            Padding="16,0,16,0"
+                            BorderThickness="0"
+                            Command="{x:Bind DebugExtractCommand}"
+                            CornerRadius="8,20,20,8"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                            <TextBlock Text="解压" />
+                        </StackPanel>
+                    </Button>
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <ProgressBar x:Name="DebugProgressBar"
+                                     MinWidth="200"
+                                     Visibility="Collapsed" />
+                        <FontIcon x:Name="DebugCompletedIcon"
+                                  FontSize="16"
+                                  Foreground="#107C10"
+                                  Glyph="&#xE73E;"
+                                  Visibility="Collapsed" />
+                    </StackPanel>
+                    <TextBlock x:Name="DebugStatus"
+                               FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Expander>
+
         </StackPanel>
     </ScrollViewer>
 
