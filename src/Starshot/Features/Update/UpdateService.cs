@@ -92,17 +92,20 @@ public static class UpdateService
         string root = AppConfig.UserDataFolder;
         string versionIni = Path.Combine(root, "version.ini");
         string versionIniBak = versionIni + ".bak";
+        string launcherExe = Path.Combine(root, "Starshot.exe");
+        string launcherBak = launcherExe + ".bak";
         string appNewDir = Path.Combine(root, "app-" + info.Version);
 
-        // 先备份 version.ini，解压中途崩了能还原（避免残缺 ini 指向不完整的 app-{new}）
-        try { if (File.Exists(versionIni)) File.Move(versionIni, versionIniBak); } catch { }
+        // 备份 version.ini + 启动器（Copy 留原件，解压覆盖原件；失败还原 .bak）
+        try { if (File.Exists(versionIni)) File.Copy(versionIni, versionIniBak, overwrite: true); } catch { }
+        try { if (File.Exists(launcherExe)) File.Copy(launcherExe, launcherBak, overwrite: true); } catch { }
 
         try
         {
             await ExtractToDirectoryAsync(info.ZipUrl, root, progress, ct);
 
             // 校验包结构：root/Starshot.exe + version.ini + app-{new}/
-            if (!File.Exists(Path.Combine(root, "Starshot.exe"))
+            if (!File.Exists(launcherExe)
                 || !File.Exists(versionIni)
                 || !Directory.Exists(appNewDir))
             {
@@ -111,16 +114,19 @@ public static class UpdateService
 
             // 成功：删 .bak
             try { if (File.Exists(versionIniBak)) File.Delete(versionIniBak); } catch { }
+            try { if (File.Exists(launcherBak)) File.Delete(launcherBak); } catch { }
 
             // 启动器接管（--cleanup-old 清旧 app-*）+ 退出本进程
-            Process.Start(new ProcessStartInfo(Path.Combine(root, "Starshot.exe")) { UseShellExecute = true, Arguments = "--cleanup-old" });
+            Process.Start(new ProcessStartInfo(launcherExe) { UseShellExecute = true, Arguments = "--cleanup-old" });
             App.Current.Exit();
         }
         catch
         {
-            // 失败：删残缺 version.ini + 还原 .bak + 删残缺 app-{new}/，保证启动器还能认旧版本
+            // 失败：删残缺 version.ini + 启动器，还原 .bak + 删残缺 app-{new}/
             try { if (File.Exists(versionIni)) File.Delete(versionIni); } catch { }
-            try { if (File.Exists(versionIniBak)) File.Move(versionIniBak, versionIni); } catch { }
+            try { if (File.Exists(versionIniBak)) File.Copy(versionIniBak, versionIni); } catch { }
+            try { if (File.Exists(launcherExe)) File.Delete(launcherExe); } catch { }
+            try { if (File.Exists(launcherBak)) File.Copy(launcherBak, launcherExe); } catch { }
             try { if (Directory.Exists(appNewDir)) Directory.Delete(appNewDir, recursive: true); } catch { }
             throw;
         }
