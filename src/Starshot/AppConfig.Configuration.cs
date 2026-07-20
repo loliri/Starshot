@@ -24,12 +24,13 @@ public static partial class AppConfig
 
     public static async Task CheckEnviromentAsync()
     {
-        AppVersion = typeof(AppConfig).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "";
-
         // 数据库固定放在根目录（app 的父目录）。AppContext.BaseDirectory 带尾部分隔符，先去掉再取父目录。
         string baseDir = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         UserDataFolder = Path.GetDirectoryName(baseDir) ?? baseDir;
         DatabaseService.SetDatabase(UserDataFolder);
+
+        // 版本号读 version.ini（启动器同源），无则 Local（debug/local release）
+        AppVersion = ReadVersionFromIni();
 
         // 应用强调色与语言
         AccentColorHelper.ChangeAppAccentColor(AccentColor);
@@ -44,6 +45,31 @@ public static partial class AppConfig
         Directory.CreateDirectory(Path.GetDirectoryName(LogFile)!);
 
         await Task.CompletedTask;
+    }
+
+
+    /// <summary>
+    /// 读 version.ini 的 version 字段；无文件或格式错返回 "Local"（debug/local release）
+    /// </summary>
+    private static string ReadVersionFromIni()
+    {
+        try
+        {
+            string ini = Path.Combine(UserDataFolder, "version.ini");
+            if (!File.Exists(ini)) return "Local";
+            string content = File.ReadAllText(ini);
+            int eq = content.IndexOf('=');
+            if (eq > 0)
+            {
+                string v = content[(eq + 1)..].Trim();
+                return string.IsNullOrEmpty(v) ? "Local" : v;
+            }
+            return "Local";
+        }
+        catch
+        {
+            return "Local";
+        }
     }
 
 

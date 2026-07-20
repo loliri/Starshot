@@ -14,7 +14,7 @@ public sealed partial class AboutPage : PageBase
 #if DEBUG
         "Debug";
 #else
-        "Release";
+        $"Release {AppConfig.AppVersion}";
 #endif
 
 
