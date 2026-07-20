@@ -22,10 +22,11 @@
             <!--  全屏文件名模板  -->
             <StackPanel Spacing="6">
                 <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_FilenameTemplate}" />
-                <TextBox HorizontalAlignment="Stretch"
+                <TextBox x:Name="FileNameTextBox"
+                         HorizontalAlignment="Stretch"
+                         GotFocus="TemplateTextBox_GotFocus"
                          Text="{x:Bind FileNamePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                <TextBlock                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
                            Text="{x:Bind FileNamePreview}"
                            TextTrimming="CharacterEllipsis" />
@@ -35,10 +36,11 @@
             <!--  区域文件名模板  -->
             <StackPanel Spacing="6">
                 <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_RegionFilenameTemplate}" />
-                <TextBox HorizontalAlignment="Stretch"
+                <TextBox x:Name="RegionFileNameTextBox"
+                         HorizontalAlignment="Stretch"
+                         GotFocus="TemplateTextBox_GotFocus"
                          Text="{x:Bind RegionFileNamePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                <TextBlock                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
                            Text="{x:Bind RegionFileNamePreview}"
                            TextTrimming="CharacterEllipsis" />
@@ -46,14 +48,12 @@
 
 
             <!--  占位符 + 标题截断  -->
-            <TextBlock FontSize="11"
-                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                       Text="{x:Bind lang:Lang.Starshot_FilenamePlaceholders}"
+            <TextBlock x:Name="PlaceholderTextBlock"
+                                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                        TextWrapping="Wrap" />
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <TextBlock VerticalAlignment="Center"
-                           FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            Text="{x:Bind lang:Lang.Starshot_TitleMaxLength}" />
                 <NumberBox Minimum="0"
                            Maximum="200"
@@ -118,8 +118,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_LogFolder}" />
                     <TextBlock VerticalAlignment="Center"
-                               FontSize="12"
-                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                Text="{x:Bind lang:Lang.Starshot_LogFolderRestartTip}" />
                 </StackPanel>
                 <Grid ColumnSpacing="0">

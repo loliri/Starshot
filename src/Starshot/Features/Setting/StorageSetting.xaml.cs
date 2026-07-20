@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Documents;
+using Microsoft.UI.Xaml.Media;
 using Starshot.Features.Codec;
 using Starshot.Features.Screenshot;
 using Starshot.Frameworks;
@@ -16,6 +19,14 @@ public sealed partial class StorageSetting : PageBase
 {
 
     private readonly ILogger<StorageSetting> _logger = AppConfig.GetLogger<StorageSetting>();
+
+    private TextBox? _lastFocusedTemplateBox;
+
+    private static readonly string[] _tokens =
+    {
+        "process", "processPath", "title", "timestamp", "time", "date",
+        "year", "month", "day", "hour", "minute", "second", "width", "height",
+    };
 
 
     public string FileNamePattern
@@ -75,7 +86,64 @@ public sealed partial class StorageSetting : PageBase
         InitializeComponent();
         InitializeScreenshotFolder();
         LogFolder = AppConfig.LogFolder;
+        _lastFocusedTemplateBox = FileNameTextBox;
+        BuildPlaceholderLinks();
         _ = RefreshStatsAsync();
+    }
+
+
+    private void BuildPlaceholderLinks()
+    {
+        PlaceholderTextBlock.Inlines.Clear();
+        // 第一行：说明 + GitHub 链接
+        PlaceholderTextBlock.Inlines.Add(new Run { Text = Lang.Starshot_ClickToInsert });
+        var help = new Hyperlink { NavigateUri = new Uri(GetHelpUrl()) };
+        help.Inlines.Add(new Run { Text = "Github" + Lang.Starshot_ClickToInsertSuffix });
+        PlaceholderTextBlock.Inlines.Add(help);
+        PlaceholderTextBlock.Inlines.Add(new LineBreak());
+        // 按钮区：每个占位符一个链接（文字不带 {}，点击插入 {token}）
+        for (int i = 0; i < _tokens.Length; i++)
+        {
+            if (i > 0)
+            {
+                PlaceholderTextBlock.Inlines.Add(new Run { Text = "  " });
+            }
+            string token = "{" + _tokens[i] + "}";
+            var link = new Hyperlink { UnderlineStyle = UnderlineStyle.None };
+            link.Inlines.Add(new Run
+            {
+                Text = _tokens[i],
+                FontFamily = new FontFamily("Consolas, Cascadia Code, Microsoft YaHei UI"),
+            });
+            link.Click += (_, _) => InsertToken(token);
+            PlaceholderTextBlock.Inlines.Add(link);
+        }
+    }
+
+
+    private static string GetHelpUrl()
+    {
+        return AppConfig.Language switch
+        {
+            "en-US" => "https://github.com/loliri/Starshot/blob/main/docs/README.en.md#filename-templates",
+            _ => "https://github.com/loliri/Starshot#文件名模板",
+        };
+    }
+
+
+    private void TemplateTextBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        _lastFocusedTemplateBox = (TextBox)sender;
+    }
+
+
+    private void InsertToken(string token)
+    {
+        var box = _lastFocusedTemplateBox ?? FileNameTextBox;
+        int pos = box.SelectionStart;
+        box.Text = box.Text.Insert(pos, token);
+        box.SelectionStart = pos + token.Length;
+        box.Focus(FocusState.Programmatic);
     }
 
 

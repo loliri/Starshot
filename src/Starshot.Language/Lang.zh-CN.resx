@@ -2788,8 +2788,9 @@
   <data name="Starshot_FilenameTemplate" xml:space="preserve"><value>文件名模板</value></data>
   <data name="Starshot_RegionFilenameTemplate" xml:space="preserve"><value>区域文件名模板</value></data>
   <data name="Starshot_FilenamePlaceholders" xml:space="preserve"><value>占位符：{process} {processPath} {title} {timestamp} {time} {date} {width} {height} {year} {month} {day} {hour} {minute} {second}</value></data>
-  <data name="Starshot_ClickToInsert" xml:space="preserve"><value>点击插入：</value></data>
+  <data name="Starshot_ClickToInsert" xml:space="preserve"><value>点击按钮在光标处添加模板，具体功能参见 </value></data>
   <data name="Starshot_AutoStartInvalidCleared" xml:space="preserve"><value>自启项指向的 exe 已不存在，已自动清除</value></data>
+  <data name="Starshot_ClickToInsertSuffix" xml:space="preserve"><value> 文件名模板</value></data>
   <data name="Starshot_TitleMaxLength" xml:space="preserve"><value>标题最大字符数（0=不截断）</value></data>
   <data name="Starshot_ScreenshotFolder" xml:space="preserve"><value>截图文件夹</value></data>
   <data name="Starshot_LogFolder" xml:space="preserve"><value>日志文件夹</value></data>
