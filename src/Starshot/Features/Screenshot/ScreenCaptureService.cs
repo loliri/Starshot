@@ -340,23 +340,35 @@ internal class ScreenCaptureService
         float maxCLL, float sdrWhiteLevel, Microsoft.UI.DisplayId displayId, bool isRegion = false, bool copyToClipboard = true)
     {
         bool hdr = bitmap.Format is DirectXPixelFormat.R16G16B16A16Float;
-        bool writeColorProfile = AppConfig.EnableScreenshotColorManagement || hdr;
+
+        // 提前判定内容是否真 HDR + 各分支标志（maxCLL 入口已有，无需等编码后再判）
+        bool contentIsHDR = hdr && maxCLL > sdrWhiteLevel + 5;
+        bool deleteHDR = hdr && AppConfig.DeleteHDRIfSDRContent && !contentIsHDR;
+        bool autoConvertSDR = hdr && AppConfig.AutoConvertScreenshotToSDR && !deleteHDR;
+        bool outputIsHDR = hdr && !deleteHDR;  // 主文件是否走 HDR 编码
+
         int quality = AppConfig.ScreenCaptureEncodeQuality switch { 0 => 80, 1 => 90, 2 => 100, _ => 90 };
         float distance = AppConfig.ScreenCaptureEncodeQuality switch { 0 => 2, 1 => 1, 2 => 0, _ => 1 };
 
         byte[] xmpData = BuildXMPMetadata(frameTime);
+
+        // colorPrimaries / writeColorProfile：HDR 强制 BT2020；deleteHDR 强制 BT709 不写 ICC（tonemap 后即 sRGB）；SDR 看色彩管理开关
         ColorPrimaries colorPrimaries;
-        if (hdr)
+        bool writeColorProfile;
+        if (outputIsHDR)
         {
             colorPrimaries = ColorPrimaries.BT2020;
+            writeColorProfile = true;
         }
-        else if (!AppConfig.EnableScreenshotColorManagement)
+        else if (deleteHDR || !AppConfig.EnableScreenshotColorManagement)
         {
             colorPrimaries = ColorPrimaries.BT709;
+            writeColorProfile = false;
         }
         else
         {
             colorPrimaries = await GetColorPrimariesFromDisplayInformationAsync(displayInfo);
+            writeColorProfile = true;
         }
 
         string? targetFolder = AppConfig.ScreenshotFolder;
@@ -367,31 +379,40 @@ internal class ScreenCaptureService
         string screenshotFolder = Path.GetFullPath(targetFolder);
         Directory.CreateDirectory(screenshotFolder);
 
-        string extension = hdr
+        // 扩展名：HDR 输出走 HDR 格式；SDR（含 deleteHDR）走 SDR 格式
+        string extension = outputIsHDR
             ? (AppConfig.ScreenCaptureHDRFormat switch { 1 => "jxl", _ => "avif" })
             : (AppConfig.ScreenCaptureSDRFormat switch { 1 => "avif", 2 => "jxl", _ => "png" });
 
         string filePath = Path.Combine(screenshotFolder,
             $"{BuildFileName(processName, processExeName, windowTitle, frameTime, bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height, isRegion ? AppConfig.RegionScreenshotFileNamePattern : null)}.{extension}");
 
+        // 主文件编码：deleteHDR 走 tonemap→SDR（BT709，不写 ICC）；其余按 colorPrimaries 直存 bitmap
         using MemoryStream ms = new();
         await _encodeSlim.WaitAsync();
         try
         {
-            if (extension is "png")
+            if (deleteHDR)
             {
-                ColorPrimaries cp = (!hdr && !AppConfig.EnableScreenshotColorManagement) ? ColorPrimaries.BT709 : colorPrimaries;
-                await ImageSaver.SaveAsPngAsync(bitmap, ms, cp, xmpData, writeColorProfile);
+                using CanvasRenderTarget sdrBitmap = TonemapToSdr(bitmap, sdrWhiteLevel);
+                if (extension is "png")
+                    await ImageSaver.SaveAsPngAsync(sdrBitmap, ms, ColorPrimaries.BT709, xmpData, false);
+                else if (extension is "avif")
+                    await ImageSaver.SaveAsAvifAsync(sdrBitmap, ms, ColorPrimaries.BT709, quality, xmpData, false);
+                else
+                    await ImageSaver.SaveAsJxlAsync(sdrBitmap, ms, ColorPrimaries.BT709, distance, xmpData, false);
+            }
+            else if (extension is "png")
+            {
+                await ImageSaver.SaveAsPngAsync(bitmap, ms, colorPrimaries, xmpData, writeColorProfile);
             }
             else if (extension is "avif")
             {
-                ColorPrimaries cp = (!hdr && !AppConfig.EnableScreenshotColorManagement) ? ColorPrimaries.BT709 : colorPrimaries;
-                await ImageSaver.SaveAsAvifAsync(bitmap, ms, cp, quality, xmpData, writeColorProfile);
+                await ImageSaver.SaveAsAvifAsync(bitmap, ms, colorPrimaries, quality, xmpData, writeColorProfile);
             }
             else if (extension is "jxl")
             {
-                ColorPrimaries cp = (!hdr && !AppConfig.EnableScreenshotColorManagement) ? ColorPrimaries.BT709 : colorPrimaries;
-                await ImageSaver.SaveAsJxlAsync(bitmap, ms, cp, distance, xmpData, writeColorProfile);
+                await ImageSaver.SaveAsJxlAsync(bitmap, ms, colorPrimaries, distance, xmpData, writeColorProfile);
             }
             else
             {
@@ -409,59 +430,24 @@ internal class ScreenCaptureService
             await ms.CopyToAsync(fs);
         }
 
-        bool contentIsHDR = hdr && maxCLL > sdrWhiteLevel + 5;
-        bool deleteHDR = hdr && AppConfig.DeleteHDRIfSDRContent && !contentIsHDR;
-        bool autoConvertSDR = hdr && AppConfig.AutoConvertScreenshotToSDR && !deleteHDR;
-        bool produceSDR = deleteHDR || autoConvertSDR;
-
+        // autoConvertSDR：主文件 HDR 之外额外产 UHDR JPEG（SDR 基图 + HDR gain map）
         string? sdrPath = null;
-        if (deleteHDR)
+        if (autoConvertSDR)
         {
-            // 内容实为 SDR：tonemap 到 R8G8B8A8，按用户 SDR 格式存（BT709），稍后删 HDR 文件
-            using CanvasRenderTarget sdrBitmap = TonemapToSdr(bitmap, sdrWhiteLevel);
-            string sdrExt = AppConfig.ScreenCaptureSDRFormat switch { 1 => "avif", 2 => "jxl", _ => "png" };
-            sdrPath = Path.ChangeExtension(filePath, sdrExt);
-            using var ms2 = new MemoryStream();
-            await _encodeSlim.WaitAsync();
-            try
-            {
-                if (sdrExt is "png")
-                    await ImageSaver.SaveAsPngAsync(sdrBitmap, ms2, ColorPrimaries.BT709, xmpData, false);
-                else if (sdrExt is "avif")
-                    await ImageSaver.SaveAsAvifAsync(sdrBitmap, ms2, ColorPrimaries.BT709, quality, xmpData, false);
-                else
-                    await ImageSaver.SaveAsJxlAsync(sdrBitmap, ms2, ColorPrimaries.BT709, distance, xmpData, false);
-            }
-            finally
-            {
-                _encodeSlim.Release();
-            }
-            ms2.Position = 0;
-            using var fs2 = File.Create(sdrPath);
-            await ms2.CopyToAsync(fs2);
-        }
-        else if (autoConvertSDR)
-        {
-            // 内容真为 HDR：额外存一份 UHDR JPEG（SDR 基图 + HDR gain map）
+            sdrPath = Path.ChangeExtension(filePath, ".jpg");
             using var ms2 = new MemoryStream();
             await ImageSaver.SaveAsUhdrAsync(bitmap, ms2, maxCLL, sdrWhiteLevel);
             ms2.Position = 0;
-            sdrPath = Path.ChangeExtension(filePath, ".jpg");
             using var fs2 = File.Create(sdrPath);
             await ms2.CopyToAsync(fs2);
         }
 
         string finalFile = filePath;
-        if (deleteHDR)
-        {
-            File.Delete(filePath);
-            finalFile = sdrPath!;
-        }
 
         if (copyToClipboard && AppConfig.AutoCopyScreenshotToClipboard)
         {
-            // 全屏截图：直接把文件放剪贴板（CF_HDROP）。开了转换复制 uhdr jpg，否则主文件
-            string clipFile = produceSDR ? sdrPath! : finalFile;
+            // 全屏截图：CF_HDROP 放文件。autoConvertSDR 放 UHDR jpg，否则主文件
+            string clipFile = autoConvertSDR ? sdrPath! : finalFile;
             ClipboardHelper.SetFiles(clipFile);
         }
 
