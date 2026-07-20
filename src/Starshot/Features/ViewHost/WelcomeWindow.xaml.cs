@@ -92,7 +92,7 @@ public sealed partial class WelcomeWindow : WindowEx
                 return;
             }
             using var bitmap = await ScreenCaptureHelper.CaptureMonitorAsync((nint)mainDisplay.DisplayId.Value, Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized, default);
-            if (bitmap is null || bitmap.SizeInPixels.Width == 0 || bitmap.SizeInPixels.Height == 0)
+            if (bitmap is null || bitmap.ContentSize.Width == 0 || bitmap.ContentSize.Height == 0)
             {
                 DxgiSupported = Visibility.Collapsed;
                 DxgiNotSupported = Visibility.Visible;
