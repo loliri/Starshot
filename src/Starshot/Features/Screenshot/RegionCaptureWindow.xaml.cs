@@ -627,8 +627,10 @@ public sealed partial class RegionCaptureWindow : WindowEx
         int physH = (int)_canvasOriginal.SizeInPixels.Height;
         int w = Math.Abs(x2 - x1) + (fromDrag ? 1 : 0);
         int h = Math.Abs(y2 - y1) + (fromDrag ? 1 : 0);
-        w = Math.Min(w, physW - x);
-        h = Math.Min(h, physH - y);
+        // 选区/hover 经 ratio 缩放 + round 后可能落在画布物理边界外（边缘 round 把 x2/y2 顶到 physW/physH+1），
+        // physW-x / physH-y 此时会为负，必须 clamp 到 0，否则 new Rect 负宽高抛 ArgumentOutOfRangeException
+        w = Math.Max(0, Math.Min(w, physW - x));
+        h = Math.Max(0, Math.Min(h, physH - y));
         return new Rect(x, y, w, h);
     }
 
