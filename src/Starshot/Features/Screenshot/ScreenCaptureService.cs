@@ -386,6 +386,8 @@ internal class ScreenCaptureService
 
         string filePath = Path.Combine(screenshotFolder,
             $"{BuildFileName(processName, processExeName, windowTitle, frameTime, bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height, isRegion ? AppConfig.RegionScreenshotFileNamePattern : null)}.{extension}");
+        // 重名不覆盖：追加 _2、_3 ...（autoConvertSDR 的 jpg 跟随主文件名 ChangeExtension，自动同序唯一）
+        filePath = EnsureUniquePath(filePath);
 
         // 主文件编码：deleteHDR 走 tonemap→SDR（BT709，不写 ICC）；其余按 colorPrimaries 直存 bitmap
         using MemoryStream ms = new();
@@ -605,6 +607,23 @@ internal class ScreenCaptureService
         return "capture";
     }
 
+
+
+    /// <summary>
+    /// 重名不覆盖：filePath 已存在时追加 _2、_3 ... 直到唯一。
+    /// </summary>
+    private static string EnsureUniquePath(string filePath)
+    {
+        if (!File.Exists(filePath)) return filePath;
+        string dir = Path.GetDirectoryName(filePath)!;
+        string name = Path.GetFileNameWithoutExtension(filePath);
+        string ext = Path.GetExtension(filePath);
+        for (int i = 2; ; i++)
+        {
+            string candidate = Path.Combine(dir, $"{name}_{i}{ext}");
+            if (!File.Exists(candidate)) return candidate;
+        }
+    }
 
 
     public static string BuildFileName(string processName, string processPath, string title, DateTimeOffset time, uint width, uint height, string? pattern = null)
