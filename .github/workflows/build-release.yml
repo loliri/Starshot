@@ -3,10 +3,18 @@ name: Build Release
 on:
   workflow_dispatch:
     inputs:
+      prerelease:
+        description: 'Mark as pre-release'
+        type: boolean
+        required: false
+        default: false
       version:
         description: 'Version (e.g. 0.1.0; spaces allowed, auto-turned into -, e.g. "0.1.0 preview 1" -> 0.1.0-preview-1)'
         required: true
         default: '0.1.0'
+      body:
+        description: 'Release notes (markdown, optional; leave empty for none)'
+        required: false
 
 permissions:
   contents: write
@@ -60,6 +68,8 @@ jobs:
         with:
           tag_name: ${{ steps.ver.outputs.v }}
           name: ${{ github.event.inputs.version }}
+          body: ${{ github.event.inputs.body }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: Starshot-${{ steps.ver.outputs.v }}-win-x64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
