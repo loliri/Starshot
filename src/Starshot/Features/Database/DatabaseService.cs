@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
+using System.Data;
 using System.IO;
 
 namespace Starshot.Features.Database;
@@ -37,6 +38,19 @@ internal static class DatabaseService
         }
     }
 
+
+    /// <summary>
+    /// 在线备份：VACUUM 压缩后用 SQLite BackupDatabase API 复制到目标文件。
+    /// 不需要关连接、WAL 安全，运行中可调。
+    /// </summary>
+    public static void BackupDatabase(string file)
+    {
+        using var backupCon = new SqliteConnection($"DataSource={file}; Pooling=False;");
+        backupCon.Open();
+        using var con = CreateConnection();
+        con.Execute("VACUUM;", commandType: CommandType.Text);
+        con.BackupDatabase(backupCon);
+    }
 
 
 }

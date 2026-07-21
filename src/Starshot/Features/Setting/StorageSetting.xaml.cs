@@ -5,12 +5,15 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using Starshot.Features.Codec;
+using Starshot.Features.Database;
 using Starshot.Features.Screenshot;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Windows.Storage;
 using Windows.System;
 
 namespace Starshot.Features.Setting;
@@ -88,6 +91,7 @@ public sealed partial class StorageSetting : PageBase
         LogFolder = AppConfig.LogFolder;
         _lastFocusedTemplateBox = FileNameTextBox;
         BuildPlaceholderLinks();
+        RefreshLastBackup();
         _ = RefreshStatsAsync();
     }
 
@@ -125,8 +129,8 @@ public sealed partial class StorageSetting : PageBase
     {
         return AppConfig.Language switch
         {
-            "en-US" => "https://github.com/loliri/Starshot/blob/main/docs/README.en.md#filename-templates",
-            _ => "https://github.com/loliri/Starshot#文件名模板",
+            "zh-CN" => "https://github.com/loliri/Starshot/blob/main/docs/README.zh-CN.md#文件名模板",
+            _ => "https://github.com/loliri/Starshot#filename-templates",
         };
     }
 
@@ -264,6 +268,91 @@ public sealed partial class StorageSetting : PageBase
 
 
 
+    #region Database Backup
+
+
+    public string LastBackupTime { get; set => SetProperty(ref field, value); } = "";
+
+
+    public Visibility LastBackupVisible { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
+
+
+    private string? _lastBackupPath;
+
+    private static string DatabaseBackupFolder => Path.Combine(AppConfig.UserDataFolder, "backup");
+
+
+    private void RefreshLastBackup()
+    {
+        try
+        {
+            string dir = DatabaseBackupFolder;
+            if (!Directory.Exists(dir))
+            {
+                LastBackupVisible = Visibility.Collapsed;
+                return;
+            }
+            var last = Directory.GetFiles(dir, "StarshotDatabase_*.db")
+                .OrderByDescending(File.GetLastWriteTime)
+                .FirstOrDefault();
+            if (last is null)
+            {
+                LastBackupVisible = Visibility.Collapsed;
+                return;
+            }
+            _lastBackupPath = last;
+            LastBackupTime = $"{Lang.Starshot_LastBackup}  {File.GetLastWriteTime(last):yyyy-MM-dd HH:mm:ss}";
+            LastBackupVisible = Visibility.Visible;
+        }
+        catch { }
+    }
+
+
+    [RelayCommand]
+    private async Task BackupDatabase()
+    {
+        try
+        {
+            Directory.CreateDirectory(DatabaseBackupFolder);
+            string file = Path.Combine(DatabaseBackupFolder, $"StarshotDatabase_{DateTime.Now:yyyyMMdd_HHmmss}.db");
+            await Task.Run(() => DatabaseService.BackupDatabase(file));
+            RefreshLastBackup();
+            _ = RefreshStatsAsync();
+            InAppToast.MainWindow?.Success(Lang.Starshot_BackupSuccess);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Backup database");
+            InAppToast.MainWindow?.Error(ex, Lang.Starshot_BackupFailed);
+        }
+    }
+
+
+    [RelayCommand]
+    private async Task OpenLastBackup()
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(_lastBackupPath) && File.Exists(_lastBackupPath))
+            {
+                var item = await StorageFile.GetFileFromPathAsync(_lastBackupPath);
+                var folder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(_lastBackupPath)!);
+                var options = new FolderLauncherOptions();
+                options.ItemsToSelect.Add(item);
+                await Launcher.LaunchFolderAsync(folder, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open last backup");
+        }
+    }
+
+
+    #endregion
+
+
+
     #region Storage Stats
 
 
@@ -277,6 +366,9 @@ public sealed partial class StorageSetting : PageBase
 
 
     public string LogSize { get; set => SetProperty(ref field, value); } = "—";
+
+
+    public string BackupSize { get; set => SetProperty(ref field, value); } = "—";
 
 
     [RelayCommand]
@@ -324,20 +416,23 @@ public sealed partial class StorageSetting : PageBase
             string cache = AppConfig.CacheFolder;
             string bgDir = Path.Combine(cache, "bg");
             string logDir = Path.Combine(AppConfig.LogFolder, "log");
+            string backupDir = DatabaseBackupFolder;
 
-            var (ssSize, cacheSize, bgSize, logSize) = await Task.Run(() =>
+            var (ssSize, cacheSize, bgSize, logSize, backupSize) = await Task.Run(() =>
             {
                 long s = StorageStatsHelper.GetDirectorySize(ssFolder);
                 long bg = StorageStatsHelper.GetDirectorySize(bgDir);
                 long cc = StorageStatsHelper.GetDirectorySize(cache) - bg;  // 缓存不含壁纸，避免重复计数
                 long ll = StorageStatsHelper.GetDirectorySize(logDir);
-                return (s, cc, bg, ll);
+                long bk = StorageStatsHelper.GetDirectorySize(backupDir);
+                return (s, cc, bg, ll, bk);
             });
 
             ScreenshotFolderSize = StorageStatsHelper.FormatSize(ssSize);
             ImageCacheSize = StorageStatsHelper.FormatSize(cacheSize);
             WallpaperSize = StorageStatsHelper.FormatSize(bgSize);
             LogSize = StorageStatsHelper.FormatSize(logSize);
+            BackupSize = StorageStatsHelper.FormatSize(backupSize);
         }
         catch (Exception ex)
         {

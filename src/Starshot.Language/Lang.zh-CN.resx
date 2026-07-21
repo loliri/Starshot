@@ -2826,4 +2826,9 @@
   <data name="Starshot_AboutThanksShareX" xml:space="preserve"><value>区域截图覆盖层的窗口检测和交互设计参考</value></data>
   <data name="Starshot_AboutProjectHome" xml:space="preserve"><value>项目主页</value></data>
   <data name="Starshot_AboutOpenDataFolder" xml:space="preserve"><value>打开数据目录</value></data>
+  <data name="Starshot_BackupDatabase" xml:space="preserve"><value>备份数据库</value></data>
+  <data name="Starshot_LastBackup" xml:space="preserve"><value>上次备份</value></data>
+  <data name="Starshot_BackupSuccess" xml:space="preserve"><value>数据库已备份</value></data>
+  <data name="Starshot_BackupFailed" xml:space="preserve"><value>数据库备份失败</value></data>
+  <data name="Starshot_StatsBackup" xml:space="preserve"><value>备份</value></data>
 </root>

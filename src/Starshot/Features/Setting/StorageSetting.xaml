@@ -169,6 +169,59 @@
             </StackPanel>
 
 
+            <!--  数据库备份  -->
+            <StackPanel Spacing="8">
+                <TextBlock FontSize="20"
+                           Text="{x:Bind lang:Lang.Starshot_BackupDatabase}" />
+                <Grid ColumnSpacing="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0"
+                            Height="40"
+                            Padding="16,0,16,0"
+                            BorderThickness="0"
+                            Command="{x:Bind BackupDatabaseCommand}"
+                            CornerRadius="8,20,20,8"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xF413;" />
+                            <TextBlock Text="{x:Bind lang:Lang.Starshot_BackupDatabase}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1"
+                            Height="40"
+                            Margin="16,0,0,0"
+                            Padding="20,0,20,1"
+                            HorizontalContentAlignment="Left"
+                            BorderThickness="0"
+                            Command="{x:Bind OpenLastBackupCommand}"
+                            CornerRadius="20"
+                            Visibility="{x:Bind LastBackupVisible}">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                                       MaxLines="2"
+                                       Text="{x:Bind LastBackupTime}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" />
+                            <FontIcon Grid.Column="1"
+                                      Margin="0,2,2,0"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE8A7;" />
+                        </Grid>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+
             <!--  存储占用  -->
             <StackPanel Spacing="8">
                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -200,6 +253,8 @@
                         <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsWallpaper}" />
                         <LineBreak />
                         <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsLog}" />
+                        <LineBreak />
+                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_StatsBackup}" />
                     </TextBlock>
                     <TextBlock>
                         <Run Text="{x:Bind ScreenshotFolderSize}" />
@@ -209,6 +264,8 @@
                         <Run Text="{x:Bind WallpaperSize}" />
                         <LineBreak />
                         <Run Text="{x:Bind LogSize}" />
+                        <LineBreak />
+                        <Run Text="{x:Bind BackupSize}" />
                     </TextBlock>
                 </StackPanel>
                 <Button Height="40"
