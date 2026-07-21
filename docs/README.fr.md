@@ -352,6 +352,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - L'overlay de capture régionale affiche les trames HDR en SDR (CanvasControl de WinUI utilise une chaîne d'échange SDR) ; les fichiers sauvegardés ne sont pas affectés
 - Les fonds d'écran personnalisés utilisent `UniformToFill` pour couvrir la fenêtre, mais le recadrage de WinUI n'est pas centré — il est actuellement aligné en **haut à gauche**. Par exemple, un fond d'écran étroit (portrait) dans une fenêtre large n'affichera que la partie supérieure (recadrée depuis le haut plutôt que centrée)
 - Au moment où l'overlay de capture régionale s'ouvre, le curseur reste dans sa forme par défaut. **Il faut bouger la souris une fois** pour que le curseur en croix apparaisse (le `ProtectedCursor` de WinUI ne prend pas effet immédiatement sur un pointeur immobile déjà au-dessus de l'élément ; un mouvement déclenche un événement de pointeur, après quoi tout fonctionne normalement)
+- Sur un double écran avec DPI différents (ex. primaire 150 %, secondaire 125 %), les coordonnées de la superposition de capture de région sont décalées sur l'écran secondaire (loupe / sélection désalignées). Solution : utiliser la même échelle sur les deux écrans
 
 ## Notes de développement
 

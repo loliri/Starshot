@@ -353,6 +353,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - 区域截图覆盖层 HDR 帧显示为 SDR（WinUI CanvasControl 走 SDR 交换链）；保存的文件不受影响
 - 自定义壁纸按 `UniformToFill` 铺满，但 WinUI 的裁剪不居中，目前是**左上**对齐，比如窄（竖向）壁纸在宽窗口里会只显示上半部分（从顶部裁剪而非居中）
 - 区域截图覆盖层打开瞬间，光标仍是系统默认形状，**需移动一次鼠标后十字光标才出现**（WinUI `ProtectedCursor` 对已在元素上的静止指针不立即生效，移动一次触发 pointer 事件后即正常）
+- 双屏 DPI 不一致（如主屏 150%、副屏 125%）时，区域截图覆盖层在副屏的坐标会错位（放大镜 / 选区对不上）。规避：统一双屏缩放比例
 
 ## 开发说明
 

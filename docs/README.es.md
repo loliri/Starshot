@@ -352,6 +352,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - La superposición de captura de región muestra fotogramas HDR como SDR (CanvasControl de WinUI usa una cadena de intercambio SDR); los archivos guardados no se ven afectados
 - Los fondos de pantalla personalizados usan `UniformToFill` para cubrir la ventana, pero el recorte de WinUI no está centrado, actualmente está alineado **arriba a la izquierda**. Por ejemplo, un fondo estrecho (vertical) en una ventana ancha solo mostrará la parte superior (recortado desde arriba en lugar de centrado)
 - Al abrir la superposición de captura de región, el cursor mantiene la forma predeterminada del sistema. **Hay que mover el ratón una vez** para que aparezca el cursor en cruz (`ProtectedCursor` de WinUI no surte efecto inmediato sobre un puntero inmóvil que ya está sobre el elemento; al moverlo una vez se activa un evento pointer, tras lo cual funciona normalmente)
+- En monitores duales con DPI distinto (p. ej. primario 150 %, secundario 125 %), las coordenadas de la superposición de captura de región se desalinean en el monitor secundario (lupa / selección desalineadas). Solución alternativa: usar la misma escala en ambos monitores
 
 ## Notas de desarrollo
 

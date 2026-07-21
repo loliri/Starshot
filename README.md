@@ -350,6 +350,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - The region screenshot overlay displays HDR frames as SDR (WinUI CanvasControl uses an SDR swap chain); saved files are unaffected.
 - Custom wallpapers use `UniformToFill` to cover the window, but WinUI's crop is not centered — it is currently **top-left** aligned. For example, a narrow (portrait) wallpaper in a wide window will only show the upper portion (cropped from the top rather than centered).
 - When the region screenshot overlay first opens, the cursor remains the default system shape. **You need to move the mouse once** for the crosshair cursor to appear (WinUI `ProtectedCursor` does not take immediate effect on a stationary pointer already over the element — moving once triggers a pointer event, after which it works normally).
+- On mixed-DPI dual monitors (e.g. primary 150%, secondary 125%), the region capture overlay's coordinates are off on the secondary monitor (magnifier / selection misaligned). Workaround: use the same scale on both monitors.
 
 ## Development Notes
 
