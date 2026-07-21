@@ -422,7 +422,7 @@ public sealed partial class StorageSetting : PageBase
             {
                 long s = StorageStatsHelper.GetDirectorySize(ssFolder);
                 long bg = StorageStatsHelper.GetDirectorySize(bgDir);
-                long cc = StorageStatsHelper.GetDirectorySize(cache) - bg;  // 缓存不含壁纸，避免重复计数
+                long cc = StorageStatsHelper.GetDirectorySize(Path.Combine(cache, "thumb"));
                 long ll = StorageStatsHelper.GetDirectorySize(logDir);
                 long bk = StorageStatsHelper.GetDirectorySize(backupDir);
                 return (s, cc, bg, ll, bk);

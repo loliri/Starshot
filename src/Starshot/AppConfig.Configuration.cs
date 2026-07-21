@@ -29,10 +29,10 @@ public static partial class AppConfig
         string baseDir = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         UserDataFolder = Path.GetDirectoryName(baseDir) ?? baseDir;
 
-        // 先用默认 LogFolder 算 CacheFolder/LogFile：欢迎页选壁纸要拷 cache/bg，
+        // 先用默认 LogFolder 算 CacheFolder/LogFile：欢迎页选壁纸要拷 bg/，
         // 而 DB 在欢迎页之后才创建，读不到用户配置的 LogFolder
         string logFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot");
-        CacheFolder = Path.Combine(logFolder, "cache");
+        CacheFolder = logFolder;
         LogFile = Path.Combine(logFolder, "log", $"Starshot_{DateTime.Now:yyMMdd}.log");
         Directory.CreateDirectory(CacheFolder);
 
@@ -88,13 +88,44 @@ public static partial class AppConfig
 
         // DB 后读用户配置的 LogFolder 覆盖（首次 DB 没值，保持默认）
         logFolder = LogFolder;
-        CacheFolder = Path.Combine(logFolder, "cache");
+        CacheFolder = logFolder;
         LogFile = Path.Combine(logFolder, "log", $"Starshot_{DateTime.Now:yyMMdd}.log");
 
         Directory.CreateDirectory(CacheFolder);
         Directory.CreateDirectory(Path.GetDirectoryName(LogFile)!);
 
+        MigrateOldCacheLayout(CacheFolder);
+
         await Task.CompletedTask;
+    }
+
+
+    /// <summary>
+    /// 旧布局 CacheFolder=根/cache，把里面的 bg/thumb 展开到根，与 log 平级。
+    /// 幂等：新布局已无 根/cache（或里面已无 bg/thumb）时啥也不做。
+    /// </summary>
+    private static void MigrateOldCacheLayout(string rootFolder)
+    {
+        try
+        {
+            string oldCache = Path.Combine(rootFolder, "cache");
+            if (!Directory.Exists(oldCache)) return;
+            foreach (var sub in new[] { "bg", "thumb" })
+            {
+                string src = Path.Combine(oldCache, sub);
+                string dst = Path.Combine(rootFolder, sub);
+                if (Directory.Exists(src) && !Directory.Exists(dst))
+                {
+                    try { Directory.Move(src, dst); } catch { }
+                }
+            }
+            // 旧 cache 空了就删；还有残留（移动失败的）就留着不强行删
+            if (Directory.Exists(oldCache) && Directory.GetFileSystemEntries(oldCache).Length == 0)
+            {
+                try { Directory.Delete(oldCache); } catch { }
+            }
+        }
+        catch { }
     }
 
 
