@@ -34,11 +34,11 @@ public static class UpdateService
     /// 真流式解压：网络流直连 SharpCompress Reader，逐 entry 写到 destDir。不落 zip、不依赖中央目录。
     /// 进度按网络已读字节 / Content-Length 计算（流式下载解压一体）。
     /// </summary>
-    public static async Task ExtractToDirectoryAsync(string zipUrl, string destDir, IProgress<(int percent, string stage)>? progress, CancellationToken ct = default)
+    public static async Task ExtractToDirectoryAsync(string zipUrl, string destDir, IProgress<(int percent, string bytesText)>? progress, CancellationToken ct = default)
     {
         string destFull = Path.GetFullPath(destDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
 
-        progress?.Report((0, Lang.Starshot_UpdateExtracting));
+        progress?.Report((0, ""));
 
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd("Starshot");
@@ -74,7 +74,7 @@ public static class UpdateService
                 {
                     // 留 100% 给调用方 await 返回（API return 作完成标志），中间只到 99
                     int pct = (int)(counting.BytesRead * 99 / total.Value);
-                    progress?.Report((pct, $"{Lang.Starshot_UpdateExtracting} {FormatSize(counting.BytesRead)} / {FormatSize(total.Value)}"));
+                    progress?.Report((pct, $"{FormatSize(counting.BytesRead)} / {FormatSize(total.Value)}"));
                 }
             }
         }
@@ -82,7 +82,7 @@ public static class UpdateService
     }
 
 
-    public static async Task StartUpdateAsync(ReleaseInfo info, IProgress<(int percent, string stage)> progress, CancellationToken ct = default)
+    public static async Task StartUpdateAsync(ReleaseInfo info, IProgress<(int percent, string bytesText)> progress, CancellationToken ct = default)
     {
         string root = AppConfig.UserDataFolder;
         string versionIni = Path.Combine(root, "version.ini");
@@ -133,16 +133,18 @@ public static class UpdateService
 
     /// <summary>
     /// 解析版本字符串（version.ini 的 AppVersion 或 tag）：去 v 前缀 + pre-release 后缀（-Preview/-beta/-rc）再 Version.TryParse。
+    /// 本地构建（无 version.ini 或 "Local"）按 0.0.0 最低版本处理，可更新到任意 CI/CD release（方便测试更新流程）。
     /// </summary>
     private static bool TryParseVersion(string? raw, out Version version)
     {
-        version = new();
-        if (string.IsNullOrWhiteSpace(raw)) return false;
+        version = new Version(0, 0, 0);
+        if (string.IsNullOrWhiteSpace(raw)) return true;
         string s = raw.Trim();
         if (s.StartsWith("v", StringComparison.OrdinalIgnoreCase)) s = s[1..];
         int dash = s.IndexOf('-');
         if (dash > 0) s = s[..dash];
-        return Version.TryParse(s, out version);
+        if (Version.TryParse(s, out var v)) version = v;
+        return true;
     }
 
 

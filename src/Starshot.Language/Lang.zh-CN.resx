@@ -2833,4 +2833,11 @@
   <data name="Starshot_StatsBackup" xml:space="preserve"><value>备份</value></data>
   <data name="Starshot_CheckPrerelease" xml:space="preserve"><value>检查预发布版本</value></data>
   <data name="Starshot_DataFolder" xml:space="preserve"><value>数据文件夹</value></data>
+  <data name="Starshot_UpdateNewVersion" xml:space="preserve"><value>新版本</value></data>
+  <data name="Starshot_UpdateLinks" xml:space="preserve"><value>相关链接</value></data>
+  <data name="Starshot_UpdateReleasePage" xml:space="preserve"><value>发布页</value></data>
+  <data name="Starshot_UpdateFullPackage" xml:space="preserve"><value>完整包</value></data>
+  <data name="Starshot_UpdateArchitecture" xml:space="preserve"><value>架构</value></data>
+  <data name="Starshot_UpdateChannel" xml:space="preserve"><value>发布渠道</value></data>
+  <data name="Starshot_UpdateBuildTime" xml:space="preserve"><value>编译时间</value></data>
 </root>

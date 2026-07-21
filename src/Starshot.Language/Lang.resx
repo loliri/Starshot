@@ -2833,4 +2833,11 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_StatsBackup" xml:space="preserve"><value>Backup</value></data>
   <data name="Starshot_CheckPrerelease" xml:space="preserve"><value>Check pre-release versions</value></data>
   <data name="Starshot_DataFolder" xml:space="preserve"><value>Data folder</value></data>
+  <data name="Starshot_UpdateNewVersion" xml:space="preserve"><value>New version</value></data>
+  <data name="Starshot_UpdateLinks" xml:space="preserve"><value>Links</value></data>
+  <data name="Starshot_UpdateReleasePage" xml:space="preserve"><value>Release page</value></data>
+  <data name="Starshot_UpdateFullPackage" xml:space="preserve"><value>Full package</value></data>
+  <data name="Starshot_UpdateArchitecture" xml:space="preserve"><value>Architecture</value></data>
+  <data name="Starshot_UpdateChannel" xml:space="preserve"><value>Channel</value></data>
+  <data name="Starshot_UpdateBuildTime" xml:space="preserve"><value>Build time</value></data>
 </root>

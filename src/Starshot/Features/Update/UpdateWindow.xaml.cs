@@ -1,12 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.System;
 
 namespace Starshot.Features.Update;
 
@@ -17,19 +19,29 @@ public sealed partial class UpdateWindow : WindowEx
     private CancellationTokenSource? _cts;
 
 
+    public string CurrentVersionText { get; set => SetProperty(ref field, value); } = "";
+    public string NewVersionText { get; set => SetProperty(ref field, value); } = "";
+    public string ReleaseNotes { get; set => SetProperty(ref field, value); } = "";
+    public string ChannelText { get; set => SetProperty(ref field, value); } = "";
+    public string BuildTimeText { get; set => SetProperty(ref field, value); } = "";
+    public string ProgressBytesText { get; set => SetProperty(ref field, value); } = "";
+    public string ProgressPercentText { get; set => SetProperty(ref field, value); } = "";
+    public double ProgressValue { get; set => SetProperty(ref field, value); }
+    public Visibility IsProgressVisible { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
+    public string ErrorMessage { get; set => SetProperty(ref field, value); } = "";
+    public Visibility HasError { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
+
+
     public UpdateWindow()
     {
         InitializeComponent();
-        this.Bindings.Update();
         Title = "Starshot";
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-        if (AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter p)
-        {
-            p.IsResizable = false;
-            p.IsMaximizable = false;
-        }
-        AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(680 * UIScale), (int)(420 * UIScale)));
-        new SystemBackdropHelper(this).TrySetAcrylic();
+        // 锁死深色：Labs MarkdownTextBlock 代码块默认浅色字，深色背景才看得见
+        RootGrid.RequestedTheme = ElementTheme.Dark;
+        SystemBackdrop = new DesktopAcrylicBackdrop();
+        AdaptTitleBarButtonColorToActuallTheme();
+        CenterInScreen(1000, 680);
         this.Closed += (_, _) => _cts?.Cancel();
     }
 
@@ -37,10 +49,27 @@ public sealed partial class UpdateWindow : WindowEx
     public void SetRelease(ReleaseInfo release)
     {
         _release = release;
-        TitleText.Text = Lang.Starshot_UpdateAvailableTitle;
-        CurrentVersionText.Text = "v" + AppConfig.AppVersion;
-        NewVersionText.Text = "v" + release.Version;
+        CurrentVersionText = AppConfig.AppVersion;
+        NewVersionText = release.TagName;
+        ChannelText = release.Prerelease ? "Preview" : "Stable";
+        BuildTimeText = release.PublishedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        ReleaseNotes = string.IsNullOrWhiteSpace(release.Notes) ? "" : release.Notes;
         Activate();
+    }
+
+
+    private void Hyperlink_Click(object sender, RoutedEventArgs e)
+    {
+        if (_release is null) return;
+        string? tag = (sender as FrameworkElement)?.Tag?.ToString();
+        string? url = tag switch
+        {
+            "release" => $"https://github.com/loliri/Starshot/releases/tag/{_release.TagName}",
+            "package" => _release.ZipUrl,
+            _ => null,
+        };
+        if (!string.IsNullOrEmpty(url))
+            _ = Launcher.LaunchUriAsync(new Uri(url));
     }
 
 
@@ -48,16 +77,18 @@ public sealed partial class UpdateWindow : WindowEx
     private async Task UpdateNow()
     {
         if (_release is null) return;
-        UpdateButton.IsEnabled = false;
-        RemindButton.IsEnabled = false;
-        IgnoreButton.IsEnabled = false;
-        Progress.Visibility = Visibility.Visible;
+        Button_Update.IsEnabled = false;
+        Button_Remind.IsEnabled = false;
+        IsProgressVisible = Visibility.Visible;
+        HasError = Visibility.Collapsed;
+        ProgressValue = 0;
 
         _cts = new CancellationTokenSource();
-        var progress = new Progress<(int percent, string stage)>(p =>
+        var progress = new Progress<(int percent, string bytesText)>(p =>
         {
-            Progress.Value = p.percent;
-            StatusText.Text = $"{p.percent}%  {p.stage}";
+            ProgressValue = p.percent;
+            ProgressPercentText = p.percent + "%";
+            ProgressBytesText = p.bytesText;
         });
         try
         {
@@ -65,11 +96,11 @@ public sealed partial class UpdateWindow : WindowEx
         }
         catch (Exception ex)
         {
-            Progress.Visibility = Visibility.Collapsed;
-            StatusText.Text = Lang.Starshot_UpdateFailed;
-            UpdateButton.IsEnabled = true;
-            RemindButton.IsEnabled = true;
-            IgnoreButton.IsEnabled = true;
+            IsProgressVisible = Visibility.Collapsed;
+            ErrorMessage = Lang.Starshot_UpdateFailed;
+            HasError = Visibility.Visible;
+            Button_Update.IsEnabled = true;
+            Button_Remind.IsEnabled = true;
             InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed, 5000);
         }
     }

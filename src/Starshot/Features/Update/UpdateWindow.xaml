@@ -4,53 +4,179 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lang="using:Starshot.Language"
+             xmlns:markdown="using:CommunityToolkit.WinUI.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sf="using:Starshot.Frameworks"
+             x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <Grid Background="Transparent" Padding="32">
-        <StackPanel Spacing="20">
+    <Grid x:Name="RootGrid">
+        <Grid.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="15"/>
+            </Style>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
 
-            <TextBlock x:Name="TitleText"
-                       FontSize="28"
-                       FontWeight="Bold" />
 
-            <StackPanel Orientation="Horizontal" Spacing="12">
-                <TextBlock x:Name="CurrentVersionText"
-                           FontSize="20"
-                           Foreground="#C50500" />
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="20"
-                           Text="→" />
-                <TextBlock x:Name="NewVersionText"
-                           FontSize="20"
-                           Foreground="#107C10" />
+        <!--  左栏：信息 + 进度 + 按钮  -->
+        <Grid Grid.Column="0" Margin="32">
+
+            <StackPanel Spacing="12">
+
+                <!--  发现新版本！  -->
+                <TextBlock FontSize="28" Text="{x:Bind lang:Lang.Starshot_UpdateAvailableTitle}" />
+
+                <!--  当前版本 -> 最新版本  -->
+                <StackPanel Margin="0,8,0,0"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                    <TextBlock VerticalAlignment="Bottom"
+                               FontSize="18"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind CurrentVersionText}" />
+                    <FontIcon VerticalAlignment="Bottom"
+                              FontSize="18"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                              Glyph="&#xEBE7;" />
+                    <TextBlock VerticalAlignment="Bottom"
+                               FontSize="18"
+                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                               Text="{x:Bind NewVersionText}" />
+                </StackPanel>
+
+                <!--  版本信息  -->
+                <Grid Margin="0,8,0,0"
+                      ColumnSpacing="12"
+                      RowSpacing="14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_UpdateArchitecture}" />
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1"
+                               Text="x64" />
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_UpdateChannel}" />
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="1"
+                               Text="{x:Bind ChannelText}" />
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_UpdateBuildTime}" />
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="1"
+                               Text="{x:Bind BuildTimeText}" />
+                </Grid>
+
+                <!--  相关链接  -->
+                <Grid Margin="0,4,0,0" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_UpdateLinks}" />
+                    <HyperlinkButton Grid.Column="1"
+                                     Click="Hyperlink_Click"
+                                     Tag="release"
+                                     Content="{x:Bind lang:Lang.Starshot_UpdateReleasePage}"
+                                     Padding="0"
+                                     FontSize="15" />
+                </Grid>
+
+                <MenuFlyoutSeparator />
             </StackPanel>
 
-            <ProgressBar x:Name="Progress"
-                         MinWidth="300"
-                         Visibility="Collapsed" />
 
-            <TextBlock x:Name="StatusText"
-                       FontSize="12"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       TextWrapping="Wrap" />
+            <!--  底部进度  -->
+            <Grid Margin="0,0,0,56"
+                  VerticalAlignment="Bottom"
+                  RowSpacing="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0"
+                           HorizontalAlignment="Left"
+                           Text="{x:Bind ProgressBytesText}"
+                           Visibility="{x:Bind IsProgressVisible}" />
+                <TextBlock Grid.Row="0"
+                           HorizontalAlignment="Right"
+                           Text="{x:Bind ProgressPercentText}"
+                           Visibility="{x:Bind IsProgressVisible}" />
+                <ProgressBar Grid.Row="1"
+                             Value="{x:Bind ProgressValue}"
+                             Visibility="{x:Bind IsProgressVisible}" />
+                <TextBlock Grid.Row="2"
+                           MaxWidth="360"
+                           HorizontalAlignment="Left"
+                           Text="{x:Bind ErrorMessage}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind HasError}" />
+                <!--  占位防塌陷  -->
+                <TextBlock Grid.Row="2" />
+            </Grid>
 
-            <StackPanel HorizontalAlignment="Right"
+
+            <!--  按钮  -->
+            <StackPanel HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
                         Orientation="Horizontal"
-                        Spacing="8">
-                <Button x:Name="IgnoreButton"
-                        Command="{x:Bind IgnoreCommand}"
-                        Content="{x:Bind lang:Lang.Starshot_IgnoreThisVersion}" />
-                <Button x:Name="RemindButton"
-                        Command="{x:Bind RemindLaterCommand}"
-                        Content="{x:Bind lang:Lang.Starshot_RemindLater}" />
-                <Button x:Name="UpdateButton"
+                        Spacing="24">
+                <Button x:Name="Button_Update"
+                        Height="40"
+                        Padding="24,0,24,0"
+                        BorderThickness="0"
                         Command="{x:Bind UpdateNowCommand}"
-                        Style="{ThemeResource AccentButtonStyle}"
-                        Content="{x:Bind lang:Lang.Starshot_UpdateNow}" />
+                        Content="{x:Bind lang:Lang.Starshot_UpdateNow}"
+                        CornerRadius="20"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                <SplitButton x:Name="Button_Remind"
+                             Height="40"
+                             BorderThickness="0"
+                             Command="{x:Bind RemindLaterCommand}"
+                             CornerRadius="20">
+                    <TextBlock Margin="6,0,0,0"
+                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_RemindLater}" />
+                    <SplitButton.Flyout>
+                        <MenuFlyout Placement="Top">
+                            <MenuFlyoutItem Command="{x:Bind IgnoreCommand}"
+                                            Text="{x:Bind lang:Lang.Starshot_IgnoreThisVersion}" />
+                        </MenuFlyout>
+                    </SplitButton.Flyout>
+                </SplitButton>
             </StackPanel>
-        </StackPanel>
+
+        </Grid>
+
+
+        <!--  右栏：release notes（markdown 渲染）  -->
+        <ScrollViewer Grid.Column="1"
+                      Padding="32,32,32,32">
+            <markdown:MarkdownTextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind ReleaseNotes}" />
+        </ScrollViewer>
+
     </Grid>
 
 </sf:WindowEx>

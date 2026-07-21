@@ -7913,5 +7913,12 @@ namespace Starshot.Language {
         public static string Starshot_StatsBackup { get { return ResourceManager.GetString("Starshot_StatsBackup", resourceCulture); } }
         public static string Starshot_CheckPrerelease { get { return ResourceManager.GetString("Starshot_CheckPrerelease", resourceCulture); } }
         public static string Starshot_DataFolder { get { return ResourceManager.GetString("Starshot_DataFolder", resourceCulture); } }
+        public static string Starshot_UpdateNewVersion { get { return ResourceManager.GetString("Starshot_UpdateNewVersion", resourceCulture); } }
+        public static string Starshot_UpdateLinks { get { return ResourceManager.GetString("Starshot_UpdateLinks", resourceCulture); } }
+        public static string Starshot_UpdateReleasePage { get { return ResourceManager.GetString("Starshot_UpdateReleasePage", resourceCulture); } }
+        public static string Starshot_UpdateFullPackage { get { return ResourceManager.GetString("Starshot_UpdateFullPackage", resourceCulture); } }
+        public static string Starshot_UpdateArchitecture { get { return ResourceManager.GetString("Starshot_UpdateArchitecture", resourceCulture); } }
+        public static string Starshot_UpdateChannel { get { return ResourceManager.GetString("Starshot_UpdateChannel", resourceCulture); } }
+        public static string Starshot_UpdateBuildTime { get { return ResourceManager.GetString("Starshot_UpdateBuildTime", resourceCulture); } }
     }
 }

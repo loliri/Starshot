@@ -15,6 +15,8 @@ public sealed class ReleaseInfo
     public string TagName { get; init; } = "";
     public string ZipUrl { get; init; } = "";
     public string Notes { get; init; } = "";
+    public bool Prerelease { get; init; }
+    public DateTimeOffset PublishedAt { get; init; }
 }
 
 
@@ -79,6 +81,8 @@ public static class ReleaseClient
             TagName = (payload.TagName ?? "").Trim(),
             ZipUrl = zipUrl,
             Notes = payload.Body ?? "",
+            Prerelease = payload.Prerelease,
+            PublishedAt = payload.PublishedAt,
         };
     }
 
@@ -88,6 +92,8 @@ public static class ReleaseClient
         [JsonPropertyName("tag_name")] public string? TagName { get; set; }
         [JsonPropertyName("body")] public string? Body { get; set; }
         [JsonPropertyName("assets")] public GitHubAsset[]? Assets { get; set; }
+        [JsonPropertyName("prerelease")] public bool Prerelease { get; set; }
+        [JsonPropertyName("published_at")] public DateTimeOffset PublishedAt { get; set; }
     }
 
     private sealed class GitHubAsset
