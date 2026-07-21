@@ -12,7 +12,11 @@
 
 int wmain(int argc, wchar_t* argv[])
 {
-    const std::filesystem::path base_folder = std::filesystem::path(argv[0]).parent_path();
+    // argv[0] may be just the filename when launched via ShellExecute, so derive base_folder
+    // from the module's absolute path instead.
+    WCHAR exePath[MAX_PATH];
+    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    const std::filesystem::path base_folder = std::filesystem::path(exePath).parent_path();
 
     // --clean wipes old app-*. Without a pid it just retries 10 times and gives up (no process kill).
     // With --clean=<pid> it retries harder (once per minute for 5 min) then force-kills that pid.
