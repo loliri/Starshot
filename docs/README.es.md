@@ -244,7 +244,7 @@ Muestra el logo + eslogan al iniciar. Retraso de 700 ms y luego se desvanece en 
 
 - Verificación limitada al inicio (≥24h + interruptor activado) de la última versión en GitHub Releases, o verificación manual desde la página Acerca de
 - Las actualizaciones usan descompresión por streaming real de SharpCompress (conexión directa al flujo de red, sin guardar zip en disco). Cada entrada se escribe directamente en el directorio raíz. En caso de error, se restaura el estado anterior. En caso de éxito, reinicia el lanzador con `--clean` para limpiar versiones antiguas
-- Solo verifica releases CI/CD (lee el número de versión de `version.ini`). Las compilaciones locales no tienen número de versión (`AppVersion = Local`) y no activan la verificación
+- Solo verifica releases CI/CD (lee el número de versión de `version.ini`). Las compilaciones locales (sin `version.ini`, `AppVersion = Local`) se tratan como 0.0.0, por lo que pueden actualizarse a cualquier release CI/CD
 - Convención de mayúsculas/minúsculas de versión: el tag de GitHub, el nombre del zip y el directorio `app-{version}/` van en minúsculas (p. ej. `0.3.1-preview`); `version.ini` mantiene el uso original de mayúsculas (`0.3.1-Preview`, se muestra en Acerca de), y el lanzador lo convierte a minúsculas al localizar el directorio.
 
 ## Arquitectura

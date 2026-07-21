@@ -244,7 +244,7 @@ Affiche le logo + le slogan au lancement. Délai de 700ms puis fondu en 400ms. S
 
 - Vérification limitée au démarrage (≥24h + option activée) de la dernière version sur GitHub Releases, ou vérification manuelle depuis la page À propos
 - Les mises à jour utilisent la décompression en streaming véritable de SharpCompress (flux réseau directement connecté, sans sauvegarde du zip sur disque). Chaque entrée est écrite directement dans le répertoire racine. En cas d'échec, l'état précédent est restauré. En cas de succès, le lanceur redémarre avec `--clean` pour nettoyer les anciennes versions
-- Vérifie uniquement les releases CI/CD (lit le numéro de version dans `version.ini`). Les builds locaux n'ont pas de numéro de version (`AppVersion = Local`) et ne déclenchent pas de vérification
+- Vérifie uniquement les releases CI/CD (lit le numéro de version dans `version.ini`). Les builds locaux (sans `version.ini`, `AppVersion = Local`) sont traités comme 0.0.0 et peuvent se mettre à jour vers n'importe quel release CI/CD
 - Convention de casse de version : le tag GitHub, le nom du zip et le répertoire `app-{version}/` sont en minuscules (ex. `0.3.1-preview`) ; `version.ini` conserve la casse d'origine (`0.3.1-Preview`, affiché dans À propos), et le lanceur le passe en minuscules pour localiser le répertoire.
 
 ## Architecture

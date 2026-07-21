@@ -245,7 +245,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 启动时节流检查（≥24h + 开关开启）GitHub Releases 最新版，或 About 页手动检查
 - 更新用 SharpCompress 真流式解压（网络流直连，不落 zip），逐 entry 直接写到根目录
 - 失败还原，成功重启启动器带 `--clean` 清旧
-- 仅 CI/CD release 检查（读 `version.ini` 版本号）；本地构建无版本号 `AppVersion = Local`，不触发
+- 仅 CI/CD release 检查（读 `version.ini` 版本号）；本地构建（无 `version.ini`，`AppVersion = Local`）按 0.0.0 处理，可更新到任意 CI/CD release
 - 版本大小写约定：GitHub tag、zip 名、`app-{version}/` 目录一律小写（如 `0.3.1-preview`）；`version.ini` 内容保留原始大小写（`0.3.1-Preview`，About 页显示用），启动器读取时自己转小写定位目录
 
 ## 架构
