@@ -98,8 +98,9 @@ public sealed partial class MainWindow : WindowEx
             if (!AppConfig.EnableAutoUpdateCheck) return;
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (now - AppConfig.LastCheckUpdateTime < 86400) return;
-            AppConfig.LastCheckUpdateTime = now;
             var release = await UpdateService.CheckUpdateAsync();
+            // 成功查询后才更新时间戳：网络失败抛异常会跳过本行（catch 兜底），下次启动即重试
+            AppConfig.LastCheckUpdateTime = now;
             if (release is null) return;
             var window = new UpdateWindow();
             window.SetRelease(release);
