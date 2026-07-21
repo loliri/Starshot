@@ -22,12 +22,23 @@ public sealed partial class AboutPage : PageBase
 #endif
 
 
+    /// <summary>
+    /// 检查更新时是否包含预发布版本（代理 AppConfig.EnablePreReleaseUpdateCheck）。
+    /// </summary>
+    public bool PreReleaseCheck
+    {
+        get => AppConfig.EnablePreReleaseUpdateCheck;
+        set => AppConfig.EnablePreReleaseUpdateCheck = value;
+    }
+
+
     public AboutPage()
     {
         InitializeComponent();
 #if DEBUG
-        // DEBUG 不查更新，隐藏按钮（CheckUpdateAsync 直接 return null，显示「最新」是假的）
+        // DEBUG 不查更新，隐藏按钮和预发布开关（CheckUpdateAsync 直接 return null，显示「最新」是假的）
         CheckUpdateButton.Visibility = Visibility.Collapsed;
+        PreReleaseSwitch.Visibility = Visibility.Collapsed;
 #endif
     }
 
@@ -35,20 +46,6 @@ public sealed partial class AboutPage : PageBase
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-    }
-
-
-    [RelayCommand]
-    private async Task OpenDataFolder()
-    {
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(AppConfig.UserDataFolder))
-            {
-                await Launcher.LaunchFolderPathAsync(AppConfig.UserDataFolder);
-            }
-        }
-        catch { }
     }
 
 

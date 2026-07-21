@@ -18,9 +18,9 @@ public static class UpdateService
 #else
         // 不吞异常：网络失败向上抛（手动检查弹"更新失败"，启动检查由调用方 catch 静默）。
         // 返回 null 仅表示"确无新版本/被忽略/无 zip 资源"。
-        var release = await ReleaseClient.GetLatestReleaseAsync();
+        var release = await ReleaseClient.GetLatestReleaseAsync(AppConfig.EnablePreReleaseUpdateCheck);
         if (release is null) return null;
-        if (!Version.TryParse(AppConfig.AppVersion, out var current)) return null;
+        if (!TryParseVersion(AppConfig.AppVersion, out var current)) return null;
         if (release.Version <= current) return null;
         // 只有自动检查才跳过用户忽略的版本；手动检查无视忽略
         if (ignoreSkipped && Version.TryParse(AppConfig.IgnoreVersion, out var ignore) && release.Version <= ignore) return null;
@@ -89,7 +89,8 @@ public static class UpdateService
         string versionIniBak = versionIni + ".bak";
         string launcherExe = Path.Combine(root, "Starshot.exe");
         string launcherBak = launcherExe + ".bak";
-        string appNewDir = Path.Combine(root, "app-" + info.Version);
+        // app-{new}/ 用原始 tag（含 -Preview 后缀），跟 zip 实际目录名对齐；Version 是去后缀的，不能拿来拼目录
+        string appNewDir = Path.Combine(root, "app-" + info.TagName);
 
         // 备份 version.ini + 启动器（Copy 留原件，解压覆盖原件；失败还原 .bak）
         try { if (File.Exists(versionIni)) File.Copy(versionIni, versionIniBak, overwrite: true); } catch { }
@@ -111,20 +112,37 @@ public static class UpdateService
             try { if (File.Exists(versionIniBak)) File.Delete(versionIniBak); } catch { }
             try { if (File.Exists(launcherBak)) File.Delete(launcherBak); } catch { }
 
-            // 启动器接管（--cleanup-old 清旧 app-*）+ 退出本进程
-            Process.Start(new ProcessStartInfo(launcherExe) { UseShellExecute = true, Arguments = "--cleanup-old" });
+            // 启动器接管（--clean=<pid> 清旧 app-*，旧主进程锁着时按 pid 强杀）+ 退出本进程
+            Process.Start(new ProcessStartInfo(launcherExe) { UseShellExecute = true, Arguments = $"--clean={Environment.ProcessId}" });
             App.Current.Exit();
         }
         catch
         {
-            // 失败：删残缺 version.ini + 启动器，还原 .bak + 删残缺 app-{new}/
+            // 失败：删残缺 version.ini + 启动器，还原 .bak + 删残缺 app-{new}/，最后清 .bak（成功路径删，失败还原完同样要删）
             try { if (File.Exists(versionIni)) File.Delete(versionIni); } catch { }
             try { if (File.Exists(versionIniBak)) File.Copy(versionIniBak, versionIni); } catch { }
             try { if (File.Exists(launcherExe)) File.Delete(launcherExe); } catch { }
             try { if (File.Exists(launcherBak)) File.Copy(launcherBak, launcherExe); } catch { }
             try { if (Directory.Exists(appNewDir)) Directory.Delete(appNewDir, recursive: true); } catch { }
+            try { if (File.Exists(versionIniBak)) File.Delete(versionIniBak); } catch { }
+            try { if (File.Exists(launcherBak)) File.Delete(launcherBak); } catch { }
             throw;
         }
+    }
+
+
+    /// <summary>
+    /// 解析版本字符串（version.ini 的 AppVersion 或 tag）：去 v 前缀 + pre-release 后缀（-Preview/-beta/-rc）再 Version.TryParse。
+    /// </summary>
+    private static bool TryParseVersion(string? raw, out Version version)
+    {
+        version = new();
+        if (string.IsNullOrWhiteSpace(raw)) return false;
+        string s = raw.Trim();
+        if (s.StartsWith("v", StringComparison.OrdinalIgnoreCase)) s = s[1..];
+        int dash = s.IndexOf('-');
+        if (dash > 0) s = s[..dash];
+        return Version.TryParse(s, out version);
     }
 
 

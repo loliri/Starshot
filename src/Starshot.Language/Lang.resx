@@ -2825,10 +2825,12 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_AboutThanksStarward" xml:space="preserve"><value>Screenshot core, codec engine, and window framework all originate from Starward, developed by @Scighost.</value></data>
   <data name="Starshot_AboutThanksShareX" xml:space="preserve"><value>Reference for the window detection and interaction design of the region capture overlay.</value></data>
   <data name="Starshot_AboutProjectHome" xml:space="preserve"><value>Project homepage</value></data>
-  <data name="Starshot_AboutOpenDataFolder" xml:space="preserve"><value>Open data folder</value></data>
+  <data name="Starshot_OpenDataFolder" xml:space="preserve"><value>Open data folder</value></data>
   <data name="Starshot_BackupDatabase" xml:space="preserve"><value>Back up database</value></data>
   <data name="Starshot_LastBackup" xml:space="preserve"><value>Last backup</value></data>
   <data name="Starshot_BackupSuccess" xml:space="preserve"><value>Database backed up</value></data>
   <data name="Starshot_BackupFailed" xml:space="preserve"><value>Database backup failed</value></data>
   <data name="Starshot_StatsBackup" xml:space="preserve"><value>Backup</value></data>
+  <data name="Starshot_CheckPrerelease" xml:space="preserve"><value>Check pre-release versions</value></data>
+  <data name="Starshot_DataFolder" xml:space="preserve"><value>Data folder</value></data>
 </root>

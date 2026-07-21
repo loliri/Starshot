@@ -11,6 +11,8 @@ namespace Starshot.Features.Update;
 public sealed class ReleaseInfo
 {
     public Version Version { get; init; } = new();
+    /// <summary>原始 tag_name（如 0.3.1-Preview）。zip 里 app-{TagName}/ 目录名用它，不能用去后缀的 Version。</summary>
+    public string TagName { get; init; } = "";
     public string ZipUrl { get; init; } = "";
     public string Notes { get; init; } = "";
 }
@@ -19,6 +21,7 @@ public sealed class ReleaseInfo
 public static class ReleaseClient
 {
     private const string LatestReleaseUrl = "https://api.github.com/repos/loliri/Starshot/releases/latest";
+    private const string AllReleasesUrl = "https://api.github.com/repos/loliri/Starshot/releases";
 
     private static readonly HttpClient _http = CreateClient();
 
@@ -32,18 +35,37 @@ public static class ReleaseClient
     }
 
 
-    public static async Task<ReleaseInfo?> GetLatestReleaseAsync(CancellationToken ct = default)
+    public static async Task<ReleaseInfo?> GetLatestReleaseAsync(bool includePrerelease, CancellationToken ct = default)
     {
         // 不吞网络异常：让 HttpRequestException 向上抛，调用方据此区分"无新版本"与"检查失败"
-        using var resp = await _http.GetAsync(LatestReleaseUrl, ct);
+        // pre-release 用 /releases 取列表第一个（最新，含 pre-release）；正式版用 /releases/latest（跳过 pre-release）
+        string url = includePrerelease ? AllReleasesUrl : LatestReleaseUrl;
+        using var resp = await _http.GetAsync(url, ct);
         resp.EnsureSuccessStatusCode();
         await using var stream = await resp.Content.ReadAsStreamAsync(ct);
-        var payload = await JsonSerializer.DeserializeAsync<GitHubReleasePayload>(stream, cancellationToken: ct);
-        if (payload is null) return null;
 
-        // tag_name 去前缀 v 再 Version.TryParse
+        GitHubReleasePayload? payload;
+        if (includePrerelease)
+        {
+            var arr = await JsonSerializer.DeserializeAsync<GitHubReleasePayload[]>(stream, cancellationToken: ct);
+            payload = arr?.FirstOrDefault();
+        }
+        else
+        {
+            payload = await JsonSerializer.DeserializeAsync<GitHubReleasePayload>(stream, cancellationToken: ct);
+        }
+        if (payload is null) return null;
+        return BuildReleaseInfo(payload);
+    }
+
+
+    private static ReleaseInfo? BuildReleaseInfo(GitHubReleasePayload payload)
+    {
+        // tag_name 去前缀 v；再去 pre-release 后缀（-Preview / -beta / -rc1 等）再 Version.TryParse
         string tag = (payload.TagName ?? "").Trim();
         if (tag.StartsWith("v", StringComparison.OrdinalIgnoreCase)) tag = tag[1..];
+        int dash = tag.IndexOf('-');
+        if (dash > 0) tag = tag[..dash];
         if (!Version.TryParse(tag, out var version)) return null;
 
         // 找 Starshot-{tag_name}-win-x64.zip（zip 名用原始 tag_name，跟 workflow 一致）
@@ -54,6 +76,7 @@ public static class ReleaseClient
         return new ReleaseInfo
         {
             Version = version,
+            TagName = (payload.TagName ?? "").Trim(),
             ZipUrl = zipUrl,
             Notes = payload.Body ?? "",
         };

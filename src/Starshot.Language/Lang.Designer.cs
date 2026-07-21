@@ -7905,11 +7905,13 @@ namespace Starshot.Language {
         public static string Starshot_AboutThanksStarward { get { return ResourceManager.GetString("Starshot_AboutThanksStarward", resourceCulture); } }
         public static string Starshot_AboutThanksShareX { get { return ResourceManager.GetString("Starshot_AboutThanksShareX", resourceCulture); } }
         public static string Starshot_AboutProjectHome { get { return ResourceManager.GetString("Starshot_AboutProjectHome", resourceCulture); } }
-        public static string Starshot_AboutOpenDataFolder { get { return ResourceManager.GetString("Starshot_AboutOpenDataFolder", resourceCulture); } }
+        public static string Starshot_OpenDataFolder { get { return ResourceManager.GetString("Starshot_OpenDataFolder", resourceCulture); } }
         public static string Starshot_BackupDatabase { get { return ResourceManager.GetString("Starshot_BackupDatabase", resourceCulture); } }
         public static string Starshot_LastBackup { get { return ResourceManager.GetString("Starshot_LastBackup", resourceCulture); } }
         public static string Starshot_BackupSuccess { get { return ResourceManager.GetString("Starshot_BackupSuccess", resourceCulture); } }
         public static string Starshot_BackupFailed { get { return ResourceManager.GetString("Starshot_BackupFailed", resourceCulture); } }
         public static string Starshot_StatsBackup { get { return ResourceManager.GetString("Starshot_StatsBackup", resourceCulture); } }
+        public static string Starshot_CheckPrerelease { get { return ResourceManager.GetString("Starshot_CheckPrerelease", resourceCulture); } }
+        public static string Starshot_DataFolder { get { return ResourceManager.GetString("Starshot_DataFolder", resourceCulture); } }
     }
 }

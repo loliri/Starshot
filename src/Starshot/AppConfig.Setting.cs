@@ -205,6 +205,12 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 检查更新时是否包含预发布版本。开 = 用 /releases 端点（含 pre-release）；关 = 用 /releases/latest（只看正式版）。
+    /// </summary>
+    public static bool EnablePreReleaseUpdateCheck { get => GetValue(false); set => SetValue(value); }
+
+
+    /// <summary>
     /// 跳过的更新版本（用户点「跳过此版本」）
     /// </summary>
     public static string? IgnoreVersion { get => GetValue<string?>(); set => SetValue(value); }

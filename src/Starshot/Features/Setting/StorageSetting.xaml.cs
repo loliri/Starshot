@@ -80,7 +80,7 @@ public sealed partial class StorageSetting : PageBase
 
     private static string BuildPreview(string pattern)
     {
-        return ScreenCaptureService.BuildFileName("explorer", "explorer.exe", "Genshin Impact", DateTimeOffset.Now, 1920, 1080, pattern) + ".png";
+        return ScreenCaptureService.BuildFileName("explorer", "explorer.exe", "StarRail", DateTimeOffset.Now, 3840, 2160, pattern) + ".png";
     }
 
 
@@ -158,6 +158,27 @@ public sealed partial class StorageSetting : PageBase
             sender.FontSize -= 1;
         }
     }
+
+
+
+    #region Data Folder
+
+
+    [RelayCommand]
+    private async Task OpenDataFolder()
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(AppConfig.UserDataFolder))
+            {
+                await Launcher.LaunchFolderPathAsync(AppConfig.UserDataFolder);
+            }
+        }
+        catch { }
+    }
+
+
+    #endregion
 
 
 

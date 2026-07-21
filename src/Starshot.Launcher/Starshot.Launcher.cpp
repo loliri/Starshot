@@ -1,3 +1,6 @@
+#include <cctype>
+#include <chrono>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -11,11 +14,16 @@ int wmain(int argc, wchar_t* argv[])
 {
     const std::filesystem::path base_folder = std::filesystem::path(argv[0]).parent_path();
 
-    // --cleanup-old is passed by UpdateService after an update; only then do we wipe old app-*
+    // --clean wipes old app-*. Without a pid it just retries 10 times and gives up (no process kill).
+    // With --clean=<pid> it retries harder (once per minute for 5 min) then force-kills that pid.
     bool cleanup = false;
+    DWORD oldPid = 0;
+    const std::wstring cleanPrefix = L"--clean=";
     for (int i = 1; i < argc; ++i)
     {
-        if (std::wstring(argv[i]) == L"--cleanup-old") { cleanup = true; break; }
+        std::wstring arg(argv[i]);
+        if (arg == L"--clean") { cleanup = true; }
+        else if (arg.rfind(cleanPrefix, 0) == 0) { cleanup = true; oldPid = (DWORD)_wtol(arg.c_str() + cleanPrefix.size()); }
     }
 
     // version.ini decides app dir: CI/CD release has it -> app-{version}; missing -> app (debug/local)
@@ -35,6 +43,8 @@ int wmain(int argc, wchar_t* argv[])
             {
                 std::string v = line.substr(eq + 1);
                 if (!v.empty() && v.back() == '\r') v.pop_back();
+                // version.ini keeps original case (shown in About); app dir is lowercase (release tag is lowercase)
+                for (char& c : v) c = (char)tolower((unsigned char)c);
                 if (!v.empty())
                     target_exe = base_folder / (L"app-" + std::wstring(v.begin(), v.end())) / L"Starshot.exe";
             }
@@ -60,17 +70,37 @@ int wmain(int argc, wchar_t* argv[])
 
         if (cleanup)
         {
-            // Clean up old app-* directories (keep only the one we just launched)
+            // Clean up old app-* directories (keep only the one we just launched).
             std::filesystem::path current_app_dir = target_exe.parent_path();
-            std::error_code ec;
-            for (const auto& entry : std::filesystem::directory_iterator(base_folder, ec))
+            std::error_code iter_ec;
+            for (const auto& entry : std::filesystem::directory_iterator(base_folder, iter_ec))
             {
-                if (ec) break;
                 if (!entry.is_directory()) continue;
                 const std::wstring name = entry.path().filename().wstring();
                 if (name.rfind(L"app-", 0) != 0) continue;
                 if (entry.path() == current_app_dir) continue;
-                std::filesystem::remove_all(entry.path(), ec);
+                // Phase 1: 10 quick attempts (200ms apart) — always done
+                std::error_code rm_ec;
+                for (int i = 0; i < 10; ++i) {
+                    std::filesystem::remove_all(entry.path(), rm_ec);
+                    if (!std::filesystem::exists(entry.path())) break;
+                    Sleep(200);
+                }
+                if (!std::filesystem::exists(entry.path())) continue;
+                // No pid -> give up here (simple mode). With pid -> long retry then force-kill.
+                if (oldPid == 0) continue;
+                // Phase 2: retry once per minute for up to 5 min
+                auto deadline = std::chrono::steady_clock::now() + std::chrono::minutes(5);
+                while (std::chrono::steady_clock::now() < deadline) {
+                    Sleep(60000);
+                    std::filesystem::remove_all(entry.path(), rm_ec);
+                    if (!std::filesystem::exists(entry.path())) break;
+                }
+                if (!std::filesystem::exists(entry.path())) continue;
+                // Phase 3: force-kill the old main process (still holding the dir locked) and try once more
+                HANDLE h = OpenProcess(PROCESS_TERMINATE, FALSE, oldPid);
+                if (h) { TerminateProcess(h, 1); CloseHandle(h); }
+                std::filesystem::remove_all(entry.path(), rm_ec);
             }
         }
     }
