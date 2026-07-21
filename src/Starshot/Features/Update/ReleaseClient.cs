@@ -34,35 +34,29 @@ public static class ReleaseClient
 
     public static async Task<ReleaseInfo?> GetLatestReleaseAsync(CancellationToken ct = default)
     {
-        try
+        // 不吞网络异常：让 HttpRequestException 向上抛，调用方据此区分"无新版本"与"检查失败"
+        using var resp = await _http.GetAsync(LatestReleaseUrl, ct);
+        resp.EnsureSuccessStatusCode();
+        await using var stream = await resp.Content.ReadAsStreamAsync(ct);
+        var payload = await JsonSerializer.DeserializeAsync<GitHubReleasePayload>(stream, cancellationToken: ct);
+        if (payload is null) return null;
+
+        // tag_name 去前缀 v 再 Version.TryParse
+        string tag = (payload.TagName ?? "").Trim();
+        if (tag.StartsWith("v", StringComparison.OrdinalIgnoreCase)) tag = tag[1..];
+        if (!Version.TryParse(tag, out var version)) return null;
+
+        // 找 Starshot-{tag_name}-win-x64.zip（zip 名用原始 tag_name，跟 workflow 一致）
+        string zipName = $"Starshot-{payload.TagName}-win-x64.zip";
+        var asset = payload.Assets?.FirstOrDefault(a => string.Equals(a.Name, zipName, StringComparison.OrdinalIgnoreCase));
+        string zipUrl = asset?.BrowserDownloadUrl ?? "";
+
+        return new ReleaseInfo
         {
-            using var resp = await _http.GetAsync(LatestReleaseUrl, ct);
-            resp.EnsureSuccessStatusCode();
-            await using var stream = await resp.Content.ReadAsStreamAsync(ct);
-            var payload = await JsonSerializer.DeserializeAsync<GitHubReleasePayload>(stream, cancellationToken: ct);
-            if (payload is null) return null;
-
-            // tag_name 去前缀 v 再 Version.TryParse
-            string tag = (payload.TagName ?? "").Trim();
-            if (tag.StartsWith("v", StringComparison.OrdinalIgnoreCase)) tag = tag[1..];
-            if (!Version.TryParse(tag, out var version)) return null;
-
-            // 找 Starshot-{tag_name}-win-x64.zip（zip 名用原始 tag_name，跟 workflow 一致）
-            string zipName = $"Starshot-{payload.TagName}-win-x64.zip";
-            var asset = payload.Assets?.FirstOrDefault(a => string.Equals(a.Name, zipName, StringComparison.OrdinalIgnoreCase));
-            string zipUrl = asset?.BrowserDownloadUrl ?? "";
-
-            return new ReleaseInfo
-            {
-                Version = version,
-                ZipUrl = zipUrl,
-                Notes = payload.Body ?? "",
-            };
-        }
-        catch
-        {
-            return null;
-        }
+            Version = version,
+            ZipUrl = zipUrl,
+            Notes = payload.Body ?? "",
+        };
     }
 
 

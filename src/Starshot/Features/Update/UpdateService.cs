@@ -16,21 +16,16 @@ public static class UpdateService
 #if DEBUG
         return null;
 #else
-        try
-        {
-            var release = await ReleaseClient.GetLatestReleaseAsync();
-            if (release is null) return null;
-            if (!Version.TryParse(AppConfig.AppVersion, out var current)) return null;
-            if (release.Version <= current) return null;
-            // 只有自动检查才跳过用户忽略的版本；手动检查无视忽略
-            if (ignoreSkipped && Version.TryParse(AppConfig.IgnoreVersion, out var ignore) && release.Version <= ignore) return null;
-            if (string.IsNullOrWhiteSpace(release.ZipUrl)) return null;
-            return release;
-        }
-        catch
-        {
-            return null;
-        }
+        // 不吞异常：网络失败向上抛（手动检查弹"更新失败"，启动检查由调用方 catch 静默）。
+        // 返回 null 仅表示"确无新版本/被忽略/无 zip 资源"。
+        var release = await ReleaseClient.GetLatestReleaseAsync();
+        if (release is null) return null;
+        if (!Version.TryParse(AppConfig.AppVersion, out var current)) return null;
+        if (release.Version <= current) return null;
+        // 只有自动检查才跳过用户忽略的版本；手动检查无视忽略
+        if (ignoreSkipped && Version.TryParse(AppConfig.IgnoreVersion, out var ignore) && release.Version <= ignore) return null;
+        if (string.IsNullOrWhiteSpace(release.ZipUrl)) return null;
+        return release;
 #endif
     }
 
