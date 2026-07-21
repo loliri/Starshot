@@ -39,8 +39,12 @@ jobs:
         id: ver
         shell: pwsh
         run: |
+          # v：原始（仅空格→-），用于 version.ini（About 显示保留大小写）
+          # vl：小写，用于 tag / zip 名 / app 目录（GitHub tag 与文件系统约定小写）
           $v = "${{ github.event.inputs.version }}".Replace(' ', '-')
+          $vl = $v.ToLowerInvariant()
           "v=$v" >> $env:GITHUB_OUTPUT
+          "vl=$vl" >> $env:GITHUB_OUTPUT
 
       - name: Build launcher
         run: msbuild src/Starshot.Launcher/Starshot.Launcher.vcxproj -p:Configuration=Release -p:Platform=x64
@@ -50,26 +54,27 @@ jobs:
 
       - name: Version layout
         run: |
-          $v = "${{ steps.ver.outputs.v }}"
-          Move-Item build/release/app "build/release/app-$v" -Force
-          "version=$v" | Set-Content -Path build/release/version.ini -Encoding UTF8
+          Move-Item build/release/app "build/release/app-${{ steps.ver.outputs.vl }}" -Force
+          # version.ini 保留原始大小写（About 页显示），启动器读取时自己转小写去找 app 目录
+          "version=${{ steps.ver.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
 
       - name: Zip release
-        run: Compress-Archive -Path build/release/* -DestinationPath "Starshot-${{ steps.ver.outputs.v }}-win-x64.zip"
+        run: Compress-Archive -Path build/release/* -DestinationPath "Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Starshot-${{ steps.ver.outputs.v }}-win-x64
-          path: Starshot-${{ steps.ver.outputs.v }}-win-x64.zip
+          name: Starshot-${{ steps.ver.outputs.vl }}-win-x64
+          path: Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.ver.outputs.v }}
+          tag_name: ${{ steps.ver.outputs.vl }}
           name: ${{ github.event.inputs.version }}
           body: ${{ github.event.inputs.body }}
+          generate_release_notes: ${{ github.event.inputs.body == '' }}
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
-          files: Starshot-${{ steps.ver.outputs.v }}-win-x64.zip
+          files: Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
