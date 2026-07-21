@@ -39,6 +39,7 @@
                                 CornerRadius="4">
                             <TextBlock FontSize="12"
                                        FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextOnAccentFillColorDefaultBrush}"
                                        Text="{x:Bind Version}" />
                         </Border>
                     </StackPanel>
