@@ -243,8 +243,9 @@ Muestra el logo + eslogan al iniciar. Retraso de 700 ms y luego se desvanece en 
 ### Buscar actualizaciones
 
 - Verificación limitada al inicio (≥24h + interruptor activado) de la última versión en GitHub Releases, o verificación manual desde la página Acerca de
-- Las actualizaciones usan descompresión por streaming real de SharpCompress (conexión directa al flujo de red, sin guardar zip en disco). Cada entrada se escribe directamente en el directorio raíz. En caso de error, se restaura el estado anterior. En caso de éxito, reinicia el lanzador con `--cleanup-old` para limpiar versiones antiguas
+- Las actualizaciones usan descompresión por streaming real de SharpCompress (conexión directa al flujo de red, sin guardar zip en disco). Cada entrada se escribe directamente en el directorio raíz. En caso de error, se restaura el estado anterior. En caso de éxito, reinicia el lanzador con `--clean` para limpiar versiones antiguas
 - Solo verifica releases CI/CD (lee el número de versión de `version.ini`). Las compilaciones locales no tienen número de versión (`AppVersion = Local`) y no activan la verificación
+- Convención de mayúsculas/minúsculas de versión: el tag de GitHub, el nombre del zip y el directorio `app-{version}/` van en minúsculas (p. ej. `0.3.1-preview`); `version.ini` mantiene el uso original de mayúsculas (`0.3.1-Preview`, se muestra en Acerca de), y el lanzador lo convierte a minúsculas al localizar el directorio.
 
 ## Arquitectura
 
@@ -268,7 +269,7 @@ Raíz/
 
 ### Lanzador
 
-Programa nativo en C++ (~400 KB). Lee `version.ini` para decidir si lanzar `app-{version}/Starshot.exe` (si no hay version.ini, usa `app/` para compilaciones debug/local). Al ejecutarse con `--cleanup-old`, recorre los directorios `app-*` y elimina los que no corresponden a la versión actual.
+Programa nativo en C++ (~400 KB). Lee `version.ini` para decidir si lanzar `app-{version}/Starshot.exe` (si no hay version.ini, usa `app/` para compilaciones debug/local). Al ejecutarse con `--clean` (o `--clean=<pid>`), recorre los directorios `app-*` y elimina los que no corresponden a la versión actual: primero 10 reintentos rápidos; con pid sigue reintentando una vez por minuto hasta 5 min y luego fuerza el cierre del proceso principal anterior por pid antes de un último borrado (sin pid, renuncia tras los 10 reintentos).
 
 ### Bandeja e inicio en segundo plano
 

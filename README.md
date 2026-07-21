@@ -241,8 +241,9 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 ### Check for Updates
 
 - Throttled check on startup (≥24h + toggle on) against GitHub Releases latest version, or manual check from the About page.
-- Updates use SharpCompress true streaming decompression (network stream direct, no zip file saved to disk). Entries are written directly to the root directory entry by entry. On failure, the previous state is restored. On success, restarts the launcher with `--cleanup-old` to remove old versions.
+- Updates use SharpCompress true streaming decompression (network stream direct, no zip file saved to disk). Entries are written directly to the root directory entry by entry. On failure, the previous state is restored. On success, restarts the launcher with `--clean` to remove old versions.
 - Only checks CI/CD releases (reads `version.ini` version number). Local builds have no version number (`AppVersion = Local`) and do not trigger update checks.
+- Version case convention: the GitHub tag, zip name, and `app-{version}/` dir are all lowercase (e.g. `0.3.1-preview`); `version.ini` keeps the original case (`0.3.1-Preview`, shown on the About page), and the launcher lowercases it when locating the dir.
 
 ## Architecture
 
@@ -266,7 +267,7 @@ Root/
 
 ### Launcher
 
-Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `app-{version}/Starshot.exe` (if no version.ini, falls back to `app/` for debug/local builds). When launched with `--cleanup-old`, iterates `app-*` directories and deletes non-current versions.
+Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `app-{version}/Starshot.exe` (if no version.ini, falls back to `app/` for debug/local builds). When launched with `--clean` (or `--clean=<pid>`), iterates `app-*` directories and deletes non-current versions — 10 quick retries first; with a pid it keeps retrying once per minute for up to 5 min, then force-kills that old main process by pid before a final removal (no pid = give up after the 10 retries).
 
 ### Tray & Background Startup
 

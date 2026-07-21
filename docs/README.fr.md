@@ -243,8 +243,9 @@ Affiche le logo + le slogan au lancement. Délai de 700ms puis fondu en 400ms. S
 ### Vérification des mises à jour
 
 - Vérification limitée au démarrage (≥24h + option activée) de la dernière version sur GitHub Releases, ou vérification manuelle depuis la page À propos
-- Les mises à jour utilisent la décompression en streaming véritable de SharpCompress (flux réseau directement connecté, sans sauvegarde du zip sur disque). Chaque entrée est écrite directement dans le répertoire racine. En cas d'échec, l'état précédent est restauré. En cas de succès, le lanceur redémarre avec `--cleanup-old` pour nettoyer les anciennes versions
+- Les mises à jour utilisent la décompression en streaming véritable de SharpCompress (flux réseau directement connecté, sans sauvegarde du zip sur disque). Chaque entrée est écrite directement dans le répertoire racine. En cas d'échec, l'état précédent est restauré. En cas de succès, le lanceur redémarre avec `--clean` pour nettoyer les anciennes versions
 - Vérifie uniquement les releases CI/CD (lit le numéro de version dans `version.ini`). Les builds locaux n'ont pas de numéro de version (`AppVersion = Local`) et ne déclenchent pas de vérification
+- Convention de casse de version : le tag GitHub, le nom du zip et le répertoire `app-{version}/` sont en minuscules (ex. `0.3.1-preview`) ; `version.ini` conserve la casse d'origine (`0.3.1-Preview`, affiché dans À propos), et le lanceur le passe en minuscules pour localiser le répertoire.
 
 ## Architecture
 
@@ -268,7 +269,7 @@ Racine/
 
 ### Lanceur
 
-Programme natif C++ (~400 Ko). Lit `version.ini` pour décider de lancer `app-{version}/Starshot.exe` (si absent, utilise `app/` pour les builds debug/local). Lorsqu'il est lancé avec `--cleanup-old`, parcourt les répertoires `app-*` et supprime ceux qui ne correspondent pas à la version actuelle.
+Programme natif C++ (~400 Ko). Lit `version.ini` pour décider de lancer `app-{version}/Starshot.exe` (si absent, utilise `app/` pour les builds debug/local). Lorsqu'il est lancé avec `--clean` (ou `--clean=<pid>`), parcourt les répertoires `app-*` et supprime ceux qui ne correspondent pas à la version actuelle — d'abord 10 tentatives rapides ; avec un pid, continue à réessayer une fois par minute pendant 5 min, puis force la fermeture de l'ancien processus principal par pid avant une dernière suppression (sans pid, abandon après les 10 tentatives).
 
 ### Barre des tâches et démarrage en arrière-plan
 

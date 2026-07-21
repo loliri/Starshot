@@ -244,8 +244,9 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 - 启动时节流检查（≥24h + 开关开启）GitHub Releases 最新版，或 About 页手动检查
 - 更新用 SharpCompress 真流式解压（网络流直连，不落 zip），逐 entry 直接写到根目录
-- 失败还原，成功重启启动器带 `--cleanup-old` 清旧
+- 失败还原，成功重启启动器带 `--clean` 清旧
 - 仅 CI/CD release 检查（读 `version.ini` 版本号）；本地构建无版本号 `AppVersion = Local`，不触发
+- 版本大小写约定：GitHub tag、zip 名、`app-{version}/` 目录一律小写（如 `0.3.1-preview`）；`version.ini` 内容保留原始大小写（`0.3.1-Preview`，About 页显示用），启动器读取时自己转小写定位目录
 
 ## 架构
 
@@ -269,7 +270,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 ### 启动器
 
-C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Starshot.exe`（无 version.ini 则 `app/`，debug/local 构建）。带 `--cleanup-old` 参数启动时遍历 `app-*` 目录删除非当前版本）。
+C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Starshot.exe`（无 version.ini 则 `app/`，debug/local 构建）。带 `--clean`（或 `--clean=<pid>`）参数启动时遍历 `app-*` 目录删除非当前版本——先 10 次快速重试；带 pid 时再每分钟一次撑 5 分钟，最后按 pid 强杀旧主进程后再删（不带 pid 则 10 次后放弃）。
 
 ### 托盘与后台启动
 
