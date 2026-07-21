@@ -11,8 +11,7 @@
              mc:Ignorable="d">
 
     <ScrollViewer Padding="0">
-        <StackPanel MaxWidth="820"
-                    Padding="36,24,36,36"
+        <StackPanel Padding="36,24,36,36"
                     Spacing="20">
 
             <TextBlock FontSize="28"
