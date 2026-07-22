@@ -9,9 +9,8 @@ on:
         required: false
         default: false
       version:
-        description: 'Version (e.g. 0.1.0; spaces allowed, auto-turned into -, e.g. "0.1.0 preview 1" -> 0.1.0-preview-1)'
-        required: true
-        default: '0.1.0'
+        description: 'Version (e.g. 0.1.0; leave empty to auto-increment minor from latest release, e.g. 0.1.0 -> 0.2.0)'
+        required: false
 
 permissions:
   contents: write
@@ -35,10 +34,24 @@ jobs:
       - name: Resolve version
         id: ver
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # v：原始（仅空格→-），用于 version.ini（About 显示保留大小写）
           # vl：小写，用于 tag / zip 名 / app 目录（GitHub tag 与文件系统约定小写）
-          $v = "${{ github.event.inputs.version }}".Replace(' ', '-')
+          $input = "${{ github.event.inputs.version }}".Trim()
+          if ([string]::IsNullOrEmpty($input)) {
+            # 版本号留空：读 latest release 的 tag，minor +1（如 0.1.0 -> 0.2.0）
+            # 没有 latest 或解析失败直接让 action 失败（不 fallback）
+            $latest = (gh api repos/${{ github.repository }}/releases/latest --jq '.tag_name' 2>$null)
+            if ($LASTEXITCODE -ne 0 -or -not ($latest -match '^(\d+)\.(\d+)\.(\d+)')) {
+              Write-Error "Version is empty and no parseable latest release found to auto-increment. Aborting."
+              exit 1
+            }
+            $input = "$($Matches[1]).$([int]$Matches[2] + 1).0"
+            Write-Host "Version empty, auto-incremented from $latest to $input"
+          }
+          $v = $input.Replace(' ', '-')
           $vl = $v.ToLowerInvariant()
           "v=$v" >> $env:GITHUB_OUTPUT
           "vl=$vl" >> $env:GITHUB_OUTPUT
@@ -68,7 +81,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.ver.outputs.vl }}
-          name: ${{ github.event.inputs.version }}
+          name: ${{ steps.ver.outputs.v }}
           generate_release_notes: true
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip
