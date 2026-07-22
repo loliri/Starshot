@@ -2840,4 +2840,6 @@
   <data name="Starshot_UpdateArchitecture" xml:space="preserve"><value>架构</value></data>
   <data name="Starshot_UpdateChannel" xml:space="preserve"><value>发布渠道</value></data>
   <data name="Starshot_UpdateBuildTime" xml:space="preserve"><value>编译时间</value></data>
+  <data name="Starshot_GithubApiNoProxy" xml:space="preserve"><value>GitHub API 直连（不走代理）</value></data>
+  <data name="Starshot_RestartToTakeEffect" xml:space="preserve"><value>重启后生效</value></data>
 </root>

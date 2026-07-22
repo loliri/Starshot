@@ -2840,4 +2840,6 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_UpdateArchitecture" xml:space="preserve"><value>Architecture</value></data>
   <data name="Starshot_UpdateChannel" xml:space="preserve"><value>Channel</value></data>
   <data name="Starshot_UpdateBuildTime" xml:space="preserve"><value>Build time</value></data>
+  <data name="Starshot_GithubApiNoProxy" xml:space="preserve"><value>GitHub API direct (no proxy)</value></data>
+  <data name="Starshot_RestartToTakeEffect" xml:space="preserve"><value>Restart to take effect</value></data>
 </root>

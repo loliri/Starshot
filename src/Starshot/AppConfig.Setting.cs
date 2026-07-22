@@ -211,6 +211,12 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// GitHub API（api.github.com）不走系统代理（直连）。仅影响 release 查询 API，不影响 zip 下载（CDN）。默认开。
+    /// </summary>
+    public static bool EnableGithubApiNoProxy { get => GetValue(true); set => SetValue(value); }
+
+
+    /// <summary>
     /// 跳过的更新版本（用户点「跳过此版本」）
     /// </summary>
     public static string? IgnoreVersion { get => GetValue<string?>(); set => SetValue(value); }

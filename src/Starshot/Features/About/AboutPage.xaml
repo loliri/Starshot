@@ -14,14 +14,14 @@
                     Spacing="20">
 
             <Grid Margin="0,0,0,0">
-                <TextBlock VerticalAlignment="Top"
+                <TextBlock VerticalAlignment="Center"
                            FontSize="32"
                            FontWeight="Bold"
                            Text="{x:Bind lang:Lang.Starshot_Nav_About}" />
-                <Image Width="96"
-                       Height="96"
+                <Image Width="80"
+                       Height="80"
                        HorizontalAlignment="Right"
-                       VerticalAlignment="Top"
+                       VerticalAlignment="Center"
                        Source="ms-appx:///Assets/logo.png" />
             </Grid>
 
@@ -112,12 +112,15 @@
                         <TextBlock Text="{x:Bind lang:Lang.Starshot_CheckUpdate}" />
                     </StackPanel>
                 </Button>
-                <ToggleSwitch x:Name="PreReleaseSwitch"
-                              VerticalAlignment="Center"
-                              IsOn="{x:Bind PreReleaseCheck, Mode=TwoWay}"
-                              OffContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}"
-                              OnContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}" />
             </StackPanel>
+            <ToggleSwitch x:Name="PreReleaseSwitch"
+                          IsOn="{x:Bind PreReleaseCheck, Mode=TwoWay}"
+                          OffContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}"
+                          OnContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}" />
+            <ToggleSwitch x:Name="GithubApiNoProxySwitch"
+                          IsOn="{x:Bind GithubApiNoProxy, Mode=TwoWay}"
+                          OffContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}"
+                          OnContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}" />
 
         </StackPanel>
     </ScrollViewer>

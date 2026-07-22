@@ -7920,5 +7920,7 @@ namespace Starshot.Language {
         public static string Starshot_UpdateArchitecture { get { return ResourceManager.GetString("Starshot_UpdateArchitecture", resourceCulture); } }
         public static string Starshot_UpdateChannel { get { return ResourceManager.GetString("Starshot_UpdateChannel", resourceCulture); } }
         public static string Starshot_UpdateBuildTime { get { return ResourceManager.GetString("Starshot_UpdateBuildTime", resourceCulture); } }
+        public static string Starshot_GithubApiNoProxy { get { return ResourceManager.GetString("Starshot_GithubApiNoProxy", resourceCulture); } }
+        public static string Starshot_RestartToTakeEffect { get { return ResourceManager.GetString("Starshot_RestartToTakeEffect", resourceCulture); } }
     }
 }

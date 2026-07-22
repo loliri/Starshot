@@ -30,7 +30,9 @@ public static class ReleaseClient
 
     private static HttpClient CreateClient()
     {
-        var c = new HttpClient();
+        // GitHub API 不走系统代理（开关开 = UseProxy=false 直连 api.github.com）。仅 API，zip 下载走 CDN 不受影响。
+        var handler = new HttpClientHandler { UseProxy = !AppConfig.EnableGithubApiNoProxy };
+        var c = new HttpClient(handler);
         c.DefaultRequestHeaders.UserAgent.ParseAdd($"Starshot/{AppConfig.AppVersion}");
         c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
         return c;
