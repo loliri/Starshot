@@ -96,7 +96,7 @@
                        FontSize="12"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        IsTextScaleFactorEnabled="False"
-                       Text="已复制" />
+                       Text="{x:Bind lang:Lang.Starshot_InfoCopied}" />
         </StackPanel>
 
 

@@ -2842,4 +2842,22 @@
   <data name="Starshot_UpdateBuildTime" xml:space="preserve"><value>编译时间</value></data>
   <data name="Starshot_GithubApiNoProxy" xml:space="preserve"><value>GitHub API 直连（不走代理）</value></data>
   <data name="Starshot_RestartToTakeEffect" xml:space="preserve"><value>重启后生效</value></data>
+  <data name="Starshot_WelcomeHello" xml:space="preserve"><value>嗨，你好！</value></data>
+  <data name="Starshot_WelcomeIntro" xml:space="preserve"><value>看来你是第一次来到 Starshot。这是一个简单的欢迎页，用来初始化一些配置。</value></data>
+  <data name="Starshot_WelcomeDxgiTitle" xml:space="preserve"><value>DXGI 接口</value></data>
+  <data name="Starshot_WelcomeDxgiSupported" xml:space="preserve"><value>支持。可以使用所有截图功能。</value></data>
+  <data name="Starshot_WelcomeDxgiNotSupported1" xml:space="preserve"><value>当前环境不支持。</value></data>
+  <data name="Starshot_WelcomeDxgiNotSupported2" xml:space="preserve"><value>这意味着你无法使用本软件的所有截图功能，程序崩溃为可预见现象。</value></data>
+  <data name="Starshot_WelcomeDxgiNotSupported3" xml:space="preserve"><value>理论上仍可正常使用部分其他功能，请您自行权衡。</value></data>
+  <data name="Starshot_WelcomeWallpaperTitle" xml:space="preserve"><value>自定义壁纸</value></data>
+  <data name="Starshot_WelcomeWallpaperDesc" xml:space="preserve"><value>强烈建议设置一张壁纸以获得最佳外观。可选择图片或视频文件；不设置则使用内置默认图片（CC0 协议），即当前窗口背景所示。</value></data>
+  <data name="Starshot_WelcomePickWallpaper" xml:space="preserve"><value>选择壁纸</value></data>
+  <data name="Starshot_WelcomeScreenshotFolderTitle" xml:space="preserve"><value>截图存放位置</value></data>
+  <data name="Starshot_WelcomeScreenshotFolderDesc" xml:space="preserve"><value>这决定了截图会存在哪里。如果不进行更改，默认会将所有截图存放在图片文件夹的 Starshot 目录。</value></data>
+  <data name="Starshot_WelcomePickFolder" xml:space="preserve"><value>选择文件夹</value></data>
+  <data name="Starshot_WelcomeStart" xml:space="preserve"><value>Starshot，启动！</value></data>
+  <data name="Starshot_InfoCopied" xml:space="preserve"><value>已复制</value></data>
+  <data name="Starshot_DebugExtractTitle" xml:space="preserve"><value>调试：流式解压测试</value></data>
+  <data name="Starshot_DebugSelect" xml:space="preserve"><value>选择</value></data>
+  <data name="Starshot_DebugExtract" xml:space="preserve"><value>解压</value></data>
 </root>

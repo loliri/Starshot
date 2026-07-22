@@ -2842,4 +2842,22 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_UpdateBuildTime" xml:space="preserve"><value>Build time</value></data>
   <data name="Starshot_GithubApiNoProxy" xml:space="preserve"><value>GitHub API direct (no proxy)</value></data>
   <data name="Starshot_RestartToTakeEffect" xml:space="preserve"><value>Restart to take effect</value></data>
+  <data name="Starshot_WelcomeHello" xml:space="preserve"><value>Hi there!</value></data>
+  <data name="Starshot_WelcomeIntro" xml:space="preserve"><value>Looks like it's your first time in Starshot. This is a quick welcome page to set up a few things.</value></data>
+  <data name="Starshot_WelcomeDxgiTitle" xml:space="preserve"><value>DXGI interface</value></data>
+  <data name="Starshot_WelcomeDxgiSupported" xml:space="preserve"><value>Supported. All screenshot features are available.</value></data>
+  <data name="Starshot_WelcomeDxgiNotSupported1" xml:space="preserve"><value>Not supported in the current environment.</value></data>
+  <data name="Starshot_WelcomeDxgiNotSupported2" xml:space="preserve"><value>Screenshot features will not work; crashes are expected.</value></data>
+  <data name="Starshot_WelcomeDxgiNotSupported3" xml:space="preserve"><value>Other features may still work; use at your own discretion.</value></data>
+  <data name="Starshot_WelcomeWallpaperTitle" xml:space="preserve"><value>Custom wallpaper</value></data>
+  <data name="Starshot_WelcomeWallpaperDesc" xml:space="preserve"><value>Strongly recommended for the best look. Pick an image or video; if skipped, a built-in CC0 default image is used (the current window background).</value></data>
+  <data name="Starshot_WelcomePickWallpaper" xml:space="preserve"><value>Pick wallpaper</value></data>
+  <data name="Starshot_WelcomeScreenshotFolderTitle" xml:space="preserve"><value>Screenshot folder</value></data>
+  <data name="Starshot_WelcomeScreenshotFolderDesc" xml:space="preserve"><value>Where screenshots are saved. Defaults to Pictures\Starshot if unchanged.</value></data>
+  <data name="Starshot_WelcomePickFolder" xml:space="preserve"><value>Pick folder</value></data>
+  <data name="Starshot_WelcomeStart" xml:space="preserve"><value>Launch Starshot!</value></data>
+  <data name="Starshot_InfoCopied" xml:space="preserve"><value>Copied</value></data>
+  <data name="Starshot_DebugExtractTitle" xml:space="preserve"><value>Debug: streaming extract test</value></data>
+  <data name="Starshot_DebugSelect" xml:space="preserve"><value>Browse</value></data>
+  <data name="Starshot_DebugExtract" xml:space="preserve"><value>Extract</value></data>
 </root>

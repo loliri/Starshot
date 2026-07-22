@@ -3,6 +3,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starshot.Language"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sf="using:Starshot.Frameworks"
              Title="Starshot"
@@ -19,49 +20,55 @@
             <TextBlock FontSize="24"
                        FontWeight="Bold"
                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                       Text="嗨，你好！" />
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeHello}" />
             <TextBlock FontSize="15"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="看来你是第一次来到 Starshot。这是一个简单的欢迎页，用来初始化一些配置。"
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeIntro}"
                        TextWrapping="Wrap" />
 
             <!--  DXGI 接口检测  -->
             <TextBlock Margin="0,12,0,0"
                        FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="DXGI 接口" />
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeDxgiTitle}" />
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <TextBlock VerticalAlignment="Center"
                            FontSize="14"
                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                           Text="支持。可以使用所有截图功能。"
+                           Text="{x:Bind lang:Lang.Starshot_WelcomeDxgiSupported}"
                            Visibility="{x:Bind DxgiSupported}" />
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="14"
-                           Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                           TextWrapping="Wrap"
-                           Visibility="{x:Bind DxgiNotSupported}">
-                    <Run Text="当前环境不支持。" />
-                    <LineBreak />
-                    <Run Text="这意味着你无法使用本软件的所有截图功能，程序崩溃为可预见现象。" />
-                    <LineBreak />
-                    <Run Text="理论上仍可正常使用部分其他功能，请您自行权衡。" />
-                </TextBlock>
+                <StackPanel Visibility="{x:Bind DxgiNotSupported}">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="14"
+                               Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_WelcomeDxgiNotSupported1}"
+                               TextWrapping="Wrap" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="14"
+                               Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_WelcomeDxgiNotSupported2}"
+                               TextWrapping="Wrap" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="14"
+                               Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_WelcomeDxgiNotSupported3}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
             </StackPanel>
 
             <!--  自定义壁纸  -->
             <TextBlock Margin="0,12,0,0"
                        FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="自定义壁纸" />
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeWallpaperTitle}" />
             <TextBlock FontSize="13"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="强烈建议设置一张壁纸以获得最佳外观。可选择图片或视频文件；不设置则使用内置默认图片（CC0 协议），即当前窗口背景所示。"
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeWallpaperDesc}"
                        TextWrapping="Wrap" />
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <Button BorderThickness="0"
                         Command="{x:Bind PickWallpaperCommand}"
-                        Content="选择壁纸"
+                        Content="{x:Bind lang:Lang.Starshot_WelcomePickWallpaper}"
                         Style="{ThemeResource AccentButtonStyle}" />
                 <TextBlock VerticalAlignment="Center"
                            FontSize="13"
@@ -74,15 +81,15 @@
             <TextBlock Margin="0,12,0,0"
                        FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="截图存放位置" />
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeScreenshotFolderTitle}" />
             <TextBlock FontSize="13"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="这决定了截图会存在哪里。如果不进行更改，默认会将所有截图存放在图片文件夹的 Starshot 目录。"
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeScreenshotFolderDesc}"
                        TextWrapping="Wrap" />
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <Button BorderThickness="0"
                         Command="{x:Bind PickScreenshotFolderCommand}"
-                        Content="选择文件夹"
+                        Content="{x:Bind lang:Lang.Starshot_WelcomePickFolder}"
                         Style="{ThemeResource AccentButtonStyle}" />
                 <TextBlock VerticalAlignment="Center"
                            FontSize="13"
@@ -102,7 +109,7 @@
                 Command="{x:Bind StartCommand}"
                 CornerRadius="8,20,20,8"
                 Style="{ThemeResource AccentButtonStyle}">
-            <TextBlock Margin="4,0,8,0" FontSize="14" Text="Starshot，启动！" />
+            <TextBlock Margin="4,0,8,0" FontSize="14" Text="{x:Bind lang:Lang.Starshot_WelcomeStart}" />
         </Button>
 
     </Grid>

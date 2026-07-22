@@ -50,7 +50,7 @@
 
 
             <!--  调试：流式解压测试  -->
-            <Expander Header="调试：流式解压测试"
+            <Expander Header="{x:Bind lang:Lang.Starshot_DebugExtractTitle}"
                       IsExpanded="True"
                       HorizontalAlignment="Stretch"
                       HorizontalContentAlignment="Stretch">
@@ -72,7 +72,7 @@
                                 Style="{ThemeResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon FontSize="14" Glyph="&#xE8DE;" />
-                                <TextBlock Text="选择" />
+                                <TextBlock Text="{x:Bind lang:Lang.Starshot_DebugSelect}" />
                             </StackPanel>
                         </Button>
                         <Button Grid.Column="1"
@@ -109,7 +109,7 @@
                             Style="{ThemeResource AccentButtonStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon FontSize="14" Glyph="&#xE72C;" />
-                            <TextBlock Text="解压" />
+                            <TextBlock Text="{x:Bind lang:Lang.Starshot_DebugExtract}" />
                         </StackPanel>
                     </Button>
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">

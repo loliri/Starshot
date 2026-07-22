@@ -7922,5 +7922,23 @@ namespace Starshot.Language {
         public static string Starshot_UpdateBuildTime { get { return ResourceManager.GetString("Starshot_UpdateBuildTime", resourceCulture); } }
         public static string Starshot_GithubApiNoProxy { get { return ResourceManager.GetString("Starshot_GithubApiNoProxy", resourceCulture); } }
         public static string Starshot_RestartToTakeEffect { get { return ResourceManager.GetString("Starshot_RestartToTakeEffect", resourceCulture); } }
+        public static string Starshot_WelcomeHello { get { return ResourceManager.GetString("Starshot_WelcomeHello", resourceCulture); } }
+        public static string Starshot_WelcomeIntro { get { return ResourceManager.GetString("Starshot_WelcomeIntro", resourceCulture); } }
+        public static string Starshot_WelcomeDxgiTitle { get { return ResourceManager.GetString("Starshot_WelcomeDxgiTitle", resourceCulture); } }
+        public static string Starshot_WelcomeDxgiSupported { get { return ResourceManager.GetString("Starshot_WelcomeDxgiSupported", resourceCulture); } }
+        public static string Starshot_WelcomeDxgiNotSupported1 { get { return ResourceManager.GetString("Starshot_WelcomeDxgiNotSupported1", resourceCulture); } }
+        public static string Starshot_WelcomeDxgiNotSupported2 { get { return ResourceManager.GetString("Starshot_WelcomeDxgiNotSupported2", resourceCulture); } }
+        public static string Starshot_WelcomeDxgiNotSupported3 { get { return ResourceManager.GetString("Starshot_WelcomeDxgiNotSupported3", resourceCulture); } }
+        public static string Starshot_WelcomeWallpaperTitle { get { return ResourceManager.GetString("Starshot_WelcomeWallpaperTitle", resourceCulture); } }
+        public static string Starshot_WelcomeWallpaperDesc { get { return ResourceManager.GetString("Starshot_WelcomeWallpaperDesc", resourceCulture); } }
+        public static string Starshot_WelcomePickWallpaper { get { return ResourceManager.GetString("Starshot_WelcomePickWallpaper", resourceCulture); } }
+        public static string Starshot_WelcomeScreenshotFolderTitle { get { return ResourceManager.GetString("Starshot_WelcomeScreenshotFolderTitle", resourceCulture); } }
+        public static string Starshot_WelcomeScreenshotFolderDesc { get { return ResourceManager.GetString("Starshot_WelcomeScreenshotFolderDesc", resourceCulture); } }
+        public static string Starshot_WelcomePickFolder { get { return ResourceManager.GetString("Starshot_WelcomePickFolder", resourceCulture); } }
+        public static string Starshot_WelcomeStart { get { return ResourceManager.GetString("Starshot_WelcomeStart", resourceCulture); } }
+        public static string Starshot_InfoCopied { get { return ResourceManager.GetString("Starshot_InfoCopied", resourceCulture); } }
+        public static string Starshot_DebugExtractTitle { get { return ResourceManager.GetString("Starshot_DebugExtractTitle", resourceCulture); } }
+        public static string Starshot_DebugSelect { get { return ResourceManager.GetString("Starshot_DebugSelect", resourceCulture); } }
+        public static string Starshot_DebugExtract { get { return ResourceManager.GetString("Starshot_DebugExtract", resourceCulture); } }
     }
 }
