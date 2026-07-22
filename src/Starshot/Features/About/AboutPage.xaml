@@ -113,14 +113,16 @@
                     </StackPanel>
                 </Button>
             </StackPanel>
-            <ToggleSwitch x:Name="PreReleaseSwitch"
-                          IsOn="{x:Bind PreReleaseCheck, Mode=TwoWay}"
-                          OffContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}"
-                          OnContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}" />
-            <ToggleSwitch x:Name="GithubApiNoProxySwitch"
-                          IsOn="{x:Bind GithubApiNoProxy, Mode=TwoWay}"
-                          OffContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}"
-                          OnContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}" />
+            <StackPanel Spacing="0">
+                <ToggleSwitch x:Name="PreReleaseSwitch"
+                              IsOn="{x:Bind PreReleaseCheck, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}"
+                              OnContent="{x:Bind lang:Lang.Starshot_CheckPrerelease}" />
+                <ToggleSwitch x:Name="GithubApiNoProxySwitch"
+                              IsOn="{x:Bind GithubApiNoProxy, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}"
+                              OnContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}" />
+            </StackPanel>
 
         </StackPanel>
     </ScrollViewer>
