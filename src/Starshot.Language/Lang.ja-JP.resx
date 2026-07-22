@@ -1,0 +1,3029 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DownloadGameDialog_PackageSize" xml:space="preserve">
+    <value>パッケージのサイズ</value>
+  </data>
+  <data name="DownloadGameDialog_Downloaded" xml:space="preserve">
+    <value>ダウンロード済み:</value>
+  </data>
+  <data name="DownloadGameDialog_FreeSpace" xml:space="preserve">
+    <value>空き容量:</value>
+  </data>
+  <data name="DownloadGameDialog_RequiredSpaceForUnzipping" xml:space="preserve">
+    <value>必要な容量:</value>
+  </data>
+  <data name="DownloadGameDialog_RepairMode" xml:space="preserve">
+    <value>修復モード:</value>
+  </data>
+  <data name="DownloadGameDialog_VoiceLanguage" xml:space="preserve">
+    <value>ボイスの言語:</value>
+  </data>
+  <data name="Language_Chinese" xml:space="preserve">
+    <value>中国語</value>
+  </data>
+  <data name="Language_English" xml:space="preserve">
+    <value>英語</value>
+  </data>
+  <data name="Language_Japanese" xml:space="preserve">
+    <value>日本語</value>
+  </data>
+  <data name="Language_Korean" xml:space="preserve">
+    <value>韓国語</value>
+  </data>
+  <data name="DownloadGameDialog_TestWarning" xml:space="preserve">
+    <value>この機能はテスト段階です。もしもゲームファイルの破損が起きた場合は、公式のランチャーを使用して修復を行なってください。</value>
+  </data>
+  <data name="DownloadGameDialog_FreeSpaceMayBeNotEnough" xml:space="preserve">
+    <value>使用可能な空き容量が不足している可能性があります</value>
+  </data>
+  <data name="GachaStatsCard_Pity" xml:space="preserve">
+    <value>天井カウント</value>
+  </data>
+  <data name="GachaStatsCard_Average" xml:space="preserve">
+    <value>平均</value>
+  </data>
+  <data name="GachaStatsCard_Stats" xml:space="preserve">
+    <value>獲得回数</value>
+  </data>
+  <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
+    <value>はじめまして〜</value>
+  </data>
+  <data name="SelectDirectoryPage_SelectFolder" xml:space="preserve">
+    <value>フォルダーを選択</value>
+  </data>
+  <data name="SelectDirectoryPage_SelectLanguage" xml:space="preserve">
+    <value>言語を選択</value>
+  </data>
+  <data name="SelectDirectoryPage_SelectGame" xml:space="preserve">
+    <value>ゲームを選択</value>
+  </data>
+  <data name="SelectDirectoryPage_RecommendFolder" xml:space="preserve">
+    <value>アプリのデータは、既定で以下のフォルダーに保存されます:</value>
+  </data>
+  <data name="SelectDirectoryPage_WouldYouLikeToChooseThisFolder" xml:space="preserve">
+    <value>このフォルダーを選択しますか?</value>
+  </data>
+  <data name="SelectDirectoryPage_AutoDeleteAfterUpdate" xml:space="preserve">
+    <value>このフォルダーはソフトウェアのアップデート後に自動的に削除されます。</value>
+  </data>
+  <data name="SelectDirectoryPage_NoWritePermission" xml:space="preserve">
+    <value>書き込み権限がありません</value>
+  </data>
+  <data name="SelectDirectoryPage_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="SelectDirectoryPage_ChooseAnother" xml:space="preserve">
+    <value>別の場所を選択</value>
+  </data>
+  <data name="SelectDirectoryPage_Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
+    <value>{Starward}を使うのは初めてのようですね。</value>
+  </data>
+  <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
+    <value>ランチャーに移動</value>
+  </data>
+  <data name="SelectGamePage_SelectFolder" xml:space="preserve">
+    <value>フォルダーを選択</value>
+  </data>
+  <data name="SelectGamePage_SomeGame" xml:space="preserve">
+    <value>{Starward}は、いくつかの「miHoYo/HoYoverse」のゲームをサポートしています。</value>
+  </data>
+  <data name="SelectGamePage_TheLastStep" xml:space="preserve">
+    <value>最後のステップ～</value>
+  </data>
+  <data name="DownloadGamePage_CloseSoftware" xml:space="preserve">
+    <value>ソフトウェアを閉じる</value>
+  </data>
+  <data name="DownloadGamePage_CloseSoftwareContent" xml:space="preserve">
+    <value>ダウンロードは次回の起動後に再開できます。
+解凍中にプログラムを終了するとゲームファイルが破損します。</value>
+  </data>
+  <data name="DownloadGamePage_Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="DownloadGamePage_SoftwareWillBeExitedSoon" xml:space="preserve">
+    <value>ソフトウェアは間もなく終了します</value>
+  </data>
+  <data name="DownloadGamePage_RepeatStart" xml:space="preserve">
+    <value>リピートを開始</value>
+  </data>
+  <data name="Common_Confirm" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="DownloadGamePage_ParameterError" xml:space="preserve">
+    <value>パラメーターエラー</value>
+  </data>
+  <data name="DownloadGamePage_NoPermission" xml:space="preserve">
+    <value>権限がありません</value>
+  </data>
+  <data name="DownloadGamePage_PleaseStartAsAdministrator" xml:space="preserve">
+    <value>管理者として実行してください</value>
+  </data>
+  <data name="DownloadGamePage_Start" xml:space="preserve">
+    <value>開始</value>
+  </data>
+  <data name="DownloadGamePage_Preparing" xml:space="preserve">
+    <value>準備中</value>
+  </data>
+  <data name="DownloadGamePage_Downloading" xml:space="preserve">
+    <value>ダウンロード中</value>
+  </data>
+  <data name="DownloadGamePage_Verifying" xml:space="preserve">
+    <value>検証中</value>
+  </data>
+  <data name="DownloadGamePage_Decompressing" xml:space="preserve">
+    <value>解凍中</value>
+  </data>
+  <data name="DownloadGamePage_SomethingError" xml:space="preserve">
+    <value>問題が発生したようです</value>
+  </data>
+  <data name="DownloadGamePage_Retry" xml:space="preserve">
+    <value>再試行</value>
+  </data>
+  <data name="DownloadGamePage_OpenLog" xml:space="preserve">
+    <value>ログを開く</value>
+  </data>
+  <data name="DownloadGamePage_NetworkError" xml:space="preserve">
+    <value>ネットワークエラー</value>
+  </data>
+  <data name="DownloadGamePage_UnknownError" xml:space="preserve">
+    <value>不明なエラー</value>
+  </data>
+  <data name="DownloadGamePage_Finished" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="DownloadGamePage_Pause" xml:space="preserve">
+    <value>一時停止</value>
+  </data>
+  <data name="DownloadGamePage_Skip" xml:space="preserve">
+    <value>スキップ</value>
+  </data>
+  <data name="DownloadGamePage_VerifyFailed" xml:space="preserve">
+    <value>検証に失敗しました</value>
+  </data>
+  <data name="DownloadGamePage_TheFollowingFileVerifyFailed" xml:space="preserve">
+    <value>次のファイルの検証に失敗しました:</value>
+  </data>
+  <data name="DownloadGamePage_Redownload" xml:space="preserve">
+    <value>再ダウンロード</value>
+  </data>
+  <data name="DownloadGamePage_Ignore" xml:space="preserve">
+    <value>無視</value>
+  </data>
+  <data name="DownloadGamePage_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="DownloadGamePage_SkipVerificationContent" xml:space="preserve">
+    <value>検証をスキップすると、ゲームファイルが破損する可能性があります。</value>
+  </data>
+  <data name="DownloadGamePage_SkipVerification" xml:space="preserve">
+    <value>検証をスキップする</value>
+  </data>
+  <data name="DownloadGamePage_DownloadPaused" xml:space="preserve">
+    <value>ダウンロードを一時停止</value>
+  </data>
+  <data name="GachaLogPage_NoGachaRecords" xml:space="preserve">
+    <value>ガチャの記録がありません</value>
+  </data>
+  <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
+    <value>記録を更新</value>
+  </data>
+  <data name="GachaLogPage_UpdateSavedURL" xml:space="preserve">
+    <value>更新 (保存済みのURL)</value>
+  </data>
+  <data name="GachaLogPage_UpdateAll" xml:space="preserve">
+    <value>更新 (すべて)</value>
+  </data>
+  <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
+    <value>米游社から同期（実験）</value>
+  </data>
+  <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
+    <value>Sync All from Miyoushe (Experimental)</value>
+  </data>
+  <data name="GachaLogPage_InputURL" xml:space="preserve">
+    <value>URLを入力</value>
+  </data>
+  <data name="Common_Setting" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="GachaLogPage_OtherSettings" xml:space="preserve">
+    <value>その他の設定</value>
+  </data>
+  <data name="GachaLogPage_CopyURL" xml:space="preserve">
+    <value>URLをコピー</value>
+  </data>
+  <data name="GachaLogPage_AuthkeyTimeoutAlwaysOccurs" xml:space="preserve">
+    <value>認証キーのタイムアウトが常に発生しますか?</value>
+  </data>
+  <data name="GachaLogPage_ClearURLCacheFiles" xml:space="preserve">
+    <value>URLキャッシュファイルをクリア</value>
+  </data>
+  <data name="GachaLogPage_ExportAs" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="GachaLogPage_ImportFromJson" xml:space="preserve">
+    <value>JSONからインポート</value>
+  </data>
+  <data name="GachaLogPage_ShowNoviceGachaType" xml:space="preserve">
+    <value>初心者向けガチャの種類を表示</value>
+  </data>
+  <data name="GachaLogPage_DeleteRecords" xml:space="preserve">
+    <value>記録を削除</value>
+  </data>
+  <data name="GachaLogPage_Language" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="GachaLogPage_CannotFindSavedURLOfUid" xml:space="preserve">
+    <value>UID {0} の保存URLが見つかりません。</value>
+    <comment>{0} = {uid}</comment>
+  </data>
+  <data name="GachaLogPage_GameNotInstalled" xml:space="preserve">
+    <value>ゲームがインストールされていません</value>
+  </data>
+  <data name="GachaLogPage_CannotFindURL" xml:space="preserve">
+    <value>URLが見つかりません。ゲーム内のガチャの記録の履歴ページを開いてください。</value>
+  </data>
+  <data name="GachaLogPage_OperationCanceled" xml:space="preserve">
+    <value>操作をキャンセルしました</value>
+  </data>
+  <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
+    <value>この機能は現在ゼンレスゾーンゼロのみ対応しています。</value>
+  </data>
+  <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
+    <value>先に米游社ツールボックスにログインし、米游社アカウントを追加してください。</value>
+  </data>
+  <data name="GachaLogPage_CurrentAccountMissingCookiePleaseReloginMiyoushe" xml:space="preserve">
+    <value>現在のアカウントにログイン認証情報がありません。米游社に再ログインしてください。</value>
+  </data>
+  <data name="GachaLogPage_SelectMiyousheRole" xml:space="preserve">
+    <value>米游社アカウントを選択</value>
+  </data>
+  <data name="GachaLogPage_SelectMiyousheRoleDescription" xml:space="preserve">
+    <value>複数のゼンレスゾーンゼロロールが見つかりました。ガチャ記録を同期するロールを一つ選択してください。</value>
+  </data>
+  <data name="GachaLogPage_PleaseSelectMiyousheRole" xml:space="preserve">
+    <value>先に米游社アカウントを選択してください。</value>
+  </data>
+  <data name="GachaLogPage_PleaseOpenTheGachaRecordsPageInGameAndTryAgain" xml:space="preserve">
+    <value>ゲーム内のガチャの記録のページを開き、再度お試しください。</value>
+  </data>
+  <data name="Common_Warning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
+    <value>UID {1} の {0} のガチャの記録を削除しました。</value>
+    <comment>{0} = {count} ,  {1} = {uid}</comment>
+  </data>
+  <data name="GachaLogPage_DeleteGachaRecordsWarning" xml:space="preserve">
+    <value>UID {0} のガチャ記録が削除されます、この操作は元に戻せません。</value>
+    <comment>{0} = {uid}</comment>
+  </data>
+  <data name="GachaLogService_WishRecords" xml:space="preserve">
+    <value>祈願の記録</value>
+  </data>
+  <data name="GachaLogService_WarpRecords" xml:space="preserve">
+    <value>跳躍の記録</value>
+  </data>
+  <data name="GachaLogService_GettingUid" xml:space="preserve">
+    <value>UID を取得</value>
+  </data>
+  <data name="GachaLogService_ThisAccountHasNoGachaRecordsInTheLast6Months" xml:space="preserve">
+    <value>このアカウントは過去6ヶ月間のガチャの記録がありません</value>
+  </data>
+  <data name="GachaLogService_GetGachaResult" xml:space="preserve">
+    <value>{0} 件の記録を取得し、{1} 件の記録を追加しました。</value>
+    <comment>{0} = {getCount} ,  {1} = {addCount}</comment>
+  </data>
+  <data name="GenshinGachaService_ImportWishRecordsSuccessfully" xml:space="preserve">
+    <value>{0} の祈願の記録を正常にインポートしました。</value>
+  </data>
+  <data name="StarRailGachaService_ImportWarpRecordsSuccessfully" xml:space="preserve">
+    <value>{0} の跳躍の記録を正常にインポートしました。</value>
+  </data>
+  <data name="DownloadGameService_AlreadyTheLatestVersion" xml:space="preserve">
+    <value>最新バージョンです</value>
+  </data>
+  <data name="DownloadGameService_TooManyRetries" xml:space="preserve">
+    <value>リトライの回数が多すぎます</value>
+  </data>
+  <data name="UpdateService_CannotUpdateAutomatically" xml:space="preserve">
+    <value>自動でアップデートできません</value>
+  </data>
+  <data name="GameSettingPage_Custom" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="GameSettingPage_VeryLow" xml:space="preserve">
+    <value>最低</value>
+  </data>
+  <data name="GameSettingPage_Low" xml:space="preserve">
+    <value>低</value>
+  </data>
+  <data name="GameSettingPage_Medium" xml:space="preserve">
+    <value>中</value>
+  </data>
+  <data name="GameSettingPage_High" xml:space="preserve">
+    <value>高</value>
+  </data>
+  <data name="GameSettingPage_VeryHigh" xml:space="preserve">
+    <value>最高</value>
+  </data>
+  <data name="GameSettingPage_Off" xml:space="preserve">
+    <value>オフ</value>
+  </data>
+  <data name="GameSettingPage_StartArguments" xml:space="preserve">
+    <value>ゲーム開始時の引数</value>
+  </data>
+  <data name="GameSettingPage_Resolution" xml:space="preserve">
+    <value>解像度</value>
+  </data>
+  <data name="GameSettingPage_FullScreen" xml:space="preserve">
+    <value>フルスクリーン</value>
+  </data>
+  <data name="GameSettingPage_CustomResolution" xml:space="preserve">
+    <value>解像度のカスタマイズ</value>
+  </data>
+  <data name="GameSettingPage_VoiceLanguage" xml:space="preserve">
+    <value>ボイスの言語</value>
+  </data>
+  <data name="GameSettingPage_VoiceLanguageDescription" xml:space="preserve">
+    <value>音声リソースのダウンロードを避ける為に、初めてゲームを開始する前にこの値を設定してください</value>
+  </data>
+  <data name="GameSettingPage_GraphicsSetting" xml:space="preserve">
+    <value>画面設定</value>
+  </data>
+  <data name="GameSettingPage_GraphicsQualityPreset" xml:space="preserve">
+    <value>画質のプリセット</value>
+  </data>
+  <data name="GameSettingPage_RenderScale" xml:space="preserve">
+    <value>レンダリング精度</value>
+  </data>
+  <data name="GameSettingPage_FPS" xml:space="preserve">
+    <value>FPS</value>
+  </data>
+  <data name="GameSettingPage_VSync" xml:space="preserve">
+    <value>垂直同期</value>
+  </data>
+  <data name="GameSettingPage_AntiAliasing" xml:space="preserve">
+    <value>アンチエイリアス</value>
+  </data>
+  <data name="GameSettingPage_ShadowQuality" xml:space="preserve">
+    <value>シャドウ品質</value>
+  </data>
+  <data name="GameSettingPage_ReflectionQuality" xml:space="preserve">
+    <value>反射品質</value>
+  </data>
+  <data name="GameSettingPage_CharacterQuality" xml:space="preserve">
+    <value>キャラ品質</value>
+  </data>
+  <data name="GameSettingPage_EnvironmentDetail" xml:space="preserve">
+    <value>シーン細部</value>
+  </data>
+  <data name="GameSettingPage_BloomEffect" xml:space="preserve">
+    <value>ブルーム効果</value>
+  </data>
+  <data name="GameSettingPage_LightQuality" xml:space="preserve">
+    <value>照明効果</value>
+  </data>
+  <data name="Common_Apply" xml:space="preserve">
+    <value>適用</value>
+  </data>
+  <data name="GameSettingPage_GameNotInstalled" xml:space="preserve">
+    <value>ゲームがインストールされていません</value>
+  </data>
+  <data name="GameSettingPage_FPSWarning" xml:space="preserve">
+    <value>FPSを120に設定するとゲーム内の画面設定が使用できなくなります</value>
+  </data>
+  <data name="GameSettingPage_SettingNotEffect" xml:space="preserve">
+    <value>ゲームの実行中は適用された設定が反映されません</value>
+  </data>
+  <data name="GameSettingPage_ResolutionMustBeGreaterThan0" xml:space="preserve">
+    <value>解像度は0より大きくなければなりません</value>
+  </data>
+  <data name="GameSettingPage_StartArgumentDesc" xml:space="preserve">
+    <value>ゲーム開始時の引数については、{Unity Standalone Player Command Line Arguments} を参照してください。</value>
+  </data>
+  <data name="GameSettingPage_On" xml:space="preserve">
+    <value>オン</value>
+  </data>
+  <data name="LauncherPage_InstallGame" xml:space="preserve">
+    <value>ゲームをインストール</value>
+  </data>
+  <data name="LauncherPage_UpdateGame" xml:space="preserve">
+    <value>ゲームをアップデート</value>
+  </data>
+  <data name="LauncherPage_PlayTime" xml:space="preserve">
+    <value>プレイ時間</value>
+  </data>
+  <data name="Common_Refresh" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="LauncherPage_ThisWeek" xml:space="preserve">
+    <value>今週</value>
+  </data>
+  <data name="LauncherPage_ThisMonth" xml:space="preserve">
+    <value>今月</value>
+  </data>
+  <data name="LauncherPage_LastTime" xml:space="preserve">
+    <value>最終時刻</value>
+  </data>
+  <data name="LauncherPage_PreInstall" xml:space="preserve">
+    <value>事前インストール</value>
+  </data>
+  <data name="LauncherPage_CurrentAccount" xml:space="preserve">
+    <value>現在のログインアカウント</value>
+  </data>
+  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
+    <value>アカウントを切り替え</value>
+  </data>
+  <data name="LauncherPage_AccountInformation" xml:space="preserve">
+    <value>アカウント情報</value>
+  </data>
+  <data name="LauncherPage_Nickname" xml:space="preserve">
+    <value>ニックネーム</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="LauncherPage_GameSetting" xml:space="preserve">
+    <value>ゲームの設定</value>
+  </data>
+  <data name="LauncherPage_InstallFolder" xml:space="preserve">
+    <value>インストール先のフォルダー</value>
+  </data>
+  <data name="LauncherPage_Locate" xml:space="preserve">
+    <value>参照</value>
+  </data>
+  <data name="LauncherPage_RepairGame" xml:space="preserve">
+    <value>ゲームを修復する</value>
+  </data>
+  <data name="LauncherPage_CustomStartExecutable" xml:space="preserve">
+    <value>ゲーム起動時に指定した実行ファイルから開始する</value>
+  </data>
+  <data name="Common_Select" xml:space="preserve">
+    <value>選択</value>
+  </data>
+  <data name="LauncherPage_ShowGameAnnouncement" xml:space="preserve">
+    <value>ゲームのお知らせを表示</value>
+  </data>
+  <data name="LauncherPage_IgnoreRunningGameProcess" xml:space="preserve">
+    <value>実行中のゲームプロセスを無視</value>
+  </data>
+  <data name="LauncherPage_BackgroundSetting" xml:space="preserve">
+    <value>背景の設定</value>
+  </data>
+  <data name="SettingPage_UseSameBackgroundInAllGameRegion" xml:space="preserve">
+    <value>すべてのゲームリージョンで同じ背景を使用する</value>
+  </data>
+  <data name="SettingPage_BgSizeTip" xml:space="preserve">
+    <value>ピクセルサイズがアプリのウィンドウに合うサイズの画像を選択してください。サイズを超える画像はパフォーマンスが低下します。</value>
+  </data>
+  <data name="LauncherPage_StartGame" xml:space="preserve">
+    <value>ゲーム開始</value>
+  </data>
+  <data name="LauncherPage_GameIsRunning" xml:space="preserve">
+    <value>ゲームを実行中です</value>
+  </data>
+  <data name="Common_Start" xml:space="preserve">
+    <value>開始</value>
+  </data>
+  <data name="LauncherPage_SelectInstallFolder" xml:space="preserve">
+    <value>インストール先のフォルダーを選択</value>
+  </data>
+  <data name="Common_Continue" xml:space="preserve">
+    <value>続行</value>
+  </data>
+  <data name="LauncherPage_Reselect" xml:space="preserve">
+    <value>再選択をする</value>
+  </data>
+  <data name="LauncherPage_TheFollowingFolderContainsUnfinishedDownloadTasks" xml:space="preserve">
+    <value>次のフォルダーは未完成のダウンロードタスクが含まれています:</value>
+  </data>
+  <data name="LauncherPage_SelectInstallFolderDesc" xml:space="preserve">
+    <value>ゲームをインストールするには空のフォルダーか、実行ファイルがあるフォルダー「{0}」を選択してください。</value>
+  </data>
+  <data name="LauncherPage_AlreadyTheLatestVersionDesc" xml:space="preserve">
+    <value>最新バージョンではない場合は、ゲームのインストールディレクトリにある「config.ini」ファイルを変更してください。</value>
+  </data>
+  <data name="LauncherPage_StartVerification" xml:space="preserve">
+    <value>検証を開始</value>
+  </data>
+  <data name="LauncherPage_WouldYouLikeToVerifyTheFiles" xml:space="preserve">
+    <value>事前インストールが完了しました。ファイルを検証しますか?</value>
+  </data>
+  <data name="MainPage_HowToSwitchGameRegion" xml:space="preserve">
+    <value>ゲームのリージョンを切り替えるには?</value>
+  </data>
+  <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
+    <value>ゲームアイコンをマウスの右クリックでメニューが表示されます。</value>
+  </data>
+  <data name="MainPage_Launcher" xml:space="preserve">
+    <value>ランチャー</value>
+  </data>
+  <data name="MainPage_GameScreenshot" xml:space="preserve">
+    <value>スクリーンショット</value>
+  </data>
+  <data name="ScreenshotPage_GameScreenshot" xml:space="preserve">
+    <value>スクリーンショット</value>
+  </data>
+  <data name="ScreenshotPage_OpenFolder" xml:space="preserve">
+    <value>フォルダーを開く</value>
+  </data>
+  <data name="SettingPage_Log" xml:space="preserve">
+    <value>ログ</value>
+  </data>
+  <data name="SettingPage_ShowConsole" xml:space="preserve">
+    <value>コンソールを表示</value>
+  </data>
+  <data name="SettingPage_AppSettings" xml:space="preserve">
+    <value>アプリの設定</value>
+  </data>
+  <data name="SettingPage_EffectiveAtNextStartup" xml:space="preserve">
+    <value>次回の起動時に有効化されます。</value>
+  </data>
+  <data name="SettingPage_OpenLogFolder" xml:space="preserve">
+    <value>ログフォルダーを開く</value>
+  </data>
+  <data name="SettingPage_WindowsSize" xml:space="preserve">
+    <value>ウィンドウのサイズ</value>
+  </data>
+  <data name="SettingPage_Normal" xml:space="preserve">
+    <value>標準</value>
+    <comment>Window Size Normal</comment>
+  </data>
+  <data name="SettingPage_Small" xml:space="preserve">
+    <value>小</value>
+    <comment>Window Size Small</comment>
+  </data>
+  <data name="SettingPage_TestNetwork" xml:space="preserve">
+    <value>ネットワークのテスト</value>
+  </data>
+  <data name="SettingPage_AppBackground" xml:space="preserve">
+    <value>アプリの背景</value>
+  </data>
+  <data name="SettingPage_CustomBackgroundSupportVideo" xml:space="preserve">
+    <value>カスタム背景 (動画をサポートしています)</value>
+  </data>
+  <data name="SettingPage_DynamicThemeColor" xml:space="preserve">
+    <value>ダイナミックテーマカラー</value>
+  </data>
+  <data name="SettingPage_CloudFlareConnectProperly" xml:space="preserve">
+    <value>アプリはCloudFlareから必要なリソースをダウンロードするため、正しく接続できることを確認してください。</value>
+  </data>
+  <data name="SettingPage_CheckForUpdate" xml:space="preserve">
+    <value>アップデートを確認</value>
+  </data>
+  <data name="SettingPage_CurrentVersion" xml:space="preserve">
+    <value>現在のバージョン:</value>
+  </data>
+  <data name="SettingPage_JoinPreviewReleaseChannel" xml:space="preserve">
+    <value>プレビューリリースチャンネルに参加</value>
+  </data>
+  <data name="SettingPage_FileManager" xml:space="preserve">
+    <value>ファイルの管理</value>
+  </data>
+  <data name="SettingPage_OpenDataFolder" xml:space="preserve">
+    <value>データフォルダーを開く</value>
+  </data>
+  <data name="SettingPage_ReselectDataFolder" xml:space="preserve">
+    <value>データフォルダーを再選択</value>
+  </data>
+  <data name="SettingPage_DeleteAllSettings" xml:space="preserve">
+    <value>すべての設定を削除</value>
+  </data>
+  <data name="SettingPage_ClearCachedFiles" xml:space="preserve">
+    <value>キャッシュされたファイルをクリア</value>
+  </data>
+  <data name="SettingPage_About" xml:space="preserve">
+    <value>バージョン情報</value>
+  </data>
+  <data name="SettingPage_ProjectHomepage" xml:space="preserve">
+    <value>ホームページ</value>
+  </data>
+  <data name="SettingPage_ReportIssue" xml:space="preserve">
+    <value>問題を報告</value>
+  </data>
+  <data name="SettingPage_ReleaseHistroy" xml:space="preserve">
+    <value>リリース履歴</value>
+  </data>
+  <data name="SettingPage_ThisIsALogo" xml:space="preserve">
+    <value>これはロゴです</value>
+  </data>
+  <data name="SettingPage_Update" xml:space="preserve">
+    <value>アップデート</value>
+  </data>
+  <data name="SettingPage_TestCDNAsync_NetworkError" xml:space="preserve">
+    <value>ネットワークエラー</value>
+  </data>
+  <data name="SettingPage_TheCurrentLocationOfTheDataFolderIs" xml:space="preserve">
+    <value>データフォルダーの現在の場所:</value>
+  </data>
+  <data name="SettingPage_WouldLikeToReselectDataFolder" xml:space="preserve">
+    <value>再選択をしますか? (選択する前に手動でデータファイルを移行する必要があります)</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>はい</value>
+  </data>
+  <data name="SettingPage_AfterDeletingTheSoftwareWillBeRestartedAutomatically" xml:space="preserve">
+    <value>削除後にソフトウェアは自動的に再起動されます。</value>
+  </data>
+  <data name="UpdatePage_NewVersion" xml:space="preserve">
+    <value>新しいバージョンです!</value>
+  </data>
+  <data name="UpdatePage_Links" xml:space="preserve">
+    <value>リンク:</value>
+  </data>
+  <data name="UpdatePage_BuiltTime" xml:space="preserve">
+    <value>ビルド日時:</value>
+  </data>
+  <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
+    <value>リリースチャンネル:</value>
+  </data>
+  <data name="UpdatePage_Architecture" xml:space="preserve">
+    <value>アーキテクチャ:</value>
+  </data>
+  <data name="UpdatePage_DownloadInstaller" xml:space="preserve">
+    <value>インストーラーをダウンロード</value>
+  </data>
+  <data name="UpdatePage_DownloadPortable" xml:space="preserve">
+    <value>ポータブルをダウンロード</value>
+  </data>
+  <data name="UpdatePage_RemindLatter" xml:space="preserve">
+    <value>後で通知</value>
+  </data>
+  <data name="UpdatePage_IgnoreThisVersion" xml:space="preserve">
+    <value>このバージョンを無視</value>
+  </data>
+  <data name="UpdatePage_UpdateNow" xml:space="preserve">
+    <value>今すぐアップデート</value>
+  </data>
+  <data name="UpdatePage_YouNeedToManuallyDownloadTheNewVersionPackage" xml:space="preserve">
+    <value>新しいバージョンのパッケージを手動でダウンロードする必要があります</value>
+  </data>
+  <data name="UpdatePage_PreviewChannel" xml:space="preserve">
+    <value>プレビューチャンネル</value>
+  </data>
+  <data name="UpdatePage_StableChannel" xml:space="preserve">
+    <value>安定版のチャンネル</value>
+  </data>
+  <data name="UpdatePage_DevChannel" xml:space="preserve">
+    <value>Devチャンネル</value>
+  </data>
+  <data name="SettingPage_ThemeColorDesc" xml:space="preserve">
+    <value>背景画像に基づいてテーマカラーを自動的に計算し、既定のシステムカラーとして使用します。</value>
+  </data>
+  <data name="UpdatePage_ReleasePage" xml:space="preserve">
+    <value>リリースページ</value>
+  </data>
+  <data name="LauncherPage_ThirdPartyToolDesc" xml:space="preserve">
+    <value>代わりにサードパーティーのプラグインを使用してゲームを開始をしてください。有効化するとゲームの時間を記録する事ができません。</value>
+  </data>
+  <data name="GachaLogPage_GachaLanguageDesc" xml:space="preserve">
+    <value>ja-jpなど言語ごとのガチャの記録を指定します。</value>
+    <comment>Replace en-us with the target language when translating</comment>
+  </data>
+  <data name="SettingPage_Language" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="SettingPage_FollowSystem" xml:space="preserve">
+    <value>システムに従う</value>
+  </data>
+  <data name="SelectDirectoryPage_ToStart" xml:space="preserve">
+    <value>始めにアプリのデータを保存するフォルダーを選択してください。</value>
+  </data>
+  <data name="GachaLogService_GetGachaProgressText" xml:space="preserve">
+    <value>{1} ページ目で {0} の記録を取得</value>
+    <comment>{0} = {gachaType} ,  {1} = {page}</comment>
+  </data>
+  <data name="HyperionToolbox" xml:space="preserve">
+    <value>Hyperionツールボックス</value>
+  </data>
+  <data name="HoYoLABToolbox" xml:space="preserve">
+    <value>HoYoLAB ツールボックス</value>
+  </data>
+  <data name="HoyolabToolboxPage_LogIn" xml:space="preserve">
+    <value>ログイン</value>
+  </data>
+  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
+    <value>Webログイン</value>
+  </data>
+  <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
+    <value>Cookieを入力</value>
+  </data>
+  <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
+    <value>情報を更新</value>
+  </data>
+  <data name="HoyolabToolboxPage_CopyCookie" xml:space="preserve">
+    <value>Cookieをコピー</value>
+  </data>
+  <data name="HoyolabToolboxPage_DeleteGameRole" xml:space="preserve">
+    <value>ゲームロールを削除</value>
+  </data>
+  <data name="HoyolabToolboxPage_SpiralAbyss" xml:space="preserve">
+    <value>深境螺旋</value>
+  </data>
+  <data name="HoyolabToolboxPage_TravelersDiary" xml:space="preserve">
+    <value>旅人手帳</value>
+  </data>
+  <data name="HoyolabToolboxPage_SimulatedUniverse" xml:space="preserve">
+    <value>模擬宇宙</value>
+  </data>
+  <data name="HoyolabToolboxPage_ForgottenHall" xml:space="preserve">
+    <value>忘却の庭</value>
+  </data>
+  <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
+    <value>開拓カレンダー</value>
+  </data>
+  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
+    <value>ログイン後にこのボタンをクリックしてください。</value>
+  </data>
+  <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
+    <value>{0}つのゲームロールを追加しました:{1}</value>
+  </data>
+  <data name="Common_Summary" xml:space="preserve">
+    <value>サマリー</value>
+  </data>
+  <data name="SpiralAbyssPage_Picked" xml:space="preserve">
+    <value>試合数</value>
+    <comment>avatar battle count stats</comment>
+  </data>
+  <data name="SpiralAbyssPage_CombatStats" xml:space="preserve">
+    <value>戦闘ステータス</value>
+  </data>
+  <data name="SpiralAbyssPage_MostDefeats" xml:space="preserve">
+    <value>最多撃破数</value>
+  </data>
+  <data name="SpiralAbyssPage_StrongestSingleStrike" xml:space="preserve">
+    <value>最大ダメージ</value>
+  </data>
+  <data name="SpiralAbyssPage_MostDamageTaken" xml:space="preserve">
+    <value>受けた最大ダメージ</value>
+  </data>
+  <data name="SpiralAbyssPage_ElementalSkillsUnleashed" xml:space="preserve">
+    <value>元素スキル使用回数</value>
+  </data>
+  <data name="SpiralAbyssPage_ElementalBrustsUnleashed" xml:space="preserve">
+    <value>元素爆発使用回数</value>
+  </data>
+  <data name="TravelersDiaryPage_GetDetails" xml:space="preserve">
+    <value>詳細を取得</value>
+    <comment>get primogems and mora details</comment>
+  </data>
+  <data name="TravelersDiaryPage_RealTimeData" xml:space="preserve">
+    <value>リアルタイムデータ</value>
+  </data>
+  <data name="TravelersDiaryPage_HistoricalData" xml:space="preserve">
+    <value>過去のデータ</value>
+  </data>
+  <data name="TravelersDiaryPage_AcquiredThisMonth" xml:space="preserve">
+    <value>今月に入手した物</value>
+  </data>
+  <data name="TravelersDiaryPage_AcquiredThisDay" xml:space="preserve">
+    <value>この日に入手した物</value>
+  </data>
+  <data name="TravelersDiaryPage_PrimogemsObtained" xml:space="preserve">
+    <value>原石収入の構成</value>
+  </data>
+  <data name="SpiralAbyssPage_DeepestDescent" xml:space="preserve">
+    <value>最高記録</value>
+  </data>
+  <data name="SpiralAbyssPage_BattlesFought" xml:space="preserve">
+    <value>挑戦回数</value>
+  </data>
+  <data name="SpiralAbyssPage_Times" xml:space="preserve">
+    <value>回</value>
+    <comment>battle count 12 times</comment>
+  </data>
+  <data name="Common_Accept" xml:space="preserve">
+    <value>同意する</value>
+  </data>
+  <data name="Common_Reject" xml:space="preserve">
+    <value>同意しない</value>
+  </data>
+  <data name="HoyolabToolboxPage_WarningAgain" xml:space="preserve">
+    <value>再度警告をする</value>
+  </data>
+  <data name="Common_Disclaimer" xml:space="preserve">
+    <value>免責事項</value>
+  </data>
+  <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
+    <value>このページの機能は、HyperionまたはHoYoLABアカウントにログインをする必要があります。Starwardはログイン認証情報(Cookie)を保存し、あなたになりすましてmiHoYoのサーバーにリクエストを送信します。この方法は危険であり、あなたのアカウントが異常な事になったり、またはアカウントがBANされたとしても責任は一切負いません。
+
+リスクを受け入れたうえで使用を続行しますか?</value>
+  </data>
+  <data name="TrailblazeCalendarPage_StellarJadeSources" xml:space="preserve">
+    <value>星玉の獲得元</value>
+  </data>
+  <data name="ForgottenHallPage_Period" xml:space="preserve">
+    <value>期間</value>
+  </data>
+  <data name="ForgottenHallPage_CyclesUsed" xml:space="preserve">
+    <value>使用サイクル:</value>
+  </data>
+  <data name="ForgottenHallPage_TeamSetup" xml:space="preserve">
+    <value>チームのセットアップ</value>
+    <comment>example: forgotten hall team setup 1</comment>
+  </data>
+  <data name="Common_AccountError" xml:space="preserve">
+    <value>アカウントエラー</value>
+  </data>
+  <data name="Common_NetworkError" xml:space="preserve">
+    <value>ネットワークエラー</value>
+  </data>
+  <data name="HoyolabToolboxPage_VerifyAccount" xml:space="preserve">
+    <value>アカウントの検証</value>
+  </data>
+  <data name="DownloadGameService_RepairMode" xml:space="preserve">
+    <value>修復モード</value>
+  </data>
+  <data name="DownloadGameDialog_ItTakesAdditionalDiskSpaceWhenUnzip" xml:space="preserve">
+    <value>解凍をすると追加の空き容量を必要とします。</value>
+  </data>
+  <data name="SimulatedUniversePage_AbilityTreeBuffsActivated" xml:space="preserve">
+    <value>覚醒したアビリティ</value>
+  </data>
+  <data name="SimulatedUniversePage_UnlockedCurios" xml:space="preserve">
+    <value>解放した奇物</value>
+  </data>
+  <data name="SimulatedUniversePage_UnlockedBlessings" xml:space="preserve">
+    <value>解放した祝福</value>
+  </data>
+  <data name="SimulatedUniversePage_NumberOfClears" xml:space="preserve">
+    <value>今期のクリア回数</value>
+  </data>
+  <data name="SimulatedUniversePage_HighestScore" xml:space="preserve">
+    <value>最高ポイント</value>
+  </data>
+  <data name="SimulatedUniversePage_ChallengedOn" xml:space="preserve">
+    <value>挑戦時間</value>
+  </data>
+  <data name="SimulatedUniversePage_CharactersUsed" xml:space="preserve">
+    <value>クリア時の使用キャラクター</value>
+  </data>
+  <data name="SimulatedUniversePage_CachedCharacters" xml:space="preserve">
+    <value>キャラダウンロード</value>
+  </data>
+  <data name="SimulatedUniversePage_CuriosObtained" xml:space="preserve">
+    <value>獲得した奇物</value>
+  </data>
+  <data name="SimulatedUniversePage_BlessingsObtained" xml:space="preserve">
+    <value>獲得した祝福</value>
+  </data>
+  <data name="HoyolabToolboxPage_DailyData" xml:space="preserve">
+    <value>デイリーデータ</value>
+  </data>
+  <data name="TrailblazeCalendarPage_StellarJade" xml:space="preserve">
+    <value>星玉</value>
+  </data>
+  <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
+    <value>星軌チケット＆星軌専用チケット</value>
+  </data>
+  <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
+    <value>原石</value>
+  </data>
+  <data name="TravelersDiaryPage_Mora" xml:space="preserve">
+    <value>モラ</value>
+  </data>
+  <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
+    <value>第 {X} 層</value>
+    <comment>Spiral Abyss Floor {X}</comment>
+  </data>
+  <data name="SpiralAbyssPage_ChamberX" xml:space="preserve">
+    <value>第 {X} 間</value>
+    <comment>Spiral Abyss Chamber {X}</comment>
+  </data>
+  <data name="ScreenshotPage_ScreenshotFolderDoesNotExist" xml:space="preserve">
+    <value>スクリーンショットフォルダが見つかりません</value>
+  </data>
+  <data name="GachaLogPage_0GachaItemsHaveBeenChangedToLanguage1" xml:space="preserve">
+    <value>{0} のガチャの記録の言語を {1} に変更しました。</value>
+    <comment>The language of 123 gacha records has been changed to (en-us).</comment>
+  </data>
+  <data name="SettingPage_PrivacyPolicy" xml:space="preserve">
+    <value>プライバシーポリシー</value>
+  </data>
+  <data name="MainPage_Tips" xml:space="preserve">
+    <value>ヒント</value>
+  </data>
+  <data name="SettingPage_CDNTips" xml:space="preserve">
+    <value>一部の地域のユーザーは、ネットワークの異常が発生する場合があります。この問題はCDNを変更する事で解決ができます。</value>
+  </data>
+  <data name="SelectGamePage_SelectGameServer" xml:space="preserve">
+    <value>サーバーを選択</value>
+  </data>
+  <data name="SettingPage_EnableSystemTrayIcon" xml:space="preserve">
+    <value>システムトレイアイコンを表示する</value>
+  </data>
+  <data name="SettingPage_ExitLauncherWhenClosingWindow" xml:space="preserve">
+    <value>ウィンドウを閉じたときにランチャーを終了する</value>
+  </data>
+  <data name="Common_Exit" xml:space="preserve">
+    <value>終了</value>
+  </data>
+  <data name="SettingPage_SystemTray" xml:space="preserve">
+    <value>システムトレイ</value>
+  </data>
+  <data name="InstallGameSystemTrayPage_Installer" xml:space="preserve">
+    <value>インストーラー</value>
+  </data>
+  <data name="DownloadGamePage_CloseSoftwareContentSystemTray" xml:space="preserve">
+    <value>そのままウィンドウを閉じるか、システムトレイに最小化をするか変更ができます。</value>
+  </data>
+  <data name="Common_Hide" xml:space="preserve">
+    <value>隠す</value>
+  </data>
+  <data name="ScreenshotPage_BackupScreenshots" xml:space="preserve">
+    <value>スクリーンショットのバックアップ</value>
+  </data>
+  <data name="ScreenshotPage_OpenBackupFolder" xml:space="preserve">
+    <value>バックアップフォルダーを開く</value>
+  </data>
+  <data name="GameSettingPage_FeatureNotSupported" xml:space="preserve">
+    <value>非対応の機能</value>
+  </data>
+  <data name="SettingPage_LastBackup" xml:space="preserve">
+    <value>最終バックアップ</value>
+  </data>
+  <data name="SettingPage_BackupDatabase" xml:space="preserve">
+    <value>データベースのバックアップ</value>
+  </data>
+  <data name="ScreenshotPage_BackedUpNewScreenshots" xml:space="preserve">
+    <value>新規スクリーンショットの {0} をバックアップしました。</value>
+  </data>
+  <data name="MainPage_GameNotices" xml:space="preserve">
+    <value>ゲームのお知らせ</value>
+  </data>
+  <data name="DownloadGamePage_Merging" xml:space="preserve">
+    <value>結合中</value>
+  </data>
+  <data name="LauncherPage_Required" xml:space="preserve">
+    <value>必須</value>
+    <comment>Nickname is required.</comment>
+  </data>
+  <data name="DownloadGameDialog_TurnOnIfThereIsNotEnoughFreeSpaceForUnzip" xml:space="preserve">
+    <value>解凍に必要な空き容量がない場合は、オンにしてください。</value>
+  </data>
+  <data name="LauncherPage_ConfirmDelete" xml:space="preserve">
+    <value>削除の確認</value>
+  </data>
+  <data name="LauncherPage_CurrentlyLoggedInAccount" xml:space="preserve">
+    <value>現在のログイン済みアカウント</value>
+  </data>
+  <data name="Common_Attention" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="LauncherPage_Replace" xml:space="preserve">
+    <value>置き換え</value>
+  </data>
+  <data name="LauncherPage_SaveNew" xml:space="preserve">
+    <value>新規で保存</value>
+    <comment>Account with uid {0} already exists, replace it or save new?</comment>
+  </data>
+  <data name="LauncherPage_AccountSaveNew" xml:space="preserve">
+    <value>UID {0} のアカウントは既に存在します。置き換えまたはアカウントを新規で保存しますか?</value>
+  </data>
+  <data name="SettingPage_RepairSystemTray" xml:space="preserve">
+    <value>システムトレイを修復する</value>
+  </data>
+  <data name="SettingPage_RepairSystemTrayContent" xml:space="preserve">
+    <value>システムトレイアイコンが表示できない問題を修正します。(エクスプローラーを再起動します)</value>
+  </data>
+  <data name="SelfQueryPage_AccountRecords" xml:space="preserve">
+    <value>アカウントの記録</value>
+  </data>
+  <data name="SelfQueryPage_DeleteThisMonthSData" xml:space="preserve">
+    <value>今月のデータを削除する</value>
+  </data>
+  <data name="SelfQueryPage_StepsToGetURL" xml:space="preserve">
+    <value>リンクを取得する手順:</value>
+  </data>
+  <data name="SelfQueryPage_InputURLSteps" xml:space="preserve">
+    <value>- ゲーム内のメニューを開き、フィードバックボタンをクリックします
+- サービスセンターで通貨記録(原神)またはセルフクエリ(その他)ページに入ります
+- Webのリンクをコピーし、下のボックスに貼り付けます</value>
+  </data>
+  <data name="SelfQueryPage_InputURLNote" xml:space="preserve">
+    <value>注意: 記録の表示言語はゲーム内の言語設定に従っている為、変更する事はできません。</value>
+  </data>
+  <data name="SelfQueryPage_DeleteThisMonthSData_DialogContent" xml:space="preserve">
+    <value>{1} 内の {0} の記録を削除しますか? この操作は取り消す事はできません。</value>
+    <comment>Would you like to delete records of Stellar Jade in 2023-08? This operation cannot be canceled.</comment>
+  </data>
+  <data name="SelfQueryPage_DeleteThisMonthSData_DeleteSuccessful" xml:space="preserve">
+    <value>{2} 内の {1} の {0} の記録を削除しました。</value>
+    <comment>Deleted 123 records of Stellar Jade in 2023-08.</comment>
+  </data>
+  <data name="LauncherPage_UninstallGame" xml:space="preserve">
+    <value>ゲームをアンインストール</value>
+  </data>
+  <data name="UninstallGameDialog_CleanRegistry" xml:space="preserve">
+    <value>レジストリを削除する</value>
+  </data>
+  <data name="UninstallGameDialog_DeleteTemporaryFiles" xml:space="preserve">
+    <value>一時ファイルを削除する</value>
+  </data>
+  <data name="UninstallGameDialog_DeleteGameAssets" xml:space="preserve">
+    <value>ゲームアセットを削除する</value>
+  </data>
+  <data name="UninstallGameDialog_StepTip" xml:space="preserve">
+    <value>アンインストールの手順を選択してください。アンインストールの処理は時間がかかります。処理が終わるまで暫くお待ちください。</value>
+  </data>
+  <data name="UninstallGameDialog_OfficalLauncherTip" xml:space="preserve">
+    <value>公式のランチャーは自分でアンインストールを行う必要があります。</value>
+  </data>
+  <data name="LauncherPage_UninstallationError" xml:space="preserve">
+    <value>アンインストールエラー</value>
+  </data>
+  <data name="LauncherPage_UninstallationCompleted" xml:space="preserve">
+    <value>アンインストールが完了しました</value>
+  </data>
+  <data name="LauncherPage_PleaseCheckTheRelatedLogs" xml:space="preserve">
+    <value>関連ログを確認してください。</value>
+  </data>
+  <data name="SettingPage_Donate" xml:space="preserve">
+    <value>寄付</value>
+  </data>
+  <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
+    <value>URLプロトコル (試験的)</value>
+  </data>
+  <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
+    <value>他のソフトウェアは、URLプロトコルを通じてStarwardの機能の一部を利用することができます。</value>
+  </data>
+  <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
+    <value>URLプロトコルを登録</value>
+  </data>
+  <data name="SettingPage_TestURLProtocol" xml:space="preserve">
+    <value>URLプロトコルをテスト</value>
+  </data>
+  <data name="LauncherPage_OpenInBrowser" xml:space="preserve">
+    <value>ブラウザーで開く</value>
+  </data>
+  <data name="ImageViewPage_ZoomOut" xml:space="preserve">
+    <value>縮小</value>
+  </data>
+  <data name="ImageViewPage_ZoomIn" xml:space="preserve">
+    <value>拡大</value>
+  </data>
+  <data name="ImageViewPage_Rotate" xml:space="preserve">
+    <value>回転</value>
+  </data>
+  <data name="Common_Copy" xml:space="preserve">
+    <value>コピー</value>
+  </data>
+  <data name="Common_Open" xml:space="preserve">
+    <value>開く</value>
+  </data>
+  <data name="LauncherPage_StartupCount" xml:space="preserve">
+    <value>起動回数</value>
+  </data>
+  <data name="FileSettingPage_DataFolder" xml:space="preserve">
+    <value>データフォルダー</value>
+  </data>
+  <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
+    <value>ログファイルを開く</value>
+  </data>
+  <data name="SettingPage_Appearance" xml:space="preserve">
+    <value>外観</value>
+  </data>
+  <data name="SettingPage_FileManagement" xml:space="preserve">
+    <value>ファイルの管理</value>
+  </data>
+  <data name="SettingPage_Completed" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="AboutSettingPage_Links" xml:space="preserve">
+    <value>リンク</value>
+  </data>
+  <data name="SettingPage_Advanced" xml:space="preserve">
+    <value>高度な設定</value>
+  </data>
+  <data name="LauncherPage_ThisDay" xml:space="preserve">
+    <value>今日</value>
+  </data>
+  <data name="ExperienceSettingPage_CloseWindowOption" xml:space="preserve">
+    <value>ウィンドウを閉じた時</value>
+  </data>
+  <data name="ExperienceSettingPage_MinimizeToSystemTray" xml:space="preserve">
+    <value>システムトレイに最小化する</value>
+  </data>
+  <data name="ExperienceSettingPage_ExitCompletely" xml:space="preserve">
+    <value>アプリケーションを終了する</value>
+  </data>
+  <data name="ExperienceSettingPage_CloseWindowButKeepSystemTray" xml:space="preserve">
+    <value>ウィンドウを閉じてシステムトレイ上にアイコンを表示</value>
+  </data>
+  <data name="SettingPage_Experience" xml:space="preserve">
+    <value>エクスペリエンス</value>
+    <comment>means user experience</comment>
+  </data>
+  <data name="CloseWindowDialog_YouCouldChangeTheOptionAgainInSettingPage" xml:space="preserve">
+    <value>このオプションは設定ページから再び変更ができます。</value>
+  </data>
+  <data name="FileSettingPage_DataFolderIsImportant" xml:space="preserve">
+    <value>個人データは以下のフォルダに保存されています。このファイルは非常に重要ですので、安易に削除しないでください。</value>
+  </data>
+  <data name="AppearanceSettingPage_ThemeColor" xml:space="preserve">
+    <value>テーマカラー</value>
+  </data>
+  <data name="AppearanceSettingPage_ThemeColorDescription" xml:space="preserve">
+    <value>既定でのテーマカラーは、背景画像によって決定されます。</value>
+  </data>
+  <data name="AppearanceSettingPage_UseSystemThemeColor" xml:space="preserve">
+    <value>システムテーマカラーを使用する</value>
+  </data>
+  <data name="AppearanceSettingPage_AlwaysDisplayNavigationSidebarIcons" xml:space="preserve">
+    <value>ナビゲーションサイドバーアイコンを常に表示する</value>
+  </data>
+  <data name="ExperienceSettingPage_Features" xml:space="preserve">
+    <value>機能</value>
+  </data>
+  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
+    <value>ゲームアカウントの切り替えを非表示にする</value>
+  </data>
+  <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
+    <value>ゲームのお知らせを赤いドットで通知しない</value>
+  </data>
+  <data name="SelectLanguagePage_NetworkTest" xml:space="preserve">
+    <value>ネットワークテスト</value>
+  </data>
+  <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
+    <value>Starwardのアップデートを受け取りますか?</value>
+  </data>
+  <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
+    <value>個人データを保存するフォルダーを選択してください。これは非常に重要です!</value>
+  </data>
+  <data name="ExperienceSettingPage_MinimizeToTaskbar" xml:space="preserve">
+    <value>タスクバーに最小化</value>
+  </data>
+  <data name="ExperienceSettingPage_DoNothing" xml:space="preserve">
+    <value>何もしない</value>
+  </data>
+  <data name="ExperienceSettingPage_AfterStartingGame" xml:space="preserve">
+    <value>ゲーム開始後</value>
+  </data>
+  <data name="ForgottenHallPage_QuickCleared" xml:space="preserve">
+    <value>クイッククリア済み</value>
+  </data>
+  <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
+    <value>虚構叙事</value>
+  </data>
+  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
+    <value>Starwardの翻訳にご協力ください</value>
+  </data>
+  <data name="FileSettingPage_Cache" xml:space="preserve">
+    <value>キャッシュ</value>
+  </data>
+  <data name="FileSettingPage_Log" xml:space="preserve">
+    <value>ログ</value>
+  </data>
+  <data name="FileSettingPage_Image" xml:space="preserve">
+    <value>画像</value>
+  </data>
+  <data name="FileSettingPage_Browser" xml:space="preserve">
+    <value>ブラウザー</value>
+  </data>
+  <data name="FileSettingPage_ClearCache" xml:space="preserve">
+    <value>キャッシュをクリア</value>
+  </data>
+  <data name="DownloadGamePage_TheDownloadTaskOfGameIsAlreadyRunning" xml:space="preserve">
+    <value>{0}のダウンロードタスクは、既に実行されています。</value>
+    <comment>{0} is game name, like Genshin Impact.</comment>
+  </data>
+  <data name="DownloadGamePage_TheFolderDoesNotExist" xml:space="preserve">
+    <value>フォルダーが存在しません。</value>
+  </data>
+  <data name="LauncherPage_PleaseDoNotSelectTheRootDirectoryOfADrive" xml:space="preserve">
+    <value>ドライブのルートディレクトリを選択しないでください。</value>
+  </data>
+  <data name="LauncherPage_SavedAccount" xml:space="preserve">
+    <value>保存されたアカウント</value>
+  </data>
+  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
+    <value>ゲームの実行中は、アカウントの切り替えを有効にする事はできません。</value>
+  </data>
+  <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
+    <value>より良いユーザーエクスペリエンスのために、システム設定で「{0}」と「{1}」を有効化する事をお勧めします。</value>
+  </data>
+  <data name="AppearanceSettingPage_TransparencyEffects" xml:space="preserve">
+    <value>透過効果</value>
+  </data>
+  <data name="AppearanceSettingPage_AnimationEffects" xml:space="preserve">
+    <value>アニメーション効果</value>
+  </data>
+  <data name="GachaLogPage_AlwaysFailedToGetGachaRecords" xml:space="preserve">
+    <value>常にガチャの記録に失敗しますか?</value>
+  </data>
+  <data name="HoyolabToolboxPage_NoData" xml:space="preserve">
+    <value>データなし</value>
+  </data>
+  <data name="AboutSettingPage_VerifyFileIntegrity" xml:space="preserve">
+    <value>ファイルの完全性を検証</value>
+  </data>
+  <data name="AboutSettingPage_VerifyFailed" xml:space="preserve">
+    <value>検証に失敗</value>
+  </data>
+  <data name="AboutSettingPage_CurrentVersionIsNotTheLatestVersion" xml:space="preserve">
+    <value>現在のバージョンは、最新のバージョン({0})ではありません。</value>
+  </data>
+  <data name="AboutSettingPage_ClickButtonToRepairFiles" xml:space="preserve">
+    <value>ボタンをクリックでファイルを修復します。</value>
+  </data>
+  <data name="AboutSettingPage_RepairFiles" xml:space="preserve">
+    <value>ファイルを修復</value>
+  </data>
+  <data name="AboutSettingPage_VerifySuccessfully" xml:space="preserve">
+    <value>検証が成功しました!</value>
+  </data>
+  <data name="DownloadGamePage_0FilesVerifyFailed" xml:space="preserve">
+    <value>{0}個のファイルの検証に失敗しました。</value>
+  </data>
+  <data name="LauncherPage_ReinstallGame" xml:space="preserve">
+    <value>ゲームの再インストール</value>
+  </data>
+  <data name="LauncherPage_SwitchClient" xml:space="preserve">
+    <value>クライアントの切り替え</value>
+  </data>
+  <data name="FileSettingPage_GameResource" xml:space="preserve">
+    <value>ゲームリソース</value>
+  </data>
+  <data name="SwitchClientPage_SelectTargetGameServer" xml:space="preserve">
+    <value>ターゲットのゲームサーバーを選択</value>
+  </data>
+  <data name="SwitchClientPage_FeatureDescription" xml:space="preserve">
+    <value>この機能によってクライアントに対応するサーバーに素早く切り替える事ができ、最初の切り替え時に必要になるのはリソースのダウンロードだけになります。</value>
+  </data>
+  <data name="SwitchClientPage_StartSwitching" xml:space="preserve">
+    <value>切り替えを開始</value>
+  </data>
+  <data name="SwitchClientPage_TheLocalGameVersionIsNotTheLatest" xml:space="preserve">
+    <value>ローカルのゲームのバージョンは最新ではありません。</value>
+  </data>
+  <data name="SwitchClientPage_TheTargetServerVersionIsDifferentFromTheLocalVersion" xml:space="preserve">
+    <value>ターゲットサーバーのバージョンがローカルのバージョンと異なります。</value>
+  </data>
+  <data name="SwitchClientPage_ReadyToSwitchClient" xml:space="preserve">
+    <value>クライアントの切り替え準備ができています</value>
+  </data>
+  <data name="SwitchClientPage_FileVerificationFailedPleaseTryAgain" xml:space="preserve">
+    <value>ファイルの検証に失敗しました。再試行をしてください。</value>
+  </data>
+  <data name="SwitchClientPage_FileVerificationFailedPleaseTryToRepairGameResources" xml:space="preserve">
+    <value>ファイルの検証に失敗しました。ゲームリソースの修復をしてください。</value>
+  </data>
+  <data name="GameResourcePage_LatestVersion" xml:space="preserve">
+    <value>最新バージョン</value>
+  </data>
+  <data name="GameResourcePage_FullPackages" xml:space="preserve">
+    <value>フルパッケージ</value>
+  </data>
+  <data name="GameResourcePage_DiffPackages" xml:space="preserve">
+    <value>差分パッケージ</value>
+  </data>
+  <data name="SwitchClientPage_TheTowFoldersExistAtTheSameTime" xml:space="preserve">
+    <value>YuanShen_DataフォルダーとGenshinImpact_Dataフォルダーは同時に存在させる事はできません。</value>
+  </data>
+  <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
+    <value>集録祈願を表示</value>
+  </data>
+  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
+    <value>デバイスフィンガープリントを更新</value>
+  </data>
+  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
+    <value>デバイスフィンガープリントはすでに更新済みです。</value>
+  </data>
+  <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
+    <value>クリップボードに画像をコピーしました</value>
+  </data>
+  <data name="HoyolabToolboxPage_BattleChronicle" xml:space="preserve">
+    <value>戦績</value>
+  </data>
+  <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
+    <value>ゲーム内のガチャの記録ページを開き、右側のボタンをクリックします。</value>
+  </data>
+  <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
+    <value>クラウドゲーム経由</value>
+  </data>
+  <data name="UpdateContentWindow_ClickToRefresh" xml:space="preserve">
+    <value>クリックで更新</value>
+  </data>
+  <data name="UpdateContentWindow_RecentlyUpdatedContent" xml:space="preserve">
+    <value>最近更新されたコンテンツ</value>
+  </data>
+  <data name="HoyolabToolboxPage_ApocalypticShadow" xml:space="preserve">
+    <value>末日の幻影</value>
+  </data>
+  <data name="GachaLogService_SignalSearchRecords" xml:space="preserve">
+    <value>変調の記録</value>
+  </data>
+  <data name="ApocalypticShadowPage_DefeatedBoss" xml:space="preserve">
+    <value>討伐済みのボス</value>
+  </data>
+  <data name="ApocalypticShadowPage_HighestDifficultyCleared" xml:space="preserve">
+    <value>最高難易度クリア済み</value>
+  </data>
+  <data name="ForgottenHallPage_FarthestStage" xml:space="preserve">
+    <value>最高レベル</value>
+  </data>
+  <data name="ForgottenHallPage_TimesChallenged" xml:space="preserve">
+    <value>エキスパート挑戦の回数</value>
+  </data>
+  <data name="InstallGameDialog_SelectInstallationPath" xml:space="preserve">
+    <value>インストール先のパス</value>
+  </data>
+  <data name="Common_Change" xml:space="preserve">
+    <value>変更</value>
+  </data>
+  <data name="InstallGameDialog_SpaceRequiredToUnzip" xml:space="preserve">
+    <value>解凍に必要な容量</value>
+  </data>
+  <data name="InstallGameDialog_SpaceAvailable" xml:space="preserve">
+    <value>空き容量</value>
+  </data>
+  <data name="InstallGameDialog_NoWritePermissionPleaseRestartAsAdministrator" xml:space="preserve">
+    <value>書き込み権限がありません。管理者権限で再起動してください。</value>
+  </data>
+  <data name="InstallGameDialog_ClickToRestart" xml:space="preserve">
+    <value>クリックで再起動</value>
+  </data>
+  <data name="InstallGameDialog_DesktopShortcut" xml:space="preserve">
+    <value>デスクトップのショートカット</value>
+  </data>
+  <data name="InstallGameDialog_Installed" xml:space="preserve">
+    <value>インストール済みですか?</value>
+  </data>
+  <data name="InstallGameDialog_LocateGame" xml:space="preserve">
+    <value>ゲームのインストール先</value>
+  </data>
+  <data name="InstallGameDialog_StartInstallation" xml:space="preserve">
+    <value>インストール開始</value>
+  </data>
+  <data name="DownloadSettingPage_DefaultGameInstallationPath" xml:space="preserve">
+    <value>既定のインストール先のパス</value>
+  </data>
+  <data name="DownloadSettingPage_DefaultGameInstallationPathDescription" xml:space="preserve">
+    <value>ゲームは別のサブフォルダーにインストールされます。既定のパスを変更してもインストールされたゲームファイルは移動されません。</value>
+  </data>
+  <data name="DownloadSettingPage_SpeedLimit" xml:space="preserve">
+    <value>速度制限</value>
+  </data>
+  <data name="DownloadSettingPage_TheNumber0MeansNoSpeedLimit" xml:space="preserve">
+    <value>0を入力した場合は速度制限を行いません。</value>
+  </data>
+  <data name="SettingPage_Download" xml:space="preserve">
+    <value>ダウンロード</value>
+  </data>
+  <data name="DownloadGamePage_Paused" xml:space="preserve">
+    <value>一時停止</value>
+  </data>
+  <data name="InstallGameManager_DownloadTaskCompleted" xml:space="preserve">
+    <value>ダウンロードタスクが完了しました</value>
+  </data>
+  <data name="InstallGameManager_DownloadTaskFailed" xml:space="preserve">
+    <value>ダウンロードタスクが失敗しました</value>
+  </data>
+  <data name="GameLauncherPage_NoWritePermission" xml:space="preserve">
+    <value>書き込み権限がありません</value>
+  </data>
+  <data name="Common_Restart" xml:space="preserve">
+    <value>再起動</value>
+  </data>
+  <data name="GameLauncherPage_PleaseRestartAsAdministrator" xml:space="preserve">
+    <value>管理者権限で再起動してください。</value>
+  </data>
+  <data name="InstallGameDialog_CreateHardLink" xml:space="preserve">
+    <value>ハードリンクを作成</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkDescription" xml:space="preserve">
+    <value>異なるサーバーのゲームクライアントをインストールするためのハードリンクを作成します。わずかな追加ストレージのみを使用します。</value>
+  </data>
+  <data name="InstallGameDialog_LinkTarget" xml:space="preserve">
+    <value>リンク先:</value>
+  </data>
+  <data name="GameLauncherPage_HardLinkNotSupportPredownload" xml:space="preserve">
+    <value>現在のサーバーは事前ダウンロードをサポートしていません。ターゲットサーバーのハードリンクを使用して事前ダウンロードを完了してください。</value>
+  </data>
+  <data name="GameLauncherPage_HardLinkUpdateToLatest" xml:space="preserve">
+    <value>このサーバーのゲームファイルをアップデートする前に、ハードリンク先のサーバーを最新のバージョンにアップデートしてください。</value>
+  </data>
+  <data name="InstallGameDialog_LinkPath" xml:space="preserve">
+    <value>リンクパス:</value>
+  </data>
+  <data name="InstallGameDialog_ThePathYouSelectMustBeOnTheSameDriveAsTheLinkPath" xml:space="preserve">
+    <value>選択するパスはリンクパスと同じドライブにある必要があります。</value>
+  </data>
+  <data name="LauncherPage_HardLink" xml:space="preserve">
+    <value>ハードリンク</value>
+  </data>
+  <data name="SelfQueryPage_RetrieveAllData" xml:space="preserve">
+    <value>すべてのデータを取得</value>
+  </data>
+  <data name="HoyolabToolboxPage_ImaginariumTheater" xml:space="preserve">
+    <value>幻想シアター</value>
+  </data>
+  <data name="ImaginariumTheaterPage_EasyMode" xml:space="preserve">
+    <value>イージーモード</value>
+  </data>
+  <data name="ImaginariumTheaterPage_NormalMode" xml:space="preserve">
+    <value>ノーマルモード</value>
+  </data>
+  <data name="ImaginariumTheaterPage_HardMode" xml:space="preserve">
+    <value>ハードモード</value>
+  </data>
+  <data name="ImaginariumTheaterPage_Act0" xml:space="preserve">
+    <value>第 {0} 幕</value>
+    <comment>Imaginarium Theater Act {0}</comment>
+  </data>
+  <data name="ImaginariumTheaterPage_PastPerformances" xml:space="preserve">
+    <value>過去の公演</value>
+  </data>
+  <data name="ImaginariumTheaterPage_BestRecord" xml:space="preserve">
+    <value>最高記録</value>
+  </data>
+  <data name="ImaginariumTheaterPage_StarChallengeStellas" xml:space="preserve">
+    <value>スター挑戦星章</value>
+  </data>
+  <data name="ImaginariumTheaterPage_FantasiaFlowersUsed" xml:space="preserve">
+    <value>消費した幻戯の花</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TriggeredExternalAudienceSupport" xml:space="preserve">
+    <value>観客の応援を引き起こした回数</value>
+  </data>
+  <data name="ImaginariumTheaterPage_SupportingCastCharactersAssistOtherPlayers" xml:space="preserve">
+    <value>サポートキャストがほかのプレーヤーを支援した回数</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TotalPerformanceDuration" xml:space="preserve">
+    <value>総パフォーマンス時間</value>
+  </data>
+  <data name="ImaginariumTheaterPage_HighestDamageDealt" xml:space="preserve">
+    <value>最高ダメージ</value>
+  </data>
+  <data name="ImaginariumTheaterPage_MostOpponentsDefeated" xml:space="preserve">
+    <value>最も多くの対戦相手を撃破</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TeamThatCompletedThePerformanceFastest" xml:space="preserve">
+    <value>最も早くパフォーマンスを完了したチーム</value>
+  </data>
+  <data name="ImaginariumTheaterPage_WondrousBoon" xml:space="preserve">
+    <value>ワンダーサポート</value>
+  </data>
+  <data name="ImaginariumTheaterPage_MysteryCache" xml:space="preserve">
+    <value>ミステリーボーナス</value>
+  </data>
+  <data name="ImaginariumTheaterPage_VisionaryMode" xml:space="preserve">
+    <value>ビジョナリーモード</value>
+  </data>
+  <data name="ImaginariumTheaterPage_BrilliantBlessing" xml:space="preserve">
+    <value>輝彩の祝福</value>
+  </data>
+  <data name="GameLauncherPage_RemovableStorageDeviceNotConnected" xml:space="preserve">
+    <value>リムーバブルストレージデバイスが接続されていません。</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
+    <value>映画の収益構成</value>
+  </data>
+  <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
+    <value>インターノット月次レポート</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_DailyActivityRewardeds" xml:space="preserve">
+    <value>毎日の活動の報酬</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_DevelopmentRewards" xml:space="preserve">
+    <value>レベルアップ時の報酬</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_EventRewards" xml:space="preserve">
+    <value>イベントの報酬</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_HollowZeroRewards" xml:space="preserve">
+    <value>零号ホロウの報酬</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_ShiyuDefenseRewards" xml:space="preserve">
+    <value>式輿防衛戦の報酬</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MailRewards" xml:space="preserve">
+    <value>メールの報酬</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_OtherRewards" xml:space="preserve">
+    <value>その他の報酬</value>
+  </data>
+  <data name="DeleteGachaLogDialog_BeginTime" xml:space="preserve">
+    <value>開始時間</value>
+  </data>
+  <data name="DeleteGachaLogDialog_EndTime" xml:space="preserve">
+    <value>終了時間</value>
+  </data>
+  <data name="DeleteGachaLogDialog_DeleteGachaRecordsForASpecificTimePeriod" xml:space="preserve">
+    <value>特定の期間のガチャの記録を削除する</value>
+  </data>
+  <data name="DeleteGachaLogDialog_6MonthsDeletingWarning" xml:space="preserve">
+    <value>警告: 選択した期間には、6ヶ月以上前のガチャの記録が含まれています。削除後に再取得を行うことはできません。</value>
+  </data>
+  <data name="DeleteGachaLogDialog_ThisAccountHas0GachaRecordS" xml:space="preserve">
+    <value>このアカウントには {0} 件のガチャの記録があります。</value>
+  </data>
+  <data name="DeleteGachaLogDialog_TheSelectedTimePeriodIncludes0GachaRecords" xml:space="preserve">
+    <value>選択した期間には {0} 件のガチャの記録があります。</value>
+  </data>
+  <data name="GachaLogPage_DeleteAll" xml:space="preserve">
+    <value>すべて削除</value>
+  </data>
+  <data name="GachaLogPage_SpecificTimePeriod" xml:space="preserve">
+    <value>特定の時間</value>
+  </data>
+  <data name="StartGameButton_ResumeDownload" xml:space="preserve">
+    <value>ダウンロードを再開</value>
+  </data>
+  <data name="StartGameButton_Waiting" xml:space="preserve">
+    <value>待機中</value>
+  </data>
+  <data name="GameLauncherPage_Relocate" xml:space="preserve">
+    <value>再配置</value>
+  </data>
+  <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
+    <value>ゲームを再配置</value>
+  </data>
+  <data name="GameLauncherSettingDialog_Size" xml:space="preserve">
+    <value>サイズ</value>
+  </data>
+  <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
+    <value>基本情報</value>
+  </data>
+  <data name="GameLauncherSettingDialog_StartupArguments" xml:space="preserve">
+    <value>起動時の引数</value>
+  </data>
+  <data name="GameLauncherSettingDialog_CustomBackground" xml:space="preserve">
+    <value>カスタム背景</value>
+  </data>
+  <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
+    <value>ゲームパッケージ</value>
+  </data>
+  <data name="GameLauncherSettingDialog_CommandLineArgument" xml:space="preserve">
+    <value>コマンドラインの引数</value>
+  </data>
+  <data name="GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument" xml:space="preserve">
+    <value>コマンドラインの引数に関する詳細情報を参照してください。</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UseVersionPoster" xml:space="preserve">
+    <value>バージョンポスターを使用する</value>
+  </data>
+  <data name="GameSelector_ActualSizeOfInstalledGames" xml:space="preserve">
+    <value>インストールされたゲームの実際のサイズ</value>
+  </data>
+  <data name="GameSelector_StorageSpaceSavedByHardLinks" xml:space="preserve">
+    <value>ハードリンクによって節約されるストレージ容量</value>
+  </data>
+  <data name="GameLauncherSettingDialog_CannotDecodeFile" xml:space="preserve">
+    <value>ファイルをデコードできません。</value>
+  </data>
+  <data name="GameLauncherSettingDialog_AnUnknownErrorOccurredPleaseCheckTheLogs" xml:space="preserve">
+    <value>不明なエラーが発生しました。ログを確認してください。</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
+    <value>画像または動画をドラッグ&amp;ドロップしてください。</value>
+  </data>
+  <data name="GameSelector_Calculating" xml:space="preserve">
+    <value>計算中</value>
+    <comment>Calculating storage space usage.</comment>
+  </data>
+  <data name="SettingPage_General" xml:space="preserve">
+    <value>一般</value>
+    <comment>General Setting</comment>
+  </data>
+  <data name="SettingPage_ForABetterExperiencePleaseEnableTheFollowingFeaturesInSystemSettings" xml:space="preserve">
+    <value>より良い体験のためにシステム設定で次の機能を有効化してください。</value>
+  </data>
+  <data name="PlayTimeButton_Last7Days" xml:space="preserve">
+    <value>過去7日間</value>
+  </data>
+  <data name="PlayTimeButton_LastStartup" xml:space="preserve">
+    <value>最後に起動</value>
+  </data>
+  <data name="UpdateWindow_AutoRestartAfterUpdate" xml:space="preserve">
+    <value>自動で再起動後に更新</value>
+  </data>
+  <data name="UpdateWindow_DisplayUpdateContentAfterRestart" xml:space="preserve">
+    <value>再起動後に更新内容を表示</value>
+  </data>
+  <data name="Common_WebView2ComponentInitializationFailed" xml:space="preserve">
+    <value>WebView2コンポーネントの初期化に失敗しました。</value>
+  </data>
+  <data name="SettingPage_RPCService" xml:space="preserve">
+    <value>RPCサービス</value>
+  </data>
+  <data name="SettingPage_RPCService_Desc" xml:space="preserve">
+    <value>RPCサービスはゲームのダウンロードやソフトウェアの更新、および管理者権限を必要とするその他の機能を実行するときに再起動を回避する独立したプロセスです。</value>
+  </data>
+  <data name="SettingPage_KeepRPCServiceRunningInTheBackground" xml:space="preserve">
+    <value>RPCサービスをバックグラウンドで実行を維持</value>
+  </data>
+  <data name="SettingPage_RPCServiceWarningIfAppInRemovableStorage" xml:space="preserve">
+    <value>アプリがリムーバブルストレージの内部にあることが検出されたため、RPCサービスをバックグラウンドで実行を維持の使用は推奨しません。</value>
+  </data>
+  <data name="ZZZGachaService_ImportSignalSearchRecordsSuccessfully" xml:space="preserve">
+    <value>{0} のシグナル検索の記録のインポートに成功しました。</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkDesc" xml:space="preserve">
+    <value>選択したパスが他のインストール済みサーバーのクライアントと同じドライブ上にある場合にハードリンクを使用して、異なるサーバーで複数のクライアントをインストールできます。これにより追加のストレージ容量が最小限に抑えられます。</value>
+  </data>
+  <data name="InstallGameDialog_SupportHardLinks" xml:space="preserve">
+    <value>ハードリンクのサポート</value>
+  </data>
+  <data name="PreDownloadDialog_NoPatchesWarning" xml:space="preserve">
+    <value>利用可能なパッチパッケージはありません。事前インストールを開始する前に、ゲームを最新のバージョンに更新することをお勧めします。</value>
+  </data>
+  <data name="PreDownloadDialog_StartPreInstall" xml:space="preserve">
+    <value>事前インストールを開始</value>
+  </data>
+  <data name="GameLauncherSettingDialog_StartRepairing" xml:space="preserve">
+    <value>修復を開始</value>
+  </data>
+  <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
+    <value>事前インストールが完了しました</value>
+  </data>
+  <data name="Common_Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="StartGameButton_InQueue" xml:space="preserve">
+    <value>キュー中</value>
+  </data>
+  <data name="RPCServiceExitedUnexpectedly" xml:space="preserve">
+    <value>RPC サービスが予期せず終了しました。</value>
+  </data>
+  <data name="StartGameButton_Install" xml:space="preserve">
+    <value>インストール</value>
+  </data>
+  <data name="StartGameButton_Verify" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="SettingPage_RPCServiceIsNotRunning" xml:space="preserve">
+    <value>RPC サービスは実行されていません</value>
+  </data>
+  <data name="SettingPage_RunService" xml:space="preserve">
+    <value>サービスを実行</value>
+  </data>
+  <data name="SettingPage_RPCServiceIsRunning" xml:space="preserve">
+    <value>RPC サービスは実行中です</value>
+  </data>
+  <data name="SettingPage_StopService" xml:space="preserve">
+    <value>サービスを停止</value>
+  </data>
+  <data name="SettingPage_CannotConnectRPCService" xml:space="preserve">
+    <value>RPC サービスに接続できません</value>
+  </data>
+  <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
+    <value>サブフォルダーを自動的に作成</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
+    <value>以下のフォルダー内のファイルがすべて削除されます。アンインストール前にパスを確認してください。</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ConfirmUninstall" xml:space="preserve">
+    <value>アンインストールを確認</value>
+  </data>
+  <data name="GameLauncherSettingDialog_CannotDeleteTheDriveRootDirectory" xml:space="preserve">
+    <value>ドライブのルートディレクトリを削除できません。</value>
+  </data>
+  <data name="PreDownloadDialog_PreInstallIsNotAvailable" xml:space="preserve">
+    <value>事前インストールは利用できません。</value>
+  </data>
+  <data name="PreDownloadDialog_IncompatibilityNotice" xml:space="preserve">
+    <value>非互換性のお知らせ</value>
+  </data>
+  <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
+    <value>Starward と HoYoPlay (miHoYo Launcher) の事前インストールファイルは互換性がなく、相互で認識できません。</value>
+  </data>
+  <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
+    <value>プレイヤーの皆様、Starward へようこそ!</value>
+  </data>
+  <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
+    <value>このランチャーはHoYoverseのゲーム向けに設計されており、ゲームを簡単に管理し、より良い体験を得ることができます。</value>
+  </data>
+  <data name="WelcomeView_SelectUserDataFolderDescription" xml:space="preserve">
+    <value>すべての個人データは以下のフォルダに保存されます。このファイルは重要なものです。以下のボタンをクリックして別のフォルダを選択できます。</value>
+  </data>
+  <data name="WelcomeView_BeforeStartingSomeNecessaryEnvironmentChecksAreRequired" xml:space="preserve">
+    <value>起動前に、環境のチェックを行う必要があります。</value>
+  </data>
+  <data name="WelcomeView_NetworkStatus" xml:space="preserve">
+    <value>ネットワークの状態</value>
+  </data>
+  <data name="WelcomeView_NotInstalled" xml:space="preserve">
+    <value>未インストール</value>
+  </data>
+  <data name="WelcomeView_InstallNow" xml:space="preserve">
+    <value>今すぐインストール</value>
+  </data>
+  <data name="WelcomeView_Installed" xml:space="preserve">
+    <value>インストール済み</value>
+  </data>
+  <data name="WelcomeView_StarwardStart" xml:space="preserve">
+    <value>Starward、起動!</value>
+  </data>
+  <data name="GameSelector_ClickToSelectOrSwitchGame" xml:space="preserve">
+    <value>クリックしてゲームを選択または切り替え。</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
+    <value>Starwardのデータフォルダがゲームフォルダ内に含まれています。ゲームのアンインストール時にデータが削除されることを防ぐため、設定ページからデータフォルダの場所を変更し、再度お試しください。</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
+    <value>Starwardの実行ファイルがゲームフォルダ内に含まれています。ゲームのアンインストール時にデータが削除されることを防ぐため、実行ファイルの場所をゲームフォルダ外に移動し、再度お試しください。</value>
+  </data>
+  <data name="CloudGameButton_CloudGame" xml:space="preserve">
+    <value>クラウドゲーム</value>
+  </data>
+  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
+    <value>現在ログインしているアカウントは保存されません。</value>
+  </data>
+  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
+    <value>レジストリベースのゲームアカウント切り替え機能</value>
+  </data>
+  <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
+    <value>ZZZのガチャアイテム画像</value>
+  </data>
+  <data name="ToolboxSetting_DisplayItemImagesInZZZGachaRecordPage" xml:space="preserve">
+    <value>ZZZガチャ記録ページにアイテム画像を表示します。</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_Miyoushe" xml:space="preserve">
+    <value>Miyoushe(米游社)</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_FetchDataForAllLanguages" xml:space="preserve">
+    <value>すべての言語のデータを取得</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_SaveToDatabase" xml:space="preserve">
+    <value>データベースへ保存</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_ExportToFolder" xml:space="preserve">
+    <value>フォルダーにエクスポート</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide" xml:space="preserve">
+    <value>このツールは「ゼンレスゾーンゼロ」ガチャ記録内のアイテム画像を更新するために使用します。
+左上隅の「Miyoushe(米游社)」または「HoYoLAB」をクリックし、ログイン、そして、データ取得をお待ちください。HoYoLAB経由でログインする場合は、「すべての言語のデータを取得」もクリックする必要があります。
+データ取得後、任意の言語でデータベースに保存するか、フォルダへエクスポートできます。
+エクスポートしたデータは以下のリポジトリへご投稿ください:</value>
+  </data>
+  <data name="SettingPage_Toolbox" xml:space="preserve">
+    <value>ツール</value>
+  </data>
+  <data name="ToolboxSetting_GachaRecordsImportExport" xml:space="preserve">
+    <value>ガチャ履歴のインポートとエクスポート</value>
+  </data>
+  <data name="UIGFGachaService_UidMismatchDetectedExpected0ButFound1" xml:space="preserve">
+    <value>UIDの不一致が検出されました。 {0} を期待していましたが、{1} でした。</value>
+  </data>
+  <data name="UIGFGachaService_ImportSuccessfulButNoRecordItemName" xml:space="preserve">
+    <value>インポートに成功しましたが、いくつかの記録にアイテム名がありません。ガチャ履歴の設定に行き、言語を変更して適用してください。</value>
+  </data>
+  <data name="UIGFGachaService_ImportSuccessful" xml:space="preserve">
+    <value>正常にインポートされました。</value>
+  </data>
+  <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
+    <value>"{0}" フィールドがガチャ記録にありません。</value>
+  </data>
+  <data name="GachaImportAndExportWindow_Export" xml:space="preserve">
+    <value>書き出し</value>
+  </data>
+  <data name="GachaImportAndExportWindow_SelectTheGachaRecordsToExport" xml:space="preserve">
+    <value>エクスポートするガチャ記録を選択してください。</value>
+  </data>
+  <data name="GachaImportAndExportWindow_TheLastGachaPull" xml:space="preserve">
+    <value>最後のガチャ引き</value>
+  </data>
+  <data name="GachaImportAndExportWindow_Count" xml:space="preserve">
+    <value>回数</value>
+  </data>
+  <data name="GachaImportAndExportWindow_TimeServerTimeZone" xml:space="preserve">
+    <value>時刻 (サーバータイムゾーン)</value>
+  </data>
+  <data name="GachaImportAndExportWindow_Name" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="GachaImportAndExportWindow_SelectTheFileToImport" xml:space="preserve">
+    <value>インポートするファイルを選択してください。</value>
+  </data>
+  <data name="GachaImportAndExportWindow_Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="GachaImportAndExportWindow_TimeZoneOffsetWarning" xml:space="preserve">
+    <value>インポートする前に、ゲームに表示されている時間と最後のガチャ回しの時間が一致していることを確認してください。 一致しない場合は、タイムゾーンのオフセットを調整してください。</value>
+  </data>
+  <data name="GachaImportAndExportWindow_TimeZoneOffset" xml:space="preserve">
+    <value>タイムゾーンオフセット</value>
+  </data>
+  <data name="GachaImportAndExportWindow_OffsetTime" xml:space="preserve">
+    <value>オフセット時間</value>
+  </data>
+  <data name="GachaImportAndExportWindow_SelectFile" xml:space="preserve">
+    <value>ファイルを選択</value>
+  </data>
+  <data name="DailyNoteButton_BH3_TimeNeededForRecovery" xml:space="preserve">
+    <value>復旧に必要な時間</value>
+  </data>
+  <data name="DailyNoteButton_BH3_DailyBP" xml:space="preserve">
+    <value>毎日BP経験値</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_DailyCommissionRewards" xml:space="preserve">
+    <value>デイリー任務報酬</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_DailyCommission" xml:space="preserve">
+    <value>デイリー依頼</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_EncounterPoints" xml:space="preserve">
+    <value>修練ポイント</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_RealmCurrency" xml:space="preserve">
+    <value>洞天宝銭</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_Expedition" xml:space="preserve">
+    <value>探索派遣</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_FullTime" xml:space="preserve">
+    <value>全回復日時</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_FullyRecovered" xml:space="preserve">
+    <value>全部回復</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_ReservedTrailblazePower" xml:space="preserve">
+    <value>予備開拓力</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_DailyTraining" xml:space="preserve">
+    <value>日常訓練</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_EchoOfWar" xml:space="preserve">
+    <value>歴戦余韻</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_BonusSynchronicityPoints" xml:space="preserve">
+    <value>追加適合値</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_OngoingAssignments" xml:space="preserve">
+    <value>依頼実行</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_AllFinished" xml:space="preserve">
+    <value>すべて完了</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_FinishedTime" xml:space="preserve">
+    <value>終了時刻</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_BatteryCharge" xml:space="preserve">
+    <value>バッテリー充電</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_DailyMissions" xml:space="preserve">
+    <value>日常タスク</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_EngagementToday" xml:space="preserve">
+    <value>本日の活躍度</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_ScratchCardMania" xml:space="preserve">
+    <value>スクラッチカード</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_Complete" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_Incomplete" xml:space="preserve">
+    <value>未完了</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_VideoStoreManagement" xml:space="preserve">
+    <value>ビデオ屋の経営</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_WaitingToOpen" xml:space="preserve">
+    <value>営業待ち</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_CurrentlyOpen" xml:space="preserve">
+    <value>営業中</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_RevenueAvailable" xml:space="preserve">
+    <value>集計待ち</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_SeasonMissions" xml:space="preserve">
+    <value>シーズンミッション</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_BountyCommissionProgress" xml:space="preserve">
+    <value>懸賞依頼進捗</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_RemainingRefreshTime" xml:space="preserve">
+    <value>今周期の残り時間</value>
+  </data>
+  <data name="DailyNoteButton_ZZZ_RiduWeeklyPoints" xml:space="preserve">
+    <value>エリー週記獲得ポイント</value>
+  </data>
+  <data name="Common_Disabled" xml:space="preserve">
+    <value>無効</value>
+  </data>
+  <data name="Common_Enabled" xml:space="preserve">
+    <value>有効</value>
+  </data>
+  <data name="HoyolabToolboxPage_ShiyuDefense" xml:space="preserve">
+    <value>式輿防衛戦</value>
+  </data>
+  <data name="HoyolabToolboxPage_DeadlyAssault" xml:space="preserve">
+    <value>危局強襲戦</value>
+  </data>
+  <data name="ShiyuDefensePage_HighestStageCleared" xml:space="preserve">
+    <value>防衛戦の最高到達記録</value>
+  </data>
+  <data name="ShiyuDefensePage_47LayerClearTime" xml:space="preserve">
+    <value>4-7 レイヤークリア時間</value>
+  </data>
+  <data name="ShiyuDefensePage_ClearTime" xml:space="preserve">
+    <value>クリア時間: </value>
+  </data>
+  <data name="ApocalypticShadowPage_TotalScore" xml:space="preserve">
+    <value>合計スコア:</value>
+  </data>
+  <data name="DeadlyAssaultPage_GlobalTopPercent" xml:space="preserve">
+    <value>グローバルのトップ</value>
+  </data>
+  <data name="ShiyuDefensePage_FastestStateTime" xml:space="preserve">
+    <value>最速ステージクリアタイム</value>
+  </data>
+  <data name="ShiyuDefensePage_FrontierEffects" xml:space="preserve">
+    <value>フロンティア効果</value>
+  </data>
+  <data name="ShiyuDefensePage_EnemyDetails" xml:space="preserve">
+    <value>敵の詳細</value>
+  </data>
+  <data name="ShiyuDefensePage_Weakness" xml:space="preserve">
+    <value>弱点</value>
+  </data>
+  <data name="ShiyuDefensePage_Resistance" xml:space="preserve">
+    <value>耐性</value>
+  </data>
+  <data name="ClearedAt" xml:space="preserve">
+    <value>クリア日時</value>
+  </data>
+  <data name="DeadlyAssaultPage_TotalScore" xml:space="preserve">
+    <value>合計スコア</value>
+  </data>
+  <data name="PureFictionPage_Score" xml:space="preserve">
+    <value>スコア:</value>
+  </data>
+  <data name="GachaLogPage_ImportAndExport" xml:space="preserve">
+    <value>インポート/エクスポート</value>
+  </data>
+  <data name="GachaLogPage_HideGachaBanners" xml:space="preserve">
+    <value>ガチャのバナーを隠す</value>
+  </data>
+  <data name="GameSettingPage_EnableHDR" xml:space="preserve">
+    <value>HDRを有効化</value>
+  </data>
+  <data name="Common_RestoreDefaults" xml:space="preserve">
+    <value>既定に復元</value>
+  </data>
+  <data name="GameSettingPage_HDRBrightnessSetting" xml:space="preserve">
+    <value>HDR輝度設定</value>
+  </data>
+  <data name="GameSettingPage_IfYouHaveMultipleMonitorsYouNeedToSetTheHDRSupportedMonitorAsThePrimaryDisplay" xml:space="preserve">
+    <value>複数のモニタがある場合は、HDR対応モニタをプライマリディスプレイとして設定する必要があります。</value>
+  </data>
+  <data name="GameSettingPage_TheCurrentMonitorDoesNotSupportHDROrWindowsHDRIsNotEnabled" xml:space="preserve">
+    <value>現在のモニターはHDRをサポートしていないか、Windows HDRが有効になっていません。</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_AdaptToMonitorBrightness" xml:space="preserve">
+    <value>ディスプレイの輝度に合わせる</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_MaxLuminance" xml:space="preserve">
+    <value>最大輝度</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_SceneryBrightness" xml:space="preserve">
+    <value>風景の明るさ</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_UIBrightness" xml:space="preserve">
+    <value>UIの明るさ</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_MonitorInformation" xml:space="preserve">
+    <value>ディスプレイ情報</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_ColorSpace" xml:space="preserve">
+    <value>カラースペース</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_PeakLuminance" xml:space="preserve">
+    <value>ピーク輝度</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_MaxFullScreenLuminance" xml:space="preserve">
+    <value>最大フルスクリーン輝度</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_SDRWhiteLuminance" xml:space="preserve">
+    <value>SDR 白色輝度</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_StandardDynamicRange" xml:space="preserve">
+    <value>スタンダードダイナミックレンジ</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_WideColorGamut" xml:space="preserve">
+    <value>広色域</value>
+  </data>
+  <data name="GenshinHDRLuminanceSettingDialog_HighDynamicRange" xml:space="preserve">
+    <value>ハイダイナミックレンジ</value>
+  </data>
+  <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
+    <value>Starwardの起動に時間がかかる場合は、Windowsセキュリティのスマート アプリ コントロールを無効にすることをおすすめします。</value>
+  </data>
+  <data name="WelcomeView_OpenWindowsSecurity" xml:space="preserve">
+    <value>Windowsセキュリティを開く</value>
+  </data>
+  <data name="WelcomeView_LearnMore" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
+    <value>ネットワークエラーが発生しました。Starwardは引き続きご利用いただけますが、今後のアップデートを受信することはできません。</value>
+  </data>
+  <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
+    <value>システムプロキシは有効です。</value>
+  </data>
+  <data name="GameSettingPage_TheCurrentMonitorDoesNotSupportHDR" xml:space="preserve">
+    <value>現在のモニターは HDR に対応していません。</value>
+  </data>
+  <data name="GameSettingPage_WindowsHDRIsNotTurnedOn" xml:space="preserve">
+    <value>Windows HDRが有効になっていません。</value>
+  </data>
+  <data name="DailyNoteButton_InterKnotMembership" xml:space="preserve">
+    <value>インターノット会員</value>
+  </data>
+  <data name="DailyNoteButton_PolychromesUnclaimed" xml:space="preserve">
+    <value>ポリクロームは受け取っていません</value>
+  </data>
+  <data name="DailyNoteButton_PolychromesClaimed" xml:space="preserve">
+    <value>ポリクロームは受け取り済みです</value>
+  </data>
+  <data name="DailyNoteButton_0DaySRemaining" xml:space="preserve">
+    <value>残り {0} 日</value>
+  </data>
+  <data name="InstallGameDialog_MappedNetworkDrivesAreNotSupportedPleaseUseANetworkSharePathStartingWithDoubleBackslashes" xml:space="preserve">
+    <value>マッピングされたネットワークドライブはサポートされていません。ダブルバックスラッシュ (\\)で始まるネットワーク共有パスを使用してください。</value>
+  </data>
+  <data name="ScreenCaptureInfoWindow_ScreenshotSaved" xml:space="preserve">
+    <value>スクリーンショットを保存しました</value>
+  </data>
+  <data name="ScreenshotPage_ManageScreenshotFolders" xml:space="preserve">
+    <value>スクリーンショットフォルダを管理</value>
+  </data>
+  <data name="ScreenshotFolderManageDialog_AddFolder" xml:space="preserve">
+    <value>フォルダを追加</value>
+  </data>
+  <data name="ScreenshotFolderManageDialog_BackingUp" xml:space="preserve">
+    <value>バックアップ中…</value>
+  </data>
+  <data name="Common_Remove" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="ScreenshotFolderManageDialog_FailedToBackupScreenshots" xml:space="preserve">
+    <value>スクリーンショットをバックアップできませんでした。</value>
+  </data>
+  <data name="ScreenCaptureInfoWindow_ScreenshotFailed" xml:space="preserve">
+    <value>スクリーンショットの撮影に失敗しました</value>
+  </data>
+  <data name="ScreenCaptureInfoWindow_CheckTheLogForMoreInformation" xml:space="preserve">
+    <value>詳細はログを確認してください。</value>
+  </data>
+  <data name="GameSettingPage_StarRailFpsTip" xml:space="preserve">
+    <value>ゲーム内の「画質」プリセットを変更しないでください。FPS設定が動作しなくなるかもしれません。 120 FPSに設定し、ゲーム設定で30 FPSと表示されていても、想定の範囲内です。</value>
+  </data>
+  <data name="ScreenshotFolderManageDialog_ImagesFromTheFollowingFoldersWillBeDisplayedInTheGallery" xml:space="preserve">
+    <value>ギャラリーには、以下のフォルダの画像が表示されます。</value>
+  </data>
+  <data name="ImageViewWindow2_OpenInExplorer" xml:space="preserve">
+    <value>エクスプローラーで開く</value>
+  </data>
+  <data name="ImageViewWindow2_OpenWith" xml:space="preserve">
+    <value>次で開く:</value>
+  </data>
+  <data name="ImageViewWindow2_Previous" xml:space="preserve">
+    <value>前へ</value>
+    <comment>Previous Image</comment>
+  </data>
+  <data name="ImageViewWindow2_Next" xml:space="preserve">
+    <value>次へ</value>
+    <comment>Next Image</comment>
+  </data>
+  <data name="ImageViewWindow2_ShowGallery" xml:space="preserve">
+    <value>ギャラリーを表示</value>
+  </data>
+  <data name="ImageViewWindow2_FitToWindow" xml:space="preserve">
+    <value>ウィンドウに合わせる</value>
+    <comment>Zoom image fit to window</comment>
+  </data>
+  <data name="ImageViewWindow2_CopyFile" xml:space="preserve">
+    <value>ファイルをコピー</value>
+  </data>
+  <data name="ImageViewWindow2_CopyPath" xml:space="preserve">
+    <value>パスをコピー</value>
+  </data>
+  <data name="ImageViewWindow2_CopyImage" xml:space="preserve">
+    <value>画像をコピー</value>
+  </data>
+  <data name="Common_Edit" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="ImageViewWindow2_SaveAs" xml:space="preserve">
+    <value>名前を付けて保存</value>
+  </data>
+  <data name="ImageViewWindow2_ImageInformation" xml:space="preserve">
+    <value>画像情報</value>
+  </data>
+  <data name="ImageViewWindow2_EditImage" xml:space="preserve">
+    <value>画像を編集</value>
+  </data>
+  <data name="ImageViewWindow2_DisplayMode" xml:space="preserve">
+    <value>表示モード</value>
+  </data>
+  <data name="ImageViewWindow2_SDRMappedLuminance" xml:space="preserve">
+    <value>SDR マッピングされた輝度</value>
+  </data>
+  <data name="ImageViewWindow2_Auto" xml:space="preserve">
+    <value>自動</value>
+  </data>
+  <data name="ImageViewWindow2_ExportImage" xml:space="preserve">
+    <value>画像をエクスポート</value>
+  </data>
+  <data name="ImageViewWindow2_ToConvertAnHDRImageToSDRPleaseUseTheEditFeature" xml:space="preserve">
+    <value>HDR 画像を SDR に変換するには、編集機能を使用してください。</value>
+  </data>
+  <data name="ImageViewWindow2_DeleteImageFile" xml:space="preserve">
+    <value>画像ファイルを削除</value>
+  </data>
+  <data name="ImageViewWindow2_CopiedToClipboard" xml:space="preserve">
+    <value>クリップボードにコピーしました。</value>
+  </data>
+  <data name="ImageViewWindow2_FileDoesNotExist" xml:space="preserve">
+    <value>ファイルが見つかりません。</value>
+  </data>
+  <data name="ImageViewWindow2_OpenWithDefaultApp" xml:space="preserve">
+    <value>既定のアプリで開く</value>
+  </data>
+  <data name="ImageViewWindow2_NoImageToDisplay" xml:space="preserve">
+    <value>表示する画像がありません</value>
+  </data>
+  <data name="Common_OpenFiles" xml:space="preserve">
+    <value>ファイルを開く</value>
+  </data>
+  <data name="ImageViewWindow2_OpenNewFiles" xml:space="preserve">
+    <value>新しいファイルを開く</value>
+  </data>
+  <data name="ImageViewWindow2_FailedToDisplayImage" xml:space="preserve">
+    <value>画像の表示に失敗しました</value>
+  </data>
+  <data name="ImageViewWindow2_FailedToSaveImage" xml:space="preserve">
+    <value>画像の保存に失敗しました</value>
+  </data>
+  <data name="ImageViewWindow2_FailedToDeleteImageFile" xml:space="preserve">
+    <value>画像の削除に失敗しました</value>
+  </data>
+  <data name="ImageViewWindow2_UnableToDeleteTheFile" xml:space="preserve">
+    <value>ファイルを削除できませんでした</value>
+  </data>
+  <data name="ImageViewWindow2_InsufficientPermissionsOrTheFileIsInUse" xml:space="preserve">
+    <value>権限が不足しているか、ファイルが使用中です。</value>
+  </data>
+  <data name="HotkeyInput_ClickToSetShortcutKeys" xml:space="preserve">
+    <value>クリックしてショートカットキーを設定</value>
+  </data>
+  <data name="HotkeyInput_PressTheShortcutKeys" xml:space="preserve">
+    <value>ショートカットキーを押す</value>
+  </data>
+  <data name="HotkeyManager_TheShortcutKeys0IsAlreadyInUse" xml:space="preserve">
+    <value>ショートカットキー（{0}）は既に使用されています。</value>
+  </data>
+  <data name="HotkeyManager_FailedToRegisterTheShortcutKeys0" xml:space="preserve">
+    <value>ショートカットキー（{0}）を登録できませんでした。</value>
+  </data>
+  <data name="HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage" xml:space="preserve">
+    <value>ショートカットキー（{0}）は既に使用されています。設定ページで変更してください。</value>
+  </data>
+  <data name="HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage" xml:space="preserve">
+    <value>ショートカットキー（{0}）を登録できませんでした。設定ページで再試行してください。</value>
+  </data>
+  <data name="ScreenshotSetting_ScreenshotShortcut" xml:space="preserve">
+    <value>スクショのショートカット</value>
+  </data>
+  <data name="HotkeySetting_OpenMainWindow" xml:space="preserve">
+    <value>メインウィンドウを開く</value>
+  </data>
+  <data name="HotkeySetting_FailedToRegisterTheShortcutKeys" xml:space="preserve">
+    <value>ショートカットキーを登録できませんでした。</value>
+  </data>
+  <data name="ScreenshotSetting_TheBuiltInScreenshotFeatureWillSaveImagesToTheFollowingFolder" xml:space="preserve">
+    <value>内蔵のスクショ機能により、以下のフォルダーに画像を保存します。</value>
+  </data>
+  <data name="Common_ChangeFolder" xml:space="preserve">
+    <value>フォルダーの変更</value>
+  </data>
+  <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
+    <value>シングルキーショートカット(F1-F12)を登録する場合は、Starwardを管理者権限で実行する必要があります。そうでなければ、ショートカットがゲームで動作しない場合があります。</value>
+  </data>
+  <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
+    <value>キーボード ショートカット</value>
+  </data>
+  <data name="SettingPage_ControllerEnhancement" xml:space="preserve">
+    <value>コントローラーの拡張</value>
+  </data>
+  <data name="GamepadControlSetting_SimulateInput" xml:space="preserve">
+    <value>入力のシミュレーション</value>
+  </data>
+  <data name="GamepadControlSetting_GuideButton" xml:space="preserve">
+    <value>ガイドボタン</value>
+  </data>
+  <data name="GamepadControlSetting_NoAction" xml:space="preserve">
+    <value>動作なし</value>
+  </data>
+  <data name="GamepadControlSetting_GameScreenshot" xml:space="preserve">
+    <value>ゲームのスクショ</value>
+  </data>
+  <data name="GamepadControlSetting_KeyboardKeys" xml:space="preserve">
+    <value>ショートカットキー</value>
+  </data>
+  <data name="GamepadControlSetting_EnterKeyText" xml:space="preserve">
+    <value>キーテキストを入力</value>
+  </data>
+  <data name="GamepadControlSetting_ShareButton" xml:space="preserve">
+    <value>共有ボタン</value>
+  </data>
+  <data name="GamepadControlSetting_ButtonMapping" xml:space="preserve">
+    <value>ボタンの割り当て</value>
+  </data>
+  <data name="GamepadControlSetting_UnrecognizedKey" xml:space="preserve">
+    <value>認識できないキー</value>
+  </data>
+  <data name="GamepadControlSetting_OnlySupportXboxControllerProtocol" xml:space="preserve">
+    <value>Xboxプロトコルコントローラーのみがサポートされています。他のタイプのコントローラーとの互換性は保証されません。</value>
+  </data>
+  <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
+    <value>ゲームコントローラーを使用してキーボードとマウスの入力をシミュレートします。この機能はゲームで正常に動作するためにStarwardを管理者権限で実行する必要があります。</value>
+  </data>
+  <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
+    <value>ガイドボタンを長押しすると、Starwardのメインウィンドウが開きます。</value>
+  </data>
+  <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
+    <value>両方のサムスティックを同時に押し込むと、コントローラーベースのキーボードとマウスシミュレーションが有効になります。</value>
+  </data>
+  <data name="GamepadControlSetting_GameInputRedistComponentDetectedSimulatedInputIsUnavailable" xml:space="preserve">
+    <value>GameInputRedist コンポーネントが検出されました。入力のシミュレーションは利用できません。</value>
+  </data>
+  <data name="GamepadControlSetting_ButtonMappingGuideDesc" xml:space="preserve">
+    <value>• ガイドボタンをマッピングする場合、デフォルトの Xbox Game Bar ショートカットは無効になります。 他のソフトウェア (Steam Big Picture Modeなど) もガイドボタンに反応する可能性があります。競合が発生した場合は、それらの機能を手動で無効にする必要があります。</value>
+  </data>
+  <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
+    <value>• キーボードキーにマッピングする場合、キーボードに表示される名前をスペースで区切って入力します。 例えば、ボタンを「Ctrl + Alt + F1」にマッピングするには、「Ctrl Alt F1」と入力します。 numpadキーについては、Pad8、Pad+ のような、キーの前にPadを追加。 この機能はゲームで正しく動作するために、Starwardが管理者権限で実行する必要があります。</value>
+  </data>
+  <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
+    <value>共有ボタンは引き続きXboxゲームバーのスクリーンショットをトリガーしますが、現時点では良い解決策はありません</value>
+  </data>
+  <data name="GamepadControlSetting_FailedToInitializeTheGameInputComponentControllerEnhancementIsUnavailable" xml:space="preserve">
+    <value>GameInput コンポーネントの初期化に失敗しました。コントローラの拡張は使用できません。</value>
+  </data>
+  <data name="SimulateInputTipsWindow_ControllerSimulatedInputIsActive" xml:space="preserve">
+    <value>コントローラの入力のシミュレーションはアクティブです。</value>
+  </data>
+  <data name="SimulateInputTipsWindow_ShowHideButtonHints" xml:space="preserve">
+    <value>ボタンヒントの表示/非表示</value>
+  </data>
+  <data name="SimulateInputTipsWindow_MouseMove" xml:space="preserve">
+    <value>マウス移動</value>
+  </data>
+  <data name="SimulateInputTipsWindow_MouseWheel" xml:space="preserve">
+    <value>マウスホイール</value>
+  </data>
+  <data name="SimulateInputTipsWindow_MouseLeftButton" xml:space="preserve">
+    <value>マウスの左ボタン</value>
+  </data>
+  <data name="SimulateInputTipsWindow_MouseRightButton" xml:space="preserve">
+    <value>マウスの右ボタン</value>
+  </data>
+  <data name="SimulateInputTipsWindow_KeyboardEscKey" xml:space="preserve">
+    <value>キーボードの Esc キー</value>
+  </data>
+  <data name="SimulateInputTipsWindow_KeyboardArrowKeys" xml:space="preserve">
+    <value>キーボードの矢印キー</value>
+  </data>
+  <data name="SimulateInputTipsWindow_LocateMousePointer" xml:space="preserve">
+    <value>マウスポインタを見つける</value>
+  </data>
+  <data name="SimulateInputTipsWindow_StopSimualteInput" xml:space="preserve">
+    <value>入力のシミュレーションを停止</value>
+  </data>
+  <data name="ScreenshotSetting_TestScreenshot" xml:space="preserve">
+    <value>テストスクショ</value>
+  </data>
+  <data name="ScreenshotSetting_AutoConvertToSDRImage" xml:space="preserve">
+    <value>SDR 画像に自動変換</value>
+  </data>
+  <data name="ScreenshotSetting_WhenCapturingHDRImagesSDRVersionWillAlsoBeSaved" xml:space="preserve">
+    <value>HDR画像をキャプチャすると、SDRバージョンも保存されます。</value>
+  </data>
+  <data name="ScreenshotSetting_ScreenshotFetureDescAndLimit" xml:space="preserve">
+    <value>スクリーンショット機能は、現在実行中のゲームをキャプチャします。複数のゲームが実行されている場合、直近でフォーカスされていたゲームが選択されます。以下の制限事項にご注意ください:
+• 最小化されたゲームウィンドウはキャプチャできません。
+• 画面からはみ出したゲームウィンドウはキャプチャされません。
+• まれに、ゲーム以外のウィンドウが誤ってキャプチャされる場合があります。</value>
+  </data>
+  <data name="ScreenshotSetting_ScreenshotWin10Limit" xml:space="preserve">
+    <value>Windows 10では、スクリーンショット機能に以下の追加制限があります:
+• ゲームのウィンドウをキャプチャ中に、色付きの枠線が表示される場合があります。
+• マウスポインタを非表示にすることはできません。</value>
+  </data>
+  <data name="ScreenshotSetting_ScreenshotWithGamepadSuggestion" xml:space="preserve">
+    <value>コントローラーでスクリーンショットをキャプチャしたい場合は、「コントローラーの拡張」ページの「ボタンの割り当て」を使用してください。</value>
+  </data>
+  <data name="TheScreenshotFeatureDoesNotSupportCloudGame" xml:space="preserve">
+    <value>スクリーンショット機能はクラウドゲームに対応していません。</value>
+  </data>
+  <data name="SimulateInputTipsWindow_SwitchWindows" xml:space="preserve">
+    <value>ウィンドウの切り替え</value>
+  </data>
+  <data name="ScreenshotSetting_AutoCopyScreenshotFile" xml:space="preserve">
+    <value>スクショファイルの自動コピー</value>
+  </data>
+  <data name="GameSettingPage_UsePopupWindow" xml:space="preserve">
+    <value>ポップアップウィンドウを使用</value>
+  </data>
+  <data name="ToolboxSetting_ImageViewer" xml:space="preserve">
+    <value>画像ビューアー</value>
+  </data>
+  <data name="ToolboxSetting_ViewOrEditImage" xml:space="preserve">
+    <value>画像の表示/編集</value>
+  </data>
+  <data name="GamepadControlSetting_GameInputRedistInstalled" xml:space="preserve">
+    <value>Microsoft GameInput コンポーネントが検出されました。バックグラウンドでアプリが実行されている場合、入力のシミュレーションは使用できません。</value>
+  </data>
+  <data name="GamepadControlSetting_GameInputRedistOutdate" xml:space="preserve">
+    <value>古いMicrosoft GameInput コンポーネントがインストールされています。アンインストールまたはアップデートしてください。</value>
+  </data>
+  <data name="GamepadControlSetting_NeedInstallGameInputRedistOnWin10" xml:space="preserve">
+    <value>Windows 10 では、コントローラ機能が正常に動作するように、Microsoft GameInput コンポーネントをインストールする必要があります。</value>
+  </data>
+  <data name="GamepadControlSetting_ClickToDownload" xml:space="preserve">
+    <value>クリックしてダウンロード。</value>
+  </data>
+  <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
+    <value>JPG としてコピー</value>
+  </data>
+  <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
+    <value>複数選択</value>
+  </data>
+  <data name="ScreenshotPage_Total0Files" xml:space="preserve">
+    <value>合計 {0} ファイル。</value>
+  </data>
+  <data name="SimulateInputTipsWindow_KeyboardEnterKey" xml:space="preserve">
+    <value>キーボードの Enter キー</value>
+  </data>
+  <data name="HoyolabToolboxPage_StygianOnslaught" xml:space="preserve">
+    <value>幽境の激戦</value>
+  </data>
+  <data name="StygianOnslaughtPage_SinglePlayer" xml:space="preserve">
+    <value>ソロで挑戦</value>
+  </data>
+  <data name="StygianOnslaughtPage_CoOp" xml:space="preserve">
+    <value>マッチング挑戦</value>
+  </data>
+  <data name="StygianOnslaughtPage_BattleTime" xml:space="preserve">
+    <value>戦闘時間</value>
+  </data>
+  <data name="StygianOnslaughtPage_HighestTotalDamageDealt" xml:space="preserve">
+    <value>最高合計ダメージ</value>
+  </data>
+  <data name="ScreenshotSetting_OtherOptions" xml:space="preserve">
+    <value>その他のオプション</value>
+  </data>
+  <data name="ScreenshotSetting_Lossless" xml:space="preserve">
+    <value>ロスレス</value>
+  </data>
+  <data name="ScreenshotSetting_FormatAndQuality" xml:space="preserve">
+    <value>フォーマットと品質</value>
+  </data>
+  <data name="ScreenCaptureInfoWindow_ProcessingImage" xml:space="preserve">
+    <value>画像処理中</value>
+  </data>
+  <data name="ScreenshotPage_BatchConvert" xml:space="preserve">
+    <value>一括変換</value>
+  </data>
+  <data name="ImageBatchConvertWindow_Quality" xml:space="preserve">
+    <value>品質</value>
+  </data>
+  <data name="ImageBatchConvertWindow_StartConvert" xml:space="preserve">
+    <value>変換を開始</value>
+  </data>
+  <data name="Common_Clear" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
+    <value>出力先</value>
+  </data>
+  <data name="ImageBatchConvertWindow_OriginalFileFolder" xml:space="preserve">
+    <value>元のファイルフォルダー</value>
+  </data>
+  <data name="ImageBatchConvertWindow_SameAsOriginalFileFormat" xml:space="preserve">
+    <value>元のファイル形式と同じ</value>
+  </data>
+  <data name="ImageBatchConvertWindow_SelectOutputFormat" xml:space="preserve">
+    <value>出力形式を選択</value>
+  </data>
+  <data name="ImageBatchConvertWindow_NoReadOrWritePermission" xml:space="preserve">
+    <value>読み取りまたは書き込みの権限がありません</value>
+  </data>
+  <data name="ImageBatchConvertWindow_ConvertFailed" xml:space="preserve">
+    <value>変換できませんでした</value>
+  </data>
+  <data name="ImageBatchConvertWindow_IfOutputFileExists" xml:space="preserve">
+    <value>出力ファイルが存在した場合</value>
+  </data>
+  <data name="ImageBatchConvertWindow_SkipDefault" xml:space="preserve">
+    <value>スキップ（デフォルト）</value>
+  </data>
+  <data name="ImageBatchConvertWindow_Overwrite" xml:space="preserve">
+    <value>上書き</value>
+  </data>
+  <data name="ImageBatchConvertWindow_Rename" xml:space="preserve">
+    <value>名前を変更</value>
+  </data>
+  <data name="Common_Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="Common_Failed" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="ImageBatchConvertWindow_ImageBatchConvert" xml:space="preserve">
+    <value>画像一括変換</value>
+  </data>
+  <data name="ScreenshotSetting_ClearThumbnailCache" xml:space="preserve">
+    <value>サムネキャッシュを削除</value>
+  </data>
+  <data name="ScreenshotSetting_ClearSuccessfully" xml:space="preserve">
+    <value>正常に削除しました</value>
+  </data>
+  <data name="ScreenshotSetting_ClearFailed" xml:space="preserve">
+    <value>失敗を削除</value>
+  </data>
+  <data name="ScreenshotSetting_HighQualityAVIFAndJPEGXLImageFormatsSaveApproximately85OfStorageSpace" xml:space="preserve">
+    <value>高品質の AVIF および JPEG XL 画像フォーマットは、ストレージスペースの約 85% を節約します。</value>
+  </data>
+  <data name="Common_CopiedToClipboard" xml:space="preserve">
+    <value>クリップボードにコピーしました。</value>
+  </data>
+  <data name="ImaginariumTheaterPage_LunarMode" xml:space="preserve">
+    <value>月諭モード</value>
+  </data>
+  <data name="ImaginariumTheaterPage_Arcana" xml:space="preserve">
+    <value>アルカナ</value>
+  </data>
+  <data name="ImaginariumTheaterPage_ArcanaChallenge0" xml:space="preserve">
+    <value>アルカナ挑戦 {0}</value>
+  </data>
+  <data name="GenshinBeyondGachaPage_MiliastraWonderlandOde" xml:space="preserve">
+    <value>星々の幻境星願</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LaunchGameUsingCMD" xml:space="preserve">
+    <value>CMD を使用してゲームを起動</value>
+  </data>
+  <data name="GameLauncherSettingDialog_AvoidShowingAlertsAboutDetectingIllegalToolInTheGame" xml:space="preserve">
+    <value>ゲーム内で不正なツールが検出された場合の警告を表示しないようにします。</value>
+  </data>
+  <data name="UpdateWindow_FullPackage" xml:space="preserve">
+    <value>フルパッケージ</value>
+  </data>
+  <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
+    <value>セットアップ版に移行</value>
+  </data>
+  <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
+    <value>重大ノード：第四フロンティア</value>
+  </data>
+  <data name="ShiyuDefensePage_CriticalNodeFifthFrontier" xml:space="preserve">
+    <value>重大ノード：第五フロンティア</value>
+  </data>
+  <data name="ItIsRecommendedToInstallTheVP9VideoExtensionsToReduceCPUUsage" xml:space="preserve">
+    <value>VP9 Video ExtensionsをインストールしてCPU使用率を下げることを推奨します。</value>
+  </data>
+  <data name="ChallengePeakPage_ChallengeAttempts" xml:space="preserve">
+    <value>挑戦回数</value>
+  </data>
+  <data name="ChallengePeakPage_KingInCheckStageRecords" xml:space="preserve">
+    <value>王手チェックステージ記録</value>
+  </data>
+  <data name="ChallengePeakPage_Cleared" xml:space="preserve">
+    <value>クリア済み</value>
+  </data>
+  <data name="ChallengePeakPage_NoClearanceRecords" xml:space="preserve">
+    <value>クリア記録なし</value>
+  </data>
+  <data name="ChallengePeakPage_KnightStageRecords" xml:space="preserve">
+    <value>ナイトステージ記録</value>
+  </data>
+  <data name="GameRecordPage_AnomalyArbitration" xml:space="preserve">
+    <value>異相アービトレーション</value>
+  </data>
+  <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
+    <value>最新バージョンに更新済みです。</value>
+  </data>
+  <data name="GameLauncherPage_PlayPause" xml:space="preserve">
+    <value>再生 / 一時停止</value>
+  </data>
+  <data name="GameLauncherPage_Gallery" xml:space="preserve">
+    <value>ギャラリー</value>
+  </data>
+  <data name="BackgroundViewPage_DeleteDuplicateFiles" xml:space="preserve">
+    <value>重複ファイルを削除</value>
+  </data>
+  <data name="BackgroundViewPage_0DuplicateFileSHasBeenDeleted" xml:space="preserve">
+    <value>{0}個の重複ファイルを削除しました。</value>
+  </data>
+  <data name="Common_All" xml:space="preserve">
+    <value>すべて</value>
+  </data>
+  <data name="Common_Video" xml:space="preserve">
+    <value>動画</value>
+  </data>
+  <data name="Common_Time" xml:space="preserve">
+    <value>時間</value>
+  </data>
+  <data name="Common_FileSize" xml:space="preserve">
+    <value>ファイルサイズ</value>
+  </data>
+  <data name="Common_Filter" xml:space="preserve">
+    <value>フィルター</value>
+  </data>
+  <data name="Common_Sort" xml:space="preserve">
+    <value>並び替え</value>
+  </data>
+  <data name="BackgroundViewPage_DeleteDuplicateFilesTip" xml:space="preserve">
+    <value>重複ファイルはファイルデータに基づいて識別されます。見た目が似ている画像でも削除されない場合があります。</value>
+  </data>
+  <data name="BackgroundViewPage_VP9VideoExtensionsTip" xml:space="preserve">
+    <value>VP9 Video Extensionsは一部の形式をサポートしていないため、サムネイル生成や正常な再生ができない可能性があります。</value>
+  </data>
+  <data name="AppBackground_ImageDecodingFailed" xml:space="preserve">
+    <value>画像デコード失敗</value>
+  </data>
+  <data name="AppBackground_PleaseInstallTheWebPImageExtension" xml:space="preserve">
+    <value>WebP Image Extensionをインストールしてください。</value>
+  </data>
+  <data name="AppBackground_VideoDecodingFailed" xml:space="preserve">
+    <value>動画デコード失敗</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_SimulatedUniversePoints" xml:space="preserve">
+    <value>模擬宇宙ポイント</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_CurrencyWarsPoints" xml:space="preserve">
+    <value>カレンシーウォーズポイント</value>
+  </data>
+  <data name="AppBackground_VideoDecodingFailedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>動画デコードに失敗しました。VP9 Video Extensionsをインストールしてください。</value>
+  </data>
+  <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
+    <value>HoYoLABから同期（実験）</value>
+  </data>
+  <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
+    <value>HoYoLABからすべて同期（実験）</value>
+  </data>
+  <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
+    <value>初期化中に不明な問題が発生しました。</value>
+  </data>
+  <data name="NoPermissionWindow_NoPermissionToFolderRestartOrClose" xml:space="preserve">
+    <value>プログラムに以下のフォルダへのアクセス権限がありません。管理者として再起動するか、フォルダを移動してください。</value>
+  </data>
+  <data name="NoPermissionWindow_RestartAsAdministrator" xml:space="preserve">
+    <value>管理者として再起動</value>
+  </data>
+  <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
+    <value>カラーマネジメント</value>
+  </data>
+  <data name="GachaLogPage_RestartGameAfterDeletingTheCacheFolder" xml:space="preserve">
+    <value>キャッシュフォルダーを削除した後、ゲームを再起動してください。</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
+    <value>キャッシュフォルダーを削除</value>
+  </data>
+  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
+    <value>画質向上</value>
+  </data>
+  <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
+    <value>DX12で起動</value>
+  </data>
+  <data name="GameLauncherPage_DetailsGt" xml:space="preserve">
+    <value>詳細 &gt;</value>
+  </data>
+  <data name="DX12IntroDialog_DX12EffectDetails" xml:space="preserve">
+    <value>DX12 効果の詳細</value>
+  </data>
+  <data name="DX12IntroDialog_RegularGraphics" xml:space="preserve">
+    <value>通常の画質</value>
+  </data>
+  <data name="DX12IntroDialog_DX12EnhancedGraphics" xml:space="preserve">
+    <value>DX12 増強画質</value>
+  </data>
+  <data name="FileManageSetting_LauncherBackground" xml:space="preserve">
+    <value>ランチャー背景</value>
+  </data>
+  <data name="FileManageSetting_CleanUpLauncherBackgroundFiles" xml:space="preserve">
+    <value>ランチャー背景ファイルをクリーンアップ</value>
+  </data>
+  <data name="Starshot_Nav_Gallery" xml:space="preserve">
+    <value>ギャラリー</value>
+  </data>
+  <data name="Starshot_Nav_Appearance" xml:space="preserve">
+    <value>外観</value>
+  </data>
+  <data name="Starshot_Nav_Hotkey" xml:space="preserve">
+    <value>ショートカット</value>
+  </data>
+  <data name="Starshot_Nav_Screenshot" xml:space="preserve">
+    <value>スクリーンショット</value>
+  </data>
+  <data name="Starshot_Nav_Storage" xml:space="preserve">
+    <value>ストレージ</value>
+  </data>
+  <data name="Starshot_Nav_Settings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Starshot_Nav_About" xml:space="preserve">
+    <value>について</value>
+  </data>
+  <data name="Starshot_SplashTagline" xml:space="preserve">
+    <value>次世代のWindowsネイティブHDRスクリーンショットツール</value>
+  </data>
+  <data name="Starshot_WallpaperNotFound" xml:space="preserve">
+    <value>壁紙ファイルが見つかりません。設定をクリアして「なし」に戻りました。</value>
+  </data>
+  <data name="Starshot_Theme" xml:space="preserve">
+    <value>テーマ</value>
+  </data>
+  <data name="Starshot_ThemeLight" xml:space="preserve">
+    <value>ライト</value>
+  </data>
+  <data name="Starshot_ThemeDark" xml:space="preserve">
+    <value>ダーク</value>
+  </data>
+  <data name="Starshot_Acrylic" xml:space="preserve">
+    <value>アクリル効果</value>
+  </data>
+  <data name="Starshot_AccentColor" xml:space="preserve">
+    <value>アクセントカラー</value>
+  </data>
+  <data name="Starshot_ApplyCurrentColor" xml:space="preserve">
+    <value>カスタムカラー</value>
+  </data>
+  <data name="Starshot_Wallpaper" xml:space="preserve">
+    <value>壁紙</value>
+  </data>
+  <data name="Starshot_WallpaperChooseFile" xml:space="preserve">
+    <value>ファイルを選択</value>
+  </data>
+  <data name="Starshot_WallpaperModeNone" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="Starshot_WallpaperModeImage" xml:space="preserve">
+    <value>画像指定</value>
+  </data>
+  <data name="Starshot_WallpaperModeFolder" xml:space="preserve">
+    <value>フォルダーランダム</value>
+  </data>
+  <data name="Starshot_WallpaperModeVideo" xml:space="preserve">
+    <value>動画指定</value>
+  </data>
+  <data name="Starshot_WallpaperChooseImage" xml:space="preserve">
+    <value>画像を選択</value>
+  </data>
+  <data name="Starshot_WallpaperChooseFolder" xml:space="preserve">
+    <value>フォルダーを選択</value>
+  </data>
+  <data name="Starshot_WallpaperChooseVideo" xml:space="preserve">
+    <value>動画を選択</value>
+  </data>
+  <data name="Starshot_WallpaperOpenFolder" xml:space="preserve">
+    <value>フォルダーを開く</value>
+  </data>
+  <data name="Starshot_WallpaperRemove" xml:space="preserve">
+    <value>壁紙を削除</value>
+  </data>
+  <data name="Starshot_WallpaperNone" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="Starshot_AccentFromWallpaper" xml:space="preserve">
+    <value>壁紙から自動アクセントカラー</value>
+  </data>
+  <data name="Starshot_HotkeyScreenshot" xml:space="preserve">
+    <value>スクリーンショット</value>
+  </data>
+  <data name="Starshot_HotkeyRegion" xml:space="preserve">
+    <value>領域キャプチャ</value>
+  </data>
+  <data name="Starshot_HotkeyRegionCopy" xml:space="preserve">
+    <value>領域コピーのみ</value>
+  </data>
+  <data name="Starshot_HotkeyScreenshotDesc" xml:space="preserve">
+    <value>モニター全体をキャプチャ（前面ウィンドウ/カーソル画面、設定で切替可）。ファイルを保存しクリップボードにもコピー。</value>
+  </data>
+  <data name="Starshot_HotkeyRegionDesc" xml:space="preserve">
+    <value>領域をドラッグ、またはウィンドウをクリック。ファイルを保存しビットマップをクリップボードにコピー。</value>
+  </data>
+  <data name="Starshot_HotkeyRegionCopyDesc" xml:space="preserve">
+    <value>領域をドラッグ、またはウィンドウをクリック。ビットマップをクリップボードにコピーするのみでファイルは保存しない。</value>
+  </data>
+  <data name="Starshot_SDRFormat" xml:space="preserve">
+    <value>SDR形式</value>
+  </data>
+  <data name="Starshot_HDRFormat" xml:space="preserve">
+    <value>HDR形式</value>
+  </data>
+  <data name="Starshot_Quality" xml:space="preserve">
+    <value>品質</value>
+  </data>
+  <data name="Starshot_ColorManagementDesc" xml:space="preserve">
+    <value>ディスプレイのICCプロファイルを読み取り実際の色域を解析し、ファイルにcICP/ICCチャンクを書き込む。HDRは常にBT2020。SDRはオン=ICCの実際の色域、オフ=BT709。</value>
+  </data>
+  <data name="Starshot_AutoConvertSDRDesc" xml:space="preserve">
+    <value>HDR画像をSDRコピー（Ultra HDR JPEG）も同時保存します。</value>
+  </data>
+  <data name="Starshot_DeleteHDRIfSDR" xml:space="preserve">
+    <value>SDR内容ならHDRを削除</value>
+  </data>
+  <data name="Starshot_DeleteHDRIfSDRDesc" xml:space="preserve">
+    <value>HDR形式だが内容はSDR（maxCLLが閾値以下）の場合、自動的にSDRに変換しHDRファイルを削除。上の自動変換設定より優先。</value>
+  </data>
+  <data name="Starshot_MonitorSource" xml:space="preserve">
+    <value>キャプチャ対象モニター</value>
+  </data>
+  <data name="Starshot_MonitorForeground" xml:space="preserve">
+    <value>前面ウィンドウ</value>
+  </data>
+  <data name="Starshot_MonitorCursor" xml:space="preserve">
+    <value>カーソル位置</value>
+  </data>
+  <data name="Starshot_FilenameTemplate" xml:space="preserve">
+    <value>ファイル名テンプレート</value>
+  </data>
+  <data name="Starshot_RegionFilenameTemplate" xml:space="preserve">
+    <value>領域用ファイル名テンプレート</value>
+  </data>
+  <data name="Starshot_FilenamePlaceholders" xml:space="preserve">
+    <value>プレースホルダー: {process} {processPath} {title} {timestamp} {time} {date} {width} {height} {year} {month} {day} {hour} {minute} {second}</value>
+  </data>
+  <data name="Starshot_ClickToInsert" xml:space="preserve">
+    <value>クリックでカーソル位置に挿入</value>
+  </data>
+  <data name="Starshot_AutoStartInvalidCleared" xml:space="preserve">
+    <value>自動起動エントリが存在しないexeを指していたため自動的にクリアしました</value>
+  </data>
+  <data name="Starshot_ClickToInsertSuffix" xml:space="preserve">
+    <value> ファイル名テンプレート</value>
+  </data>
+  <data name="Starshot_CheckUpdate" xml:space="preserve">
+    <value>アップデートを確認</value>
+  </data>
+  <data name="Starshot_UpdateAvailable" xml:space="preserve">
+    <value>新しいバージョン {0} が利用可能です（現在 {1}）</value>
+  </data>
+  <data name="Starshot_UpdateAvailableTitle" xml:space="preserve">
+    <value>新しいバージョンがあります！</value>
+  </data>
+  <data name="Starshot_UpdateNow" xml:space="preserve">
+    <value>今すぐ更新</value>
+  </data>
+  <data name="Starshot_RemindLater" xml:space="preserve">
+    <value>後で通知</value>
+  </data>
+  <data name="Starshot_IgnoreThisVersion" xml:space="preserve">
+    <value>このバージョンをスキップ</value>
+  </data>
+  <data name="Starshot_LatestVersion" xml:space="preserve">
+    <value>最新バージョンです</value>
+  </data>
+  <data name="Starshot_UpdateDownloading" xml:space="preserve">
+    <value>ダウンロード中… {0}%</value>
+  </data>
+  <data name="Starshot_UpdateExtracting" xml:space="preserve">
+    <value>展開中…</value>
+  </data>
+  <data name="Starshot_UpdateFailed" xml:space="preserve">
+    <value>更新に失敗しました</value>
+  </data>
+  <data name="Starshot_TitleMaxLength" xml:space="preserve">
+    <value>タイトル最大文字数（0=切り捨てなし）</value>
+  </data>
+  <data name="Starshot_ScreenshotFolder" xml:space="preserve">
+    <value>スクリーンショットフォルダー</value>
+  </data>
+  <data name="Starshot_LogFolder" xml:space="preserve">
+    <value>ログフォルダー</value>
+  </data>
+  <data name="Starshot_LogFolderRestartTip" xml:space="preserve">
+    <value>再起動後に反映</value>
+  </data>
+  <data name="Starshot_Change" xml:space="preserve">
+    <value>変更</value>
+  </data>
+  <data name="Starshot_StorageStats" xml:space="preserve">
+    <value>ストレージ使用量</value>
+  </data>
+  <data name="Starshot_ClearCache" xml:space="preserve">
+    <value>キャッシュを消去</value>
+  </data>
+  <data name="Starshot_StatsScreenshots" xml:space="preserve">
+    <value>スクリーンショット</value>
+  </data>
+  <data name="Starshot_StatsFiles" xml:space="preserve">
+    <value>ファイル数</value>
+  </data>
+  <data name="Starshot_StatsImageCache" xml:space="preserve">
+    <value>サムネイルキャッシュ</value>
+  </data>
+  <data name="Starshot_StatsWallpaper" xml:space="preserve">
+    <value>壁紙</value>
+  </data>
+  <data name="Starshot_StatsLog" xml:space="preserve">
+    <value>ログ</value>
+  </data>
+  <data name="Starshot_Calculating" xml:space="preserve">
+    <value>計算中…</value>
+  </data>
+  <data name="Starshot_SystemTray" xml:space="preserve">
+    <value>システムトレイ</value>
+  </data>
+  <data name="Starshot_AutoStart" xml:space="preserve">
+    <value>起動時に自動実行</value>
+  </data>
+  <data name="Starshot_AutoStartMinimized" xml:space="preserve">
+    <value>トレイに最小化して起動</value>
+  </data>
+  <data name="Starshot_AboutDesc" xml:space="preserve">
+    <value>DXGIレイヤーからディスプレイ出力のR16G16B16A16Float scRGBフレームバッファを直接取得し、HDR輝度情報（数千nitまで）を完全に保持。16bit HDR AVIFまたはJPEG XLとしてBT2020+PQ伝達関数付きでエンコード。SDRディスプレイ自動フォールバック、領域キャプチャ、マルチフォーマット一括変換も搭載。</value>
+  </data>
+  <data name="Starshot_AboutTagline" xml:space="preserve">
+    <value>次世代のWindowsネイティブHDRスクリーンショットツール</value>
+  </data>
+  <data name="Starshot_AboutThanksTitle" xml:space="preserve">
+    <value>謝辞</value>
+  </data>
+  <data name="Starshot_AboutThanksStarward" xml:space="preserve">
+    <value>スクリーンショットコア、コーデックエンジン、ウィンドウフレームワークはStarward（@Scighost）のコードを基にしています。</value>
+  </data>
+  <data name="Starshot_AboutThanksShareX" xml:space="preserve">
+    <value>領域キャプチャオーバーレイのウィンドウ検出とインタラクション設計を参考にしました。</value>
+  </data>
+  <data name="Starshot_AboutProjectHome" xml:space="preserve">
+    <value>プロジェクトホームページ</value>
+  </data>
+  <data name="Starshot_OpenDataFolder" xml:space="preserve">
+    <value>データフォルダーを開く</value>
+  </data>
+  <data name="Starshot_BackupDatabase" xml:space="preserve">
+    <value>データベースをバックアップ</value>
+  </data>
+  <data name="Starshot_LastBackup" xml:space="preserve">
+    <value>前回のバックアップ</value>
+  </data>
+  <data name="Starshot_BackupSuccess" xml:space="preserve">
+    <value>データベースをバックアップしました</value>
+  </data>
+  <data name="Starshot_BackupFailed" xml:space="preserve">
+    <value>データベースのバックアップに失敗しました</value>
+  </data>
+  <data name="Starshot_StatsBackup" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="Starshot_CheckPrerelease" xml:space="preserve">
+    <value>プレリリース版を含める</value>
+  </data>
+  <data name="Starshot_DataFolder" xml:space="preserve">
+    <value>データフォルダー</value>
+  </data>
+  <data name="Starshot_UpdateNewVersion" xml:space="preserve">
+    <value>新しいバージョン</value>
+  </data>
+  <data name="Starshot_UpdateLinks" xml:space="preserve">
+    <value>リンク</value>
+  </data>
+  <data name="Starshot_UpdateReleasePage" xml:space="preserve">
+    <value>リリースページ</value>
+  </data>
+  <data name="Starshot_UpdateFullPackage" xml:space="preserve">
+    <value>フルパッケージ</value>
+  </data>
+  <data name="Starshot_UpdateArchitecture" xml:space="preserve">
+    <value>アーキテクチャ</value>
+  </data>
+  <data name="Starshot_UpdateChannel" xml:space="preserve">
+    <value>チャネル</value>
+  </data>
+  <data name="Starshot_UpdateBuildTime" xml:space="preserve">
+    <value>ビルド日時</value>
+  </data>
+  <data name="Starshot_GithubApiNoProxy" xml:space="preserve">
+    <value>GitHub API 直結（プロキシ不使用）</value>
+  </data>
+  <data name="Starshot_RestartToTakeEffect" xml:space="preserve">
+    <value>再起動後に反映</value>
+  </data>
+  <data name="Starshot_WelcomeHello" xml:space="preserve">
+    <value>こんにちは！</value>
+  </data>
+  <data name="Starshot_WelcomeIntro" xml:space="preserve">
+    <value>Starshotへようこそ。初回起動のため、簡単な初期設定を行います。</value>
+  </data>
+  <data name="Starshot_WelcomeDxgiTitle" xml:space="preserve">
+    <value>DXGIインターフェース</value>
+  </data>
+  <data name="Starshot_WelcomeDxgiSupported" xml:space="preserve">
+    <value>サポートされています。すべてのスクリーンショット機能が利用可能です。</value>
+  </data>
+  <data name="Starshot_WelcomeDxgiNotSupported1" xml:space="preserve">
+    <value>現在の環境ではサポートされていません。</value>
+  </data>
+  <data name="Starshot_WelcomeDxgiNotSupported2" xml:space="preserve">
+    <value>スクリーンショット機能は動作せず、クラッシュする可能性があります。</value>
+  </data>
+  <data name="Starshot_WelcomeDxgiNotSupported3" xml:space="preserve">
+    <value>その他の機能は部分的に動作する可能性があります。自己責任でご利用ください。</value>
+  </data>
+  <data name="Starshot_WelcomeWallpaperTitle" xml:space="preserve">
+    <value>カスタム壁紙</value>
+  </data>
+  <data name="Starshot_WelcomeWallpaperDesc" xml:space="preserve">
+    <value>最高の外観のために壁紙の設定をお勧めします。画像または動画を選択できます。スキップすると組み込みのCC0画像（現在の背景）が使用されます。</value>
+  </data>
+  <data name="Starshot_WelcomePickWallpaper" xml:space="preserve">
+    <value>壁紙を選択</value>
+  </data>
+  <data name="Starshot_WelcomeScreenshotFolderTitle" xml:space="preserve">
+    <value>スクリーンショットの保存先</value>
+  </data>
+  <data name="Starshot_WelcomeScreenshotFolderDesc" xml:space="preserve">
+    <value>スクリーンショットの保存場所を指定します。変更しない場合、デフォルトでピクチャフォルダーのStarshotディレクトリに保存されます。</value>
+  </data>
+  <data name="Starshot_WelcomePickFolder" xml:space="preserve">
+    <value>フォルダーを選択</value>
+  </data>
+  <data name="Starshot_WelcomeStart" xml:space="preserve">
+    <value>Starshotを起動！</value>
+  </data>
+  <data name="Starshot_InfoCopied" xml:space="preserve">
+    <value>コピーしました</value>
+  </data>
+  <data name="Starshot_DebugExtractTitle" xml:space="preserve">
+    <value>デバッグ: ストリーミング展開テスト</value>
+  </data>
+  <data name="Starshot_DebugSelect" xml:space="preserve">
+    <value>参照</value>
+  </data>
+  <data name="Starshot_DebugExtract" xml:space="preserve">
+    <value>展開</value>
+  </data>
+</root>

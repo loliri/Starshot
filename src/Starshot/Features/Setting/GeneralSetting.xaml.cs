@@ -122,14 +122,14 @@ public sealed partial class GeneralSetting : PageBase
         {
             if (SetProperty(ref field, value))
             {
-                string? lang = value switch { 1 => "en-US", 2 => "zh-CN", _ => null };
+                string? lang = value switch { 1 => "en-US", 2 => "zh-CN", 3 => "ja-JP", _ => null };
                 AppConfig.Language = lang;
                 AppConfig.SetLanguage(lang);
                 Process.Start(new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = true });
                 Environment.Exit(0);
             }
         }
-    } = AppConfig.Language switch { "en-US" => 1, "zh-CN" => 2, _ => 0 };
+    } = AppConfig.Language switch { "en-US" => 1, "zh-CN" => 2, "ja-JP" => 3, _ => 0 };
 
 
     private static readonly string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";

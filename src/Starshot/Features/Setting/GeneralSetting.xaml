@@ -27,6 +27,7 @@
                     <ComboBoxItem Content="{x:Bind lang:Lang.SettingPage_FollowSystem}" />
                     <ComboBoxItem Content="English" />
                     <ComboBoxItem Content="简体中文" />
+                    <ComboBoxItem Content="日本語" />
                 </ComboBox>
             </StackPanel>
 

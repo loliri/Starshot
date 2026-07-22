@@ -127,10 +127,16 @@ public sealed partial class StorageSetting : PageBase
 
     private static string GetHelpUrl()
     {
+        const string repo = "https://github.com/loliri/Starshot";
         return AppConfig.Language switch
         {
-            "zh-CN" => "https://github.com/loliri/Starshot/blob/main/docs/README.zh-CN.md#文件名模板",
-            _ => "https://github.com/loliri/Starshot#filename-templates",
+            "zh-CN" => $"{repo}/blob/main/docs/README.zh-CN.md#文件名模板",
+            "zh-TW" => $"{repo}/blob/main/docs/README.zh-TW.md#檔案名稱範本",
+            "ja-JP" => $"{repo}/blob/main/docs/README.ja.md#ファイル名テンプレート",
+            "fr-FR" => $"{repo}/blob/main/docs/README.fr.md#modèles-de-nom-de-fichier",
+            "ru-RU" => $"{repo}/blob/main/docs/README.ru.md#шаблоны-имён-файлов",
+            "es-ES" => $"{repo}/blob/main/docs/README.es.md#plantillas-de-nombre-de-archivo",
+            _ => $"{repo}#filename-templates",
         };
     }
 
