@@ -6,6 +6,7 @@ using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.System;
@@ -20,6 +21,7 @@ public sealed partial class UpdateWindow : WindowEx
 
 
     public string CurrentVersionText { get; set => SetProperty(ref field, value); } = "";
+    public string ArchitectureText { get; set => SetProperty(ref field, value); } = RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant();
     public string NewVersionText { get; set => SetProperty(ref field, value); } = "";
     public string ReleaseNotes { get; set => SetProperty(ref field, value); } = "";
     public string ChannelText { get; set => SetProperty(ref field, value); } = "";

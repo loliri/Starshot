@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -72,8 +73,9 @@ public static class ReleaseClient
         if (dash > 0) tag = tag[..dash];
         if (!Version.TryParse(tag, out var version)) return null;
 
-        // 找 Starshot-{tag_name}-win-x64.zip（zip 名用原始 tag_name，跟 workflow 一致）
-        string zipName = $"Starshot-{payload.TagName}-win-x64.zip";
+        // 找 Starshot-{tag_name}-win-{arch}.zip（arch 跟随当前进程架构：x64 / arm64）
+        string arch = RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant();
+        string zipName = $"Starshot-{payload.TagName}-win-{arch}.zip";
         var asset = payload.Assets?.FirstOrDefault(a => string.Equals(a.Name, zipName, StringComparison.OrdinalIgnoreCase));
         string zipUrl = asset?.BrowserDownloadUrl ?? "";
 

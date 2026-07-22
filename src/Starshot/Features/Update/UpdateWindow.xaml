@@ -67,7 +67,7 @@
                                Text="{x:Bind lang:Lang.Starshot_UpdateArchitecture}" />
                     <TextBlock Grid.Row="0"
                                Grid.Column="1"
-                               Text="x64" />
+                               Text="{x:Bind ArchitectureText}" />
                     <TextBlock Grid.Row="1"
                                Grid.Column="0"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
