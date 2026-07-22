@@ -1,4 +1,4 @@
-name: Build Release
+name: Build Release Pub
 
 on:
   workflow_dispatch:
@@ -12,9 +12,6 @@ on:
         description: 'Version (e.g. 0.1.0; spaces allowed, auto-turned into -, e.g. "0.1.0 preview 1" -> 0.1.0-preview-1)'
         required: true
         default: '0.1.0'
-      body:
-        description: 'Release notes (markdown, optional; leave empty for none)'
-        required: false
 
 permissions:
   contents: write
@@ -68,12 +65,11 @@ jobs:
           path: Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.ver.outputs.vl }}
           name: ${{ github.event.inputs.version }}
-          body: ${{ github.event.inputs.body }}
-          generate_release_notes: ${{ github.event.inputs.body == '' }}
+          generate_release_notes: true
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip
         env:
