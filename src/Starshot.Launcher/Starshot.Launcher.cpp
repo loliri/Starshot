@@ -83,28 +83,36 @@ int wmain(int argc, wchar_t* argv[])
                 const std::wstring name = entry.path().filename().wstring();
                 if (name.rfind(L"app-", 0) != 0) continue;
                 if (entry.path() == current_app_dir) continue;
-                // Phase 1: 10 quick attempts (200ms apart) — always done
+                // Retry 10 times, once per second (10s total)
                 std::error_code rm_ec;
                 for (int i = 0; i < 10; ++i) {
                     std::filesystem::remove_all(entry.path(), rm_ec);
                     if (!std::filesystem::exists(entry.path())) break;
-                    Sleep(200);
+                    Sleep(1000);
                 }
                 if (!std::filesystem::exists(entry.path())) continue;
-                // No pid -> give up here (simple mode). With pid -> long retry then force-kill.
-                if (oldPid == 0) continue;
-                // Phase 2: retry once per minute for up to 5 min
-                auto deadline = std::chrono::steady_clock::now() + std::chrono::minutes(5);
-                while (std::chrono::steady_clock::now() < deadline) {
-                    Sleep(60000);
+                // Still locked after 10s. Always prompt; what we do after OK differs.
+                if (oldPid != 0)
+                {
+                    // Can force-kill: tell the user, then kill the old process and retry once.
+                    MessageBox(NULL,
+                        L"The previous Starshot is still running and holding old files locked.\n"
+                        L"It will be forced to close to finish the cleanup.",
+                        L"Starshot",
+                        MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND);
+                    HANDLE h = OpenProcess(PROCESS_TERMINATE, FALSE, oldPid);
+                    if (h) { TerminateProcess(h, 1); CloseHandle(h); }
                     std::filesystem::remove_all(entry.path(), rm_ec);
-                    if (!std::filesystem::exists(entry.path())) break;
                 }
-                if (!std::filesystem::exists(entry.path())) continue;
-                // Phase 3: force-kill the old main process (still holding the dir locked) and try once more
-                HANDLE h = OpenProcess(PROCESS_TERMINATE, FALSE, oldPid);
-                if (h) { TerminateProcess(h, 1); CloseHandle(h); }
-                std::filesystem::remove_all(entry.path(), rm_ec);
+                else
+                {
+                    // No pid to kill — tell the user to handle it themselves.
+                    MessageBox(NULL,
+                        L"Could not remove old files (maybe locked by another process).\n"
+                        L"Please delete the old folder manually.",
+                        L"Starshot",
+                        MB_OK | MB_ICONWARNING | MB_SETFOREGROUND);
+                }
             }
         }
     }
