@@ -354,6 +354,12 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - Au moment où l'overlay de capture régionale s'ouvre, le curseur reste dans sa forme par défaut. **Il faut bouger la souris une fois** pour que le curseur en croix apparaisse (le `ProtectedCursor` de WinUI ne prend pas effet immédiatement sur un pointeur immobile déjà au-dessus de l'élément ; un mouvement déclenche un événement de pointeur, après quoi tout fonctionne normalement)
 - Sur un double écran avec DPI différents (ex. primaire 150 %, secondaire 125 %), les coordonnées de la superposition de capture de région sont décalées sur l'écran secondaire (loupe / sélection désalignées). Solution : utiliser la même échelle sur les deux écrans
 
+## Internationalisation (i18n)
+
+Les traductions sont basées sur les fichiers `.resx` dans `src/Starshot.Language/` (`Lang.resx` est l'anglais par défaut ; `Lang.zh-CN.resx` etc. par langue). Il faut aussi ajouter une option au ComboBox de langue dans `GeneralSetting` + son mappage `LanguageIndex`.
+
+Contributions de traduction bienvenues : forkez le dépôt → copiez `Lang.resx` en `Lang.{votre-locale}.resx` → traduisez → ouvrez une PR.
+
 ## Notes de développement
 
 Ce projet est en phase de développement actif. Les fonctionnalités peuvent évoluer à tout moment — restez à l'écoute des mises à jour !

@@ -352,6 +352,12 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - When the region screenshot overlay first opens, the cursor remains the default system shape. **You need to move the mouse once** for the crosshair cursor to appear (WinUI `ProtectedCursor` does not take immediate effect on a stationary pointer already over the element — moving once triggers a pointer event, after which it works normally).
 - On mixed-DPI dual monitors (e.g. primary 150%, secondary 125%), the region capture overlay's coordinates are off on the secondary monitor (magnifier / selection misaligned). Workaround: use the same scale on both monitors.
 
+## Internationalization (i18n)
+
+Translations are based on `.resx` resource files under `src/Starshot.Language/` (`Lang.resx` is the English default; `Lang.zh-CN.resx` etc. are per-locale). You also need to add an option to the language ComboBox in `GeneralSetting` + its `LanguageIndex` mapping.
+
+Translation contributions welcome: fork the repo → copy `Lang.resx` to `Lang.{your-locale}.resx` → translate → open a PR.
+
 ## Development Notes
 
 This project is under active development. Features may change at any time — stay tuned for updates!

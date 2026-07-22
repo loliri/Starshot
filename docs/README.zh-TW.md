@@ -354,6 +354,12 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - 區域截圖覆蓋層開啟瞬間，游標仍是系統預設形狀，**需移動一次滑鼠後十字游標才出現**（WinUI `ProtectedCursor` 對已在元素上的靜止指標不立即生效，移動一次觸發 pointer 事件後即正常）
 - 雙屏 DPI 不一致（如主屏 150%、副屏 125%）時，區域截圖覆蓋層在副屏的座標會錯位（放大鏡 / 選區對不上）。規避：統一雙屏縮放比例
 
+## 國際化（i18n）
+
+翻譯基於 `src/Starshot.Language/` 下的 `.resx` 資源檔（`Lang.resx` 為英文預設，`Lang.zh-CN.resx` 等為各語言）。另外還需在 `GeneralSetting` 的語言 ComboBox 加選項 + `LanguageIndex` 映射。
+
+歡迎貢獻翻譯：fork 儲存庫 → 複製 `Lang.resx` 為 `Lang.{你的語言}.resx` → 翻譯 → 提交 PR。
+
 ## 開發說明
 
 本專案正處於開發階段，功能可能隨時變動，請隨時關注更新！
