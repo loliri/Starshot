@@ -269,7 +269,7 @@ Raíz/
 
 ### Lanzador
 
-Programa nativo en C++ (~400 KB). Lee `version.ini` para decidir si lanzar `app-{version}/Starshot.exe` (si no hay version.ini, usa `app/` para compilaciones debug/local). Al ejecutarse con `--clean` (o `--clean=<pid>`), recorre los directorios `app-*` y elimina los que no corresponden a la versión actual: primero 10 reintentos rápidos; con pid sigue reintentando una vez por minuto hasta 5 min y luego fuerza el cierre del proceso principal anterior por pid antes de un último borrado (sin pid, renuncia tras los 10 reintentos).
+Programa nativo en C++ (~400 KB). Lee `version.ini` para decidir si lanzar `app-{version}/Starshot.exe` (si no hay version.ini, usa `app/` para compilaciones debug/local). Al ejecutarse con `--clean` (o `--clean=<pid>`), recorre los directorios `app-*` y elimina los que no corresponden a la versión actual.
 
 ### Bandeja e inicio en segundo plano
 

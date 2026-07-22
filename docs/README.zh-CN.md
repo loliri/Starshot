@@ -270,7 +270,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 ### 启动器
 
-C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Starshot.exe`（无 version.ini 则 `app/`，debug/local 构建）。带 `--clean`（或 `--clean=<pid>`）参数启动时遍历 `app-*` 目录删除非当前版本——先 10 次快速重试；带 pid 时再每分钟一次撑 5 分钟，最后按 pid 强杀旧主进程后再删（不带 pid 则 10 次后放弃）。
+C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Starshot.exe`（无 version.ini 则 `app/`，debug/local 构建）。带 `--clean`（或 `--clean=<pid>`）参数启动时遍历 `app-*` 目录删除非当前版本。
 
 ### 托盘与后台启动
 

@@ -269,7 +269,7 @@ Racine/
 
 ### Lanceur
 
-Programme natif C++ (~400 Ko). Lit `version.ini` pour décider de lancer `app-{version}/Starshot.exe` (si absent, utilise `app/` pour les builds debug/local). Lorsqu'il est lancé avec `--clean` (ou `--clean=<pid>`), parcourt les répertoires `app-*` et supprime ceux qui ne correspondent pas à la version actuelle — d'abord 10 tentatives rapides ; avec un pid, continue à réessayer une fois par minute pendant 5 min, puis force la fermeture de l'ancien processus principal par pid avant une dernière suppression (sans pid, abandon après les 10 tentatives).
+Programme natif C++ (~400 Ko). Lit `version.ini` pour décider de lancer `app-{version}/Starshot.exe` (si absent, utilise `app/` pour les builds debug/local). Lorsqu'il est lancé avec `--clean` (ou `--clean=<pid>`), parcourt les répertoires `app-*` et supprime ceux qui ne correspondent pas à la version actuelle.
 
 ### Barre des tâches et démarrage en arrière-plan
 

@@ -267,7 +267,7 @@ Root/
 
 ### Launcher
 
-Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `app-{version}/Starshot.exe` (if no version.ini, falls back to `app/` for debug/local builds). When launched with `--clean` (or `--clean=<pid>`), iterates `app-*` directories and deletes non-current versions — 10 quick retries first; with a pid it keeps retrying once per minute for up to 5 min, then force-kills that old main process by pid before a final removal (no pid = give up after the 10 retries).
+Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `app-{version}/Starshot.exe` (if no version.ini, falls back to `app/` for debug/local builds). When launched with `--clean` (or `--clean=<pid>`), iterates `app-*` directories and deletes non-current versions.
 
 ### Tray & Background Startup
 
