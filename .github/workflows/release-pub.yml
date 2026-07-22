@@ -16,9 +16,42 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: windows-latest
 
+  version:
+    runs-on: windows-latest
+    outputs:
+      v: ${{ steps.ver.outputs.v }}
+      vl: ${{ steps.ver.outputs.vl }}
+    steps:
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $input = "${{ github.event.inputs.version }}".Trim()
+          if ([string]::IsNullOrEmpty($input)) {
+            $latest = (gh api repos/${{ github.repository }}/releases/latest --jq '.tag_name' 2>$null)
+            if ($LASTEXITCODE -eq 0 -and $latest -match '^(\d+)\.(\d+)\.(\d+)') {
+              $input = "$($Matches[1]).$([int]$Matches[2] + 1).0"
+              Write-Host "Version empty, auto-incremented from $latest to $input"
+            } else {
+              $input = "0.1.0"
+              Write-Host "Version empty, no latest release found, fallback to 0.1.0"
+            }
+          }
+          $v = $input.Replace(' ', '-')
+          $vl = $v.ToLowerInvariant()
+          "v=$v" >> $env:GITHUB_OUTPUT
+          "vl=$vl" >> $env:GITHUB_OUTPUT
+
+
+  build:
+    needs: version
+    strategy:
+      matrix:
+        platform: [x64, arm64]
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,59 +64,51 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Resolve version
-        id: ver
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # v：原始（仅空格→-），用于 version.ini（About 显示保留大小写）
-          # vl：小写，用于 tag / zip 名 / app 目录（GitHub tag 与文件系统约定小写）
-          $input = "${{ github.event.inputs.version }}".Trim()
-          if ([string]::IsNullOrEmpty($input)) {
-            # 版本号留空：读 latest release 的 tag，minor +1（如 0.1.0 -> 0.2.0）
-            # 没有 latest 或解析失败直接让 action 失败（不 fallback）
-            $latest = (gh api repos/${{ github.repository }}/releases/latest --jq '.tag_name' 2>$null)
-            if ($LASTEXITCODE -ne 0 -or -not ($latest -match '^(\d+)\.(\d+)\.(\d+)')) {
-              Write-Error "Version is empty and no parseable latest release found to auto-increment. Aborting."
-              exit 1
-            }
-            $input = "$($Matches[1]).$([int]$Matches[2] + 1).0"
-            Write-Host "Version empty, auto-incremented from $latest to $input"
-          }
-          $v = $input.Replace(' ', '-')
-          $vl = $v.ToLowerInvariant()
-          "v=$v" >> $env:GITHUB_OUTPUT
-          "vl=$vl" >> $env:GITHUB_OUTPUT
-
       - name: Build launcher
-        run: msbuild src/Starshot.Launcher/Starshot.Launcher.vcxproj -p:Configuration=Release -p:Platform=x64
+        run: msbuild src/Starshot.Launcher/Starshot.Launcher.vcxproj -p:Configuration=Release -p:Platform=${{ matrix.platform }}
 
       - name: Publish main app
-        run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
+        run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=${{ matrix.platform }} -r win-${{ matrix.platform }}
 
       - name: Version layout
         run: |
-          Move-Item build/release/app "build/release/app-${{ steps.ver.outputs.vl }}" -Force
-          # version.ini 保留原始大小写（About 页显示），启动器读取时自己转小写去找 app 目录
-          "version=${{ steps.ver.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
+          Move-Item build/release/app "build/release/app-${{ needs.version.outputs.vl }}" -Force
+          "version=${{ needs.version.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
 
       - name: Zip release
-        run: Compress-Archive -Path build/release/* -DestinationPath "Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip"
+        run: Compress-Archive -Path build/release/* -DestinationPath "Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Starshot-${{ steps.ver.outputs.vl }}-win-x64
-          path: Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip
+          name: Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}
+          path: Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip
+
+
+  release:
+    needs: [version, build]
+    runs-on: windows-latest
+    steps:
+      - name: Download x64
+        uses: actions/download-artifact@v4
+        with:
+          name: Starshot-${{ needs.version.outputs.vl }}-win-x64
+          path: x64
+      - name: Download arm64
+        uses: actions/download-artifact@v4
+        with:
+          name: Starshot-${{ needs.version.outputs.vl }}-win-arm64
+          path: arm64
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ steps.ver.outputs.vl }}
-          name: ${{ steps.ver.outputs.v }}
+          tag_name: ${{ needs.version.outputs.vl }}
+          name: ${{ needs.version.outputs.v }}
           generate_release_notes: true
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
-          files: Starshot-${{ steps.ver.outputs.vl }}-win-x64.zip
+          files: |
+            x64/Starshot-${{ needs.version.outputs.vl }}-win-x64.zip
+            arm64/Starshot-${{ needs.version.outputs.vl }}-win-arm64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
