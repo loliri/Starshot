@@ -7,6 +7,7 @@
 		<LangVersion>preview</LangVersion>
 		<RootNamespace>Starshot</RootNamespace>
 		<Nullable>enable</Nullable>
+		<NoWarn>CS8618;CS9264;CS8600;CS8603;CS0169;WMC1506</NoWarn>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>../logo.ico</ApplicationIcon>
