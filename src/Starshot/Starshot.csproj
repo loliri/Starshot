@@ -72,6 +72,9 @@
 		<Content Include="Assets\Font\PhotosIcons.ttf">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
+		<Content Include="..\logo.png" Link="Assets\logo.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 		<Content Update="Assets\**">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
