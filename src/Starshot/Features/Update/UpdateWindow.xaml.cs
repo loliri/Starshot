@@ -37,8 +37,8 @@ public sealed partial class UpdateWindow : WindowEx
         InitializeComponent();
         Title = "Starshot";
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-        // 锁死深色：Labs MarkdownTextBlock 代码块默认浅色字，深色背景才看得见
-        RootGrid.RequestedTheme = ElementTheme.Dark;
+        // Labs MarkdownTextBlock 只认系统主题（不看 app 主题），窗口也跟随系统保持一致
+        RootGrid.RequestedTheme = ElementTheme.Default;
         SystemBackdrop = new DesktopAcrylicBackdrop();
         AdaptTitleBarButtonColorToActuallTheme();
         CenterInScreen(1000, 680);
