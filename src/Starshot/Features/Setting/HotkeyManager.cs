@@ -52,11 +52,11 @@ internal static class HotkeyManager
                     hotkey = HotkeyInput.GetHotkeyText((uint)modifiers, (uint)key);
                     if (error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
                     {
-                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 0);
+                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 5000);
                     }
                     else
                     {
-                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 0);
+                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 5000);
                     }
                 }
             }
@@ -80,9 +80,9 @@ internal static class HotkeyManager
             item.ErrorShown = true;
             string hotkey = HotkeyInput.GetHotkeyText((uint)item.Modifiers, (uint)item.Key);
             if (item.Error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
-                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 0);
+                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 5000);
             else
-                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 0);
+                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 5000);
         }
     }
 

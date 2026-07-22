@@ -81,7 +81,7 @@ public sealed partial class AboutPage : PageBase
         }
         catch (Exception ex)
         {
-            InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed, 5000);
+            InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed);
         }
     }
 

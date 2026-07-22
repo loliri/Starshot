@@ -434,7 +434,7 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 3000);
+                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 5000);
                 }
             }
         }
@@ -473,13 +473,13 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 3000);
+                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 5000);
                 }
             }
         }
         catch (Exception ex)
         {
-            InAppToast.MainWindow?.Error(Lang.ImageViewWindow2_CopyAsJPG, ex.Message, 3000);
+            InAppToast.MainWindow?.Error(Lang.ImageViewWindow2_CopyAsJPG, ex.Message);
             _logger.LogError(ex, "Failed to copy file as JPG to clipboard");
         }
     }
@@ -500,7 +500,7 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 3000);
+                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 5000);
                 }
             }
         }
@@ -524,7 +524,7 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 3000);
+                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 5000);
                 }
             }
         }
@@ -549,7 +549,7 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 3000);
+                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow2_FileDoesNotExist, item.FilePath, 5000);
                 }
             }
         }

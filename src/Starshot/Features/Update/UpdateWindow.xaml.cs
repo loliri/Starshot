@@ -101,7 +101,7 @@ public sealed partial class UpdateWindow : WindowEx
             HasError = Visibility.Visible;
             Button_Update.IsEnabled = true;
             Button_Remind.IsEnabled = true;
-            InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed, 5000);
+            InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed);
         }
     }
 

@@ -175,14 +175,14 @@ public class InAppToast : Behavior<StackPanel>
 
 
 
-    public void Error(string? title, string? message = null, int duration = 5000)
+    public void Error(string? title, string? message = null, int duration = 7000)
     {
         AddInfoBar(InfoBarSeverity.Error, title, message, duration);
     }
 
 
 
-    public void Error(Exception ex, string? message = null, int duration = 5000)
+    public void Error(Exception ex, string? message = null, int duration = 7000)
     {
         if (string.IsNullOrWhiteSpace(message))
         {
