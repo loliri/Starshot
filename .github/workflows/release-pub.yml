@@ -70,6 +70,18 @@ jobs:
       - name: Publish main app
         run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=${{ matrix.platform }} -r win-${{ matrix.platform }}
 
+      - name: Trim unsupported locales
+        run: |
+          # 从 Starshot.Language 的 Lang.{locale}.resx 读程序支持的语言（Lang.resx 是默认 en，主 dll 内无目录）
+          $supported = Get-ChildItem src/Starshot.Language/Lang.*.resx | ForEach-Object {
+            if ($_.Name -match '^Lang\.([a-z]{2}(-[A-Za-z0-9]+)?)\.resx$') { $Matches[1] }
+          }
+          Write-Host "Supported locales: $($supported -join ', ')"
+          Get-ChildItem build/release/app -Directory | Where-Object {
+            if ($supported -contains $_.Name) { return $false }
+            try { [void][System.Globalization.CultureInfo]::GetCultureInfo($_.Name); return $true } catch { return $false }
+          } | Remove-Item -Recurse -Force
+
       - name: Version layout
         run: |
           Move-Item build/release/app "build/release/app-${{ needs.version.outputs.vl }}" -Force
