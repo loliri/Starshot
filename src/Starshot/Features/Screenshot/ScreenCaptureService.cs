@@ -187,45 +187,65 @@ internal class ScreenCaptureService
             _logger.LogInformation("Region capture: {count} displays found", displays.Count);
             if (displays.Count == 0) return;
 
-            // 判断是否有 HDR
+            // 逐显示器记录 HDR 标志：float composite 里 SDR 屏白=1.0、HDR 屏白=SdrWhiteLevel/80，语义不同
             bool anyHDR = false;
+            var isHdrDisplay = new bool[displays.Count];
             for (int i = 0; i < displays.Count; i++)
             {
                 using var di = DisplayInformation.CreateForDisplayId(displays[i].DisplayId);
                 if (di.GetAdvancedColorInfo().CurrentAdvancedColorKind is DisplayAdvancedColorKind.HighDynamicRange)
                 {
+                    isHdrDisplay[i] = true;
                     anyHDR = true;
-                    break;
                 }
             }
             var pixelFormat = anyHDR ? DirectXPixelFormat.R16G16B16A16Float : DirectXPixelFormat.R8G8B8A8UIntNormalized;
 
+            // SDR 白电平（HDR 屏的 SdrWhiteLevelInNits）：SDR 屏帧提亮 + 下游覆盖层/保存 tonemap 共用
+            float sdrWhiteLevel = anyHDR ? GetSdrWhiteLevelFromDisplays(displays) : 80;
+
             // 并行捕获所有显示器（同时启动所有 GraphicsCaptureSession，等全部帧到达）
             var device = CanvasDevice.GetSharedDevice();
-            var captureTasks = new Task<(int ox, int oy, CanvasBitmap bmp)>[displays.Count];
+            var captureTasks = new Task<(int ox, int oy, CanvasBitmap bmp, bool isHDR)>[displays.Count];
             for (int i = 0; i < displays.Count; i++)
             {
                 var d = displays[i];
                 var bounds = d.OuterBounds;
                 int ox = bounds.X - vx;
                 int oy = bounds.Y - vy;
+                bool isHDR = isHdrDisplay[i];
                 captureTasks[i] = Task.Run(async () =>
                 {
                     using var frame = await ScreenCaptureHelper.CaptureMonitorAsync((nint)d.DisplayId.Value, pixelFormat);
                     var bmp = CanvasBitmap.CreateFromDirect3D11Surface(device, frame.Surface, 96);
-                    return (ox, oy, bmp);
+                    return (ox, oy, bmp, isHDR);
                 });
             }
             var results = await Task.WhenAll(captureTasks);
 
             // 合成到虚拟屏幕大小的 CanvasRenderTarget
+            // float 路径下 SDR 屏白=1.0(80nits)、HDR 屏白=SdrWhiteLevel/80；SDR 屏帧先 ×(SdrWhiteLevel/80) 提亮，让 composite 统一为 scene-referred，下游才能共用同一个 sdrWhiteLevel
             composite = new CanvasRenderTarget(device, vw, vh, 96, pixelFormat, CanvasAlphaMode.Premultiplied);
             for (int i = 0; i < results.Length; i++)
             {
                 var r = results[i];
                 using (var ds = composite.CreateDrawingSession())
                 {
-                    ds.DrawImage(r.bmp, r.ox, r.oy);
+                    if (anyHDR && !r.isHDR && sdrWhiteLevel != 80)
+                    {
+                        var wle = new WhiteLevelAdjustmentEffect
+                        {
+                            Source = r.bmp,
+                            InputWhiteLevel = sdrWhiteLevel,
+                            OutputWhiteLevel = 80,
+                            BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                        };
+                        ds.DrawImage(wle, r.ox, r.oy);
+                    }
+                    else
+                    {
+                        ds.DrawImage(r.bmp, r.ox, r.oy);
+                    }
                 }
                 r.bmp.Dispose();
             }
@@ -234,9 +254,6 @@ internal class ScreenCaptureService
             nint fgHwnd = (nint)User32.GetForegroundWindow();
             float dpi = User32.GetDpiForWindow(fgHwnd);
             float scale = dpi / 96f;
-
-            // SDR 白电平（用于覆盖层 HDR→SDR 色调映射）
-            float sdrWhiteLevel = anyHDR ? GetSdrWhiteLevelFromDisplays(displays) : 80;
 
             // 弹覆盖层，等用户选区
             _logger.LogInformation("Region capture: showing overlay window");
