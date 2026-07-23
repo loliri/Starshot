@@ -131,6 +131,7 @@ public sealed partial class AppBackground : UserControl
             DisposeVideoResource();
             BackgroundImageSource = null;
 
+            _logger.LogInformation("UpdateBackground file={File} isVideo={IsVideo} fellBack={FellBack} lastFile={LastFile}", file, IsSupportedVideo(file), fellBackToImage, _lastFile);
             if (IsSupportedVideo(file))
             {
                 StartMediaPlayer(file);
@@ -358,6 +359,7 @@ public sealed partial class AppBackground : UserControl
 
     private void StartMediaPlayer(string file)
     {
+        _logger.LogInformation("StartMediaPlayer {File}", file);
         _mediaPlayer = new MediaPlayer
         {
             IsLoopingEnabled = true,
@@ -393,6 +395,7 @@ public sealed partial class AppBackground : UserControl
                     _videoSurface = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), w, h, 96);
                     _videoImageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), w, h, 96);
                     BackgroundImageSource = _videoImageSource;
+                    _logger.LogInformation("VideoFrameAvailable first frame {W}x{H}", w, h);
                 }
                 sender.CopyFrameToVideoSurface(_videoSurface);
                 using var ds = _videoImageSource.CreateDrawingSession(Colors.Transparent);

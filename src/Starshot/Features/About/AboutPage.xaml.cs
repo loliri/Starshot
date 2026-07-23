@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Navigation;
+using Serilog;
 using Starshot.Features.Update;
 using Starshot.Frameworks;
 using Starshot.Helpers;
@@ -81,6 +82,7 @@ public sealed partial class AboutPage : PageBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "AboutPage.CheckUpdate failed");
             InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed);
         }
     }
