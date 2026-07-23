@@ -2759,7 +2759,8 @@
   <data name="Starshot_WallpaperModeImage" xml:space="preserve"><value>指定图片</value></data>
   <data name="Starshot_WallpaperModeFolder" xml:space="preserve"><value>文件夹随机</value></data>
   <data name="Starshot_WallpaperModeVideo" xml:space="preserve"><value>指定视频</value></data>
-  <data name="Starshot_WallpaperFolderVideoOnly" xml:space="preserve"><value>仅视频</value></data>
+  <data name="Starshot_WallpaperFolderVideoOnly" xml:space="preserve"><value>视频优先</value></data>
+  <data name="Starshot_WallpaperFolderVideoOnlyDesc" xml:space="preserve"><value>优先选择视频；视频无法初始化时回退到随机图片</value></data>
   <data name="Starshot_WallpaperVideoFallbackToImage" xml:space="preserve"><value>文件夹内无视频，已随机选取一张图片</value></data>
   <data name="Starshot_WallpaperChooseImage" xml:space="preserve"><value>选择图片</value></data>
   <data name="Starshot_WallpaperChooseFolder" xml:space="preserve"><value>选择文件夹</value></data>

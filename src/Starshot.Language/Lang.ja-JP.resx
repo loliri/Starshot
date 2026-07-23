@@ -2739,7 +2739,10 @@
     <value>動画指定</value>
   </data>
   <data name="Starshot_WallpaperFolderVideoOnly" xml:space="preserve">
-    <value>動画のみ</value>
+    <value>動画優先</value>
+  </data>
+  <data name="Starshot_WallpaperFolderVideoOnlyDesc" xml:space="preserve">
+    <value>動画を優先して選択；動画を初期化できない場合はランダムな画像に切り替えます</value>
   </data>
   <data name="Starshot_WallpaperVideoFallbackToImage" xml:space="preserve">
     <value>フォルダーに動画がありません。画像をランダムに選択しました</value>

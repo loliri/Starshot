@@ -78,6 +78,11 @@
                               Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}"
                               OffContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}"
                               OnContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnlyDesc}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}" />
             </StackPanel>
 
 

@@ -7840,6 +7840,7 @@ namespace Starshot.Language {
         public static string Starshot_WallpaperModeFolder { get { return ResourceManager.GetString("Starshot_WallpaperModeFolder", resourceCulture); } }
         public static string Starshot_WallpaperModeVideo { get { return ResourceManager.GetString("Starshot_WallpaperModeVideo", resourceCulture); } }
         public static string Starshot_WallpaperFolderVideoOnly { get { return ResourceManager.GetString("Starshot_WallpaperFolderVideoOnly", resourceCulture); } }
+        public static string Starshot_WallpaperFolderVideoOnlyDesc { get { return ResourceManager.GetString("Starshot_WallpaperFolderVideoOnlyDesc", resourceCulture); } }
         public static string Starshot_WallpaperVideoFallbackToImage { get { return ResourceManager.GetString("Starshot_WallpaperVideoFallbackToImage", resourceCulture); } }
         public static string Starshot_WallpaperChooseImage { get { return ResourceManager.GetString("Starshot_WallpaperChooseImage", resourceCulture); } }
         public static string Starshot_WallpaperChooseFolder { get { return ResourceManager.GetString("Starshot_WallpaperChooseFolder", resourceCulture); } }
