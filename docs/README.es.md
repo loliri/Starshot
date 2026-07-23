@@ -97,7 +97,7 @@ La mayoría de las herramientas de captura solo obtienen SDR de 8 bits incluso e
 1. **Captura HDR**: cuando la pantalla informa modo HDR, solicita el formato de píxel `R16G16B16A16Float` para obtener los datos scRGB de punto flotante completos (luminancia de hasta miles de nits)
 2. **Guardado HDR**: AVIF / JPEG XL de 16 bits, espacio de color BT.2020 + función de transferencia PQ. Las altas luces no se recortan, la gama no se reduce
 3. **Cálculo de maxCLL**: el efecto de histograma de Win2D calcula la luminancia máxima del contenido, usada para distinguir el contenido HDR real del contenido SDR en contenedor HDR
-4. **Gestión del color**: lee el perfil ICC de la pantalla para extraer los primarios de gama reales, escribe los chunks cICP/ICC en el archivo. HDR fuerza BT.2020; la gestión de color SDR se puede activar/desactivar (activado = leer gama real del ICC, desactivado = BT.709)
+4. **Gestión del color**: lee el perfil ICC de la pantalla para extraer los primarios de gama reales, escribe los chunks cICP/ICC en el archivo. HDR es siempre BT.2020; para SDR está desactivado por defecto (BT.709) y se puede activar opcionalmente (lee la gama real del ICC); al activarlo primero verifica la configuración de color de la pantalla y no se puede habilitar si es inválida (p. ej. máquinas virtuales, dispositivos sin perfil ICC)
 
 #### Manejo de contenido SDR
 
@@ -216,7 +216,7 @@ Después de una captura, aparece una miniatura + notificación de estado (no int
 - **Fondo de pantalla personalizado**: tres modos
   - **Imagen específica**: elige una imagen, se muestra fija
   - **Video específico**: reproducción en bucle silenciada; se pausa automáticamente al ocultar la ventana principal
-  - **Aleatorio desde carpeta**: elige una imagen o video aleatorio de una carpeta en cada inicio
+  - **Aleatorio desde carpeta**: elige una imagen o video aleatorio de una carpeta en cada inicio; un interruptor opcional de solo videos hace que elija únicamente videos, y si la carpeta no tiene video, recurre a una imagen aleatoria con un aviso
   - Detección automática de pérdida de fuente del fondo, limpieza de configuración y vuelta a sin fondo + notificación toast
 - **Color de acento**:
   - **Extracción automática del fondo** (activado por defecto): muestrea el color dominante del fondo como color de acento de la aplicación (aumento de saturación HSV). Para videos, solo se muestrea el primer fotograma para evitar parpadeos.
@@ -385,6 +385,13 @@ Esto suele ser un problema de los códecs de imagen del sistema Windows (extensi
 - **Webp Image Extensions**
 
 Reinicia Starshot después de actualizar. Si el problema persiste, [abre un Issue](../../../issues/new) adjuntando una captura de pantalla.
+
+</details>
+
+<details>
+<summary><b>La captura de pantalla falla al guardar (máquinas virtuales / algunos monitores)</b></summary>
+
+Estos entornos (máquinas virtuales, dispositivos sin perfil ICC) reportan configuraciones de color de monitor inválidas; con la gestión de color activada, el codificador (lcms2) falla al procesar los datos de gama malformados. Mantén la gestión de color desactivada (valor por defecto) para evitarlo; las capturas HDR no se ven afectadas.
 
 </details>
 

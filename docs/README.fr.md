@@ -97,7 +97,7 @@ La plupart des outils de capture ne produisent que du SDR 8bit même sur les éc
 1. **Capture HDR** : Lorsque l'écran signale le mode HDR, demande le format de pixel `R16G16B16A16Float` pour obtenir les données scRGB flottantes complètes (luminance jusqu'à plusieurs milliers de nits)
 2. **Sauvegarde HDR** : AVIF / JPEG XL 16bit, espace BT.2020 + fonction de transfert PQ. Les hautes lumières ne sont pas écrêtées, la gamme n'est pas réduite
 3. **Calcul maxCLL** : L'effet d'histogramme Win2D calcule la luminance maximale du contenu, utilisée pour distinguer le contenu réellement HDR du contenu SDR en conteneur HDR
-4. **Gestion des couleurs** : Lecture du profil ICC de l'écran pour extraire les primaires de gamme réelles, écriture des chunks cICP/ICC dans le fichier. HDR force BT.2020 ; la gestion des couleurs SDR est activable (activé = lecture ICC gamme réelle, désactivé = BT.709)
+4. **Gestion des couleurs** : Lecture du profil ICC de l'écran pour extraire les primaires de gamme réelles, écriture des chunks cICP/ICC dans le fichier. Le HDR est toujours en BT.2020 ; pour le SDR, la gestion des couleurs est désactivée par défaut (BT.709) et peut être activée en option (lit la gamme réelle depuis le profil ICC) — l'activation sonde d'abord la configuration colorimétrique de l'écran, et ne peut pas être activée si celle-ci est invalide (ex. machines virtuelles, appareils sans profil ICC).
 
 #### Traitement du contenu SDR
 
@@ -216,7 +216,7 @@ Après une capture, un toast avec miniature + statut apparaît (n'interfère pas
 - **Fond d'écran personnalisé** : Trois modes
   - **Image spécifique** : Choisir une image, affichée en permanence
   - **Vidéo spécifique** : Lecture en boucle muette ; pause automatique quand la fenêtre principale est masquée
-  - **Aléatoire depuis un dossier** : Choisit une image ou vidéo aléatoire dans un dossier à chaque lancement
+  - **Aléatoire depuis un dossier** : Choisit une image ou vidéo aléatoire dans un dossier à chaque lancement ; une option secondaire « vidéos uniquement » permet de ne choisir que des vidéos, et si le dossier n'en contient aucune, un repli vers une image aléatoire s'effectue avec une notification
   - Détection automatique de la perte de source du fond d'écran, nettoyage de la configuration et retour à l'absence de fond d'écran + notification toast
 - **Couleur d'accentuation** :
   - **Extraction automatique depuis le fond d'écran** (activé par défaut) : Échantillonne la couleur dominante du fond d'écran comme couleur d'accentuation (boost de saturation HSV). Pour les vidéos, seule la première image est échantillonnée pour éviter le scintillement.
@@ -385,6 +385,13 @@ C'est généralement un problème de codec d'image du système Windows (extensio
 - **Webp Image Extensions**
 
 Redémarrez Starshot après la mise à jour. Si le problème persiste, veuillez [soumettre une Issue](../../../issues/new) avec une capture d'écran jointe.
+
+</details>
+
+<details>
+<summary><b>La sauvegarde de capture plante (machines virtuelles / certains écrans)</b></summary>
+
+Ces environnements (machines virtuelles, appareils sans profil ICC) signalent des configurations colorimétriques d'écran invalides ; avec la gestion des couleurs activée, l'encodeur (lcms2) plante en traitant les données de gamme malformées. Gardez la gestion des couleurs désactivée (valeur par défaut) pour éviter cela ; les captures HDR ne sont pas affectées.
 
 </details>
 

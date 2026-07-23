@@ -95,7 +95,7 @@ Most screenshot tools can only capture 8bit SDR even on HDR displays — the sys
 1. **HDR Capture**: When the display reports HDR, requests `R16G16B16A16Float` pixel format to obtain the full scRGB floating-point data (luminance up to thousands of nits).
 2. **HDR Save**: 16bit AVIF / JPEG XL with BT.2020 color space + PQ transfer function. Highlights are not clipped, gamut is not narrowed.
 3. **maxCLL Calculation**: Win2D histogram effect computes the maximum content light level, used to distinguish genuine HDR content from SDR content in an HDR container.
-4. **Color Management**: Reads the display ICC profile to extract real gamut primaries, writes cICP/ICC chunks into the output file. HDR forces BT.2020; SDR color management can be toggled on/off (on = read ICC real gamut, off = BT.709).
+4. **Color Management**: Reads the display ICC profile to extract real gamut primaries, writes cICP/ICC chunks into the output file. HDR is always BT.2020; for SDR it defaults to off (BT.709) and can optionally be enabled (reads the ICC real gamut) — enabling first probes the monitor's color configuration, and cannot be turned on if it's invalid (e.g. VMs, devices without an ICC profile).
 
 #### SDR Content Handling
 
@@ -214,7 +214,7 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - **Custom Wallpaper**: Three modes
   - **Specific Image**: Pick an image, always displayed.
   - **Specific Video**: Loops muted; auto-pauses when the main window is hidden.
-  - **Random from Folder**: Picks a random image or video from a folder on each launch.
+  - **Random from Folder**: Picks a random image or video from a folder on each launch; an optional videos-only sub-toggle makes it pick only videos, and if the folder has no video it falls back to a random image with a notice.
   - Lost wallpaper sources are auto-detected, with config cleanup and fallback to no wallpaper + toast notification.
 - **Accent Color**:
   - **Auto-extract from wallpaper** (on by default): Samples the wallpaper's dominant color as the app accent color (HSV saturation boost). For videos, only the first frame is sampled to avoid color flickering.
@@ -383,6 +383,13 @@ This is typically a Windows system image codec issue (AVIF / HEIF / JPEG XL exte
 - **Webp Image Extensions**
 
 Restart Starshot after updating. If the issue persists, please [submit an Issue](../../issues/new) with a screenshot attached.
+
+</details>
+
+<details>
+<summary><b>Screenshot save crashes (VMs / some monitors)</b></summary>
+
+These environments (VMs, devices without an ICC profile) report invalid monitor color configurations; with color management on, the encoder (lcms2) crashes processing the malformed gamut data. Keep color management off (the default) to avoid this; HDR screenshots are unaffected.
 
 </details>
 
