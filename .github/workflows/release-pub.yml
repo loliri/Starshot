@@ -7,9 +7,9 @@ on:
         description: 'Mark as pre-release'
         type: boolean
         required: false
-        default: false
+        default: true
       version:
-        description: 'Version (e.g. 0.1.0; leave empty to auto-increment minor from latest release, e.g. 0.1.0 -> 0.2.0)'
+        description: 'Version (e.g. 0.1.0; leave empty to auto-increment from latest tag — prerelease on: patch+1 (0.6.3->0.6.4), off: minor+1 (0.6.3->0.7.0))'
         required: false
 
 permissions:
@@ -30,14 +30,20 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $input = "${{ github.event.inputs.version }}".Trim()
+          $isPreview = "${{ github.event.inputs.prerelease }}" -eq 'true'
           if ([string]::IsNullOrEmpty($input)) {
-            $latest = (gh api repos/${{ github.repository }}/releases/latest --jq '.tag_name' 2>$null)
+            # 最新一条 release（含 prerelease；/releases 默认不含 draft，按创建时间倒序）
+            $latest = (gh api repos/${{ github.repository }}/releases --jq '.[0].tag_name' 2>$null)
             if ($LASTEXITCODE -eq 0 -and $latest -match '^(\d+)\.(\d+)\.(\d+)') {
-              $input = "$($Matches[1]).$([int]$Matches[2] + 1).0"
-              Write-Host "Version empty, auto-incremented from $latest to $input"
+              if ($isPreview) {
+                $input = "$($Matches[1]).$($Matches[2]).$([int]$Matches[3] + 1)"
+              } else {
+                $input = "$($Matches[1]).$([int]$Matches[2] + 1).0"
+              }
+              Write-Host "Version empty, auto-incremented from $latest to $input (prerelease=$isPreview)"
             } else {
-              $input = "0.1.0"
-              Write-Host "Version empty, no latest release found, fallback to 0.1.0"
+              $input = if ($isPreview) { "0.0.1" } else { "0.1.0" }
+              Write-Host "Version empty, no release found, fallback to $input (prerelease=$isPreview)"
             }
           }
           $v = $input.Replace(' ', '-')
