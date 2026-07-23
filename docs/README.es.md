@@ -24,18 +24,19 @@ Captura 16bit de pipeline completo · Captura de región · Codificación AVIF /
 
 ## Por qué Starshot
 
-Las herramientas de captura integradas de Windows (Snipping Tool, Win+Shift+S) solo producen imágenes SDR de 8 bits incluso en pantallas HDR: el compositor del sistema tritura los fotogramas HDR de 16 bits, recortando las altas luces y estrechando la gama de colores. Las herramientas de captura de terceros más comunes (ShareX, etc.) también están limitadas por el pipeline tradicional GDI/BitBlt y no pueden acceder a los datos HDR.
+La herramienta de recortes integrada de Windows (Snipping Tool, Win+Shift+S) solo puede capturar imágenes SDR de 8 bits incluso en monitores HDR: el compositor del sistema comprime los fotogramas HDR de 16 bits, lo que provoca recorte de altas luces y reducción de la gama de colores, resultando en capturas apagadas, sobreexpuestas o con errores de mapeo de color. Las herramientas de captura de pantalla más comunes también están limitadas por el pipeline tradicional GDI/BitBlt y no pueden procesar datos HDR.
 
 Starshot captura directamente el framebuffer bruto `R16G16B16A16Float` scRGB desde la capa DXGI, preservando completamente la información de luminancia HDR (hasta miles de nits). Las capturas se codifican como AVIF o JPEG XL HDR de 16 bits con metadatos de espacio de color BT.2020 y función de transferencia PQ. También ofrece degradación automática para pantallas SDR, captura de región, conversión por lotes multiformato y todo lo que se espera de una herramienta de captura de propósito general.
 
 **Características principales**
 
 - 🎯 **Pipeline HDR completo sin pérdidas**: captura, codificación y gestión del color en 16 bits de principio a fin. Sin mapeo tonal con pérdidas.
-- 🧠 **Detección inteligente HDR/SDR**: el histograma maxCLL distingue el contenido HDR real del contenido SDR envuelto en un formato HDR.
+- 🧠 **Detección inteligente HDR/SDR**: distingue automáticamente el contenido HDR real del contenido SDR envuelto en un formato HDR, evitando ocupar espacio en vano.
 - ✂️ **Captura de región**: superposición multimonitor con fotograma congelado, detección de ventanas y lupa para selección precisa al píxel.
-- 📋 **Portapapeles nativo**: API nativa de Win32 escribe directamente en el portapapeles, evitando los fallos de pegado por renderizado diferido de WinRT.
+- 📋 **Portapapeles nativo**: API nativa de Win32 escribe directamente, pegado fiable sin pérdida de contenido.
 - 🗂️ **Soporte multiformato**: AVIF / JPEG XL / UHDR JPEG / PNG, incluyendo herramienta de conversión por lotes.
-- 📦 **Portable**: extraer y ejecutar. Sin instalación, sin privilegios de administrador.
+- 🖥️ **Multimonitor**: la captura de región puede seleccionar abarcando varios monitores, componiendo directamente imágenes que cruzan los límites de pantalla.
+- 🔄 **Comprobación automática de actualizaciones**: comprobación integrada; al detectar una nueva versión, descarga por streaming, extracción y reemplazo.
 
 <div align="center">
 <table>
@@ -126,7 +127,7 @@ Los tres modos comparten la misma detección HDR, gestión del color, plantillas
 ### Superposición de captura de región
 
 - **Fotograma congelado**: primero captura todos los monitores en un solo mapa de bits compuesto; la superposición muestra este fotograma congelado para que la imagen permanezca fija durante la selección. La superposición en sí queda excluida de la captura.
-- **Multimonitor**: cubre toda la pantalla virtual. La lupa y la caja de coordenadas están limitadas al monitor donde se encuentra el cursor (sin desbordamiento entre pantallas).
+- **Multimonitor**: cubre toda la pantalla virtual. La selección puede abarcar varios monitores (luminancia precisa incluso en configuración mixta HDR+SDR); la lupa y la caja de coordenadas se limitan al monitor actual del cursor.
 - **Detección de ventanas**: EnumWindows + filtrado DWM cloaked/toolwindow + bordes extendidos DWM (eliminación de sombras) + doble candidato de área cliente + selección por orden Z. Haz clic en una ventana para capturarla directamente (QuickCrop).
 - **Lupa**: alineación entera NearestNeighbor + cuadrícula de píxeles (15×15 píxeles, 10px cada uno), haciendo que los píxeles individuales sean claramente distinguibles.
 - **Línea de selección animada + coordenadas en tiempo real**: X/Y/An/Al de la selección + coordenadas físicas del cursor.

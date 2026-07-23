@@ -24,18 +24,19 @@ Capture 16bit full pipeline · Capture régionale · Encodage AVIF / JPEG XL · 
 
 ## Pourquoi Starshot
 
-Les outils de capture intégrés de Windows (Snipping Tool, Win+Shift+S) ne produisent que des images SDR 8bit même sur les écrans HDR — le compositeur système écrase les trames HDR 16bit en sortie, les hautes lumières sont écrêtées et la gamme de couleurs est réduite. Les outils de capture courants (ShareX, etc.) sont également limités par le pipeline traditionnel GDI/BitBlt et ne peuvent pas accéder aux données HDR.
+L'outil de capture d'écran intégré à Windows (Snipping Tool, Win+Maj+S) ne peut capturer que des images SDR 8 bits même sur un écran HDR : le compositeur système compresse les trames HDR 16 bits, ce qui écrête les hautes lumières et réduit la gamme de couleurs, donnant des captures fades, surexposées ou avec des erreurs de mappage colorimétrique. Les outils de capture d'écran courants sont également limités par le pipeline traditionnel GDI/BitBlt et ne peuvent pas percevoir les données HDR.
 
 Starshot capture directement le framebuffer brut `R16G16B16A16Float` scRGB depuis la couche DXGI, préservant intégralement les informations de luminance HDR (jusqu'à plusieurs milliers de nits). Les captures sont encodées en AVIF ou JPEG XL HDR 16bit, avec les métadonnées d'espace colorimétrique BT.2020 et de fonction de transfert PQ. L'outil offre également une dégradation automatique pour écrans SDR, une capture régionale, une conversion par lots multi-format et toutes les fonctionnalités attendues d'un outil de capture généraliste.
 
 **Caractéristiques principales**
 
 - 🎯 **Pipeline HDR sans perte** — Capture, encodage et gestion des couleurs en 16bit de bout en bout. Aucun tone mapping avec perte.
-- 🧠 **Détection intelligente HDR/SDR** — L'histogramme maxCLL distingue le contenu réellement HDR du contenu SDR encapsulé dans un format HDR.
+- 🧠 **Détection intelligente HDR/SDR** — Distingue automatiquement le contenu réellement HDR du contenu SDR encapsulé dans un format HDR, sans gaspiller d'espace.
 - ✂️ **Capture régionale** — Overlay multi-écran avec gel d'image, détection de fenêtres et loupe pour une sélection précise au pixel près.
-- 📋 **Presse-papiers natif** — API native Win32 pour l'écriture directe dans le presse-papiers, évitant les échecs de collage liés au rendu différé de WinRT.
+- 📋 **Presse-papiers natif** — API native Win32 pour une écriture directe, collage fiable sans perte de contenu.
 - 🗂️ **Support multi-format** — AVIF / JPEG XL / UHDR JPEG / PNG, avec outil de conversion par lots.
-- 📦 **Portable** — Extraire et lancer. Aucune installation, aucun privilège administrateur requis.
+- 🖥️ **Multi-écran** — La capture régionale peut sélectionner à travers plusieurs écrans, composant directement des images traversant les frontières d'écrans.
+- 🔄 **Vérification automatique de mises à jour** — Vérification intégrée ; nouvelle version détectée → téléchargement en flux, extraction et remplacement.
 
 <div align="center">
 <table>
@@ -126,7 +127,7 @@ Les trois modes partagent la même détection HDR, la gestion des couleurs, les 
 ### Overlay de capture régionale
 
 - **Gel d'image** : Capture d'abord tous les moniteurs en une seule bitmap assemblée ; l'overlay affiche cette image gelée afin que l'image reste fixe pendant la sélection. L'overlay lui-même est exclu de la capture.
-- **Multi-écran** : Couvre tout l'écran virtuel. La loupe et la boîte de coordonnées sont limitées au moniteur où se trouve le curseur (pas de débordement inter-écran).
+- **Multi-écran** : Couvre tout l'écran virtuel. La sélection peut s'étendre sur plusieurs écrans (luminosité exacte même en configuration HDR+SDR mixte) ; la loupe et la boîte de coordonnées sont limitées au moniteur du curseur.
 - **Détection de fenêtres** : EnumWindows + filtrage DWM cloaked/toolwindow + bordures étendues DWM (suppression des ombres) + double candidat zone cliente + sélection par Z-order. Cliquez sur une fenêtre pour la capturer directement (QuickCrop).
 - **Loupe** : Alignement entier NearestNeighbor + grille de pixels (15×15 pixels, 10px chacun), rendant les pixels individuels clairement distinguables.
 - **Ligne de sélection animée + coordonnées en temps réel** : X/Y/L/H de la sélection + coordonnées physiques du curseur.

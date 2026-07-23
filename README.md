@@ -22,18 +22,19 @@
 
 ## Why Starshot
 
-Windows' built-in screenshot tools (Snipping Tool, Win+Shift+S) only capture 8bit SDR images even on HDR displays — the system compositor crushes 16bit HDR frames down to SDR, clipping highlights and narrowing the color gamut. Common third-party screenshot tools (ShareX, etc.) are similarly limited by the traditional GDI/BitBlt screenshot pipeline and cannot access HDR data.
+Windows' built-in screenshot tool (Snipping Tool, Win+Shift+S) can only capture 8-bit SDR images even on HDR displays — the system compositor compresses 16-bit HDR frames on output, highlights are clipped, the color gamut is narrowed, resulting in screenshots that appear washed out, overexposed, or have incorrect color mapping. Common third-party screenshot tools are likewise limited by the traditional GDI/BitBlt capture pipeline and cannot perceive HDR data.
 
 Starshot directly captures the raw `R16G16B16A16Float` scRGB framebuffer from the DXGI layer, fully preserving HDR luminance information (up to thousands of nits). Screenshots are encoded as 16bit HDR AVIF or JPEG XL with BT.2020 color space and PQ transfer function metadata. It also provides SDR display auto-degradation, region screenshot, multi-format batch conversion, and everything else you'd expect from a general-purpose screenshot tool.
 
 **Key Features**
 
 - 🎯 **Full HDR Pipeline** — Lossless capture, encoding, and color management in 16bit throughout. No lossy tone mapping.
-- 🧠 **Smart HDR/SDR Detection** — maxCLL histogram distinguishes genuine HDR content from SDR content wrapped in an HDR format.
+- 🧠 **Smart HDR/SDR Detection** — Automatically distinguishes genuine HDR content from SDR content wrapped in an HDR format, avoiding wasted space.
 - ✂️ **Region Screenshot** — Frozen-frame multi-monitor overlay with window detection and magnifier for pixel-precise selection.
-- 📋 **Native Clipboard** — Win32 native API writes directly to the clipboard, avoiding WinRT deferred-rendering paste failures.
+- 📋 **Native Clipboard** — Win32 native API writes directly to the clipboard for reliable pasting.
 - 🗂️ **Multi-format Support** — AVIF / JPEG XL / UHDR JPEG / PNG, including a batch conversion tool.
-- 📦 **Portable** — Extract and run. No installation, no admin privileges required.
+- 🖥️ **Multi-Monitor** — Region screenshots can span across monitors, composing captures that cross screen boundaries.
+- 🔄 **Auto Update Check** — Built-in update check; on a new release it streams the download, extracts, and replaces in place.
 
 <div align="center">
 <table>
@@ -124,7 +125,7 @@ All three modes share the same HDR detection, color management, filename templat
 ### Region Screenshot Overlay
 
 - **Frozen Frame**: Captures all monitors into a single stitched bitmap first; the overlay displays this frozen frame so the image stays still during selection. The overlay itself is excluded from the screenshot.
-- **Multi-Monitor**: Covers the entire virtual screen. The magnifier and coordinate box are clamped to the cursor's current monitor (no cross-monitor spill).
+- **Multi-Monitor**: Covers the entire virtual screen. Selections can span across monitors (brightness stays accurate even on mixed HDR+SDR setups); the magnifier and coordinate box are limited to the cursor's current monitor.
 - **Window Detection**: EnumWindows + DWM cloaked/toolwindow filtering + DWM extended frame bounds (de-shadow) + client-area dual candidate + Z-order selection. Click a window to capture it directly (QuickCrop).
 - **Magnifier**: NearestNeighbor integer-aligned + pixel grid (15×15 pixels, 10px each), making individual pixels clearly distinguishable.
 - **Animated Marching Ants + Real-time Coordinates**: Selection X/Y/W/H + cursor physical coordinates.
