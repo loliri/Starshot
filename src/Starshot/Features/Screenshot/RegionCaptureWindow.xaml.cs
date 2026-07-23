@@ -310,11 +310,20 @@ public sealed partial class RegionCaptureWindow : WindowEx
         if (hasRect)
         {
             // 选区/hover 位置挖洞：重画干净原图抵消压黑（backgroundHighlight）
-            ds.DrawImage(_displayBitmap,
-                rect,
-                new Rect(rect.X / _lockedW * physW, rect.Y / _lockedH * physH,
-                         rect.Width / _lockedW * physW, rect.Height / _lockedH * physH),
-                1f, CanvasImageInterpolation.Linear);
+            // hover rect 可能含标题栏/阴影（位置负，超画布），只挖与画布的交集，避免 sourceRect 越出 bitmap 边界被拉伸
+            double cx = Math.Max(rect.X, 0);
+            double cy = Math.Max(rect.Y, 0);
+            double cw = Math.Min(rect.X + rect.Width, _lockedW) - cx;
+            double ch = Math.Min(rect.Y + rect.Height, _lockedH) - cy;
+            var clip = new Rect(cx, cy, cw, ch);
+            if (clip.Width > 0 && clip.Height > 0)
+            {
+                ds.DrawImage(_displayBitmap,
+                    clip,
+                    new Rect(clip.X / _lockedW * physW, clip.Y / _lockedH * physH,
+                             clip.Width / _lockedW * physW, clip.Height / _lockedH * physH),
+                    1f, CanvasImageInterpolation.Linear);
+            }
 
             ds.DrawRectangle(rect, Colors.Black, 1);
             using var anim = new CanvasStrokeStyle { CustomDashStyle = new float[] { 5, 5 }, DashOffset = _dashOffset };
