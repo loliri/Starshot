@@ -29,11 +29,12 @@ Starshot directly captures the raw `R16G16B16A16Float` scRGB framebuffer from th
 **Key Features**
 
 - 🎯 **Full HDR Pipeline** — Lossless capture, encoding, and color management in 16bit throughout. No lossy tone mapping.
-- 🧠 **Smart HDR/SDR Detection** — maxCLL histogram distinguishes genuine HDR content from SDR content wrapped in an HDR format.
+- 🧠 **Smart HDR/SDR Detection** — Automatically distinguishes genuine HDR content from SDR content wrapped in an HDR format, avoiding wasted space.
 - ✂️ **Region Screenshot** — Frozen-frame multi-monitor overlay with window detection and magnifier for pixel-precise selection.
-- 📋 **Native Clipboard** — Win32 native API writes directly to the clipboard, avoiding WinRT deferred-rendering paste failures.
+- 📋 **Native Clipboard** — Win32 native API writes directly to the clipboard for reliable pasting.
 - 🗂️ **Multi-format Support** — AVIF / JPEG XL / UHDR JPEG / PNG, including a batch conversion tool.
-- 📦 **Portable** — Extract and run. No installation, no admin privileges required.
+- 🖥️ **Multi-Monitor** — Region screenshots can span across monitors, composing captures that cross screen boundaries.
+- 🔄 **Auto Update Check** — Built-in update check; on a new release it streams the download, extracts, and replaces in place.
 
 <div align="center">
 <table>
@@ -124,7 +125,7 @@ All three modes share the same HDR detection, color management, filename templat
 ### Region Screenshot Overlay
 
 - **Frozen Frame**: Captures all monitors into a single stitched bitmap first; the overlay displays this frozen frame so the image stays still during selection. The overlay itself is excluded from the screenshot.
-- **Multi-Monitor**: Covers the entire virtual screen. The magnifier and coordinate box are clamped to the cursor's current monitor (no cross-monitor spill).
+- **Multi-Monitor**: Covers the entire virtual screen. Selections can span across monitors (brightness stays accurate even on mixed HDR+SDR setups); the magnifier and coordinate box are limited to the cursor's current monitor.
 - **Window Detection**: EnumWindows + DWM cloaked/toolwindow filtering + DWM extended frame bounds (de-shadow) + client-area dual candidate + Z-order selection. Click a window to capture it directly (QuickCrop).
 - **Magnifier**: NearestNeighbor integer-aligned + pixel grid (15×15 pixels, 10px each), making individual pixels clearly distinguishable.
 - **Animated Marching Ants + Real-time Coordinates**: Selection X/Y/W/H + cursor physical coordinates.

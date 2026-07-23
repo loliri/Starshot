@@ -31,11 +31,12 @@ Starshot captura directamente el framebuffer bruto `R16G16B16A16Float` scRGB des
 **Características principales**
 
 - 🎯 **Pipeline HDR completo sin pérdidas**: captura, codificación y gestión del color en 16 bits de principio a fin. Sin mapeo tonal con pérdidas.
-- 🧠 **Detección inteligente HDR/SDR**: el histograma maxCLL distingue el contenido HDR real del contenido SDR envuelto en un formato HDR.
+- 🧠 **Detección inteligente HDR/SDR**: distingue automáticamente el contenido HDR real del contenido SDR envuelto en un formato HDR, evitando ocupar espacio en vano.
 - ✂️ **Captura de región**: superposición multimonitor con fotograma congelado, detección de ventanas y lupa para selección precisa al píxel.
-- 📋 **Portapapeles nativo**: API nativa de Win32 escribe directamente en el portapapeles, evitando los fallos de pegado por renderizado diferido de WinRT.
+- 📋 **Portapapeles nativo**: API nativa de Win32 escribe directamente, pegado fiable sin pérdida de contenido.
 - 🗂️ **Soporte multiformato**: AVIF / JPEG XL / UHDR JPEG / PNG, incluyendo herramienta de conversión por lotes.
-- 📦 **Portable**: extraer y ejecutar. Sin instalación, sin privilegios de administrador.
+- 🖥️ **Multimonitor**: la captura de región puede seleccionar abarcando varios monitores, componiendo directamente imágenes que cruzan los límites de pantalla.
+- 🔄 **Comprobación automática de actualizaciones**: comprobación integrada; al detectar una nueva versión, descarga por streaming, extracción y reemplazo.
 
 <div align="center">
 <table>
@@ -126,7 +127,7 @@ Los tres modos comparten la misma detección HDR, gestión del color, plantillas
 ### Superposición de captura de región
 
 - **Fotograma congelado**: primero captura todos los monitores en un solo mapa de bits compuesto; la superposición muestra este fotograma congelado para que la imagen permanezca fija durante la selección. La superposición en sí queda excluida de la captura.
-- **Multimonitor**: cubre toda la pantalla virtual. La lupa y la caja de coordenadas están limitadas al monitor donde se encuentra el cursor (sin desbordamiento entre pantallas).
+- **Multimonitor**: cubre toda la pantalla virtual. La selección puede abarcar varios monitores (luminancia precisa incluso en configuración mixta HDR+SDR); la lupa y la caja de coordenadas se limitan al monitor actual del cursor.
 - **Detección de ventanas**: EnumWindows + filtrado DWM cloaked/toolwindow + bordes extendidos DWM (eliminación de sombras) + doble candidato de área cliente + selección por orden Z. Haz clic en una ventana para capturarla directamente (QuickCrop).
 - **Lupa**: alineación entera NearestNeighbor + cuadrícula de píxeles (15×15 píxeles, 10px cada uno), haciendo que los píxeles individuales sean claramente distinguibles.
 - **Línea de selección animada + coordenadas en tiempo real**: X/Y/An/Al de la selección + coordenadas físicas del cursor.
