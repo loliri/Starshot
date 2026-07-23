@@ -44,6 +44,7 @@ public sealed partial class AppBackground : UserControl
 
     // ===== 视频 =====
     private MediaPlayer? _mediaPlayer;
+    private int _mediaPlayerRetryCount;  // 管线卡死重建次数，首帧到则清零
     private CanvasRenderTarget? _videoSurface;
     private CanvasImageSource? _videoImageSource;
     private readonly SemaphoreSlim _videoSemaphore = new(1, 1);
@@ -364,15 +365,43 @@ public sealed partial class AppBackground : UserControl
         {
             IsLoopingEnabled = true,
             IsMuted = true,
-            IsVideoFrameServerEnabled = true,
             Source = MediaSource.CreateFromUri(new Uri(file)),
         };
         _mediaPlayer.CommandManager.IsEnabled = false;
         _mediaPlayer.SystemMediaTransportControls.IsEnabled = false;
         _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
         _mediaPlayer.MediaFailed += (_, a) => _logger.LogError(a.ExtendedErrorCode, "MediaPlayer failed");
+        _mediaPlayer.MediaOpened += MediaPlayer_MediaOpened;
         _videoAccentExtracted = false;  // 新视频重置取色标志
-        _mediaPlayer.Play();
+        // 不在此 Play：等 MediaOpened（Source 解析完成、NaturalVideoWidth/Height 可用）再进 frame server + Play，
+        // 规避启动期 MF 管线（demux/decode/首帧）未就绪时 VideoFrameAvailable 间歇不触发的竞争
+    }
+
+
+    private void MediaPlayer_MediaOpened(MediaPlayer sender, object args)
+    {
+        _logger.LogInformation("MediaOpened, enter frame server + Play");
+        sender.IsVideoFrameServerEnabled = true;
+        sender.Play();
+        // MediaOpened 后 2s 仍无首帧 = 管线卡死，重建 MediaPlayer（重 Play 幂等唤不醒损坏实例，重建才稳；最多 2 次防死循环）
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(2000);
+            DispatcherQueue?.TryEnqueue(() =>
+            {
+                if (_mediaPlayer == sender && _videoImageSource is null && _mediaPlayerRetryCount < 2)
+                {
+                    _mediaPlayerRetryCount++;
+                    _logger.LogWarning("No first frame 2s after MediaOpened, rebuild MediaPlayer (retry {Retry})", _mediaPlayerRetryCount);
+                    var f = _lastFile;
+                    if (f is not null)
+                    {
+                        DisposeVideoResource();
+                        StartMediaPlayer(f);
+                    }
+                }
+            });
+        });
     }
 
 
@@ -383,7 +412,7 @@ public sealed partial class AppBackground : UserControl
             return;
         }
         _videoSemaphore.Wait();
-        DispatcherQueue.TryEnqueue(() =>
+        DispatcherQueue?.TryEnqueue(() =>
         {
             try
             {
@@ -395,6 +424,7 @@ public sealed partial class AppBackground : UserControl
                     _videoSurface = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), w, h, 96);
                     _videoImageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), w, h, 96);
                     BackgroundImageSource = _videoImageSource;
+                    _mediaPlayerRetryCount = 0;
                     _logger.LogInformation("VideoFrameAvailable first frame {W}x{H}", w, h);
                 }
                 sender.CopyFrameToVideoSurface(_videoSurface);
