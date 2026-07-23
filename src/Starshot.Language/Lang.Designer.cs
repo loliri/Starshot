@@ -7860,6 +7860,7 @@ namespace Starshot.Language {
         public static string Starshot_HDRFormat { get { return ResourceManager.GetString("Starshot_HDRFormat", resourceCulture); } }
         public static string Starshot_Quality { get { return ResourceManager.GetString("Starshot_Quality", resourceCulture); } }
         public static string Starshot_ColorManagementDesc { get { return ResourceManager.GetString("Starshot_ColorManagementDesc", resourceCulture); } }
+        public static string Starshot_ColorManagementUnavailable { get { return ResourceManager.GetString("Starshot_ColorManagementUnavailable", resourceCulture); } }
         public static string Starshot_AutoConvertSDRDesc { get { return ResourceManager.GetString("Starshot_AutoConvertSDRDesc", resourceCulture); } }
         public static string Starshot_DeleteHDRIfSDR { get { return ResourceManager.GetString("Starshot_DeleteHDRIfSDR", resourceCulture); } }
         public static string Starshot_DeleteHDRIfSDRDesc { get { return ResourceManager.GetString("Starshot_DeleteHDRIfSDRDesc", resourceCulture); } }

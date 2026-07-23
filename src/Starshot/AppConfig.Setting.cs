@@ -331,7 +331,7 @@ public static partial class AppConfig
     /// </summary>
     public static bool EnableScreenshotColorManagement
     {
-        get => GetValue(true);
+        get => GetValue(false);
         set => SetValue(value);
     }
 

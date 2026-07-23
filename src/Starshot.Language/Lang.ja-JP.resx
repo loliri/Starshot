@@ -2793,7 +2793,10 @@
     <value>品質</value>
   </data>
   <data name="Starshot_ColorManagementDesc" xml:space="preserve">
-    <value>ディスプレイのICCプロファイルを読み取り実際の色域を解析し、ファイルにcICP/ICCチャンクを書き込む。HDRは常にBT2020。SDRはオン=ICCの実際の色域、オフ=BT709。</value>
+    <value>ディスプレイのICCプロファイルを読み取り実際の色域を解析し、ファイルにcICP/ICCチャンクを書き込む。HDRは常にBT2020。SDRはオン=ICCの実際の色域、オフ=BT709。有効化前にディスプレイのカラー設定を検証し、異常（VMやICCなし）の場合はオンにできません。</value>
+  </data>
+  <data name="Starshot_ColorManagementUnavailable" xml:space="preserve">
+    <value>ディスプレイのカラー設定が異常です（VMやICCプロファイルのないデバイスで発生しやすい）。色彩管理を有効にできません。</value>
   </data>
   <data name="Starshot_AutoConvertSDRDesc" xml:space="preserve">
     <value>HDR画像をSDRコピー（Ultra HDR JPEG）も同時保存します。</value>

@@ -2779,7 +2779,8 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_SDRFormat" xml:space="preserve"><value>SDR format</value></data>
   <data name="Starshot_HDRFormat" xml:space="preserve"><value>HDR format</value></data>
   <data name="Starshot_Quality" xml:space="preserve"><value>Quality</value></data>
-  <data name="Starshot_ColorManagementDesc" xml:space="preserve"><value>Reads the monitor's ICC profile to parse the real color gamut and writes the cICP/ICC chunk into the file. HDR is always BT2020; for SDR, on = real gamut from ICC, off = BT709.</value></data>
+  <data name="Starshot_ColorManagementDesc" xml:space="preserve"><value>Reads the monitor's ICC profile to parse the real color gamut and writes the cICP/ICC chunk into the file. HDR is always BT2020; for SDR, on = real gamut from ICC, off = BT709. Enabling first probes the monitor; if the color config is invalid (e.g. VM, missing ICC), it cannot be turned on.</value></data>
+  <data name="Starshot_ColorManagementUnavailable" xml:space="preserve"><value>The monitor's color configuration is invalid (common on VMs or devices without an ICC profile). Color management cannot be enabled.</value></data>
   <data name="Starshot_AutoConvertSDRDesc" xml:space="preserve"><value>HDR screenshots also save an SDR copy (Ultra HDR JPEG).</value></data>
   <data name="Starshot_DeleteHDRIfSDR" xml:space="preserve"><value>Delete HDR if SDR content</value></data>
   <data name="Starshot_DeleteHDRIfSDRDesc" xml:space="preserve"><value>When an HDR-format frame is actually SDR content (maxCLL below threshold), automatically convert to SDR and delete the HDR file. The format follows the SDR storage format.</value></data>

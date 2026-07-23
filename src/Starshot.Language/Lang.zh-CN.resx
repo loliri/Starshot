@@ -2779,7 +2779,8 @@
   <data name="Starshot_SDRFormat" xml:space="preserve"><value>SDR 格式</value></data>
   <data name="Starshot_HDRFormat" xml:space="preserve"><value>HDR 格式</value></data>
   <data name="Starshot_Quality" xml:space="preserve"><value>质量</value></data>
-  <data name="Starshot_ColorManagementDesc" xml:space="preserve"><value>读取显示器 ICC profile 解析真实色域基色，写入文件的 cICP/ICC chunk。HDR 强制 BT2020；SDR 可开关（开 = 读 ICC 真实色域，关 = BT709）。</value></data>
+  <data name="Starshot_ColorManagementDesc" xml:space="preserve"><value>读取显示器 ICC profile 解析真实色域基色，写入文件的 cICP/ICC chunk。HDR 强制 BT2020；SDR 可开关（开 = 读 ICC 真实色域，关 = BT709）。启用前会检测显示器色彩配置，异常（如虚拟机、无 ICC 设备）则无法开启。</value></data>
+  <data name="Starshot_ColorManagementUnavailable" xml:space="preserve"><value>当前显示器色彩配置异常（常见于虚拟机或无 ICC profile 的设备），无法启用色彩管理。</value></data>
   <data name="Starshot_AutoConvertSDRDesc" xml:space="preserve"><value>HDR 截图同时保存一份 SDR（Ultra HDR JPEG）。</value></data>
   <data name="Starshot_DeleteHDRIfSDR" xml:space="preserve"><value>SDR 内容删 HDR</value></data>
   <data name="Starshot_DeleteHDRIfSDRDesc" xml:space="preserve"><value>HDR 格式但内容为 SDR（maxCLL 不达标）时，自动转 SDR 并删除 HDR 文件，无视上方的自动转换开关。格式遵循 SDR 存储格式。</value></data>

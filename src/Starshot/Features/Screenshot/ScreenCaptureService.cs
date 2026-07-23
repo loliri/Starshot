@@ -717,6 +717,32 @@ internal class ScreenCaptureService
     }
 
 
+    /// <summary>
+    /// 探测主显示器能否正确解析色彩 primaries（色彩管理开关启用前校验，避免畸形数据喂给 lcms2 崩溃）。
+    /// </summary>
+    public static async Task<bool> CanEnableColorManagementAsync()
+    {
+        try
+        {
+            var mon = User32.MonitorFromWindow(IntPtr.Zero, User32.MonitorFlags.MONITOR_DEFAULTTOPRIMARY);
+            using var di = DisplayInformation.CreateForDisplayId(new((ulong)mon.DangerousGetHandle()));
+            var p = await GetColorPrimariesFromDisplayInformationAsync(di);
+            return ArePrimariesValid(p);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    private static bool ArePrimariesValid(ColorPrimaries p)
+    {
+        return Valid(p.Red) && Valid(p.Green) && Valid(p.Blue) && Valid(p.White);
+        static bool Valid(Vector2 v) => float.IsFinite(v.X) && float.IsFinite(v.Y) && v.X > 0f && v.X < 1f && v.Y > 0f && v.Y < 1f;
+    }
+
+
     public static byte[] BuildXMPMetadata(DateTimeOffset time)
     {
         string value = $"""
