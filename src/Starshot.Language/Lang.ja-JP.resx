@@ -2738,6 +2738,12 @@
   <data name="Starshot_WallpaperModeVideo" xml:space="preserve">
     <value>動画指定</value>
   </data>
+  <data name="Starshot_WallpaperFolderVideoOnly" xml:space="preserve">
+    <value>動画のみ</value>
+  </data>
+  <data name="Starshot_WallpaperVideoFallbackToImage" xml:space="preserve">
+    <value>フォルダーに動画がありません。画像をランダムに選択しました</value>
+  </data>
   <data name="Starshot_WallpaperChooseImage" xml:space="preserve">
     <value>画像を選択</value>
   </data>

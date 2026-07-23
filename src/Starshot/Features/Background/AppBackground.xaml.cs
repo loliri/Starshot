@@ -111,13 +111,17 @@ public sealed partial class AppBackground : UserControl
                 return;
             }
 
-            string? file = ResolveWallpaperPath();
+            var (file, fellBackToImage) = ResolveWallpaperPath();
             if (!AppConfig.EnableWallpaper || string.IsNullOrEmpty(file) || !File.Exists(file))
             {
                 DisposeVideoResource();
                 BackgroundImageSource = null;
                 _lastFile = null;
                 return;
+            }
+            if (fellBackToImage)
+            {
+                InAppToast.MainWindow?.Warning(null, Lang.Starshot_WallpaperVideoFallbackToImage, 5000);
             }
             if (file == _lastFile)
             {
@@ -155,41 +159,68 @@ public sealed partial class AppBackground : UserControl
         ".mp4", ".mkv", ".mov", ".avi", ".webm",
     };
 
+    private static readonly HashSet<string> WallpaperVideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp4", ".mkv", ".mov", ".avi", ".webm",
+    };
+
 
     /// <summary>
-    /// 按模式解析当前要加载的壁纸文件路径。
+    /// 按模式解析当前要加载的壁纸文件路径，并指示是否发生了"仅视频无视频→回退图片"。
     /// 模式 0=无；1：CacheFolder/bg/WallpaperFile（复制件）；2：WallpaperVideoFile（读源）；
-    /// 3：枚举 WallpaperFolder 随机抽一个图/视频（读源，混合）。模式 2/3 不复制。
+    /// 3：枚举 WallpaperFolder 随机抽一个图/视频（读源，混合）；仅视频开关开且无视频时回退到图片。模式 2/3 不复制。
     /// </summary>
-    private static string? ResolveWallpaperPath()
+    private static (string? path, bool fellBackToImage) ResolveWallpaperPath()
     {
         return AppConfig.WallpaperMode switch
         {
-            1 => AppConfig.WallpaperFile is { Length: > 0 } f ? Path.Combine(AppConfig.CacheFolder, "bg", f) : null,
-            2 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? null : AppConfig.WallpaperVideoFile,
+            1 => (AppConfig.WallpaperFile is { Length: > 0 } f ? Path.Combine(AppConfig.CacheFolder, "bg", f) : null, false),
+            2 => (string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? null : AppConfig.WallpaperVideoFile, false),
             3 => PickRandomFromFolder(AppConfig.WallpaperFolder),
-            _ => null,
+            _ => (null, false),
         };
     }
 
 
-    private static string? PickRandomFromFolder(string? folder)
+    private static (string? path, bool fellBackToImage) PickRandomFromFolder(string? folder)
     {
         if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
         {
-            return null;
+            return (null, false);
         }
         try
         {
-            var files = Directory.EnumerateFiles(folder)
+            var all = Directory.EnumerateFiles(folder)
                 .Where(f => WallpaperMediaExtensions.Contains(Path.GetExtension(f)))
                 .ToList();
-            if (files.Count == 0) return null;
-            return files[Random.Shared.Next(files.Count)];
+            if (all.Count == 0) return (null, false);
+
+            List<string> candidates;
+            bool fellBack = false;
+            if (AppConfig.WallpaperFolderVideoOnly)
+            {
+                var videos = all.Where(f => WallpaperVideoExtensions.Contains(Path.GetExtension(f))).ToList();
+                if (videos.Count > 0)
+                {
+                    candidates = videos;
+                }
+                else
+                {
+                    // 仅视频但无视频 → 回退到图片（由调用方弹 warning）
+                    candidates = all.Where(f => !WallpaperVideoExtensions.Contains(Path.GetExtension(f))).ToList();
+                    if (candidates.Count == 0) return (null, false);
+                    fellBack = true;
+                }
+            }
+            else
+            {
+                candidates = all;
+            }
+            return (candidates[Random.Shared.Next(candidates.Count)], fellBack);
         }
         catch
         {
-            return null;
+            return (null, false);
         }
     }
 
@@ -293,7 +324,7 @@ public sealed partial class AppBackground : UserControl
     /// </summary>
     public async Task RefreshAccentAsync()
     {
-        string? file = ResolveWallpaperPath();
+        string? file = ResolveWallpaperPath().path;
         if (string.IsNullOrEmpty(file) || !File.Exists(file))
         {
             return;

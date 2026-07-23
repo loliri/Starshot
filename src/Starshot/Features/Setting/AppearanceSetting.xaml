@@ -74,6 +74,10 @@
                         </Grid>
                     </Button>
                 </Grid>
+                <ToggleSwitch IsOn="{x:Bind WallpaperFolderVideoOnly, Mode=TwoWay}"
+                              Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}"
+                              OffContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}"
+                              OnContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}" />
             </StackPanel>
 
 

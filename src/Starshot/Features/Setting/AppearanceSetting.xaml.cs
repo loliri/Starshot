@@ -128,6 +128,7 @@ public sealed partial class AppearanceSetting : PageBase
                 OnPropertyChanged(nameof(WallpaperChooseLabel));
                 OnPropertyChanged(nameof(WallpaperValue));
                 OnPropertyChanged(nameof(WallpaperRowVisibility));
+                OnPropertyChanged(nameof(WallpaperFolderVideoOnlyVisibility));
                 WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
                 // 开着自动取色：切换模式后强制重新从新壁纸取色（避免 _lastFile 短路 / 视频模式不取色）
                 if (AppConfig.EnableAccentFromWallpaper)
@@ -153,6 +154,24 @@ public sealed partial class AppearanceSetting : PageBase
         3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFolder!,
         _ => string.IsNullOrWhiteSpace(AppConfig.WallpaperFile) ? Lang.Starshot_WallpaperNone : AppConfig.WallpaperFile!,
     };
+
+
+    public Visibility WallpaperFolderVideoOnlyVisibility => AppConfig.WallpaperMode == 3 ? Visibility.Visible : Visibility.Collapsed;
+
+
+    public bool WallpaperFolderVideoOnly
+    {
+        get => AppConfig.WallpaperFolderVideoOnly;
+        set
+        {
+            if (AppConfig.WallpaperFolderVideoOnly != value)
+            {
+                AppConfig.WallpaperFolderVideoOnly = value;
+                OnPropertyChanged();
+                WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
+            }
+        }
+    }
 
 
     private static readonly (string, string)[] ImageFilters =

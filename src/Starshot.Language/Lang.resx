@@ -2759,6 +2759,8 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_WallpaperModeImage" xml:space="preserve"><value>Single image</value></data>
   <data name="Starshot_WallpaperModeFolder" xml:space="preserve"><value>Folder random</value></data>
   <data name="Starshot_WallpaperModeVideo" xml:space="preserve"><value>Specified video</value></data>
+  <data name="Starshot_WallpaperFolderVideoOnly" xml:space="preserve"><value>Videos only</value></data>
+  <data name="Starshot_WallpaperVideoFallbackToImage" xml:space="preserve"><value>No video in folder, picked a random image instead</value></data>
   <data name="Starshot_WallpaperChooseImage" xml:space="preserve"><value>Choose image</value></data>
   <data name="Starshot_WallpaperChooseFolder" xml:space="preserve"><value>Choose folder</value></data>
   <data name="Starshot_WallpaperChooseVideo" xml:space="preserve"><value>Choose video</value></data>

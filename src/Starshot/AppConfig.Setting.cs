@@ -90,6 +90,16 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 文件夹随机模式仅抽视频（模式 3 子选项），默认 false=图/视频混合
+    /// </summary>
+    public static bool WallpaperFolderVideoOnly
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
     /// 启用自定义壁纸（开则关 Mica，铺壁纸 + 亚克力隔层）。模式 0=无 → false；1/2/3 看对应路径。
     /// </summary>
     public static bool EnableWallpaper
