@@ -247,6 +247,14 @@ HDR 截圖可同時儲存一份 Ultra HDR JPEG（SDR 基圖 + HDR gain map），
 - 僅 CI/CD release 檢查（讀 `version.ini` 版本號）；本機建構（無 `version.ini`，`AppVersion = Local`）按 0.0.0 處理，可更新到任意 CI/CD release
 - 版本大小寫約定：GitHub tag、zip 名、`app-{version}/` 目錄一律小寫（如 `0.3.1-preview`）；`version.ini` 內容保留原始大小寫（`0.3.1-Preview`，About 頁顯示用），啟動器讀取時自己轉小寫定位目錄
 
+## 已知限制
+
+- 區域截圖覆蓋層 HDR 幀顯示為 SDR（WinUI CanvasControl 走 SDR 交換鏈）；儲存的檔案不受影響
+- 自訂桌布按 `UniformToFill` 鋪滿，但 WinUI 的裁剪不置中，目前是**左上**對齊，比如窄（豎向）桌布在寬視窗裡會只顯示上半部分（從頂部裁剪而非置中）
+- 區域截圖覆蓋層開啟瞬間，游標仍是系統預設形狀，**需移動一次滑鼠後十字游標才出現**（WinUI `ProtectedCursor` 對已在元素上的靜止指標不立即生效，移動一次觸發 pointer 事件後即正常）
+- 雙屏 DPI 不一致（如主屏 150%、副屏 125%）時，區域截圖的**視窗偵測**（hover 高亮選視窗）在副屏座標會錯位；拖曳自由選區、儲存等不受影響。規避：統一雙屏縮放比例
+- 區域截圖懸停某些視窗時，座標框可能顯示負值（如 `-11,-11`）。這是 Windows DWM 報告的視窗擴展邊界（含螢幕外陰影/邊框），Starshot 如實讀取——螢幕外部分不可見，不影響截圖結果
+
 ## 架構
 
 ### 目錄結構
@@ -346,13 +354,6 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 #     Starshot.exe      ← 主程式（自包含 + trim + R2R）
 #     *.dll / avifenc.exe 等
 ```
-
-## 已知限制
-
-- 區域截圖覆蓋層 HDR 幀顯示為 SDR（WinUI CanvasControl 走 SDR 交換鏈）；儲存的檔案不受影響
-- 自訂桌布按 `UniformToFill` 鋪滿，但 WinUI 的裁剪不置中，目前是**左上**對齊，比如窄（豎向）桌布在寬視窗裡會只顯示上半部分（從頂部裁剪而非置中）
-- 區域截圖覆蓋層開啟瞬間，游標仍是系統預設形狀，**需移動一次滑鼠後十字游標才出現**（WinUI `ProtectedCursor` 對已在元素上的靜止指標不立即生效，移動一次觸發 pointer 事件後即正常）
-- 雙屏 DPI 不一致（如主屏 150%、副屏 125%）時，區域截圖覆蓋層在副屏的座標會錯位（放大鏡 / 選區對不上）。規避：統一雙屏縮放比例
 
 ## 國際化（i18n）
 

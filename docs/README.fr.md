@@ -247,6 +247,14 @@ Affiche le logo + le slogan au lancement. Délai de 700ms puis fondu en 400ms. S
 - Vérifie uniquement les releases CI/CD (lit le numéro de version dans `version.ini`). Les builds locaux (sans `version.ini`, `AppVersion = Local`) sont traités comme 0.0.0 et peuvent se mettre à jour vers n'importe quel release CI/CD
 - Convention de casse de version : le tag GitHub, le nom du zip et le répertoire `app-{version}/` sont en minuscules (ex. `0.3.1-preview`) ; `version.ini` conserve la casse d'origine (`0.3.1-Preview`, affiché dans À propos), et le lanceur le passe en minuscules pour localiser le répertoire.
 
+## Limitations connues
+
+- L'overlay de capture régionale affiche les trames HDR en SDR (CanvasControl de WinUI utilise une chaîne d'échange SDR) ; les fichiers sauvegardés ne sont pas affectés
+- Les fonds d'écran personnalisés utilisent `UniformToFill` pour couvrir la fenêtre, mais le recadrage de WinUI n'est pas centré — il est actuellement aligné en **haut à gauche**. Par exemple, un fond d'écran étroit (portrait) dans une fenêtre large n'affichera que la partie supérieure (recadrée depuis le haut plutôt que centrée)
+- Au moment où l'overlay de capture régionale s'ouvre, le curseur reste dans sa forme par défaut. **Il faut bouger la souris une fois** pour que le curseur en croix apparaisse (le `ProtectedCursor` de WinUI ne prend pas effet immédiatement sur un pointeur immobile déjà au-dessus de l'élément ; un mouvement déclenche un événement de pointeur, après quoi tout fonctionne normalement)
+- Sur un double écran avec DPI différents (ex. primaire 150 %, secondaire 125 %), la **détection des fenêtres** de la capture régionale (survol pour sélectionner une fenêtre) est décalée sur l'écran secondaire ; la sélection libre par glissement et la sauvegarde ne sont pas affectées. Solution : utiliser la même échelle sur les deux écrans
+- Lors de la capture régionale, le survol de certaines fenêtres peut afficher des valeurs négatives dans la boîte de coordonnées (ex. `-11,-11`). Ce sont les limites du cadre étendu de la fenêtre rapportées par Windows DWM (incluant l'ombre/bordure hors écran) ; Starshot les lit telles quelles — la partie hors écran est invisible et n'affecte pas la capture
+
 ## Architecture
 
 ### Structure des répertoires
@@ -346,13 +354,6 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 #     Starshot.exe      ← Programme principal (autonome + trim + R2R)
 #     *.dll / avifenc.exe etc.
 ```
-
-## Limitations connues
-
-- L'overlay de capture régionale affiche les trames HDR en SDR (CanvasControl de WinUI utilise une chaîne d'échange SDR) ; les fichiers sauvegardés ne sont pas affectés
-- Les fonds d'écran personnalisés utilisent `UniformToFill` pour couvrir la fenêtre, mais le recadrage de WinUI n'est pas centré — il est actuellement aligné en **haut à gauche**. Par exemple, un fond d'écran étroit (portrait) dans une fenêtre large n'affichera que la partie supérieure (recadrée depuis le haut plutôt que centrée)
-- Au moment où l'overlay de capture régionale s'ouvre, le curseur reste dans sa forme par défaut. **Il faut bouger la souris une fois** pour que le curseur en croix apparaisse (le `ProtectedCursor` de WinUI ne prend pas effet immédiatement sur un pointeur immobile déjà au-dessus de l'élément ; un mouvement déclenche un événement de pointeur, après quoi tout fonctionne normalement)
-- Sur un double écran avec DPI différents (ex. primaire 150 %, secondaire 125 %), les coordonnées de la superposition de capture de région sont décalées sur l'écran secondaire (loupe / sélection désalignées). Solution : utiliser la même échelle sur les deux écrans
 
 ## Internationalisation (i18n)
 

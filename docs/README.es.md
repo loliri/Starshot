@@ -247,6 +247,14 @@ Muestra el logo + eslogan al iniciar. Retraso de 700 ms y luego se desvanece en 
 - Solo verifica releases CI/CD (lee el número de versión de `version.ini`). Las compilaciones locales (sin `version.ini`, `AppVersion = Local`) se tratan como 0.0.0, por lo que pueden actualizarse a cualquier release CI/CD
 - Convención de mayúsculas/minúsculas de versión: el tag de GitHub, el nombre del zip y el directorio `app-{version}/` van en minúsculas (p. ej. `0.3.1-preview`); `version.ini` mantiene el uso original de mayúsculas (`0.3.1-Preview`, se muestra en Acerca de), y el lanzador lo convierte a minúsculas al localizar el directorio.
 
+## Limitaciones conocidas
+
+- La superposición de captura de región muestra fotogramas HDR como SDR (CanvasControl de WinUI usa una cadena de intercambio SDR); los archivos guardados no se ven afectados
+- Los fondos de pantalla personalizados usan `UniformToFill` para cubrir la ventana, pero el recorte de WinUI no está centrado, actualmente está alineado **arriba a la izquierda**. Por ejemplo, un fondo estrecho (vertical) en una ventana ancha solo mostrará la parte superior (recortado desde arriba en lugar de centrado)
+- Al abrir la superposición de captura de región, el cursor mantiene la forma predeterminada del sistema. **Hay que mover el ratón una vez** para que aparezca el cursor en cruz (`ProtectedCursor` de WinUI no surte efecto inmediato sobre un puntero inmóvil que ya está sobre el elemento; al moverlo una vez se activa un evento pointer, tras lo cual funciona normalmente)
+- En monitores duales con DPI distinto (p. ej. primario 150 %, secundario 125 %), la **detección de ventanas** de la captura de región (resaltado al pasar el cursor) se desalinea en el monitor secundario; la selección libre por arrastre y el guardado no se ven afectados. Solución alternativa: usar la misma escala en ambos monitores
+- Al pasar el cursor sobre ciertas ventanas en la captura de región, el cuadro de coordenadas puede mostrar valores negativos (p. ej. `-11,-11`). Son los límites del marco extendido de la ventana que reporta Windows DWM (incluyendo sombra/borde fuera de pantalla); Starshot los lee tal cual — la parte fuera de pantalla es invisible y no afecta la captura
+
 ## Arquitectura
 
 ### Estructura de directorios
@@ -346,13 +354,6 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 #     Starshot.exe      ← Programa principal (autocontenido + trim + R2R)
 #     *.dll / avifenc.exe etc.
 ```
-
-## Limitaciones conocidas
-
-- La superposición de captura de región muestra fotogramas HDR como SDR (CanvasControl de WinUI usa una cadena de intercambio SDR); los archivos guardados no se ven afectados
-- Los fondos de pantalla personalizados usan `UniformToFill` para cubrir la ventana, pero el recorte de WinUI no está centrado, actualmente está alineado **arriba a la izquierda**. Por ejemplo, un fondo estrecho (vertical) en una ventana ancha solo mostrará la parte superior (recortado desde arriba en lugar de centrado)
-- Al abrir la superposición de captura de región, el cursor mantiene la forma predeterminada del sistema. **Hay que mover el ratón una vez** para que aparezca el cursor en cruz (`ProtectedCursor` de WinUI no surte efecto inmediato sobre un puntero inmóvil que ya está sobre el elemento; al moverlo una vez se activa un evento pointer, tras lo cual funciona normalmente)
-- En monitores duales con DPI distinto (p. ej. primario 150 %, secundario 125 %), las coordenadas de la superposición de captura de región se desalinean en el monitor secundario (lupa / selección desalineadas). Solución alternativa: usar la misma escala en ambos monitores
 
 ## Internacionalización (i18n)
 

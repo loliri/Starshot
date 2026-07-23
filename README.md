@@ -245,6 +245,14 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 - Only checks CI/CD releases (reads `version.ini` version number). Local builds (no `version.ini`, `AppVersion = Local`) are treated as 0.0.0, so they can update to any CI/CD release.
 - Version case convention: the GitHub tag, zip name, and `app-{version}/` dir are all lowercase (e.g. `0.3.1-preview`); `version.ini` keeps the original case (`0.3.1-Preview`, shown on the About page), and the launcher lowercases it when locating the dir.
 
+## Known Limitations
+
+- The region screenshot overlay displays HDR frames as SDR (WinUI CanvasControl uses an SDR swap chain); saved files are unaffected.
+- Custom wallpapers use `UniformToFill` to cover the window, but WinUI's crop is not centered — it is currently **top-left** aligned. For example, a narrow (portrait) wallpaper in a wide window will only show the upper portion (cropped from the top rather than centered).
+- When the region screenshot overlay first opens, the cursor remains the default system shape. **You need to move the mouse once** for the crosshair cursor to appear (WinUI `ProtectedCursor` does not take immediate effect on a stationary pointer already over the element — moving once triggers a pointer event, after which it works normally).
+- On mixed-DPI dual monitors (e.g. primary 150%, secondary 125%), region capture's **window detection** (hover highlight) coordinates are off on the secondary monitor; free-form drag selection and saving are unaffected. Workaround: use the same scale on both monitors.
+- When hovering certain windows in region capture, the coordinate box may show negative values (e.g. `-11,-11`). This is the window extended frame bounds reported by Windows DWM (including off-screen shadow/border); Starshot reads it as-is — the off-screen part is invisible and does not affect the screenshot.
+
 ## Architecture
 
 ### Directory Structure
@@ -344,13 +352,6 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 #     Starshot.exe      ← Main program (self-contained + trim + R2R)
 #     *.dll / avifenc.exe etc.
 ```
-
-## Known Limitations
-
-- The region screenshot overlay displays HDR frames as SDR (WinUI CanvasControl uses an SDR swap chain); saved files are unaffected.
-- Custom wallpapers use `UniformToFill` to cover the window, but WinUI's crop is not centered — it is currently **top-left** aligned. For example, a narrow (portrait) wallpaper in a wide window will only show the upper portion (cropped from the top rather than centered).
-- When the region screenshot overlay first opens, the cursor remains the default system shape. **You need to move the mouse once** for the crosshair cursor to appear (WinUI `ProtectedCursor` does not take immediate effect on a stationary pointer already over the element — moving once triggers a pointer event, after which it works normally).
-- On mixed-DPI dual monitors (e.g. primary 150%, secondary 125%), the region capture overlay's coordinates are off on the secondary monitor (magnifier / selection misaligned). Workaround: use the same scale on both monitors.
 
 ## Internationalization (i18n)
 
