@@ -85,11 +85,6 @@
 		<ProjectReference Include="..\Starshot.Language\Starshot.Language.csproj" />
 	</ItemGroup>
 
-	<Target Name="RemoveDlls" AfterTargets="Publish">
-		<Delete Files="$(PublishDir)DirectML.dll;$(PublishDir)onnxruntime.dll" />
-		<RemoveDir Directories="$(PublishDir)NpuDetect" />
-	</Target>
-
 	<Target Name="CopyLauncher" AfterTargets="Publish">
 		<PropertyGroup>
 			<_ReleaseRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\build\release'))</_ReleaseRoot>
