@@ -76,6 +76,11 @@ jobs:
       - name: Publish main app
         run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=${{ matrix.platform }} -r win-${{ matrix.platform }}
 
+      - name: Remove unused dlls
+        run: |
+          Remove-Item -Force build/release/app/DirectML.dll, build/release/app/onnxruntime.dll, build/release/app/onnxruntime_providers_shared.dll, build/release/app/Microsoft.ML.OnnxRuntime.dll, build/release/app/VP9DecoderMFT.dll -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force build/release/app/NpuDetect -ErrorAction SilentlyContinue
+
       - name: Trim unsupported locales
         run: |
           # 从 Starshot.Language 的 Lang.{locale}.resx 读程序支持的语言（Lang.resx 是默认 en，主 dll 内无目录）
@@ -94,7 +99,11 @@ jobs:
           "version=${{ needs.version.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
 
       - name: Zip release
-        run: Compress-Archive -Path build/release/* -DestinationPath "Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip"
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = "Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip"
+          if (Test-Path $zip) { Remove-Item $zip }
+          [System.IO.Compression.ZipFile]::CreateFromDirectory("build/release", $zip, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
