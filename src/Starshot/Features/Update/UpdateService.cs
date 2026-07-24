@@ -11,21 +11,21 @@ namespace Starshot.Features.Update;
 
 public static class UpdateService
 {
-    public static async Task<ReleaseInfo?> CheckUpdateAsync(bool ignoreSkipped = true)
+    public static async Task<(ReleaseInfo? update, string? latestTag)> CheckUpdateAsync(bool ignoreSkipped = true)
     {
 #if DEBUG
-        return null;
+        return (null, null);
 #else
         // 不吞异常：网络失败向上抛（手动检查弹"更新失败"，启动检查由调用方 catch 静默）。
-        // 返回 null 仅表示"确无新版本/被忽略/无 zip 资源"。
+        // update=null 仅表示"确无新版本/被忽略/无 zip 资源"；latestTag 始终带 GitHub 最新版号（供"已是最新"提示显示）
         var release = await ReleaseClient.GetLatestReleaseAsync(AppConfig.EnablePreReleaseUpdateCheck);
-        if (release is null) return null;
-        if (!TryParseVersion(AppConfig.AppVersion, out var current)) return null;
-        if (release.Version <= current) return null;
+        if (release is null) return (null, null);
+        if (!TryParseVersion(AppConfig.AppVersion, out var current)) return (null, release.TagName);
+        if (release.Version <= current) return (null, release.TagName);
         // 只有自动检查才跳过用户忽略的版本；手动检查无视忽略
-        if (ignoreSkipped && Version.TryParse(AppConfig.IgnoreVersion, out var ignore) && release.Version <= ignore) return null;
-        if (string.IsNullOrWhiteSpace(release.ZipUrl)) return null;
-        return release;
+        if (ignoreSkipped && Version.TryParse(AppConfig.IgnoreVersion, out var ignore) && release.Version <= ignore) return (null, release.TagName);
+        if (string.IsNullOrWhiteSpace(release.ZipUrl)) return (null, release.TagName);
+        return (release, release.TagName);
 #endif
     }
 

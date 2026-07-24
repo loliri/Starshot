@@ -129,17 +129,31 @@ public class InAppToast : Behavior<StackPanel>
     }
 
 
-    private void AddInfoBar(InfoBarSeverity severity, string? title, string? message, int duration = 0)
+    private void AddInfoBar(InfoBarSeverity severity, string? title, string? message, int duration = 0, string? accentMessage = null)
     {
         void core() => DispatcherQueue.TryEnqueue(() =>
         {
             var infoBar = new InfoBar
             {
                 Title = title,
-                Message = message,
                 Severity = severity,
                 IsOpen = true,
             };
+            if (accentMessage is not null)
+            {
+                // message + 空格 + accentMessage（强调色），用 Content 富文本替代 Message
+                var tb = new TextBlock();
+                if (!string.IsNullOrEmpty(message))
+                {
+                    tb.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = message + "    " });
+                }
+                tb.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = accentMessage, Foreground = Application.Current.Resources["SystemFillColorSuccessBrush"] as Brush });
+                infoBar.Content = tb;
+            }
+            else
+            {
+                infoBar.Message = message;
+            }
             if (severity == InfoBarSeverity.Informational)
             {
                 infoBar.Background = Application.Current.Resources["CustomAcrylicBrush"] as Brush;
@@ -153,9 +167,9 @@ public class InAppToast : Behavior<StackPanel>
 
 
 
-    public void Information(string? title, string? message = null, int duration = 3000)
+    public void Information(string? title, string? message = null, int duration = 3000, string? accentMessage = null)
     {
-        AddInfoBar(InfoBarSeverity.Informational, title, message, duration);
+        AddInfoBar(InfoBarSeverity.Informational, title, message, duration, accentMessage);
     }
 
 

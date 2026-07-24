@@ -71,10 +71,12 @@ public sealed partial class AboutPage : PageBase
     {
         try
         {
-            var release = await UpdateService.CheckUpdateAsync(ignoreSkipped: false);
+            var (release, tag) = await UpdateService.CheckUpdateAsync(ignoreSkipped: false);
             if (release is null)
             {
-                InAppToast.MainWindow?.Information(null, Lang.Starshot_LatestVersion, 3000);
+                // 显示 GitHub 最新版号（不是当前版本号——当前可能比 GitHub 还新）
+                var t = tag ?? AppConfig.AppVersion;
+                InAppToast.MainWindow?.Information(null, Lang.Starshot_LatestVersion, 3000, t);
                 return;
             }
             var window = new UpdateWindow();
