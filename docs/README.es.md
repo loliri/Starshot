@@ -216,7 +216,7 @@ Después de una captura, aparece una miniatura + notificación de estado (no int
 - **Fondo de pantalla personalizado**: tres modos
   - **Imagen específica**: elige una imagen, se muestra fija
   - **Video específico**: reproducción en bucle silenciada; se pausa automáticamente al ocultar la ventana principal
-  - **Aleatorio desde carpeta**: elige una imagen o video aleatorio de una carpeta en cada inicio; un interruptor opcional de solo videos hace que elija únicamente videos, y si la carpeta no tiene video, recurre a una imagen aleatoria con un aviso
+  - **Aleatorio desde carpeta**: elige una imagen o video aleatorio de una carpeta en cada inicio; un interruptor opcional «Preferir video» prefiere los videos cuando está activado
   - Detección automática de pérdida de fuente del fondo, limpieza de configuración y vuelta a sin fondo + notificación toast
 - **Color de acento**:
   - **Extracción automática del fondo** (activado por defecto): muestrea el color dominante del fondo como color de acento de la aplicación (aumento de saturación HSV). Para videos, solo se muestrea el primer fotograma para evitar parpadeos.
@@ -255,6 +255,7 @@ Muestra el logo + eslogan al iniciar. Retraso de 700 ms y luego se desvanece en 
 - Al abrir la superposición de captura de región, el cursor mantiene la forma predeterminada del sistema. **Hay que mover el ratón una vez** para que aparezca el cursor en cruz (`ProtectedCursor` de WinUI no surte efecto inmediato sobre un puntero inmóvil que ya está sobre el elemento; al moverlo una vez se activa un evento pointer, tras lo cual funciona normalmente)
 - En monitores duales con DPI distinto (p. ej. primario 150 %, secundario 125 %), la **detección de ventanas** de la captura de región (resaltado al pasar el cursor) se desalinea en el monitor secundario; la selección libre por arrastre y el guardado no se ven afectados. Solución alternativa: usar la misma escala en ambos monitores
 - Al pasar el cursor sobre ciertas ventanas en la captura de región, el cuadro de coordenadas puede mostrar valores negativos (p. ej. `-11,-11`). Son los límites del marco extendido de la ventana que reporta Windows DWM (incluyendo sombra/borde fuera de pantalla); Starshot los lee tal cual — la parte fuera de pantalla es invisible y no afecta la captura
+- El fondo de pantalla de video puede no inicializarse al inicio debido a contención del pipeline de medios de MF (intermitente, no resuelto completamente); durante la carga se muestra como marcador de posición una imagen aleatoria del directorio del video, que se mantiene si el video se queda atascado — sin pantalla negra
 
 ## Arquitectura
 

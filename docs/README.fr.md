@@ -216,7 +216,7 @@ Après une capture, un toast avec miniature + statut apparaît (n'interfère pas
 - **Fond d'écran personnalisé** : Trois modes
   - **Image spécifique** : Choisir une image, affichée en permanence
   - **Vidéo spécifique** : Lecture en boucle muette ; pause automatique quand la fenêtre principale est masquée
-  - **Aléatoire depuis un dossier** : Choisit une image ou vidéo aléatoire dans un dossier à chaque lancement ; une option secondaire « vidéos uniquement » permet de ne choisir que des vidéos, et si le dossier n'en contient aucune, un repli vers une image aléatoire s'effectue avec une notification
+  - **Aléatoire depuis un dossier** : Choisit une image ou vidéo aléatoire dans un dossier à chaque lancement ; une option secondaire « Préférer les vidéos » préfère les vidéos lorsqu'elle est activée
   - Détection automatique de la perte de source du fond d'écran, nettoyage de la configuration et retour à l'absence de fond d'écran + notification toast
 - **Couleur d'accentuation** :
   - **Extraction automatique depuis le fond d'écran** (activé par défaut) : Échantillonne la couleur dominante du fond d'écran comme couleur d'accentuation (boost de saturation HSV). Pour les vidéos, seule la première image est échantillonnée pour éviter le scintillement.
@@ -255,6 +255,7 @@ Affiche le logo + le slogan au lancement. Délai de 700ms puis fondu en 400ms. S
 - Au moment où l'overlay de capture régionale s'ouvre, le curseur reste dans sa forme par défaut. **Il faut bouger la souris une fois** pour que le curseur en croix apparaisse (le `ProtectedCursor` de WinUI ne prend pas effet immédiatement sur un pointeur immobile déjà au-dessus de l'élément ; un mouvement déclenche un événement de pointeur, après quoi tout fonctionne normalement)
 - Sur un double écran avec DPI différents (ex. primaire 150 %, secondaire 125 %), la **détection des fenêtres** de la capture régionale (survol pour sélectionner une fenêtre) est décalée sur l'écran secondaire ; la sélection libre par glissement et la sauvegarde ne sont pas affectées. Solution : utiliser la même échelle sur les deux écrans
 - Lors de la capture régionale, le survol de certaines fenêtres peut afficher des valeurs négatives dans la boîte de coordonnées (ex. `-11,-11`). Ce sont les limites du cadre étendu de la fenêtre rapportées par Windows DWM (incluant l'ombre/bordure hors écran) ; Starshot les lit telles quelles — la partie hors écran est invisible et n'affecte pas la capture
+- Le fond d'écran vidéo peut échouer à s'initialiser au démarrage en raison de la contention du pipeline média MF (intermittent, non entièrement résolu) ; durant le chargement, une image aléatoire du répertoire de la vidéo est affichée comme placeholder, et conservée si la vidéo reste bloquée — aucun écran noir
 
 ## Architecture
 

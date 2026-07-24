@@ -214,7 +214,7 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - **Custom Wallpaper**: Three modes
   - **Specific Image**: Pick an image, always displayed.
   - **Specific Video**: Loops muted; auto-pauses when the main window is hidden.
-  - **Random from Folder**: Picks a random image or video from a folder on each launch; an optional videos-only sub-toggle makes it pick only videos, and if the folder has no video it falls back to a random image with a notice.
+  - **Random from Folder**: Picks a random image or video from a folder on each launch; an optional "Prefer video" sub-toggle prefers videos when on.
   - Lost wallpaper sources are auto-detected, with config cleanup and fallback to no wallpaper + toast notification.
 - **Accent Color**:
   - **Auto-extract from wallpaper** (on by default): Samples the wallpaper's dominant color as the app accent color (HSV saturation boost). For videos, only the first frame is sampled to avoid color flickering.
@@ -253,6 +253,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 - When the region screenshot overlay first opens, the cursor remains the default system shape. **You need to move the mouse once** for the crosshair cursor to appear (WinUI `ProtectedCursor` does not take immediate effect on a stationary pointer already over the element — moving once triggers a pointer event, after which it works normally).
 - On mixed-DPI dual monitors (e.g. primary 150%, secondary 125%), region capture's **window detection** (hover highlight) coordinates are off on the secondary monitor; free-form drag selection and saving are unaffected. Workaround: use the same scale on both monitors.
 - When hovering certain windows in region capture, the coordinate box may show negative values (e.g. `-11,-11`). This is the window extended frame bounds reported by Windows DWM (including off-screen shadow/border); Starshot reads it as-is — the off-screen part is invisible and does not affect the screenshot.
+- Video wallpaper may fail to initialize on startup due to MF media pipeline contention (intermittent, not fully resolved); during load a random image from the video's directory is shown as a placeholder, and kept if the video gets stuck — no black screen.
 
 ## Architecture
 
