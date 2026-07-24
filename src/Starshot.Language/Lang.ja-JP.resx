@@ -2981,6 +2981,12 @@
   <data name="Starshot_GithubApiNoProxy" xml:space="preserve">
     <value>GitHub API 直結（プロキシ不使用）</value>
   </data>
+  <data name="Starshot_DeltaUpdateMaxLayers" xml:space="preserve">
+    <value>差分更新の最大階層数</value>
+  </data>
+  <data name="Starshot_Advanced" xml:space="preserve">
+    <value>詳細</value>
+  </data>
   <data name="Starshot_RestartToTakeEffect" xml:space="preserve">
     <value>再起動後に反映</value>
   </data>

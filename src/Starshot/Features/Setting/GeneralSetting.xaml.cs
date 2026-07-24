@@ -115,6 +115,13 @@ public sealed partial class GeneralSetting : PageBase
     public Visibility AutoStartMinimizedVisibility => EnableAutoStart ? Visibility.Visible : Visibility.Collapsed;
 
 
+    public int DeltaUpdateMaxLayers
+    {
+        get => AppConfig.DeltaUpdateMaxLayers;
+        set => AppConfig.DeltaUpdateMaxLayers = (int)Math.Clamp(value, 1, 20);
+    }
+
+
     public int LanguageIndex
     {
         get;

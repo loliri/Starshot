@@ -7925,6 +7925,8 @@ namespace Starshot.Language {
         public static string Starshot_UpdateChannel { get { return ResourceManager.GetString("Starshot_UpdateChannel", resourceCulture); } }
         public static string Starshot_UpdateBuildTime { get { return ResourceManager.GetString("Starshot_UpdateBuildTime", resourceCulture); } }
         public static string Starshot_GithubApiNoProxy { get { return ResourceManager.GetString("Starshot_GithubApiNoProxy", resourceCulture); } }
+        public static string Starshot_DeltaUpdateMaxLayers { get { return ResourceManager.GetString("Starshot_DeltaUpdateMaxLayers", resourceCulture); } }
+        public static string Starshot_Advanced { get { return ResourceManager.GetString("Starshot_Advanced", resourceCulture); } }
         public static string Starshot_RestartToTakeEffect { get { return ResourceManager.GetString("Starshot_RestartToTakeEffect", resourceCulture); } }
         public static string Starshot_WelcomeHello { get { return ResourceManager.GetString("Starshot_WelcomeHello", resourceCulture); } }
         public static string Starshot_WelcomeIntro { get { return ResourceManager.GetString("Starshot_WelcomeIntro", resourceCulture); } }

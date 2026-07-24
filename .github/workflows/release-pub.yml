@@ -98,6 +98,99 @@ jobs:
           Move-Item build/release/app "build/release/app-${{ needs.version.outputs.vl }}" -Force
           "version=${{ needs.version.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
 
+      - name: Generate delta
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $newTag = "${{ needs.version.outputs.vl }}"
+          $arch = "${{ matrix.platform }}"
+          # 上个 release tag（最新一条 release 的 tag）
+          $oldTag = (gh api repos/${{ github.repository }}/releases --jq '.[0].tag_name' 2>$null)
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($oldTag) -or $oldTag -eq $newTag) {
+            Write-Host "No previous release found (or same tag), skipping delta"
+            exit 0
+          }
+          Write-Host "Generating delta: $oldTag -> $newTag ($arch)"
+
+          # 下载上个 release 整包
+          $oldZip = "old-full.zip"
+          gh release download $oldTag --pattern "Starshot-${oldTag}-win-${arch}.zip" --output $oldZip --repo ${{ github.repository }} 2>$null
+          if ($LASTEXITCODE -ne 0 -or !(Test-Path $oldZip)) {
+            Write-Host "Previous release zip not found, skipping delta"
+            exit 0
+          }
+
+          # 解压上个 release
+          Expand-Archive $oldZip -DestinationPath old/ -Force
+          # 对齐 app 目录名：old/app-{oldTag} -> old/app-{newTag}
+          $oldAppDir = "old/app-$oldTag"
+          $newAppDir = "old/app-$newTag"
+          if (Test-Path $oldAppDir) {
+            Move-Item $oldAppDir $newAppDir -Force
+          }
+
+          # 对比 old/ vs build/release/，收集变化 + 删除
+          $oldRoot = (Resolve-Path "old/").Path
+          $newRoot = (Resolve-Path "build/release/").Path
+          $deletedFiles = @()
+          $changedFiles = @()
+
+          # 删除文件（old 有 new 没有）
+          Get-ChildItem $oldRoot -Recurse -File | ForEach-Object {
+            $rel = $_.FullName.Substring($oldRoot.Length + 1).Replace('\','/')
+            if (!(Test-Path (Join-Path $newRoot $rel))) {
+              $deletedFiles += $rel
+            }
+          }
+
+          # 变化/新增文件（hash 不同或 new 独有）
+          Get-ChildItem $newRoot -Recurse -File | ForEach-Object {
+            $rel = $_.FullName.Substring($newRoot.Length + 1).Replace('\','/')
+            $oldFile = Join-Path $oldRoot $rel
+            $newHash = (Get-FileHash $_.FullName).Hash
+            if (!(Test-Path $oldFile)) {
+              $changedFiles += [PSCustomObject]@{ Path = $rel; FullPath = $_.FullName }
+            } else {
+              $oldHash = (Get-FileHash $oldFile).Hash
+              if ($oldHash -ne $newHash) {
+                $changedFiles += [PSCustomObject]@{ Path = $rel; FullPath = $_.FullName }
+              }
+            }
+          }
+
+          if ($changedFiles.Count -eq 0 -and $deletedFiles.Count -eq 0) {
+            Write-Host "No changes detected, skipping delta"
+            exit 0
+          }
+
+          Write-Host "Changed files: $($changedFiles.Count), Deleted files: $($deletedFiles.Count)"
+
+          # 生成 manifest.json
+          $manifest = @{ deletedFiles = $deletedFiles }
+          $manifestPath = "build/release/manifest.json"
+          $manifest | ConvertTo-Json -Depth 10 | Set-Content $manifestPath -Encoding UTF8
+
+          # 打包 delta.zip（只含变化文件 + manifest.json，保持 release 相对路径结构）
+          $deltaZip = "Starshot-${newTag}-from-${oldTag}-win-${arch}-delta.zip"
+          Add-Type -AssemblyName System.IO.Compression
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          if (Test-Path $deltaZip) { Remove-Item $deltaZip }
+          $zipArchive = [System.IO.Compression.ZipFile]::Open($deltaZip, 'Create')
+          try {
+            # manifest.json
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zipArchive, $manifestPath, "manifest.json", [System.IO.Compression.CompressionLevel]::SmallestSize)
+            # 变化文件
+            foreach ($f in $changedFiles) {
+              [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zipArchive, $f.FullPath, $f.Path, [System.IO.Compression.CompressionLevel]::SmallestSize)
+            }
+          } finally {
+            $zipArchive.Dispose()
+          }
+          # 清理临时 manifest（不进整包 zip）
+          Remove-Item $manifestPath -Force
+          Write-Host "Delta zip created: $deltaZip ($((Get-Item $deltaZip).Length / 1MB) MB)"
+
       - name: Zip release
         run: |
           Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -109,7 +202,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}
-          path: Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip
+          path: |
+            Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip
+            Starshot-${{ needs.version.outputs.vl }}-from-*-win-${{ matrix.platform }}-delta.zip
 
 
   release:
@@ -137,5 +232,7 @@ jobs:
           files: |
             x64/Starshot-${{ needs.version.outputs.vl }}-win-x64.zip
             arm64/Starshot-${{ needs.version.outputs.vl }}-win-arm64.zip
+            x64/Starshot-${{ needs.version.outputs.vl }}-from-*-win-x64-delta.zip
+            arm64/Starshot-${{ needs.version.outputs.vl }}-from-*-win-arm64-delta.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

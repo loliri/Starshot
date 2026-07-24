@@ -130,6 +130,22 @@
                 </StackPanel>
             </Expander>
 
+            <!--  高级  -->
+            <StackPanel Spacing="8">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Advanced}" />
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <TextBlock VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               FontSize="13"
+                               Text="{x:Bind lang:Lang.Starshot_DeltaUpdateMaxLayers}" />
+                    <NumberBox Value="{x:Bind DeltaUpdateMaxLayers, Mode=TwoWay}"
+                               Minimum="1"
+                               Maximum="20"
+                               SpinButtonPlacementMode="Compact"
+                               Width="100" />
+                </StackPanel>
+            </StackPanel>
+
         </StackPanel>
     </ScrollViewer>
 

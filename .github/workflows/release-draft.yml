@@ -98,6 +98,67 @@ jobs:
           Move-Item build/release/app "build/release/app-${{ needs.version.outputs.vl }}" -Force
           "version=${{ needs.version.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
 
+      - name: Generate delta
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $newTag = "${{ needs.version.outputs.vl }}"
+          $arch = "${{ matrix.platform }}"
+          $oldTag = (gh api repos/${{ github.repository }}/releases --jq '.[0].tag_name' 2>$null)
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($oldTag) -or $oldTag -eq $newTag) {
+            Write-Host "No previous release found (or same tag), skipping delta"
+            exit 0
+          }
+          Write-Host "Generating delta: $oldTag -> $newTag ($arch)"
+          $oldZip = "old-full.zip"
+          gh release download $oldTag --pattern "Starshot-${oldTag}-win-${arch}.zip" --output $oldZip --repo ${{ github.repository }} 2>$null
+          if ($LASTEXITCODE -ne 0 -or !(Test-Path $oldZip)) {
+            Write-Host "Previous release zip not found, skipping delta"
+            exit 0
+          }
+          Expand-Archive $oldZip -DestinationPath old/ -Force
+          $oldAppDir = "old/app-$oldTag"
+          $newAppDir = "old/app-$newTag"
+          if (Test-Path $oldAppDir) { Move-Item $oldAppDir $newAppDir -Force }
+          $oldRoot = (Resolve-Path "old/").Path
+          $newRoot = (Resolve-Path "build/release/").Path
+          $deletedFiles = @()
+          $changedFiles = @()
+          Get-ChildItem $oldRoot -Recurse -File | ForEach-Object {
+            $rel = $_.FullName.Substring($oldRoot.Length + 1).Replace('\','/')
+            if (!(Test-Path (Join-Path $newRoot $rel))) { $deletedFiles += $rel }
+          }
+          Get-ChildItem $newRoot -Recurse -File | ForEach-Object {
+            $rel = $_.FullName.Substring($newRoot.Length + 1).Replace('\','/')
+            $oldFile = Join-Path $oldRoot $rel
+            $newHash = (Get-FileHash $_.FullName).Hash
+            if (!(Test-Path $oldFile)) {
+              $changedFiles += [PSCustomObject]@{ Path = $rel; FullPath = $_.FullName }
+            } else {
+              $oldHash = (Get-FileHash $oldFile).Hash
+              if ($oldHash -ne $newHash) { $changedFiles += [PSCustomObject]@{ Path = $rel; FullPath = $_.FullName } }
+            }
+          }
+          if ($changedFiles.Count -eq 0 -and $deletedFiles.Count -eq 0) { Write-Host "No changes, skipping delta"; exit 0 }
+          Write-Host "Changed: $($changedFiles.Count), Deleted: $($deletedFiles.Count)"
+          $manifest = @{ deletedFiles = $deletedFiles }
+          $manifestPath = "build/release/manifest.json"
+          $manifest | ConvertTo-Json -Depth 10 | Set-Content $manifestPath -Encoding UTF8
+          $deltaZip = "Starshot-${newTag}-from-${oldTag}-win-${arch}-delta.zip"
+          Add-Type -AssemblyName System.IO.Compression
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          if (Test-Path $deltaZip) { Remove-Item $deltaZip }
+          $zipArchive = [System.IO.Compression.ZipFile]::Open($deltaZip, 'Create')
+          try {
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zipArchive, $manifestPath, "manifest.json", [System.IO.Compression.CompressionLevel]::SmallestSize)
+            foreach ($f in $changedFiles) {
+              [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zipArchive, $f.FullPath, $f.Path, [System.IO.Compression.CompressionLevel]::SmallestSize)
+            }
+          } finally { $zipArchive.Dispose() }
+          Remove-Item $manifestPath -Force
+          Write-Host "Delta zip created: $deltaZip ($((Get-Item $deltaZip).Length / 1MB) MB)"
+
       - name: Zip release
         run: |
           Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -109,7 +170,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}
-          path: Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip
+          path: |
+            Starshot-${{ needs.version.outputs.vl }}-win-${{ matrix.platform }}.zip
+            Starshot-${{ needs.version.outputs.vl }}-from-*-win-${{ matrix.platform }}-delta.zip
 
 
   release:
@@ -137,5 +200,7 @@ jobs:
           files: |
             x64/Starshot-${{ needs.version.outputs.vl }}-win-x64.zip
             arm64/Starshot-${{ needs.version.outputs.vl }}-win-arm64.zip
+            x64/Starshot-${{ needs.version.outputs.vl }}-from-*-win-x64-delta.zip
+            arm64/Starshot-${{ needs.version.outputs.vl }}-from-*-win-arm64-delta.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

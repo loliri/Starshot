@@ -239,6 +239,12 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 差分更新最大链式层数（默认 5，范围 1-20）
+    /// </summary>
+    public static int DeltaUpdateMaxLayers { get => GetValue(5); set => SetValue(value); }
+
+
+    /// <summary>
     /// 日志/缓存文件夹，默认 %LOCALAPPDATA%\Starshot
     /// </summary>
     public static string LogFolder

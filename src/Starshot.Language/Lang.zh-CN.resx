@@ -2845,6 +2845,8 @@
   <data name="Starshot_UpdateChannel" xml:space="preserve"><value>发布渠道</value></data>
   <data name="Starshot_UpdateBuildTime" xml:space="preserve"><value>编译时间</value></data>
   <data name="Starshot_GithubApiNoProxy" xml:space="preserve"><value>GitHub API 直连（不走代理）</value></data>
+  <data name="Starshot_DeltaUpdateMaxLayers" xml:space="preserve"><value>差分更新最大层数</value></data>
+  <data name="Starshot_Advanced" xml:space="preserve"><value>高级</value></data>
   <data name="Starshot_RestartToTakeEffect" xml:space="preserve"><value>重启后生效</value></data>
   <data name="Starshot_WelcomeHello" xml:space="preserve"><value>嗨，你好！</value></data>
   <data name="Starshot_WelcomeIntro" xml:space="preserve"><value>看来你是第一次来到 Starshot。这是一个简单的欢迎页，用来初始化一些配置。</value></data>
