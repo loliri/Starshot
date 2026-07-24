@@ -7944,6 +7944,7 @@ namespace Starshot.Language {
         public static string Starshot_WelcomeStart { get { return ResourceManager.GetString("Starshot_WelcomeStart", resourceCulture); } }
         public static string Starshot_InfoCopied { get { return ResourceManager.GetString("Starshot_InfoCopied", resourceCulture); } }
         public static string Starshot_DebugExtractTitle { get { return ResourceManager.GetString("Starshot_DebugExtractTitle", resourceCulture); } }
+        public static string Starshot_DebugSection { get { return ResourceManager.GetString("Starshot_DebugSection", resourceCulture); } }
         public static string Starshot_DebugSelect { get { return ResourceManager.GetString("Starshot_DebugSelect", resourceCulture); } }
         public static string Starshot_DebugExtract { get { return ResourceManager.GetString("Starshot_DebugExtract", resourceCulture); } }
     }

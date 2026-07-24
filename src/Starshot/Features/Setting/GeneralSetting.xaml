@@ -50,13 +50,15 @@
             </StackPanel>
 
 
-            <!--  调试：流式解压测试  -->
-            <Expander Header="{x:Bind lang:Lang.Starshot_DebugExtractTitle}"
-                      IsExpanded="True"
-                      HorizontalAlignment="Stretch"
-                      HorizontalContentAlignment="Stretch">
-                <StackPanel Spacing="8">
-                    <TextBox x:Name="DebugUrlBox"
+            <!--  调试  -->
+            <StackPanel Spacing="8">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_DebugSection}" />
+                <Expander Header="{x:Bind lang:Lang.Starshot_DebugExtractTitle}"
+                          IsExpanded="True"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="8">
+                        <TextBox x:Name="DebugUrlBox"
                              Header="Zip URL"
                              PlaceholderText="https://..." />
                     <Grid ColumnSpacing="0" Margin="0,12,0,0">
@@ -127,8 +129,9 @@
                                FontSize="12"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                TextWrapping="Wrap" />
-                </StackPanel>
-            </Expander>
+                    </StackPanel>
+                </Expander>
+            </StackPanel>
 
             <!--  高级  -->
             <StackPanel Spacing="8">

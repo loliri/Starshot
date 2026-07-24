@@ -2863,7 +2863,8 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Starshot_WelcomePickFolder" xml:space="preserve"><value>Pick folder</value></data>
   <data name="Starshot_WelcomeStart" xml:space="preserve"><value>Launch Starshot!</value></data>
   <data name="Starshot_InfoCopied" xml:space="preserve"><value>Copied</value></data>
-  <data name="Starshot_DebugExtractTitle" xml:space="preserve"><value>Debug: streaming extract test</value></data>
+  <data name="Starshot_DebugExtractTitle" xml:space="preserve"><value>Streaming extract test</value></data>
+  <data name="Starshot_DebugSection" xml:space="preserve"><value>Debug</value></data>
   <data name="Starshot_DebugSelect" xml:space="preserve"><value>Browse</value></data>
   <data name="Starshot_DebugExtract" xml:space="preserve"><value>Extract</value></data>
 </root>

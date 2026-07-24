@@ -3036,7 +3036,10 @@
     <value>コピーしました</value>
   </data>
   <data name="Starshot_DebugExtractTitle" xml:space="preserve">
-    <value>デバッグ: ストリーミング展開テスト</value>
+    <value>ストリーミング展開テスト</value>
+  </data>
+  <data name="Starshot_DebugSection" xml:space="preserve">
+    <value>デバッグ</value>
   </data>
   <data name="Starshot_DebugSelect" xml:space="preserve">
     <value>参照</value>

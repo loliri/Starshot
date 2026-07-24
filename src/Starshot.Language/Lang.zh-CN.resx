@@ -2863,7 +2863,8 @@
   <data name="Starshot_WelcomePickFolder" xml:space="preserve"><value>选择文件夹</value></data>
   <data name="Starshot_WelcomeStart" xml:space="preserve"><value>Starshot，启动！</value></data>
   <data name="Starshot_InfoCopied" xml:space="preserve"><value>已复制</value></data>
-  <data name="Starshot_DebugExtractTitle" xml:space="preserve"><value>调试：流式解压测试</value></data>
+  <data name="Starshot_DebugExtractTitle" xml:space="preserve"><value>流式解压测试</value></data>
+  <data name="Starshot_DebugSection" xml:space="preserve"><value>调试</value></data>
   <data name="Starshot_DebugSelect" xml:space="preserve"><value>选择</value></data>
   <data name="Starshot_DebugExtract" xml:space="preserve"><value>解压</value></data>
 </root>
