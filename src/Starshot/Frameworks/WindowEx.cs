@@ -102,7 +102,7 @@ public abstract partial class WindowEx : Window
     {
         width = width <= 0 ? null : width;
         height = height <= 0 ? null : height;
-        DisplayArea display = DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest);
+        DisplayArea display = DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest) ?? DisplayArea.Primary;
         double scale = UIScale;
         int w = (int)((width * scale) ?? AppWindow.Size.Width);
         int h = (int)((height * scale) ?? AppWindow.Size.Height);
