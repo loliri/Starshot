@@ -392,6 +392,10 @@ public sealed partial class RegionCaptureWindow : WindowEx
         // 源矩形整数对齐，让 NearestNeighbor 真正锐利（不再糊）
         int srcX = (int)Math.Floor(mx * _scale) - halfCount;
         int srcY = (int)Math.Floor(my * _scale) - halfCount;
+        // 钳制到 bitmap bounds 内：鼠标在屏幕边缘时 srcX/srcY 可能负或越界，
+        // DrawImage sourceRect 越出 bitmap → E_BOUNDS → stowed exception → fail-fast
+        srcX = Math.Clamp(srcX, 0, (int)_displayBitmap.SizeInPixels.Width - MagnifierPixelCount);
+        srcY = Math.Clamp(srcY, 0, (int)_displayBitmap.SizeInPixels.Height - MagnifierPixelCount);
 
         ds.DrawImage(_displayBitmap,
             new Rect(destX, destY, magSize, magSize),
