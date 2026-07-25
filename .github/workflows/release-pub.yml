@@ -216,6 +216,14 @@ jobs:
         with:
           tag_name: ${{ needs.version.outputs.vl }}
           name: ${{ needs.version.outputs.v }}
+          body: |
+            ### Download / 下载
+
+            - **x64**: [Starshot-${{ needs.version.outputs.vl }}-win-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ needs.version.outputs.vl }}/Starshot-${{ needs.version.outputs.vl }}-win-x64.zip)
+            - **arm64**: [Starshot-${{ needs.version.outputs.vl }}-win-arm64.zip](https://github.com/${{ github.repository }}/releases/download/${{ needs.version.outputs.vl }}/Starshot-${{ needs.version.outputs.vl }}-win-arm64.zip)
+
+            ---
+
           generate_release_notes: true
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: |
