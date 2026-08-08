@@ -265,6 +265,9 @@ public static class ReleaseClient
 
         if (!SemVersion.TryParse(tag, out var version)) return null;
 
+        // release notes 走 GitHub API（跟 GitHub 渠道同源，完全一致）；
+        // draft 还没发布/编辑时 body 拿不到 → fallback 英文（CDN 上传和 draft 编辑有时间差）
+        var body = await GetGitHubReleaseBodyAsync(tag, ct);
         return new ReleaseInfo
         {
             Version = version,
@@ -272,6 +275,7 @@ public static class ReleaseClient
             ZipUrl = $"{AppConfig.CdnBase}/release/{tag}/{archManifest.Full}",
             Prerelease = vm.Prerelease,
             PublishedAt = vm.PublishedAt,
+            Notes = string.IsNullOrWhiteSpace(body) ? "Release notes will be available once the update is published." : body,
         };
     }
 
@@ -282,5 +286,26 @@ public static class ReleaseClient
         resp.EnsureSuccessStatusCode();
         await using var stream = await resp.Content.ReadAsStreamAsync(ct);
         return await JsonSerializer.DeserializeAsync<CdnVersionManifest>(stream, cancellationToken: ct);
+    }
+
+
+    /// <summary>
+    /// 调 GitHub API 拿指定 tag 的 release body（release notes）。
+    /// CDN 模式 release notes 走这里，跟 GitHub 渠道同源；draft 未发布/编辑时拿不到 → null（调用方 fallback）。
+    /// </summary>
+    private static async Task<string?> GetGitHubReleaseBodyAsync(string tag, CancellationToken ct)
+    {
+        try
+        {
+            using var resp = await _http.GetAsync($"https://api.github.com/repos/loliri/Starshot/releases/tags/{tag}", ct);
+            if (!resp.IsSuccessStatusCode) return null;
+            await using var stream = await resp.Content.ReadAsStreamAsync(ct);
+            var payload = await JsonSerializer.DeserializeAsync<GitHubReleasePayload>(stream, cancellationToken: ct);
+            return payload?.Body;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
