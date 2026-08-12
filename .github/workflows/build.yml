@@ -163,7 +163,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if ("${{ matrix.platform }}" -eq "x64") {
-            Invoke-WebRequest "https://r2.cialo.site/hpatchz.exe" -OutFile build/release/hpatchz.exe
+            $url = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows64\\.zip$")) | .browser_download_url'
+            Invoke-WebRequest $url -OutFile hpatch-x64.zip
+            Expand-Archive hpatch-x64.zip -DestinationPath hpatch-tool -Force
+            $exe = (Get-ChildItem hpatch-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
+            Move-Item $exe build/release/app-${{ needs.resolve-version.outputs.vl }}/hpatchz.exe -Force
+            Remove-Item hpatch-x64.zip, hpatch-tool -Recurse -Force
           } else {
             $url = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows_arm64\\.zip$")) | .browser_download_url'
             if ([string]::IsNullOrEmpty($url)) {
@@ -173,10 +178,12 @@ jobs:
             Invoke-WebRequest $url -OutFile hpatch-arm64.zip
             Expand-Archive hpatch-arm64.zip -DestinationPath hpatch-tool -Force
             $exe = (Get-ChildItem hpatch-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
-            Move-Item $exe build/release/hpatchz.exe -Force
+            Move-Item $exe build/release/app-${{ needs.resolve-version.outputs.vl }}/hpatchz.exe -Force
             Remove-Item hpatch-arm64.zip, hpatch-tool -Recurse -Force
           }
-          build/release/hpatchz.exe -v
+          $hpatchz = "build/release/app-${{ needs.resolve-version.outputs.vl }}/hpatchz.exe"
+          if ("${{ matrix.platform }}" -eq "x64") { & $hpatchz -v }
+          elseif (-not (Test-Path $hpatchz)) { Write-Error "hpatchz.exe not found"; exit 1 }
 
       - name: Generate delta
         shell: pwsh
