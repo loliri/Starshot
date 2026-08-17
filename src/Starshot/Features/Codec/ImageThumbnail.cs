@@ -154,7 +154,7 @@ internal static class ImageThumbnail
             Directory.CreateDirectory(CacheFolder);
             var tmp = cachePath + "_tmp";
             using var fs_tmp = File.Create(tmp);
-            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fs.AsRandomAccessStream(), ImageQuality).AsTask(cancellationToken).ConfigureAwait(false);
+            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fs_tmp.AsRandomAccessStream(), ImageQuality).AsTask(cancellationToken).ConfigureAwait(false);
             encoder.SetSoftwareBitmap(softwareBitmap);
             (uint scaledWidth, uint scaledHeight) = GetThumbnailSize(rgb.Width, rgb.Height);
             encoder.BitmapTransform.ScaledWidth = scaledWidth;
@@ -194,7 +194,7 @@ internal static class ImageThumbnail
             Directory.CreateDirectory(CacheFolder);
             var tmp = cachePath + "_tmp";
             using var fs_tmp = File.Create(tmp);
-            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fs.AsRandomAccessStream(), ImageQuality).AsTask(cancellationToken).ConfigureAwait(false);
+            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fs_tmp.AsRandomAccessStream(), ImageQuality).AsTask(cancellationToken).ConfigureAwait(false);
             encoder.SetSoftwareBitmap(softwareBitmap);
             (uint width, uint height) = GetThumbnailSize(decoder.Width, decoder.Height);
             encoder.BitmapTransform.ScaledWidth = width;
