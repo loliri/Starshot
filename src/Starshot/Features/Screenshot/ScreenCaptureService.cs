@@ -174,6 +174,8 @@ internal class ScreenCaptureService
         CanvasRenderTarget composite = null;
         CanvasRenderTarget cropped = null;
         CanvasRenderTarget sdrCrop = null;  // 覆盖层裁出的 SDR 选区（剪贴板用）
+        nint fgHwnd = 0;                    // try 内赋值，catch 里 CaptureError 要用
+        bool captureStarted = false;
         try
         {
             // 虚拟屏幕边界（物理像素）
@@ -271,7 +273,7 @@ internal class ScreenCaptureService
                 r.frame.Dispose();
             }
 
-            nint fgHwnd = (nint)User32.GetForegroundWindow();
+            fgHwnd = (nint)User32.GetForegroundWindow();
 
             // 弹覆盖层，等用户选区
             _logger.LogInformation("Region capture: showing overlay window");
@@ -337,6 +339,7 @@ internal class ScreenCaptureService
 
             _infoWindow ??= new ScreenCaptureInfoWindow();
             _infoWindow.CaptureStart(regionDisplayId, cropped, maxCLL);
+            captureStarted = true;
 
             // 守卫只挡"抓帧+选区"；编码慢且已由 _encodeSlim 单独串行，这里放守卫让下一次按下能立刻进
             Interlocked.Exchange(ref _isCapturing, 0);
@@ -351,6 +354,9 @@ internal class ScreenCaptureService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Region capture failed");
+            // 对齐全屏路径：不补 CaptureError 的话计数永差一，信息窗这个会话不再自动隐藏（卡「处理中」）
+            _infoWindow ??= new ScreenCaptureInfoWindow();
+            _infoWindow.CaptureError(fgHwnd, captureStarted);
         }
         finally
         {
