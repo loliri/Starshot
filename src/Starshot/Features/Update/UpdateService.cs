@@ -393,6 +393,7 @@ public static class UpdateService
                 await DownloadFileAsync(launcherUrl, tmpLauncher, null, ct);
                 File.Move(tmpLauncher, Path.Combine(root, "Starshot.exe"), overwrite: true);
             }
+            catch (OperationCanceledException) { throw; }  // 用户取消要中止更新，不能当「launcher 失败保留旧的」吞掉
             catch (Exception ex)
             {
                 _logger?.LogWarning(ex, "Failed to update launcher, keeping old one");
