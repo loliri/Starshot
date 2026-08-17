@@ -2,7 +2,6 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
-using Serilog;
 using Starshot.Features.ViewHost;
 using System;
 using System.Collections;
@@ -38,7 +37,7 @@ public partial class App : Application
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        Log.Fatal(e.Exception, "App Crash");
+        Program.WriteCrashLog("App Crash", e.Exception);
     }
 
 

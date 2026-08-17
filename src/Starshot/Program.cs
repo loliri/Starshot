@@ -96,7 +96,25 @@ public static class Program
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        Log.Fatal(e.ExceptionObject as Exception, "Program Crash");
+        WriteCrashLog("Program Crash", e.ExceptionObject as Exception);
+    }
+
+
+    /// <summary>
+    /// 崩溃直写文件，不依赖任何初始化：Serilog 要到首个页面构造才配置（Log.Logger 唯一赋值点在 BuildServiceProvider），
+    /// 早期崩溃走 Log.Fatal 会落进 SilentLogger 零输出。LogFile 已设则并入同一天的应用日志，否则落到程序目录 log/。
+    /// </summary>
+    internal static void WriteCrashLog(string kind, Exception? ex)
+    {
+        try
+        {
+            string file = string.IsNullOrWhiteSpace(AppConfig.LogFile)
+                ? Path.Combine(AppContext.BaseDirectory, "log", AppConfig.BuildLogFileName())
+                : AppConfig.LogFile;
+            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+            File.AppendAllText(file, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [{kind}]\r\n{ex}\r\n\r\n");
+        }
+        catch { }
     }
 }
 
