@@ -197,18 +197,17 @@ public sealed partial class ScreenshotPage : PageBase
             if (e.ChangeType == WatcherChangeTypes.Created)
             {
                 string name = Path.GetFileName(e.FullPath);
-                if (_screenshotDict.ContainsKey(name))
-                {
-                    return;
-                }
                 if (ScreenshotHelper.IsSupportedExtension(e.FullPath) && File.Exists(e.FullPath))
                 {
                     await ScreenshotHelper.WaitForFileReleaseAsync(e.FullPath, CancellationToken.None);
                     var item = new ScreenshotItem(e.FullPath);
-                    _screenshotDict[name] = item;
+                    // 字典/集合统一只在 UI 线程动：FSW 线程池续体与 UI 线程并发读写非线程安全集合；
+                    // 页面卸载后字段已置空，迟到的续体（await 跨越了卸载）直接丢弃
                     DispatcherQueue.TryEnqueue(() =>
                     {
-                        ScreenshotGroups ??= new();
+                        if (_screenshotDict is null) return;
+                        if (_screenshotDict.ContainsKey(name)) return;
+                        _screenshotDict[name] = item;
                         _screenshotItems ??= new();
                         _screenshotItems.Insert(0, item);
                         if (ScreenshotGroups.FirstOrDefault(x => x.Header == item.TimeMonthDay) is ScreenshotItemGroup group)
@@ -234,22 +233,24 @@ public sealed partial class ScreenshotPage : PageBase
 
     private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
     {
-        try
+        // 同 Created：整体挪到 UI 线程，消除 FSW 线程与 UI 线程的并发读写
+        DispatcherQueue.TryEnqueue(() =>
         {
-            string name = Path.GetFileName(e.FullPath);
-            if (_screenshotDict.TryGetValue(name, out ScreenshotItem? item))
+            try
             {
-                if (e.FullPath == item.FilePath)
+                if (_screenshotDict is null) return;
+                string name = Path.GetFileName(e.FullPath);
+                if (_screenshotDict.TryGetValue(name, out ScreenshotItem? item))
                 {
-                    if (ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay) is ScreenshotItemGroup group)
+                    if (e.FullPath == item.FilePath)
                     {
-                        if (group.Contains(item))
+                        if (ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay) is ScreenshotItemGroup group)
                         {
-                            // 字典键带扩展名（Created 用 GetFileName 存），item.Name 是去扩展名的显示名——之前拿它删键永不命中，
-                            // 幽灵键残留导致同名文件重建时被 Created 的 ContainsKey 拦截、从图库消失
-                            _screenshotDict.Remove(item.FileName);
-                            DispatcherQueue.TryEnqueue(() =>
+                            if (group.Contains(item))
                             {
+                                // 字典键带扩展名（Created 用 GetFileName 存），item.Name 是去扩展名的显示名——之前拿它删键永不命中，
+                                // 幽灵键残留导致同名文件重建时被 Created 的 ContainsKey 拦截、从图库消失
+                                _screenshotDict.Remove(item.FileName);
                                 _screenshotItems?.Remove(item);
                                 group.Remove(item);
                                 if (group.Count == 0)
@@ -257,13 +258,13 @@ public sealed partial class ScreenshotPage : PageBase
                                     ScreenshotGroups.Remove(group);
                                 }
                                 UpdateSelectCountText();
-                            });
+                            }
                         }
                     }
                 }
             }
-        }
-        catch { }
+            catch { }
+        });
     }
 
 
