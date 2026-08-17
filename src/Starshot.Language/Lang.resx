@@ -583,9 +583,6 @@
   <data name="Starshot_UpdateAvailableTitle" xml:space="preserve">
     <value>New version available!</value>
   </data>
-  <data name="Starshot_UpdateNow" xml:space="preserve">
-    <value>Update Now</value>
-  </data>
   <data name="Starshot_UpdateDelta" xml:space="preserve">
     <value>Delta Update</value>
   </data>
@@ -639,9 +636,6 @@
   </data>
   <data name="Starshot_StatsLog" xml:space="preserve">
     <value>Log</value>
-  </data>
-  <data name="Starshot_SystemTray" xml:space="preserve">
-    <value>System Tray</value>
   </data>
   <data name="Starshot_AutoStart" xml:space="preserve">
     <value>Launch on Startup</value>
@@ -703,9 +697,6 @@
   <data name="Starshot_UpdateFull" xml:space="preserve">
     <value>Full Update</value>
   </data>
-  <data name="Starshot_UpdateVerifying" xml:space="preserve">
-    <value>Verifying integrity…</value>
-  </data>
   <data name="Starshot_UpdateArchitecture" xml:space="preserve">
     <value>Architecture</value>
   </data>
@@ -717,12 +708,6 @@
   </data>
   <data name="Starshot_GithubApiNoProxy" xml:space="preserve">
     <value>GitHub API direct (no proxy)</value>
-  </data>
-  <data name="Starshot_DeltaUpdateMaxLayers" xml:space="preserve">
-    <value>Delta Update Max Layers</value>
-  </data>
-  <data name="Starshot_Advanced" xml:space="preserve">
-    <value>Advanced</value>
   </data>
   <data name="Starshot_RestartToTakeEffect" xml:space="preserve">
     <value>Restart to take effect</value>
@@ -795,12 +780,6 @@
   </data>
   <data name="Starshot_Update" xml:space="preserve">
     <value>Update source</value>
-  </data>
-  <data name="Starshot_UpdateSource" xml:space="preserve">
-    <value>Update source</value>
-  </data>
-  <data name="Starshot_General" xml:space="preserve">
-    <value>General</value>
   </data>
   <data name="Starshot_PriorityStart" xml:space="preserve">
     <value>High priority start</value>

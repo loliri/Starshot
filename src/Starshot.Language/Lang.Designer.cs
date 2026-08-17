@@ -1041,16 +1041,6 @@
             }
         }
         
-        /// <summary>
-        ///   查找类似 Advanced 的本地化字符串。
-        /// </summary>
-        public static string Starshot_Advanced {
-            get {
-                return ResourceManager.GetString("Starshot_Advanced", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Custom Color 的本地化字符串。
         /// </summary>
         public static string Starshot_ApplyCurrentColor {
@@ -1238,26 +1228,6 @@
                 return ResourceManager.GetString("Starshot_Update", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   查找类似 Update source 的本地化字符串。
-        /// </summary>
-        public static string Starshot_UpdateSource {
-            get {
-                return ResourceManager.GetString("Starshot_UpdateSource", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   查找类似 General 的本地化字符串。
-        /// </summary>
-        public static string Starshot_General {
-            get {
-                return ResourceManager.GetString("Starshot_General", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   查找类似 God Mode (pin debug to top) 的本地化字符串。
         /// </summary>
         /// <summary>
@@ -1341,16 +1311,6 @@
             }
         }
         
-        /// <summary>
-        ///   查找类似 Delta Update Max Layers 的本地化字符串。
-        /// </summary>
-        public static string Starshot_DeltaUpdateMaxLayers {
-            get {
-                return ResourceManager.GetString("Starshot_DeltaUpdateMaxLayers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Disable Certificate Validation 的本地化字符串。
         /// </summary>
         public static string Starshot_DisableCertificateValidation {
@@ -1737,16 +1697,6 @@
             }
         }
         
-        /// <summary>
-        ///   查找类似 System Tray 的本地化字符串。
-        /// </summary>
-        public static string Starshot_SystemTray {
-            get {
-                return ResourceManager.GetString("Starshot_SystemTray", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Theme 的本地化字符串。
         /// </summary>
         public static string Starshot_Theme {
@@ -1845,16 +1795,6 @@
             }
         }
 
-        /// <summary>
-        ///   查找类似 Verifying integrity… 的本地化字符串。
-        /// </summary>
-        public static string Starshot_UpdateVerifying {
-            get {
-                return ResourceManager.GetString("Starshot_UpdateVerifying", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Links 的本地化字符串。
         /// </summary>
         public static string Starshot_UpdateLinks {
@@ -1863,16 +1803,6 @@
             }
         }
         
-        /// <summary>
-        ///   查找类似 Update Now 的本地化字符串。
-        /// </summary>
-        public static string Starshot_UpdateNow {
-            get {
-                return ResourceManager.GetString("Starshot_UpdateNow", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Release Page 的本地化字符串。
         /// </summary>
         public static string Starshot_UpdateReleasePage {

@@ -583,9 +583,6 @@
   <data name="Starshot_UpdateAvailableTitle" xml:space="preserve">
     <value>发现新版本！</value>
   </data>
-  <data name="Starshot_UpdateNow" xml:space="preserve">
-    <value>立即更新</value>
-  </data>
   <data name="Starshot_UpdateDelta" xml:space="preserve">
     <value>差分更新</value>
   </data>
@@ -639,9 +636,6 @@
   </data>
   <data name="Starshot_StatsLog" xml:space="preserve">
     <value>日志</value>
-  </data>
-  <data name="Starshot_SystemTray" xml:space="preserve">
-    <value>系统托盘</value>
   </data>
   <data name="Starshot_AutoStart" xml:space="preserve">
     <value>开机自启</value>
@@ -703,9 +697,6 @@
   <data name="Starshot_UpdateFull" xml:space="preserve">
     <value>全量更新</value>
   </data>
-  <data name="Starshot_UpdateVerifying" xml:space="preserve">
-    <value>正在校验完整性…</value>
-  </data>
   <data name="Starshot_UpdateArchitecture" xml:space="preserve">
     <value>架构</value>
   </data>
@@ -717,12 +708,6 @@
   </data>
   <data name="Starshot_GithubApiNoProxy" xml:space="preserve">
     <value>GitHub API 直连（不走代理）</value>
-  </data>
-  <data name="Starshot_DeltaUpdateMaxLayers" xml:space="preserve">
-    <value>差分更新最大层数</value>
-  </data>
-  <data name="Starshot_Advanced" xml:space="preserve">
-    <value>高级</value>
   </data>
   <data name="Starshot_RestartToTakeEffect" xml:space="preserve">
     <value>重启后生效</value>
@@ -795,12 +780,6 @@
   </data>
   <data name="Starshot_Update" xml:space="preserve">
     <value>更新源</value>
-  </data>
-  <data name="Starshot_UpdateSource" xml:space="preserve">
-    <value>更新服务器</value>
-  </data>
-  <data name="Starshot_General" xml:space="preserve">
-    <value>通用</value>
   </data>
   <data name="Starshot_PriorityStart" xml:space="preserve">
     <value>高优先级启动</value>

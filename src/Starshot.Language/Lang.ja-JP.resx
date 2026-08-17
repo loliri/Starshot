@@ -583,9 +583,6 @@
   <data name="Starshot_UpdateAvailableTitle" xml:space="preserve">
     <value>新しいバージョンがあります！</value>
   </data>
-  <data name="Starshot_UpdateNow" xml:space="preserve">
-    <value>今すぐ更新</value>
-  </data>
   <data name="Starshot_UpdateDelta" xml:space="preserve">
     <value>差分更新</value>
   </data>
@@ -639,9 +636,6 @@
   </data>
   <data name="Starshot_StatsLog" xml:space="preserve">
     <value>ログ</value>
-  </data>
-  <data name="Starshot_SystemTray" xml:space="preserve">
-    <value>システムトレイ</value>
   </data>
   <data name="Starshot_AutoStart" xml:space="preserve">
     <value>起動時に自動実行</value>
@@ -703,9 +697,6 @@
   <data name="Starshot_UpdateFull" xml:space="preserve">
     <value>完全更新</value>
   </data>
-  <data name="Starshot_UpdateVerifying" xml:space="preserve">
-    <value>整合性を検証中…</value>
-  </data>
   <data name="Starshot_UpdateArchitecture" xml:space="preserve">
     <value>アーキテクチャ</value>
   </data>
@@ -717,12 +708,6 @@
   </data>
   <data name="Starshot_GithubApiNoProxy" xml:space="preserve">
     <value>GitHub API 直結（プロキシ不使用）</value>
-  </data>
-  <data name="Starshot_DeltaUpdateMaxLayers" xml:space="preserve">
-    <value>差分更新の最大階層数</value>
-  </data>
-  <data name="Starshot_Advanced" xml:space="preserve">
-    <value>詳細</value>
   </data>
   <data name="Starshot_RestartToTakeEffect" xml:space="preserve">
     <value>再起動後に反映</value>
@@ -795,12 +780,6 @@
   </data>
   <data name="Starshot_Update" xml:space="preserve">
     <value>更新元</value>
-  </data>
-  <data name="Starshot_UpdateSource" xml:space="preserve">
-    <value>更新サーバー</value>
-  </data>
-  <data name="Starshot_General" xml:space="preserve">
-    <value>全般</value>
   </data>
   <data name="Starshot_PriorityStart" xml:space="preserve">
     <value>高優先起動</value>
