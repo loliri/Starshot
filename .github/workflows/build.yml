@@ -217,10 +217,15 @@ jobs:
             if ($parts.Count -ge 2) {
               $lineStart = "$($parts[0]).$($parts[1]).0"
               if ($lineStart -ne $newTag -and -not $targetTags.Contains($lineStart)) {
-                $lineStartRelease = $releases | Where-Object { -not $_.prerelease -and $_.tag_name -eq $lineStart } | Select-Object -First 1
-                if ($lineStartRelease) {
-                  $targetTags.Add($lineStart)
-                  Write-Host "Line-start delta added: $lineStart -> $newTag"
+                # 直接按 tag 查 release（不受 /releases 分页影响：.0 基线可能早已滚出第 1 页）；
+                # 该端点不返回 draft，仅需再排除 prerelease（.0 只以预览存在过的线不算）
+                $lsJson = gh api "repos/${{ github.repository }}/releases/tags/$lineStart" 2>$null
+                if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrEmpty($lsJson)) {
+                  $lsRelease = $lsJson | ConvertFrom-Json
+                  if (-not $lsRelease.prerelease) {
+                    $targetTags.Add($lineStart)
+                    Write-Host "Line-start delta added: $lineStart -> $newTag"
+                  }
                 }
               }
             }
