@@ -245,7 +245,9 @@ public sealed partial class ScreenshotPage : PageBase
                     {
                         if (group.Contains(item))
                         {
-                            _screenshotDict.Remove(item.Name);
+                            // 字典键带扩展名（Created 用 GetFileName 存），item.Name 是去扩展名的显示名——之前拿它删键永不命中，
+                            // 幽灵键残留导致同名文件重建时被 Created 的 ContainsKey 拦截、从图库消失
+                            _screenshotDict.Remove(item.FileName);
                             DispatcherQueue.TryEnqueue(() =>
                             {
                                 _screenshotItems?.Remove(item);
