@@ -42,6 +42,9 @@ public static class Program
                     var td = ts.NewTask();
                     td.Triggers.Add(new LogonTrigger());
                     td.Actions.Add(new ExecAction(launcherPath, taskArgs));
+                    // 启动时机的优先权（Task Scheduler 替代注册表 Run 抢先启动）+ 进程优先级一并给足：
+                    // launcher CreateProcess 继承任务优先级，app 不再自钉 Normal，链路全程 High
+                    td.Settings.Priority = ProcessPriorityClass.High;
                     td.Settings.DisallowStartIfOnBatteries = false;
                     td.Settings.StopIfGoingOnBatteries = false;
                     try { ts.RootFolder.DeleteTask("Starshot", false); } catch { }
@@ -67,7 +70,6 @@ public static class Program
         }
 
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Normal;
 
         global::WinRT.ComWrappersSupport.InitializeComWrappers();
         global::Microsoft.UI.Xaml.Application.Start((p) =>
