@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Starward.Codec.AVIF;
+using Starward.Codec.ICC;
 using Starward.Codec.JpegXL;
 using Starward.Codec.JpegXL.CMS;
 using Starward.Codec.JpegXL.CodeStream;
@@ -418,6 +419,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             1 => ".png",
             2 => ".avif",
             3 => ".jxl",
+            4 => ".pngv3",  // HDR PNG：路由标记，输出文件扩展名仍是 .png（GetOutputPath 归一）
             _ => "",
         };
         if (string.IsNullOrWhiteSpace(_format))
@@ -481,6 +483,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             {
                 Task task = (item.SourceExtension, _format) switch
                 {
+                    (".jpg" or ".png" or ".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".pngv3") => ConvertToHdrPngAsync(item, cancellationToken),
                     (".jpg" or ".png", ".avif" or ".jxl") => ConvertJpegPngToAvifJxlAsync(item, cancellationToken),
                     (".avif" or ".jxl", ".jpg" or ".png") => ConvertAvifJxlToJpegPngAsync(item, cancellationToken),
                     (".jpg" or ".png" or ".jxr" or ".webp" or ".heic", ".jpg" or ".png") => ConvertJpegPngJxrWebpHeicToJpgPngAsync(item, cancellationToken),
@@ -666,6 +669,28 @@ public sealed partial class ImageBatchConvertWindow : PageBase
     }
 
 
+    /// <summary>
+    /// HDR PNG（pngv3）目标：ImageLoader 解码保位深/CICP，ImageSaver 按 位图格式分流——
+    /// HDR 源出 16bit PQ/BT2020 + cICP，SDR 源出带真实色域的 sRGB PNG。输出扩展名 .png。
+    /// </summary>
+    private async Task ConvertToHdrPngAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    {
+        string outputPath = GetOutputPath(item);
+        if (File.Exists(outputPath) && _overwriteMode is 0)
+        {
+            item.OutputFilePath = outputPath;
+            return;
+        }
+        using var imageInfo = await ImageLoader.LoadImageAsync(item.SourceFilePath, cancellationToken);
+        using var ms = new MemoryStream();
+        await ImageSaver.SaveAsPngAsync(imageInfo.CanvasBitmap, ms, imageInfo.ColorPrimaries ?? ColorPrimaries.BT709, ScreenCaptureService.BuildXMPMetadata(item.SourceFileTime));
+        using var fs = File.Create(outputPath);
+        ms.Position = 0;
+        await ms.CopyToAsync(fs, CancellationToken.None);
+        item.OutputFilePath = outputPath;
+    }
+
+
     private async Task ConvertJxrWebpHeicAvifJxlToAvifJxlAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
     {
         string outputPath = GetOutputPath(item);
@@ -833,7 +858,9 @@ public sealed partial class ImageBatchConvertWindow : PageBase
     {
         string name = Path.GetFileNameWithoutExtension(item.SourceFilePath);
         string folder = _outputFolder ?? Path.GetDirectoryName(item.SourceFilePath)!;
-        string outputPath = Path.Combine(folder, name + _format);
+        // .pngv3 只是 HDR PNG 的路由标记，输出文件扩展名统一 .png
+        string ext = _format == ".pngv3" ? ".png" : _format;
+        string outputPath = Path.Combine(folder, name + ext);
         if (doNotRename || _overwriteMode is 0 or 1)
         {
             return outputPath;
@@ -841,7 +868,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         int i = 0;
         while (File.Exists(outputPath))
         {
-            outputPath = Path.Combine(folder, $"{name}_{++i}{_format}");
+            outputPath = Path.Combine(folder, $"{name}_{++i}{ext}");
         }
         return outputPath;
     }
