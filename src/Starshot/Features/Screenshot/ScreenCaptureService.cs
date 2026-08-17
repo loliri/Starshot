@@ -224,7 +224,24 @@ internal class ScreenCaptureService
                     return (ox, oy, bmp, isHDR, frame);
                 });
             }
-            var results = await Task.WhenAll(captureTasks);
+            (int ox, int oy, CanvasBitmap bmp, bool isHDR, Direct3D11CaptureFrame frame)[] results;
+            try
+            {
+                results = await Task.WhenAll(captureTasks);
+            }
+            catch
+            {
+                // 任一屏失败（超时/无法创建 capture item）：回收其余已成功屏的 bmp+frame（显存无 GC 压力，不释放会持续累积）
+                foreach (var t in captureTasks)
+                {
+                    if (t.Status == TaskStatus.RanToCompletion)
+                    {
+                        t.Result.bmp.Dispose();
+                        t.Result.frame.Dispose();
+                    }
+                }
+                throw;
+            }
 
             // 合成到虚拟屏幕大小的 CanvasRenderTarget
             // float 路径下 SDR 屏白=1.0(80nits)、HDR 屏白=SdrWhiteLevel/80；SDR 屏帧先 ×(SdrWhiteLevel/80) 提亮，让 composite 统一为 scene-referred，下游才能共用同一个 sdrWhiteLevel
