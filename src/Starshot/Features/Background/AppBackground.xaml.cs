@@ -374,7 +374,9 @@ public sealed partial class AppBackground : UserControl
     /// </summary>
     public async Task RefreshAccentAsync()
     {
-        string? file = ResolveWallpaperPath().path;
+        // 取色对象必须是「正在显示的文件」（_lastFile）。此前用 ResolveWallpaperPath()：
+        // mode 3 会重新随机抽一个（取到非显示图的颜色），抽到视频则只重置标志直接返回（本次取色丢失）
+        string? file = _lastFile;
         if (string.IsNullOrEmpty(file) || !File.Exists(file))
         {
             return;
