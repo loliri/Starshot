@@ -1441,7 +1441,7 @@ public sealed partial class ImageViewWindow : Window
             if (displayHdr)
             {
                 // hdr image & hdr display
-                path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("AVIF", ".avif"), ("JPEG XL", ".jxl"));
+                path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("AVIF", ".avif"), ("JPEG XL", ".jxl"), ("HDR PNG", ".png"));
                 if (string.IsNullOrWhiteSpace(path))
                 {
                     return;

@@ -57,6 +57,7 @@
                     <ComboBoxItem Content="AVIF" />
                     <ComboBoxItem Content="JPEG XL" />
                     <ComboBoxItem Content="HDR PNG" />
+                    <ComboBoxItem Content="Ultra HDR JPG" />
                 </ComboBox>
                 <!--  文件已存在  -->
                 <ComboBox x:Name="ComboBox_OutputFileExists"

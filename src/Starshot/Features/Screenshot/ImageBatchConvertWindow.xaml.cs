@@ -419,7 +419,8 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             1 => ".png",
             2 => ".avif",
             3 => ".jxl",
-            4 => ".pngv3",  // HDR PNG：路由标记，输出文件扩展名仍是 .png（GetOutputPath 归一）
+            4 => ".pngv3",   // HDR PNG：路由标记，输出扩展名归一 .png（GetOutputPath）
+            5 => ".uhdrjpg", // Ultra HDR JPG：同上，输出扩展名归一 .jpg
             _ => "",
         };
         if (string.IsNullOrWhiteSpace(_format))
@@ -484,6 +485,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
                 Task task = (item.SourceExtension, _format) switch
                 {
                     (".jpg" or ".png" or ".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".pngv3") => ConvertToHdrPngAsync(item, cancellationToken),
+                    (".jpg" or ".png" or ".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".uhdrjpg") => ConvertToUhdrJpgAsync(item, cancellationToken),
                     (".jpg" or ".png", ".avif" or ".jxl") => ConvertJpegPngToAvifJxlAsync(item, cancellationToken),
                     (".avif" or ".jxl", ".jpg" or ".png") => ConvertAvifJxlToJpegPngAsync(item, cancellationToken),
                     (".jpg" or ".png" or ".jxr" or ".webp" or ".heic", ".jpg" or ".png") => ConvertJpegPngJxrWebpHeicToJpgPngAsync(item, cancellationToken),
@@ -691,6 +693,34 @@ public sealed partial class ImageBatchConvertWindow : PageBase
     }
 
 
+    /// <summary>
+    /// Ultra HDR JPG（SDR 基图 + HDR gain map）目标：走 ImageSaver.SaveAsUhdrAsync。
+    /// 仅对 HDR 源有意义——SDR 源没有可编码的增益，报错跳过该文件。
+    /// </summary>
+    private async Task ConvertToUhdrJpgAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    {
+        string outputPath = GetOutputPath(item);
+        if (File.Exists(outputPath) && _overwriteMode is 0)
+        {
+            item.OutputFilePath = outputPath;
+            return;
+        }
+        using var imageInfo = await ImageLoader.LoadImageAsync(item.SourceFilePath, cancellationToken);
+        if (!imageInfo.HDR)
+        {
+            throw new NotSupportedException("Ultra HDR JPG is only applicable to HDR images.");
+        }
+        float maxCLL = ScreenCaptureService.GetMaxCLL(imageInfo.CanvasBitmap);
+        using var ms = new MemoryStream();
+        // SDR 白 300 nits：与查看器导出 UHDR 的默认显示亮度一致（SDRLuminance 默认值）
+        await ImageSaver.SaveAsUhdrAsync(imageInfo.CanvasBitmap, ms, maxCLL, 300);
+        using var fs = File.Create(outputPath);
+        ms.Position = 0;
+        await ms.CopyToAsync(fs, CancellationToken.None);
+        item.OutputFilePath = outputPath;
+    }
+
+
     private async Task ConvertJxrWebpHeicAvifJxlToAvifJxlAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
     {
         string outputPath = GetOutputPath(item);
@@ -858,8 +888,13 @@ public sealed partial class ImageBatchConvertWindow : PageBase
     {
         string name = Path.GetFileNameWithoutExtension(item.SourceFilePath);
         string folder = _outputFolder ?? Path.GetDirectoryName(item.SourceFilePath)!;
-        // .pngv3 只是 HDR PNG 的路由标记，输出文件扩展名统一 .png
-        string ext = _format == ".pngv3" ? ".png" : _format;
+        // .pngv3 / .uhdrjpg 只是路由标记，输出文件扩展名归一
+        string ext = _format switch
+        {
+            ".pngv3" => ".png",
+            ".uhdrjpg" => ".jpg",
+            _ => _format,
+        };
         string outputPath = Path.Combine(folder, name + ext);
         if (doNotRename || _overwriteMode is 0 or 1)
         {
