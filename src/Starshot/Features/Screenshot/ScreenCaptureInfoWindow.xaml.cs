@@ -102,6 +102,11 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
 
     private CancellationToken _openImageCancellationToken;
 
+    // 区域路径（光标定位变体）的会话级缓存：首帧采样光标所在屏 + DPI，进度/成功更新复用，不跟手
+    private bool _hasCursorMonitorRect;
+    private RECT _cursorMonitorRect;
+    private uint _cursorMonitorDpi;
+
 
 
     /// <summary>
@@ -136,6 +141,7 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         _captureImageCount++;
         CropImage(bitmap, GetDpiForMonitor(displayId), maxCLL);
         _cancellationTokenSource?.Cancel();
+        _hasCursorMonitorRect = false;  // 新会话：让 DisplayWindow 重新采样光标所在屏
         DisplayWindow(true);
     }
 
@@ -439,15 +445,22 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
     {
         try
         {
-            // 用光标位置定位所在显示器（物理坐标，DPI 无关），避开 DisplayArea.OuterBounds 单位歧义
-            User32.GetCursorPos(out var pt);
-            HMONITOR monitor = User32.MonitorFromPoint(pt, User32.MonitorFlags.MONITOR_DEFAULTTONEAREST);
-            User32.MONITORINFOEX monitorInfo = new() { cbSize = (uint)Marshal.SizeOf<User32.MONITORINFOEX>() };
-            User32.GetMonitorInfo(monitor, ref monitorInfo);
-            var rc = monitorInfo.rcMonitor;
-
-            GetDpiForMonitor((nint)monitor.DangerousGetHandle(), 0, out uint dpiX, out _);
-            float dpiScale = dpiX / 96f;
+            // 光标所在屏只在会话首帧采样一次（CaptureStart 后的首次显示），之后进度/成功更新复用缓存——
+            // 否则浮窗在显示期间跟着鼠标跨屏来回跳
+            if (!_hasCursorMonitorRect)
+            {
+                User32.GetCursorPos(out var pt);
+                HMONITOR monitor = User32.MonitorFromPoint(pt, User32.MonitorFlags.MONITOR_DEFAULTTONEAREST);
+                User32.MONITORINFOEX monitorInfo = new() { cbSize = (uint)Marshal.SizeOf<User32.MONITORINFOEX>() };
+                User32.GetMonitorInfo(monitor, ref monitorInfo);
+                _cursorMonitorRect = monitorInfo.rcMonitor;
+                _cursorMonitorDpi = 0;
+                GetDpiForMonitor((nint)monitor.DangerousGetHandle(), 0, out uint dpiX, out _);
+                _cursorMonitorDpi = dpiX;
+                _hasCursorMonitorRect = true;
+            }
+            var rc = _cursorMonitorRect;
+            float dpiScale = _cursorMonitorDpi / 96f;
             int width = (int)(WindowWidth * dpiScale);
             int height = (int)(WindowHeight * dpiScale);
 
