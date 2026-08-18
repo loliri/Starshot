@@ -277,7 +277,11 @@ internal class ScreenCaptureService
 
             // 弹覆盖层，等用户选区
             _logger.LogInformation("Region capture: showing overlay window");
-            _regionWindow ??= new RegionCaptureWindow();
+            // 弹覆盖层，等用户选区（用户真关过窗口则重建：单例只对活窗口有意义）
+            if (_regionWindow is null || _regionWindow.IsDestroyed)
+            {
+                _regionWindow = new RegionCaptureWindow();
+            }
             _regionWindow.SetCapture(composite, sdrWhiteLevel, vw, vh);
 
             bool confirmed = await _regionWindow.Completion.Task;

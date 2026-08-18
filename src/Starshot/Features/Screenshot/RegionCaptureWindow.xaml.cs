@@ -82,7 +82,8 @@ public sealed partial class RegionCaptureWindow : WindowEx
         this.Closed += RegionCaptureWindow_Closed;
 
         // 窗口设置（单例，只一次）
-        WindowEx.MainWindowId = AppWindow.Id;
+        // 不写 WindowEx.MainWindowId：那是主窗口的静态锚（CenterInScreen 用），覆盖层窗口
+        // 既不用居中，写它会歪曲 UpdateWindow/WelcomeWindow 的定位（且单例重建时会反复覆盖）
         Title = "Starshot";
         AppWindow.IsShownInSwitchers = false;
         SystemBackdrop = new TransparentBackdrop();
@@ -108,6 +109,12 @@ public sealed partial class RegionCaptureWindow : WindowEx
         var style = (User32.WindowStyles)User32.GetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE);
         style &= ~(User32.WindowStyles.WS_THICKFRAME | User32.WindowStyles.WS_BORDER | User32.WindowStyles.WS_CAPTION | User32.WindowStyles.WS_DLGFRAME);
         User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE, (nint)style);
+        // 任务栏硬保证：窗口永不 Hide（只挪屏外）后 IsWindowVisible 恒真，IsShownInSwitchers=false 只是提示，
+        // 激活/样式手术等时机会失守让窗口冒进任务栏；TOOLWINDOW + 清 APPWINDOW 是 shell 层的硬规则
+        var exStyle = (User32.WindowStylesEx)User32.GetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE);
+        exStyle |= User32.WindowStylesEx.WS_EX_TOOLWINDOW;
+        exStyle &= ~User32.WindowStylesEx.WS_EX_APPWINDOW;
+        User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE, (nint)exStyle);
         User32.SetWindowPos(WindowHandle, IntPtr.Zero, vx, vy, vw, vh, (User32.SetWindowPosFlags)0x0020 | User32.SetWindowPosFlags.SWP_NOZORDER);
 
         PointerCursor.SetCursorShape(Canvas, InputSystemCursorShape.Cross);
@@ -126,6 +133,11 @@ public sealed partial class RegionCaptureWindow : WindowEx
     /// 关窗时移到屏外保持 IsWindowVisible（合成管线不停摆），下次截图先把新帧 Present 上屏
     /// 再移回屏内，从根上避免 Show 瞬间 DWM 先合成保留的旧会话帧（启动闪上次截图界面）。
     /// </summary>
+    // 窗口被用户真关（任务栏/系统关闭）后置 true 且不再复位——
+    // service 据此丢弃单例重建窗口，SetCapture 也不会再碰已销毁的 HWND
+    public bool IsDestroyed { get; private set; }
+
+
     public void SetCapture(CanvasBitmap canvas, float sdrWhiteLevel, int physW, int physH)
     {
         // swapChain 常驻（关窗只移屏外不销毁）；分辨率变了尺寸过期则重建
@@ -162,13 +174,15 @@ public sealed partial class RegionCaptureWindow : WindowEx
         _lockedW = 0;
         _lockedH = 0;
         _sizeLocked = false;  // 首帧重新锁尺寸 + 触发 DetectWindows
-        _isClosed = false;
         _cleanedUp = false;
         Completion = new TaskCompletionSource<bool>();
         _prevForeground = (nint)User32.GetForegroundWindow();
 
-        _renderTimer.Start();
         Show();          // 首次显示；后续会话窗口一直可见（在屏外），no-op
+        // 会话激活放在 Show 之后：万一 Show 在已销毁窗口上抛（用户真关过窗、service 未能重建的兜底路径），
+        // _isClosed 仍为 true、timer 未启动，Redraw 守卫生效，不会拿已释放的帧再画导致 FATAL
+        _isClosed = false;
+        _renderTimer.Start();
         Redraw();        // 屏外先把新冻结帧 Present 上屏（窗口可见，合成照常提交）
         _pendingMoveIn = true;   // 第 2 个 tick（新帧确定已合成）再移回屏内，移回瞬间不可能是旧内容
         _moveInTick = 0;
@@ -658,6 +672,10 @@ public sealed partial class RegionCaptureWindow : WindowEx
 
     private void RegionCaptureWindow_Closed(object sender, WindowEventArgs e)
     {
+        // 用户从任务栏/系统真关了窗口（正常运行期我们只移屏外不 Close）：
+        // 标记销毁让 service 下次重建，放行 pending 的 Completion 防 service 悬等
+        IsDestroyed = true;
+        Completion?.TrySetResult(false);
         Cleanup();
     }
 
