@@ -760,6 +760,15 @@
   <data name="Starshot_DebugExtractTitle" xml:space="preserve">
     <value>流式解压测试</value>
   </data>
+  <data name="Starshot_Performance" xml:space="preserve">
+    <value>性能</value>
+  </data>
+  <data name="Starshot_HighPriorityProcess" xml:space="preserve">
+    <value>高优先级运行</value>
+  </data>
+  <data name="Starshot_EcoQosExemption" xml:space="preserve">
+    <value>豁免效率模式</value>
+  </data>
   <data name="Starshot_DebugSection" xml:space="preserve">
     <value>调试</value>
   </data>

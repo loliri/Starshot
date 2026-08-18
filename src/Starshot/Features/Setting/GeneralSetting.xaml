@@ -178,6 +178,18 @@
                 </ToggleSwitch>
             </StackPanel>
 
+
+            <!--  性能  -->
+            <StackPanel Spacing="8">
+                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Performance}" />
+                <ToggleSwitch IsOn="{x:Bind HighPriorityProcess, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}"
+                              OnContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}" />
+                <ToggleSwitch IsOn="{x:Bind EcoQosExemption, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.Starshot_EcoQosExemption}"
+                              OnContent="{x:Bind lang:Lang.Starshot_EcoQosExemption}" />
+            </StackPanel>
+
         </StackPanel>
     </ScrollViewer>
 

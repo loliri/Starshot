@@ -219,6 +219,34 @@ public sealed partial class GeneralSetting : PageBase
 
 
     /// <summary>
+    /// 每次启动把进程提升为高优先级（应用自设，与启动方式无关）。改后重启生效。
+    /// </summary>
+    public bool HighPriorityProcess
+    {
+        get => AppConfig.HighPriorityProcess;
+        set
+        {
+            AppConfig.HighPriorityProcess = value;
+            InAppToast.MainWindow?.Information(null, Lang.Starshot_RestartToTakeEffect, 3000);
+        }
+    }
+
+
+    /// <summary>
+    /// 豁免效率模式（EcoQoS）：系统/外部 API 不再把本进程自动降频。改后重启生效。
+    /// </summary>
+    public bool EcoQosExemption
+    {
+        get => AppConfig.EcoQosExemption;
+        set
+        {
+            AppConfig.EcoQosExemption = value;
+            InAppToast.MainWindow?.Information(null, Lang.Starshot_RestartToTakeEffect, 3000);
+        }
+    }
+
+
+    /// <summary>
     /// GitHub API 不走系统代理（仅 GitHub 源生效；CDN 源走系统代理不受影响）。改后重启生效。
     /// </summary>
     public bool GithubApiNoProxy

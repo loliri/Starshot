@@ -760,6 +760,15 @@
   <data name="Starshot_DebugExtractTitle" xml:space="preserve">
     <value>Streaming Extract Test</value>
   </data>
+  <data name="Starshot_Performance" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="Starshot_HighPriorityProcess" xml:space="preserve">
+    <value>Run at high priority</value>
+  </data>
+  <data name="Starshot_EcoQosExemption" xml:space="preserve">
+    <value>Efficiency mode exemption</value>
+  </data>
   <data name="Starshot_DebugSection" xml:space="preserve">
     <value>Debug</value>
   </data>

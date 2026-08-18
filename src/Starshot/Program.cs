@@ -40,22 +40,27 @@ public static class Program
     private static extern bool SetProcessInformation(nint hProcess, int processInformationClass, ref PROCESS_POWER_THROTTLING_STATE processInformation, int size);
 
 
+    /// <summary>
+    /// 声明/撤销 EcoQoS 豁免。enabled=true：EXECUTION_SPEED 节流显式置关（始终 High Performance），
+    /// 系统与外部 API 都不能再把本进程设为效率模式（进程对自己的声明优先）；false：交还系统管理（恢复默认可被降级）。
+    /// </summary>
+    internal static void SetEcoQosExemption(bool enabled)
+    {
+        var throttling = new PROCESS_POWER_THROTTLING_STATE
+        {
+            Version = 1,        // PROCESS_POWER_THROTTLING_CURRENT_VERSION
+            ControlMask = 0x1,  // PROCESS_POWER_THROTTLING_EXECUTION_SPEED
+            StateMask = enabled ? 0u : 0x1u,  // 0=不节流（豁免）；1=允许节流（交还系统）
+        };
+        SetProcessInformation((nint)(-1), 2 /* ProcessPowerThrottling */, ref throttling, Marshal.SizeOf<PROCESS_POWER_THROTTLING_STATE>());
+    }
+
+
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.UI.Xaml.Markup.Compiler", " 3.0.0.2411")]
     [global::System.STAThreadAttribute]
     static int Main(string[] args)
     {
         SetCurrentProcessExplicitAppUserModelID("loliri.Starshot");
-        try
-        {
-            var throttling = new PROCESS_POWER_THROTTLING_STATE
-            {
-                Version = 1,   // PROCESS_POWER_THROTTLING_CURRENT_VERSION
-                ControlMask = 0x1,  // PROCESS_POWER_THROTTLING_EXECUTION_SPEED
-                StateMask = 0,      // 0 = 不节流
-            };
-            SetProcessInformation((nint)(-1), 2 /* ProcessPowerThrottling */, ref throttling, Marshal.SizeOf<PROCESS_POWER_THROTTLING_STATE>());
-        }
-        catch { }
         // 提权子进程：--manage-task create/delete，以管理员权限调 TaskScheduler API 创建/删除任务后退出
         if (args.Length > 0 && args[0] == "--manage-task")
         {
@@ -69,9 +74,6 @@ public static class Program
                     var td = ts.NewTask();
                     td.Triggers.Add(new LogonTrigger());
                     td.Actions.Add(new ExecAction(launcherPath, taskArgs));
-                    // 启动时机的优先权（Task Scheduler 替代注册表 Run 抢先启动）+ 进程优先级一并给足：
-                    // launcher CreateProcess 继承任务优先级，app 不再自钉 Normal，链路全程 High
-                    td.Settings.Priority = ProcessPriorityClass.High;
                     td.Settings.DisallowStartIfOnBatteries = false;
                     td.Settings.StopIfGoingOnBatteries = false;
                     try { ts.RootFolder.DeleteTask("Starshot", false); } catch { }

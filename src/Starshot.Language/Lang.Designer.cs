@@ -1265,7 +1265,34 @@
                 return ResourceManager.GetString("Starshot_DebugExtractTitle", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Performance 的本地化字符串。
+        /// </summary>
+        public static string Starshot_Performance {
+            get {
+                return ResourceManager.GetString("Starshot_Performance", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Run at high priority 的本地化字符串。
+        /// </summary>
+        public static string Starshot_HighPriorityProcess {
+            get {
+                return ResourceManager.GetString("Starshot_HighPriorityProcess", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Efficiency mode exemption 的本地化字符串。
+        /// </summary>
+        public static string Starshot_EcoQosExemption {
+            get {
+                return ResourceManager.GetString("Starshot_EcoQosExemption", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Debug 的本地化字符串。
         /// </summary>

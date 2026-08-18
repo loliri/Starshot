@@ -2,6 +2,7 @@ using Starshot.Features.Database;
 using Starshot.Features.ViewHost;
 using Starshot.Helpers;
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -64,6 +65,20 @@ public static partial class AppConfig
         }
 
         DatabaseService.SetDatabase(UserDataFolder);
+
+        // 高优先级运行开关：开了每次启动自提升（对自身 SetPriorityClass 无需权限，任何启动方式都生效）；关=系统默认
+        try
+        {
+            if (HighPriorityProcess) Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+        }
+        catch { }
+
+        // 效率模式豁免开关（默认关）：开了声明豁免（DB 就绪后应用一次即可，进程内全局生效）
+        try
+        {
+            if (EcoQosExemption) Program.SetEcoQosExemption(true);
+        }
+        catch { }
 
         // 欢迎页选的配置在 SetDatabase 之后才写 DB（之前 DB 没创建，直接写会丢）
         if (welcome is not null)
