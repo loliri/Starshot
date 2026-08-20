@@ -682,8 +682,8 @@ public sealed partial class RegionCaptureWindow : WindowEx
     }
 
     /// <summary>
-    /// 释放覆盖层资源。应用退出或窗口被用户真关时调用：运行期单例只移屏外不 Close，
-    /// 进程退出/真关才真销毁。
+    /// 释放覆盖层资源。窗口被用户真关（任务栏/系统关闭）时调用：运行期单例只移屏外不 Close，真关才真销毁；
+    /// 进程退出的资源回收靠进程终止本身。
     /// </summary>
     public void Cleanup()
     {

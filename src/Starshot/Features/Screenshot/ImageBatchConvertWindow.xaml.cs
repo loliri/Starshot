@@ -90,6 +90,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             Button_StartConvert.Click -= Button_StartConvert_Click;
             Button_Stop.Click -= Button_Stop_Click;
             Button_Clear.Click -= Button_Clear_Click;
+            ComboBox_OutputFormat.SelectionChanged -= ComboBox_OutputFormat_SelectionChanged;
             ListView_ImageConvertItems.DragOver -= ListView_ImageConvertItems_DragOver;
             ListView_ImageConvertItems.Drop -= ListView_ImageConvertItems_Drop;
             _cancellationTokenSource?.Cancel();

@@ -162,8 +162,9 @@ public sealed partial class AppBackground : UserControl
                 {
                     BackgroundImageSource = null;
                 }
-                // 占位加载内部最后一次 await 不带 token，取消未必抛出；放行会把已取消会话的 MediaPlayer 启起来
-                // 叠在新会话上（双视频同屏 + _lastFile 被旧值覆盖），此处强制拦截
+                // 占位加载尾段是否观察 token 取决于取色开关（开关开时 ExtractAccentAsync 内会主动抛）；
+                // 关闭时尾段无 token-aware await，取消未必抛出，放行会把已取消会话的 MediaPlayer 启起来
+                // 叠在新会话上（双视频同屏 + _lastFile 被旧值覆盖），此处强制拦截兜底
                 ct.ThrowIfCancellationRequested();
                 StartMediaPlayer(file);
             }
