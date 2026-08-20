@@ -655,10 +655,11 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             _ => throw new NotSupportedException("Unsupported format"),
         };
         using var ms = new MemoryStream();
-        // JPEG 专用参数只给 JPEG 编码器；WIC 的 PNG 编码器不认这些参数，混用 CreateAsync 直接抛异常
-        List<KeyValuePair<string, BitmapTypedValue>>? options = _format == ".jpg"
+        // JPEG 专用参数只给 JPEG 编码器；WIC 的 PNG 编码器不认这些参数，混用 CreateAsync 直接抛异常。
+        // PNG 分支必须传空集——传 null 会在 WinRT 边界炸 NullReferenceException
+        List<KeyValuePair<string, BitmapTypedValue>> options = _format == ".jpg"
             ? [KeyValuePair.Create("ImageQuality", new BitmapTypedValue(_quality / 100f, PropertyType.Single)), KeyValuePair.Create("JpegYCrCbSubsampling", new BitmapTypedValue(3, PropertyType.UInt8))]
-            : null;
+            : [];
         var encoder = await BitmapEncoder.CreateAsync(encoderId, ms.AsRandomAccessStream(), options).AsTask(cancellationToken);
         encoder.SetSoftwareBitmap(await decoder.GetSoftwareBitmapAsync().AsTask(cancellationToken));
         await encoder.FlushAsync().AsTask(cancellationToken);
