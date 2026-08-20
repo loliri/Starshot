@@ -1441,7 +1441,8 @@ public sealed partial class ImageViewWindow : Window
 
             string? path;
             Task encodeTask;
-            // hdr&sdr 分支的 SDR 渲染目标：编码完成后统一在外层 await 之后释放（switch 只创建 Task，提前 dispose 会赶在编码读位图前）
+            // hdr&sdr 分支的 SDR 渲染目标：switch 只创建 Task 不执行（提前 dispose 会赶在编码读位图前），
+            // 统一在外层 await 之后释放，异常路径走 finally 同样释放
             CanvasRenderTarget? sdr8 = null;
             if (displayHdr)
             {
@@ -1494,8 +1495,14 @@ public sealed partial class ImageViewWindow : Window
                     _ => throw new ArgumentOutOfRangeException($"Unknown filter index {filterIndex}."),
                 };
             }
-            await encodeTask;
-            sdr8?.Dispose();
+            try
+            {
+                await encodeTask;
+            }
+            finally
+            {
+                sdr8?.Dispose();
+            }
 
             ms.Position = 0;
             using var fs = File.Create(path);
