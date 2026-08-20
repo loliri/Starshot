@@ -233,20 +233,6 @@ public sealed partial class GeneralSetting : PageBase
 
 
     /// <summary>
-    /// 豁免效率模式（EcoQoS）：系统/外部 API 不再把本进程自动降频。改后重启生效。
-    /// </summary>
-    public bool EcoQosExemption
-    {
-        get => AppConfig.EcoQosExemption;
-        set
-        {
-            AppConfig.EcoQosExemption = value;
-            InAppToast.MainWindow?.Information(null, Lang.Starshot_RestartToTakeEffect, 3000);
-        }
-    }
-
-
-    /// <summary>
     /// GitHub API 不走系统代理（仅 GitHub 源生效；CDN 源走系统代理不受影响）。改后重启生效。
     /// </summary>
     public bool GithubApiNoProxy

@@ -73,13 +73,6 @@ public static partial class AppConfig
         }
         catch { }
 
-        // 效率模式豁免开关（默认关）：开了声明豁免（DB 就绪后应用一次即可，进程内全局生效）
-        try
-        {
-            if (EcoQosExemption) Program.SetEcoQosExemption(true);
-        }
-        catch { }
-
         // 欢迎页选的配置在 SetDatabase 之后才写 DB（之前 DB 没创建，直接写会丢）
         if (welcome is not null)
         {

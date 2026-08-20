@@ -185,9 +185,6 @@
                 <ToggleSwitch IsOn="{x:Bind HighPriorityProcess, Mode=TwoWay}"
                               OffContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}"
                               OnContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}" />
-                <ToggleSwitch IsOn="{x:Bind EcoQosExemption, Mode=TwoWay}"
-                              OffContent="{x:Bind lang:Lang.Starshot_EcoQosExemption}"
-                              OnContent="{x:Bind lang:Lang.Starshot_EcoQosExemption}" />
             </StackPanel>
 
         </StackPanel>

@@ -24,38 +24,6 @@ public static class Program
     private static extern void SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string appID);
 
 
-    // Windows 11 效率模式（EcoQoS）会把后台/窗口隐藏的进程自动压低执行频率——托盘常驻的 Starshot 是施加对象。
-    // 该声明把 EXECUTION_SPEED 节流显式置为关闭（始终 High Performance），系统不再自动降级；
-    // 用户在任务管理器手动设效率模式仍可覆盖（用户意图，无 API 可禁也不该禁）
-    [StructLayout(LayoutKind.Sequential)]
-    private struct PROCESS_POWER_THROTTLING_STATE
-    {
-        public uint Version;
-        public uint ControlMask;
-        public uint StateMask;
-    }
-
-
-    [DllImport("kernel32.dll")]
-    private static extern bool SetProcessInformation(nint hProcess, int processInformationClass, ref PROCESS_POWER_THROTTLING_STATE processInformation, int size);
-
-
-    /// <summary>
-    /// 声明/撤销 EcoQoS 豁免。enabled=true：EXECUTION_SPEED 节流显式置关（始终 High Performance），
-    /// 系统与外部 API 都不能再把本进程设为效率模式（进程对自己的声明优先）；false：交还系统管理（恢复默认可被降级）。
-    /// </summary>
-    internal static void SetEcoQosExemption(bool enabled)
-    {
-        var throttling = new PROCESS_POWER_THROTTLING_STATE
-        {
-            Version = 1,        // PROCESS_POWER_THROTTLING_CURRENT_VERSION
-            ControlMask = 0x1,  // PROCESS_POWER_THROTTLING_EXECUTION_SPEED
-            StateMask = enabled ? 0u : 0x1u,  // 0=不节流（豁免）；1=允许节流（交还系统）
-        };
-        SetProcessInformation((nint)(-1), 2 /* ProcessPowerThrottling */, ref throttling, Marshal.SizeOf<PROCESS_POWER_THROTTLING_STATE>());
-    }
-
-
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.UI.Xaml.Markup.Compiler", " 3.0.0.2411")]
     [global::System.STAThreadAttribute]
     static int Main(string[] args)

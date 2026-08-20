@@ -288,12 +288,6 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 豁免效率模式（EcoQoS）：声明进程不被系统/外部 API 自动降频。关=交还系统管理（可被降级）。
-    /// </summary>
-    public static bool EcoQosExemption { get => GetValue(false); set => SetValue(value); }
-
-
-    /// <summary>
     /// 开发者模式：显示设置页调试组（流式解压测试）。默认关。
     /// </summary>
     public static bool DevMode { get => GetValue(false); set => SetValue(value); }
