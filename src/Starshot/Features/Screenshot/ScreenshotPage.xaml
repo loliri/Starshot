@@ -153,10 +153,10 @@
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <!--  复制为 JPG  -->
-                                <MenuFlyoutItem x:Name="MenuFlyoutItem_CopyAsJPG"
-                                                Click="MenuFlyoutItem_CopyAsJPG_Click"
+                                <MenuFlyoutItem x:Name="MenuFlyoutItem_CopyImage"
+                                                Click="MenuFlyoutItem_CopyImage_Click"
                                                 IsTextScaleFactorEnabled="False"
-                                                Text="{x:Bind lang:Lang.ImageViewWindow_CopyAsJPG}">
+                                                Text="{x:Bind lang:Lang.ImageViewWindow_CopyImage}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF413;" IsTextScaleFactorEnabled="False" />
                                     </MenuFlyoutItem.Icon>

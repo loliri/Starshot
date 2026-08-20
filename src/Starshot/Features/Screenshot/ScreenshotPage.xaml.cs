@@ -1,10 +1,12 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.Graphics.Canvas;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
+using Starshot.Features.Codec;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using System;
@@ -15,6 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Graphics.DirectX;
 using Windows.Storage;
 using Windows.System;
 
@@ -447,7 +450,7 @@ public sealed partial class ScreenshotPage : PageBase
     }
 
 
-    private async void MenuFlyoutItem_CopyAsJPG_Click(object sender, RoutedEventArgs e)
+    private async void MenuFlyoutItem_CopyImage_Click(object sender, RoutedEventArgs e)
     {
         static string GetSizeString(long size)
         {
@@ -468,10 +471,37 @@ public sealed partial class ScreenshotPage : PageBase
             {
                 if (File.Exists(item.FilePath))
                 {
-                    string jpgFilePath = await ScreenshotHelper.ConvertToJpgAsync(item.FilePath);
-                    var file = await StorageFile.GetFileFromPathAsync(jpgFilePath);
-                    ClipboardHelper.SetStorageItems(DataPackageOperation.Copy, file);
-                    InAppToast.MainWindow?.Success($"{Lang.ImageViewWindow_CopiedToClipboard} ({GetSizeString(new FileInfo(jpgFilePath).Length)})", null, 1500);
+                    // 全程内存、零写盘：.jpg 源直接复制原文件；其余解码到内存，
+                    // HDR 过截图同款 TonemapToSdr（此前 CLI avifdec/djxl 直转对 PQ 不做色调映射，画面发灰），
+                    // 以 CF_DIB 进剪贴板（区域截图同款可靠路径）
+                    if (Path.GetExtension(item.FilePath).Equals(".jpg", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var file = await StorageFile.GetFileFromPathAsync(item.FilePath);
+                        ClipboardHelper.SetStorageItems(DataPackageOperation.Copy, file);
+                        InAppToast.MainWindow?.Success($"{Lang.ImageViewWindow_CopiedToClipboard} ({GetSizeString(new FileInfo(item.FilePath).Length)})", null, 1500);
+                        return;
+                    }
+                    using var imageInfo = await ImageLoader.LoadImageAsync(item.FilePath);
+                    var bitmap = imageInfo.CanvasBitmap;
+                    int width = (int)bitmap.SizeInPixels.Width;
+                    int height = (int)bitmap.SizeInPixels.Height;
+                    byte[] bgra;
+                    if (imageInfo.HDR)
+                    {
+                        using var sdr = ScreenCaptureService.TonemapToSdr(bitmap, ScreenCaptureService.GetSdrWhiteLevel());
+                        bgra = sdr.GetPixelBytes();
+                    }
+                    else
+                    {
+                        using var rt = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+                        using (var ds = rt.CreateDrawingSession())
+                        {
+                            ds.DrawImage(bitmap);
+                        }
+                        bgra = rt.GetPixelBytes();
+                    }
+                    ClipboardHelper.SetBitmapDib(width, height, bgra);
+                    InAppToast.MainWindow?.Success($"{Lang.ImageViewWindow_CopiedToClipboard} ({width}×{height})", null, 1500);
                 }
                 else
                 {
@@ -481,7 +511,7 @@ public sealed partial class ScreenshotPage : PageBase
         }
         catch (Exception ex)
         {
-            InAppToast.MainWindow?.Error(Lang.ImageViewWindow_CopyAsJPG, ex.Message);
+            InAppToast.MainWindow?.Error(Lang.ImageViewWindow_CopyToClipboard, ex.Message);
             _logger.LogError(ex, "Failed to copy file as JPG to clipboard");
         }
     }
