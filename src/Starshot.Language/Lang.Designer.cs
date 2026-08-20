@@ -528,14 +528,14 @@
         }
         
         /// <summary>
-        ///   查找类似 Copy as JPG 的本地化字符串。
+        ///   查找类似 Copy to clipboard 的本地化字符串。
         /// </summary>
-        public static string ImageViewWindow_CopyAsJPG {
+        public static string ImageViewWindow_CopyToClipboard {
             get {
-                return ResourceManager.GetString("ImageViewWindow_CopyAsJPG", resourceCulture);
+                return ResourceManager.GetString("ImageViewWindow_CopyToClipboard", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   查找类似 Copy File 的本地化字符串。
         /// </summary>
@@ -1281,15 +1281,6 @@
         public static string Starshot_HighPriorityProcess {
             get {
                 return ResourceManager.GetString("Starshot_HighPriorityProcess", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   查找类似 Efficiency mode exemption 的本地化字符串。
-        /// </summary>
-        public static string Starshot_EcoQosExemption {
-            get {
-                return ResourceManager.GetString("Starshot_EcoQosExemption", resourceCulture);
             }
         }
 

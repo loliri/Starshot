@@ -343,8 +343,8 @@
   <data name="ScreenshotSetting_AutoCopyScreenshotFile" xml:space="preserve">
     <value>スクショファイルの自動コピー</value>
   </data>
-  <data name="ImageViewWindow_CopyAsJPG" xml:space="preserve">
-    <value>JPG としてコピー</value>
+  <data name="ImageViewWindow_CopyToClipboard" xml:space="preserve">
+    <value>クリップボードにコピー</value>
   </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>複数選択</value>
@@ -765,9 +765,6 @@
   </data>
   <data name="Starshot_HighPriorityProcess" xml:space="preserve">
     <value>高優先度で実行</value>
-  </data>
-  <data name="Starshot_EcoQosExemption" xml:space="preserve">
-    <value>効率モードの免除</value>
   </data>
   <data name="Starshot_DebugSection" xml:space="preserve">
     <value>デバッグ</value>

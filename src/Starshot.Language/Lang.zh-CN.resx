@@ -343,8 +343,8 @@
   <data name="ScreenshotSetting_AutoCopyScreenshotFile" xml:space="preserve">
     <value>自动复制截图文件</value>
   </data>
-  <data name="ImageViewWindow_CopyAsJPG" xml:space="preserve">
-    <value>复制为 JPG</value>
+  <data name="ImageViewWindow_CopyToClipboard" xml:space="preserve">
+    <value>复制到剪贴板</value>
   </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>多选</value>
@@ -765,9 +765,6 @@
   </data>
   <data name="Starshot_HighPriorityProcess" xml:space="preserve">
     <value>高优先级运行</value>
-  </data>
-  <data name="Starshot_EcoQosExemption" xml:space="preserve">
-    <value>豁免效率模式</value>
   </data>
   <data name="Starshot_DebugSection" xml:space="preserve">
     <value>调试</value>
