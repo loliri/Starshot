@@ -248,8 +248,9 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
 
     private static uint GetDpiForMonitor(nint hmonitor)
     {
-        // 失败时 out 参数是未写入的栈内存，检查 HRESULT 并兜底 96（dpiScale=1）
-        return GetDpiForMonitor(hmonitor, 0, out uint dpiX, out _) == 0 ? dpiX : 96;
+        // 失败时 out 参数是未写入的栈内存，检查 HRESULT；兜底改问系统 DPI（随用户缩放设置，
+        // 如 150% 机器返回 144），不写死 96 以免高缩放用户浮窗尺寸失真
+        return GetDpiForMonitor(hmonitor, 0, out uint dpiX, out _) == 0 ? dpiX : User32.GetDpiForSystem();
     }
 
 
