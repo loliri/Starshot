@@ -152,7 +152,7 @@
                                         <FontIcon Glyph="&#xE8C8;" IsTextScaleFactorEnabled="False" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <!--  复制为 JPG  -->
+                                <!--  复制图像  -->
                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_CopyImage"
                                                 Click="MenuFlyoutItem_CopyImage_Click"
                                                 IsTextScaleFactorEnabled="False"

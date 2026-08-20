@@ -129,15 +129,17 @@ public sealed partial class RegionCaptureWindow : WindowEx
 
 
     /// <summary>
+    /// 窗口被用户真关（任务栏/系统关闭）后置 true 且不再复位——
+    /// service 据此丢弃单例重建窗口，SetCapture 也不会再碰已销毁的 HWND。
+    /// </summary>
+    public bool IsDestroyed { get; private set; }
+
+
+    /// <summary>
     /// 每次截图调用：更新冻结帧 + 重置交互状态 + 显示。窗口单例且永不 Hide——
     /// 关窗时移到屏外保持 IsWindowVisible（合成管线不停摆），下次截图先把新帧 Present 上屏
     /// 再移回屏内，从根上避免 Show 瞬间 DWM 先合成保留的旧会话帧（启动闪上次截图界面）。
     /// </summary>
-    // 窗口被用户真关（任务栏/系统关闭）后置 true 且不再复位——
-    // service 据此丢弃单例重建窗口，SetCapture 也不会再碰已销毁的 HWND
-    public bool IsDestroyed { get; private set; }
-
-
     public void SetCapture(CanvasBitmap canvas, float sdrWhiteLevel, int physW, int physH)
     {
         // swapChain 常驻（关窗只移屏外不销毁）；分辨率变了尺寸过期则重建
@@ -679,7 +681,10 @@ public sealed partial class RegionCaptureWindow : WindowEx
         Cleanup();
     }
 
-    // 释放覆盖层资源（仅应用退出时调用：单例窗口运行期只 Hide 不 Close，进程退出才真销毁）
+    /// <summary>
+    /// 释放覆盖层资源。应用退出或窗口被用户真关时调用：运行期单例只移屏外不 Close，
+    /// 进程退出/真关才真销毁。
+    /// </summary>
     public void Cleanup()
     {
         if (_cleanedUp) return;

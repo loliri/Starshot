@@ -1228,8 +1228,7 @@
                 return ResourceManager.GetString("Starshot_Update", resourceCulture);
             }
         }
-        ///   查找类似 God Mode (pin debug to top) 的本地化字符串。
-        /// </summary>
+
         /// <summary>
         ///   查找类似 Priority start 的本地化字符串。
         /// </summary>
@@ -1821,6 +1820,7 @@
             }
         }
         
+        /// <summary>
         ///   查找类似 Release Page 的本地化字符串。
         /// </summary>
         public static string Starshot_UpdateReleasePage {

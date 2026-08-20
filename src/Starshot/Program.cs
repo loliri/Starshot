@@ -1,12 +1,10 @@
 global using Starshot.Language;
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.TaskScheduler;
-using Serilog;
 
 namespace Starshot;
 
