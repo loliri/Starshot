@@ -40,6 +40,8 @@ public sealed partial class AppBackground : UserControl
 
     private string? _lastFile;
     private CancellationTokenSource? _cts;
+    // 在途的壁纸重载任务：RefreshAccentAsync 先等它收尾再读 _lastFile（末尾才更新），否则取到旧壁纸路径
+    private Task _updateBackgroundTask = Task.CompletedTask;
 
     /// <summary>
     /// 文件夹随机模式下当前壁纸文件名（设置页打开时取初始值）。null = 未加载/非文件夹模式。
@@ -67,10 +69,10 @@ public sealed partial class AppBackground : UserControl
     public AppBackground()
     {
         InitializeComponent();
-        WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => _ = UpdateBackgroundAsync());
+        WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => _updateBackgroundTask = UpdateBackgroundAsync());
         WeakReferenceMessenger.Default.Register<AccentRefreshRequestedMessage>(this, (_, _) => _ = RefreshAccentAsync());
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnWindowStateChanged);
-        Loaded += (_, _) => _ = UpdateBackgroundAsync();
+        Loaded += (_, _) => _updateBackgroundTask = UpdateBackgroundAsync();
         Unloaded += (_, _) =>
         {
             DisposeVideoResource();
@@ -338,14 +340,14 @@ public sealed partial class AppBackground : UserControl
         BackgroundImageSource = src;
         ReportNowPlaying(file);
 
-        await ExtractAccentAsync(bgra, w, h);
+        await ExtractAccentAsync(bgra, w, h, ct);
     }
 
 
     /// <summary>
     /// 从 BGRA 位图提取主色应用为强调色（开关关则跳过）。
     /// </summary>
-    private async Task ExtractAccentAsync(CanvasRenderTarget bgra, int w, int h)
+    private async Task ExtractAccentAsync(CanvasRenderTarget bgra, int w, int h, CancellationToken ct = default)
     {
         if (!AppConfig.EnableAccentFromWallpaper)
         {
@@ -355,6 +357,8 @@ public sealed partial class AppBackground : UserControl
         {
             byte[] bytes = bgra.GetPixelBytes();
             var color = await Task.Run(() => AccentColorHelper.GetAccentColor(bytes, w, h));
+            // 取色算完但会话已被更新会话取消：已废弃图的颜色不再应用到全局 accent
+            ct.ThrowIfCancellationRequested();
             if (color is not null)
             {
                 AccentColorHelper.ChangeAppAccentColor(color);
@@ -362,6 +366,7 @@ public sealed partial class AppBackground : UserControl
                 // ChangeAppAccentColor 已发 AccentColorChangedMessage → MainWindow 会重解析主题
             }
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Accent from wallpaper");
@@ -374,6 +379,9 @@ public sealed partial class AppBackground : UserControl
     /// </summary>
     public async Task RefreshAccentAsync()
     {
+        // 设置页切换模式时 BackgroundChanged 与 AccentRefreshRequested 几乎同时到，
+        // 直接读会拿到旧壁纸路径（重载任务末尾才更新 _lastFile），先等在途重载收尾
+        await _updateBackgroundTask;
         // 取色对象必须是「正在显示的文件」（_lastFile）。此前用 ResolveWallpaperPath()：
         // mode 3 会重新随机抽一个（取到非显示图的颜色），抽到视频则只重置标志直接返回（本次取色丢失）
         string? file = _lastFile;
