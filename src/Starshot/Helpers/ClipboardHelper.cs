@@ -79,9 +79,9 @@ internal static class ClipboardHelper
 
     /// <summary>
     /// 把 BGRA top-down 像素以 CF_DIB 放进剪贴板（BITMAPINFOHEADER + 倒序行成 bottom-up）。
-    /// 任意线程可调，剪贴板被占用时重试。
+    /// 任意线程可调，剪贴板被占用时重试。返回是否成功（失败时调用方不应报成功）。
     /// </summary>
-    public static void SetBitmapDib(int width, int height, byte[] bgraTopDown)
+    public static bool SetBitmapDib(int width, int height, byte[] bgraTopDown)
     {
         const int headerSize = 40;
         int rowBytes = width * 4;
@@ -89,9 +89,9 @@ internal static class ClipboardHelper
         int total = headerSize + pixelBytes;
 
         IntPtr hMem = GlobalAlloc(GMEM_MOVEABLE, (UIntPtr)total);
-        if (hMem == IntPtr.Zero) return;
+        if (hMem == IntPtr.Zero) return false;
         IntPtr ptr = GlobalLock(hMem);
-        if (ptr == IntPtr.Zero) { GlobalFree(hMem); return; }
+        if (ptr == IntPtr.Zero) { GlobalFree(hMem); return false; }
 
         // BITMAPINFOHEADER
         Marshal.WriteInt32(ptr, 0, headerSize);       // biSize
@@ -131,6 +131,7 @@ internal static class ClipboardHelper
         {
             GlobalFree(hMem); // 失败时自己释放
         }
+        return success;
     }
 
 

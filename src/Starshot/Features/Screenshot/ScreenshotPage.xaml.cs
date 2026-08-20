@@ -487,7 +487,7 @@ public sealed partial class ScreenshotPage : PageBase
                     int height = (int)bitmap.SizeInPixels.Height;
                     // 像素回读（GPU→CPU 数千万字节）与 CF_DIB 写入（被占用时最多 10×20ms 重试）都是长阻塞，
                     // 挪出 UI 线程（区域截图 CopyCaptureToClipboardAsync 同款做法）
-                    await Task.Run(() =>
+                    bool copied = await Task.Run(() =>
                     {
                         // 统一画进 B8G8R8A8 再取字节：CF_DIB 要 BGRA。HDR 先过 tonemap——
                         // TonemapToSdr 输出 R8G8B8A8（Rgba 字节序）直喂 SetBitmapDib 会红蓝互换
@@ -506,8 +506,13 @@ public sealed partial class ScreenshotPage : PageBase
                             ds.DrawImage(source);
                             bgra = rt.GetPixelBytes();
                         }
-                        ClipboardHelper.SetBitmapDib(width, height, bgra);
+                        return ClipboardHelper.SetBitmapDib(width, height, bgra);
                     });
+                    if (!copied)
+                    {
+                        InAppToast.MainWindow?.Error(Lang.ImageViewWindow_CopyToClipboard, null, 5000);
+                        return;
+                    }
                     InAppToast.MainWindow?.Success($"{Lang.ImageViewWindow_CopiedToClipboard} ({width}×{height})", null, 1500);
                 }
                 else
@@ -519,7 +524,7 @@ public sealed partial class ScreenshotPage : PageBase
         catch (Exception ex)
         {
             InAppToast.MainWindow?.Error(Lang.ImageViewWindow_CopyToClipboard, ex.Message);
-            _logger.LogError(ex, "Failed to copy file as JPG to clipboard");
+            _logger.LogError(ex, "Failed to copy image to clipboard");
         }
     }
 

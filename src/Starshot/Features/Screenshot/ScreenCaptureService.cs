@@ -563,7 +563,11 @@ internal class ScreenCaptureService
                     int h = (int)src.SizeInPixels.Height;
                     byte[] pixels = src.GetPixelBytes(); // BGRA top-down
                     log.LogInformation("CopyCaptureToClipboardAsync: DIB {W}x{H}, {Len} bytes", w, h, pixels.Length);
-                    ClipboardHelper.SetBitmapDib(w, h, pixels);
+                    if (!ClipboardHelper.SetBitmapDib(w, h, pixels))
+                    {
+                        log.LogWarning("CopyCaptureToClipboardAsync: SetBitmapDib failed (clipboard busy)");
+                        return;
+                    }
                     log.LogInformation("CopyCaptureToClipboardAsync: SetClipboardData done");
                 }
                 finally
