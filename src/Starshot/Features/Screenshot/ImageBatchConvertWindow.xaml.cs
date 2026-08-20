@@ -378,8 +378,21 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         Button_Clear.IsEnabled = true;
         ComboBox_OutputFormat.IsEnabled = true;
         ComboBox_OutputFileExists.IsEnabled = true;
-        Slider_Quality.IsEnabled = true;
+        UpdateQualitySliderEnabled();
         Button_StartConvert.Content = Lang.ImageBatchConvertWindow_StartConvert;
+    }
+
+
+    private void ComboBox_OutputFormat_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        UpdateQualitySliderEnabled();
+    }
+
+
+    // PNG 无损、Ultra HDR JPG 基图固定默认质量：质量滑杆对这两种目标无效，置灰防误导
+    private void UpdateQualitySliderEnabled()
+    {
+        Slider_Quality.IsEnabled = ComboBox_OutputFormat.SelectedIndex is not (1 or 4);
     }
 
 

@@ -51,6 +51,7 @@
                           MinWidth="100"
                           Padding="18.5,0,0,0"
                           VerticalAlignment="Center"
+                          SelectionChanged="ComboBox_OutputFormat_SelectionChanged"
                           PlaceholderText="{x:Bind lang:Lang.ImageBatchConvertWindow_SelectOutputFormat}">
                     <ComboBoxItem Content="SDR JPG" />
                     <ComboBoxItem Content="SDR PNG" />
