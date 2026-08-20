@@ -52,11 +52,10 @@
                           Padding="18.5,0,0,0"
                           VerticalAlignment="Center"
                           PlaceholderText="{x:Bind lang:Lang.ImageBatchConvertWindow_SelectOutputFormat}">
-                    <ComboBoxItem Content="JPEG" />
-                    <ComboBoxItem Content="PNG" />
+                    <ComboBoxItem Content="SDR JPG" />
+                    <ComboBoxItem Content="SDR PNG" />
                     <ComboBoxItem Content="AVIF" />
                     <ComboBoxItem Content="JPEG XL" />
-                    <ComboBoxItem Content="HDR PNG" />
                     <ComboBoxItem Content="Ultra HDR JPG" />
                 </ComboBox>
                 <!--  文件已存在  -->
@@ -76,7 +75,7 @@
                         VerticalAlignment="Center"
                         Maximum="100"
                         Minimum="0"
-                        Value="90" />
+                        Value="100" />
                 <TextBlock MinWidth="32"
                            VerticalAlignment="Center"
                            Text="{x:Bind Slider_Quality.Value}" />
@@ -90,22 +89,6 @@
                               Height="24"
                               IsIndeterminate="True"
                               Visibility="{x:Bind IsConverting}" />
-                <!--  转换信息  -->
-                <TextBlock VerticalAlignment="Center"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Visibility="{x:Bind DisplayInfo}">
-                    <Run Text="{x:Bind lang:Lang.Common_Success}" />
-                    <Run Text="{x:Bind SuccessCount}" /><Run Text="/" /><Run Text="{x:Bind TotalCount}" />
-                    <Run Text="" />
-                    <Run Text="" />
-                    <Run Text="{x:Bind lang:Lang.Common_Failed}" />
-                    <Run Text="{x:Bind ErrorCount}" />
-                    <Run Text="" />
-                    <Run Text="" />
-                    <Run Text="{x:Bind local:ImageBatchConvertWindow.SizeToString(TotalSourceFileSize)}" />
-                    <Run Text="→" />
-                    <Run Text="{x:Bind local:ImageBatchConvertWindow.SizeToString(TotalOutputFileSize)}" />
-                </TextBlock>
             </StackPanel>
 
             <StackPanel HorizontalAlignment="Right"
@@ -131,6 +114,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Button x:Name="Button_OutputFolder"
                     Click="Button_OutputFolder_Click"
@@ -140,6 +124,19 @@
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Text="{x:Bind OutputFolder}"
                        TextTrimming="CharacterEllipsis" />
+            <!--  转换信息（挪到本行右侧：工具栏行空间不够，挤在一起重叠）  -->
+            <TextBlock Grid.Column="2"
+                       VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Visibility="{x:Bind DisplayInfo}">
+                <Run Text="{x:Bind lang:Lang.Common_Success}" />
+                <Run Text="{x:Bind SuccessCount}" /><Run Text="/" /><Run Text="{x:Bind TotalCount}" />
+                <Run Text="{x:Bind lang:Lang.Common_Failed}" />
+                <Run Text="{x:Bind ErrorCount}" />
+                <Run Text="{x:Bind local:ImageBatchConvertWindow.SizeToString(TotalSourceFileSize)}" />
+                <Run Text="→" />
+                <Run Text="{x:Bind local:ImageBatchConvertWindow.SizeToString(TotalOutputFileSize)}" />
+            </TextBlock>
         </Grid>
 
 

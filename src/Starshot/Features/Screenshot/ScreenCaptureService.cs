@@ -475,7 +475,7 @@ internal class ScreenCaptureService
             await ms.CopyToAsync(fs);
         }
 
-        // autoConvertSDR：主文件 HDR 之外额外产 UHDR JPEG（SDR 基图 + HDR gain map）
+        // autoConvertSDR：主文件 HDR 之外额外产 Ultra HDR JPEG（SDR 基图 + HDR gain map）
         string? sdrPath = null;
         if (autoConvertSDR)
         {
@@ -491,7 +491,7 @@ internal class ScreenCaptureService
 
         if (copyToClipboard && AppConfig.AutoCopyScreenshotToClipboard)
         {
-            // 全屏截图：CF_HDROP 放文件。autoConvertSDR 放 UHDR jpg，否则主文件
+            // 全屏截图：CF_HDROP 放文件。autoConvertSDR 放 Ultra HDR jpg，否则主文件
             string clipFile = autoConvertSDR ? sdrPath! : finalFile;
             ClipboardHelper.SetFiles(clipFile);
         }
@@ -503,8 +503,9 @@ internal class ScreenCaptureService
     /// <summary>
     /// HDR（R16G16B16A16Float scRGB）→ SDR（R8G8B8A8）色调映射。
     /// WhiteLevelAdjustment(80→sdrWhiteLevel) + SrgbGamma(OETF)，与覆盖层显示用 tonemap 同逻辑。
+    /// 批量转换 HDR→SDR 复用同一条线（防两套实现各改各的）。
     /// </summary>
-    private static CanvasRenderTarget TonemapToSdr(CanvasBitmap hdrBitmap, float sdrWhiteLevel)
+    public static CanvasRenderTarget TonemapToSdr(CanvasBitmap hdrBitmap, float sdrWhiteLevel)
     {
         var device = CanvasDevice.GetSharedDevice();
         int w = (int)hdrBitmap.SizeInPixels.Width;
@@ -605,6 +606,15 @@ internal class ScreenCaptureService
             }
         }
         return 80;
+    }
+
+
+    /// <summary>
+    /// 当前环境的 SDR 白电平（HDR 屏的 SdrWhiteLevelInNits，无 HDR 屏则 80）。批量转换 tonemap 用，与截图线同源。
+    /// </summary>
+    public static float GetSdrWhiteLevel()
+    {
+        return GetSdrWhiteLevelFromDisplays(DisplayArea.FindAll());
     }
 
 

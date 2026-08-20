@@ -45,6 +45,31 @@ internal static class ImageSaver
 
 
 
+    /// <summary>
+    /// 8bit 位图存普通 JPEG（WIC，quality 0-100）。输入需已 SDR（HDR 先过 tonemap）。
+    /// </summary>
+    public static async Task SaveAsJpegAsync(CanvasBitmap bitmap, Stream stream, int quality)
+    {
+        if (bitmap.Format is not (DirectXPixelFormat.R8G8B8A8UIntNormalized or DirectXPixelFormat.B8G8R8A8UIntNormalized))
+        {
+            throw new NotSupportedException($"{bitmap.Format} is not supported for JPEG encoding; tone-map to 8bit first.");
+        }
+        using var ms = new MemoryStream();
+        var options = new BitmapPropertySet();
+        options.Add("ImageQuality", new BitmapTypedValue(Math.Clamp(quality, 0, 100) / 100f, Windows.Foundation.PropertyType.Single));
+        options.Add("JpegYCrCbSubsampling", new BitmapTypedValue(3, Windows.Foundation.PropertyType.UInt8));
+        var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms.AsRandomAccessStream(), options);
+        encoder.SetPixelData(
+            bitmap.Format is DirectXPixelFormat.B8G8R8A8UIntNormalized ? BitmapPixelFormat.Bgra8 : BitmapPixelFormat.Rgba8,
+            BitmapAlphaMode.Premultiplied,
+            bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height, 96, 96,
+            bitmap.GetPixelBytes());
+        await encoder.FlushAsync();
+        ms.Position = 0;
+        await ms.CopyToAsync(stream);
+    }
+
+
     public static async Task SaveAsPngAsync(CanvasBitmap bitmap, Stream stream, ColorPrimaries colorPrimaries, byte[]? xmpData = null, bool writeColorProfile = true)
     {
         uint width = bitmap.SizeInPixels.Width;

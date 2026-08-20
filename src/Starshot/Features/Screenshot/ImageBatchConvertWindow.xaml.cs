@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -394,11 +395,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
 
     private string _avifenc;
 
-    private string _avifdec;
-
     private string _cjxl;
-
-    private string _djxl;
 
 
     private async Task ConvertInternalAsync(CancellationToken cancellationToken = default)
@@ -419,8 +416,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             1 => ".png",
             2 => ".avif",
             3 => ".jxl",
-            4 => ".pngv3",   // HDR PNG：路由标记，输出扩展名归一 .png（GetOutputPath）
-            5 => ".uhdrjpg", // Ultra HDR JPG：同上，输出扩展名归一 .jpg
+            4 => ".uhdrjpg", // Ultra HDR JPG：路由标记，输出扩展名归一 .jpg（GetOutputPath）
             _ => "",
         };
         if (string.IsNullOrWhiteSpace(_format))
@@ -448,9 +444,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
         _quality = (int)Math.Clamp(Slider_Quality.Value, 0, 100);
         _avifenc = Path.Combine(AppContext.BaseDirectory, "avifenc.exe");
-        _avifdec = Path.Combine(AppContext.BaseDirectory, "avifdec.exe");
         _cjxl = Path.Combine(AppContext.BaseDirectory, "cjxl.exe");
-        _djxl = Path.Combine(AppContext.BaseDirectory, "djxl.exe");
 
         foreach (var item in ImageConvertItems)
         {
@@ -484,10 +478,11 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             {
                 Task task = (item.SourceExtension, _format) switch
                 {
-                    (".jpg" or ".png" or ".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".pngv3") => ConvertToHdrPngAsync(item, cancellationToken),
                     (".jpg" or ".png" or ".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".uhdrjpg") => ConvertToUhdrJpgAsync(item, cancellationToken),
                     (".jpg" or ".png", ".avif" or ".jxl") => ConvertJpegPngToAvifJxlAsync(item, cancellationToken),
-                    (".avif" or ".jxl", ".jpg" or ".png") => ConvertAvifJxlToJpegPngAsync(item, cancellationToken),
+                    // avif/jxl → jpg/png 走进程内管线（HDR 源过截图同款 tonemap）：CLI avifdec/djxl 直转对 PQ 内容
+                    // 不做色调映射，naive 压 8bit 导致画面发灰
+                    (".avif" or ".jxl", ".jpg" or ".png") => ConvertAvifJxlToJpgPngAsync(item, cancellationToken),
                     (".jpg" or ".png" or ".jxr" or ".webp" or ".heic", ".jpg" or ".png") => ConvertJpegPngJxrWebpHeicToJpgPngAsync(item, cancellationToken),
                     (".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".avif" or ".jxl") => ConvertJxrWebpHeicAvifJxlToAvifJxlAsync(item, cancellationToken),
                     _ => throw new NotSupportedException($"Unsupported conversion from '{item.SourceExtension}' to '{_format}'."),
@@ -592,7 +587,13 @@ public sealed partial class ImageBatchConvertWindow : PageBase
     }
 
 
-    private async Task ConvertAvifJxlToJpegPngAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// avif/jxl → jpg/png：进程内解码（ImageLoader）+ HDR 源过截图同款 TonemapToSdr。
+    /// 取代原 CLI avifdec/djxl 直转——CLI 对 PQ 内容不做色调映射，naive 压 8bit 导致发灰。
+    /// 编码分流：JPG 走 ImageSaver.SaveAsJpegAsync（与查看器 SDR JPEG 同一条线）；
+    /// PNG 走 ImageSaver.SaveAsPngAsync（截图验证过的管线——WIC 的 PNG 编码器不认 JPEG 参数，混用会 CreateAsync 直接抛异常）。
+    /// </summary>
+    private async Task ConvertAvifJxlToJpgPngAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
     {
         string outputPath = GetOutputPath(item);
         if (File.Exists(outputPath) && _overwriteMode is 0)
@@ -600,46 +601,40 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             item.OutputFilePath = outputPath;
             return;
         }
-        if (item.SourceExtension == ".avif")
+        using var imageInfo = await ImageLoader.LoadImageAsync(item.SourceFilePath, cancellationToken);
+        int width = (int)imageInfo.CanvasBitmap.SizeInPixels.Width;
+        int height = (int)imageInfo.CanvasBitmap.SizeInPixels.Height;
+
+        // 统一转 8bit B8G8R8A8：HDR 过 tonemap（截图同款），SDR 直绘
+        CanvasRenderTarget rt8;
+        if (imageInfo.HDR)
         {
-            Process? process = Process.Start(new ProcessStartInfo
-            {
-                FileName = _avifdec,
-                Arguments = $"""
-                      "{item.SourceFilePath}" "{outputPath}" -q {_quality}
-                      """,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            }) ?? throw new NullReferenceException("avifdec process is null");
-            await process.WaitForExitAsync(cancellationToken);
-            if (process.ExitCode != 0 || !File.Exists(outputPath))
-            {
-                string error = await process.StandardError.ReadToEndAsync();
-                throw new Exception($"avifdec failed: {error}");
-            }
-            item.OutputFilePath = outputPath;
+            rt8 = ScreenCaptureService.TonemapToSdr(imageInfo.CanvasBitmap, ScreenCaptureService.GetSdrWhiteLevel());
         }
-        if (item.SourceExtension == ".jxl")
+        else
         {
-            Process? process = Process.Start(new ProcessStartInfo
+            rt8 = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+            using (var ds = rt8.CreateDrawingSession())
             {
-                FileName = _djxl,
-                Arguments = $"""
-                      "{item.SourceFilePath}" "{outputPath}" -q {_quality} -j
-                      """,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            }) ?? throw new NullReferenceException("djxl process is null");
-            await process.WaitForExitAsync(cancellationToken);
-            if (process.ExitCode != 0 || !File.Exists(outputPath))
-            {
-                string error = await process.StandardError.ReadToEndAsync();
-                throw new Exception($"djxl failed: {error}");
+                ds.DrawImage(imageInfo.CanvasBitmap);
             }
-            item.OutputFilePath = outputPath;
         }
+        using (rt8)
+        using (var ms = new MemoryStream())
+        {
+            if (_format == ".png")
+            {
+                await ImageSaver.SaveAsPngAsync(rt8, ms, ColorPrimaries.BT709, ScreenCaptureService.BuildXMPMetadata(item.SourceFileTime), false);
+            }
+            else
+            {
+                await ImageSaver.SaveAsJpegAsync(rt8, ms, _quality);
+            }
+            using var fs_write = File.Create(outputPath);
+            ms.Position = 0;
+            await ms.CopyToAsync(fs_write, CancellationToken.None);
+        }
+        item.OutputFilePath = outputPath;
     }
 
 
@@ -660,7 +655,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             _ => throw new NotSupportedException("Unsupported format"),
         };
         using var ms = new MemoryStream();
-        List<KeyValuePair<string, BitmapTypedValue>> options = [KeyValuePair.Create("ImageQuality", new BitmapTypedValue(_quality / 100f, PropertyType.Single)), KeyValuePair.Create("JpegYCrCbSubsampling", new BitmapTypedValue(3, PropertyType.UInt8))];
+        // JPEG 专用参数只给 JPEG 编码器；WIC 的 PNG 编码器不认这些参数，混用 CreateAsync 直接抛异常
+        List<KeyValuePair<string, BitmapTypedValue>>? options = _format == ".jpg"
+            ? [KeyValuePair.Create("ImageQuality", new BitmapTypedValue(_quality / 100f, PropertyType.Single)), KeyValuePair.Create("JpegYCrCbSubsampling", new BitmapTypedValue(3, PropertyType.UInt8))]
+            : null;
         var encoder = await BitmapEncoder.CreateAsync(encoderId, ms.AsRandomAccessStream(), options).AsTask(cancellationToken);
         encoder.SetSoftwareBitmap(await decoder.GetSoftwareBitmapAsync().AsTask(cancellationToken));
         await encoder.FlushAsync().AsTask(cancellationToken);
@@ -712,7 +710,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
         float maxCLL = ScreenCaptureService.GetMaxCLL(imageInfo.CanvasBitmap);
         using var ms = new MemoryStream();
-        // SDR 白 300 nits：与查看器导出 UHDR 的默认显示亮度一致（SDRLuminance 默认值）
+        // SDR 白 300 nits：与查看器导出 Ultra HDR 的默认显示亮度一致（SDRLuminance 默认值）
         await ImageSaver.SaveAsUhdrAsync(imageInfo.CanvasBitmap, ms, maxCLL, 300);
         using var fs = File.Create(outputPath);
         ms.Position = 0;
