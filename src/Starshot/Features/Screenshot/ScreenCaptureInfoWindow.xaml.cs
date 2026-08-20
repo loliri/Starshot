@@ -242,8 +242,14 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
 
     private static uint GetDpiForMonitor(Microsoft.UI.DisplayId displayId)
     {
-        GetDpiForMonitor((nint)displayId.Value, 0, out uint dpiX, out uint dpiY);
-        return dpiX;
+        return GetDpiForMonitor((nint)displayId.Value);
+    }
+
+
+    private static uint GetDpiForMonitor(nint hmonitor)
+    {
+        // 失败时 out 参数是未写入的栈内存，检查 HRESULT 并兜底 96（dpiScale=1）
+        return GetDpiForMonitor(hmonitor, 0, out uint dpiX, out _) == 0 ? dpiX : 96;
     }
 
 
@@ -455,9 +461,7 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
                 User32.MONITORINFOEX monitorInfo = new() { cbSize = (uint)Marshal.SizeOf<User32.MONITORINFOEX>() };
                 User32.GetMonitorInfo(monitor, ref monitorInfo);
                 _cursorMonitorRect = monitorInfo.rcMonitor;
-                _cursorMonitorDpi = 0;
-                GetDpiForMonitor((nint)monitor.DangerousGetHandle(), 0, out uint dpiX, out _);
-                _cursorMonitorDpi = dpiX;
+                _cursorMonitorDpi = GetDpiForMonitor(monitor.DangerousGetHandle());
                 _hasCursorMonitorRect = true;
             }
             var rc = _cursorMonitorRect;
