@@ -1538,15 +1538,24 @@ public sealed partial class ImageViewWindow : Window
         var rt = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(),
             sizeSource.SizeInPixels.Width, sizeSource.SizeInPixels.Height, 96,
             DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
-        using var ds = rt.CreateDrawingSession();
-        using var gamma = new SrgbGammaEffect
+        try
         {
-            Source = output,
-            GammaMode = SrgbGammaMode.OETF,
-            BufferPrecision = CanvasBufferPrecision.Precision16Float,
-        };
-        ds.DrawImage(gamma);
-        return rt;
+            using var ds = rt.CreateDrawingSession();
+            using var gamma = new SrgbGammaEffect
+            {
+                Source = output,
+                GammaMode = SrgbGammaMode.OETF,
+                BufferPrecision = CanvasBufferPrecision.Precision16Float,
+            };
+            ds.DrawImage(gamma);
+            return rt;
+        }
+        catch
+        {
+            // 渲染段（设备丢失等）抛出时 rt 还没赋给外层 sdr8，就地释放防 GPU 表面靠 GC 延迟回收
+            rt.Dispose();
+            throw;
+        }
     }
 
     #endregion
