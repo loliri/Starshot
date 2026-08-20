@@ -208,6 +208,8 @@ public sealed partial class ScreenshotPage : PageBase
                     // 页面卸载后字段已置空，迟到的续体（await 跨越了卸载）直接丢弃
                     DispatcherQueue.TryEnqueue(() =>
                     {
+                        // Initialize 半途失败（如外置文件夹失效抛异常被吞）时 ScreenshotGroups 停留 null，先兜住
+                        ScreenshotGroups ??= new();
                         if (_screenshotDict is null) return;
                         if (_screenshotDict.ContainsKey(name)) return;
                         _screenshotDict[name] = item;
