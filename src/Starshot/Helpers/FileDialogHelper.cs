@@ -199,7 +199,7 @@ internal static class FileDialogHelper
                     shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
                     dialog.GetFileTypeIndex(out uint index);
                     var extension = Path.GetExtension(types[index - 1].pszSpec);
-                    if (!name.EndsWith(extension))
+                    if (!name.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
                     {
                         name += extension;
                     }
@@ -263,7 +263,7 @@ internal static class FileDialogHelper
                 shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
                 dialog.GetFileTypeIndex(out uint index);
                 var extension = Path.GetExtension(types[index - 1].pszSpec);
-                if (!name.EndsWith(extension))
+                if (!name.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
                 {
                     name += extension;
                 }
