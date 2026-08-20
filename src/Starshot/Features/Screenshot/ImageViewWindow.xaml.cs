@@ -1436,16 +1436,27 @@ public sealed partial class ImageViewWindow : Window
             ICanvasImage output = GetDrawOutput(out int displayMode);
             bool imageHdr = bitmap.Format is DirectXPixelFormat.R16G16B16A16Float or DirectXPixelFormat.R32G32B32A32Float;
             bool displayHdr = displayMode is 2;
+            using var ms = new MemoryStream();
+            bool writeColorProfile = AppConfig.EnableScreenshotColorManagement;
 
             string? path;
+            Task encodeTask;
+            // hdr&sdr 分支的 SDR 渲染目标：编码完成后统一在外层 await 之后释放（switch 只创建 Task，提前 dispose 会赶在编码读位图前）
+            CanvasRenderTarget? sdr8 = null;
             if (displayHdr)
             {
                 // hdr image & hdr display
-                path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("AVIF", ".avif"), ("JPEG XL", ".jxl"), ("HDR PNG", ".png"));
+                path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("AVIF", ".avif"), ("JPEG XL", ".jxl"));
                 if (string.IsNullOrWhiteSpace(path))
                 {
                     return;
                 }
+                encodeTask = Path.GetExtension(path).ToLowerInvariant() switch
+                {
+                    ".avif" => ImageSaver.SaveAsAvifAsync(bitmap, ms, colorPrimaries, 100, null, writeColorProfile),
+                    ".jxl" => ImageSaver.SaveAsJxlAsync(bitmap, ms, colorPrimaries, 0f, null, writeColorProfile),
+                    _ => throw new ArgumentOutOfRangeException($"File extension '{Path.GetExtension(path)}' is not supported."),
+                };
             }
             else if (!imageHdr)
             {
@@ -1455,29 +1466,36 @@ public sealed partial class ImageViewWindow : Window
                 {
                     return;
                 }
+                encodeTask = Path.GetExtension(path).ToLowerInvariant() switch
+                {
+                    ".png" => ImageSaver.SaveAsPngAsync(bitmap, ms, colorPrimaries, null, writeColorProfile),
+                    ".avif" => ImageSaver.SaveAsAvifAsync(bitmap, ms, colorPrimaries, 100, null, writeColorProfile),
+                    ".jxl" => ImageSaver.SaveAsJxlAsync(bitmap, ms, colorPrimaries, 0f, null, writeColorProfile),
+                    _ => throw new ArgumentOutOfRangeException($"File extension '{Path.GetExtension(path)}' is not supported."),
+                };
             }
             else
             {
-                // hdr image & sdr display
-                path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("JPEG", ".jpg"));
-                if (string.IsNullOrWhiteSpace(path))
+                // hdr image & sdr display：两组同扩展名（SDR/Ultra HDR 的 .jpg、SDR/HDR 的 .png），
+                // WinRT picker 拿不到用户选了哪个 filter，走带序号的 Win32 对话框
+                var picked = await FileDialogHelper.OpenSaveFileDialogWithFilterIndexAsync(Content.XamlRoot, name,
+                    ("SDR JPEG", ".jpg"), ("Ultra HDR JPEG", ".jpg"), ("SDR PNG", ".png"));
+                if (picked is null)
                 {
                     return;
                 }
+                (path, int filterIndex) = picked.Value;
+                // SDR JPEG / SDR PNG：渲染 SDR 显示管线（HdrToneMap + 白电平 + 色彩管理）到 8bit，所见即所得
+                encodeTask = filterIndex switch
+                {
+                    0 => ImageSaver.SaveAsJpegAsync(sdr8 = RenderToSdr8bit(output, bitmap), ms, 100),
+                    1 => ImageSaver.SaveAsUhdrAsync(bitmap, ms, maxCLL, outputNits),
+                    2 => ImageSaver.SaveAsPngAsync(sdr8 = RenderToSdr8bit(output, bitmap), ms, ColorPrimaries.BT709, null, false),
+                    _ => throw new ArgumentOutOfRangeException($"Unknown filter index {filterIndex}."),
+                };
             }
-
-            using var ms = new MemoryStream();
-            string extension = Path.GetExtension(path).ToLowerInvariant();
-            bool writeColorProfile = AppConfig.EnableScreenshotColorManagement;
-            Task task = Path.GetExtension(path).ToLowerInvariant() switch
-            {
-                ".png" => ImageSaver.SaveAsPngAsync(bitmap, ms, colorPrimaries, null, writeColorProfile),
-                ".avif" => ImageSaver.SaveAsAvifAsync(bitmap, ms, colorPrimaries, 90, null, writeColorProfile),
-                ".jxl" => ImageSaver.SaveAsJxlAsync(bitmap, ms, colorPrimaries, 1f, null, writeColorProfile),
-                ".jpg" => ImageSaver.SaveAsUhdrAsync(bitmap, ms, maxCLL, outputNits),
-                _ => throw new ArgumentOutOfRangeException($"File extension '{extension}' is not supported."),
-            };
-            await task;
+            await encodeTask;
+            sdr8?.Dispose();
 
             ms.Position = 0;
             using var fs = File.Create(path);
@@ -1493,6 +1511,20 @@ public sealed partial class ImageViewWindow : Window
             ShowInfo(InfoBarSeverity.Error, Lang.ImageViewWindow_FailedToSaveImage, ex.Message, 0);
             _logger.LogError(ex, "Failed to export image");
         }
+    }
+
+
+    /// <summary>
+    /// 把显示管线图像（SDR 模式的 tonemap 链）渲染到 8bit B8G8R8A8——所见即所得的 SDR 导出像素。
+    /// </summary>
+    private static CanvasRenderTarget RenderToSdr8bit(ICanvasImage output, CanvasBitmap sizeSource)
+    {
+        var rt = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(),
+            sizeSource.SizeInPixels.Width, sizeSource.SizeInPixels.Height, 96,
+            DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+        using var ds = rt.CreateDrawingSession();
+        ds.DrawImage(output);
+        return rt;
     }
 
     #endregion

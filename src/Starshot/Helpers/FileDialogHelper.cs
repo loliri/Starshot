@@ -221,6 +221,69 @@ internal static class FileDialogHelper
     }
 
 
+    /// <summary>
+    /// 带 filter 序号返回的保存对话框（WinRT picker 拿不到用户选了哪个 filter，只能走 Win32 IFileSaveDialog）。
+    /// 用于同扩展名多语义的场景（如 .jpg 同时是 SDR JPEG 与 Ultra HDR JPEG），按序号区分。
+    /// filterIndex 为 0 基，对应 fileTypeFilter 参数下标；取消返回 null。
+    /// </summary>
+    public static async Task<(string Path, int FilterIndex)?> OpenSaveFileDialogWithFilterIndexAsync(nint parentWindow, string? fileName = null, params (string Name, string Extension)[] fileTypeFilter)
+    {
+        if (fileTypeFilter is null || fileTypeFilter.Length == 0)
+        {
+            throw new ArgumentException("At least one file type filter is required.", nameof(fileTypeFilter));
+        }
+        return await Task.Run<(string Path, int FilterIndex)?>(() =>
+        {
+            IFileSaveDialog? dialog = null;
+            IShellItem? shell = null;
+            try
+            {
+                dialog = new NativeFileSaveDialog();
+                dialog.GetOptions(out var options);
+                options |= FOS.FOS_NOREADONLYRETURN;
+                options |= FOS.FOS_DONTADDTORECENT;
+                options |= FOS.FOS_OVERWRITEPROMPT;
+                dialog.SetOptions(options);
+                if (!string.IsNullOrWhiteSpace(fileName))
+                {
+                    dialog.SetFileName(fileName);
+                }
+                // 不预置 All 条目：filter 序号与参数下标一一对应（GetFileTypeIndex 1 基 → 减 1）
+                var types = fileTypeFilter.Select(x => new COMDLG_FILTERSPEC { pszName = x.Name, pszSpec = "*" + x.Extension }).ToArray();
+                dialog.SetFileTypes((uint)types.Length, types);
+                try
+                {
+                    ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                }
+                catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                {
+                    return null;
+                }
+                dialog.GetResult(out shell);
+                shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
+                dialog.GetFileTypeIndex(out uint index);
+                var extension = Path.GetExtension(types[index - 1].pszSpec);
+                if (!name.EndsWith(extension))
+                {
+                    name += extension;
+                }
+                return (name, (int)index - 1);
+            }
+            finally
+            {
+                if (dialog != null) Marshal.FinalReleaseComObject(dialog);
+                if (shell != null) Marshal.FinalReleaseComObject(shell);
+            }
+        }).ConfigureAwait(false);
+    }
+
+
+    public static async Task<(string Path, int FilterIndex)?> OpenSaveFileDialogWithFilterIndexAsync(XamlRoot xamlRoot, string? fileName = null, params (string Name, string Extension)[] fileTypeFilter)
+    {
+        return await OpenSaveFileDialogWithFilterIndexAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value, fileName, fileTypeFilter);
+    }
+
+
     private static COMDLG_FILTERSPEC[] SetFileTypeFilter(in IFileDialog dialog, params (string Name, string Spec)[] fileTypeFilter)
     {
         uint count = (uint)fileTypeFilter.Length;
