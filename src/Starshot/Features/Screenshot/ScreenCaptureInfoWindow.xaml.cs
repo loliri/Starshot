@@ -221,6 +221,7 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = new CancellationTokenSource();
             _openImageCancellationToken = _cancellationTokenSource.Token;
+            _hasCursorMonitorRect = false;  // copy-only 不走 CaptureStart，这里补重置：浮窗重新采样光标所在屏
             DisplayWindow(false, _cancellationTokenSource.Token);
         }
         catch (Exception ex)
