@@ -1516,6 +1516,8 @@ public sealed partial class ImageViewWindow : Window
 
     /// <summary>
     /// 把显示管线图像（SDR 模式的 tonemap 链）渲染到 8bit B8G8R8A8——所见即所得的 SDR 导出像素。
+    /// 链输出是线性 scRGB，画进 8bit 前必须补 sRGB OETF（显示路径由 DWM 对 float swapchain 编码，
+    /// 落盘文件没有这层），否则按 sRGB 解读严重偏暗——与 TonemapToSdr / Ultra HDR 基图同款处理。
     /// </summary>
     private static CanvasRenderTarget RenderToSdr8bit(ICanvasImage output, CanvasBitmap sizeSource)
     {
@@ -1523,7 +1525,13 @@ public sealed partial class ImageViewWindow : Window
             sizeSource.SizeInPixels.Width, sizeSource.SizeInPixels.Height, 96,
             DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
         using var ds = rt.CreateDrawingSession();
-        ds.DrawImage(output);
+        using var gamma = new SrgbGammaEffect
+        {
+            Source = output,
+            GammaMode = SrgbGammaMode.OETF,
+            BufferPrecision = CanvasBufferPrecision.Precision16Float,
+        };
+        ds.DrawImage(gamma);
         return rt;
     }
 
