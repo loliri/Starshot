@@ -34,7 +34,7 @@ Starshot 直接從 DXGI 層獲取顯示器輸出的原始 `R16G16B16A16Float` sc
 - 🧠 **智慧 HDR/SDR 判定**——自動區分真實 HDR 內容與 HDR 格式包裹的 SDR 內容，避免無謂佔空間
 - ✂️ **區域截圖**——凍結幀多顯示器覆蓋層，視窗偵測 + 放大鏡精確選點
 - 📋 **剪貼板支援**——截圖可自動寫入剪貼簿，獨立頁面瀏覽剪貼簿歷史圖片，預覽 / 重新複製 / 刪除
-- 🗂️ **多格式支援**——AVIF / JPEG XL / PNGv3 / UHDR JPEG / PNG，含批次轉換工具
+- 🗂️ **多格式支援**——AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG，含批次轉換工具
 - 🖥️ **多顯示器**——區域截圖可跨螢幕框選，直接組合截取橫跨多屏的影像
 - 🔄 **自動檢查更新**——內建更新檢查，發現新版串流下載解壓替換
 
@@ -106,7 +106,7 @@ HDR 顯示器上，桌面和 SDR 應用也以 HDR 格式（R16G16B16A16Float）�
 - **預設**：仍以 HDR 格式儲存（16bit），**不做 8bit 色調映射**，避免降級偏色
 - **SDR 內容刪 HDR 開關**（可選）：啟用後檢測 maxCLL 閾值，內容不達標則自動轉 SDR（遵循使用者設定的 SDR 儲存格式）並刪除 HDR 檔案，節省空間
 
-#### UHDR JPEG 回退
+#### Ultra HDR JPEG 回退
 
 HDR 截圖可同時儲存一份 Ultra HDR JPEG（SDR 基圖 + HDR gain map），在不支援 HDR 的軟體中也能正常顯示。透過 `Starward.Codec` 的 `UhdrEncoder` 編碼。
 
@@ -159,7 +159,7 @@ HDR 截圖可同時儲存一份 Ultra HDR JPEG（SDR 基圖 + HDR gain map），
 | AVIF      | 8bit / 10bit / 12bit | 完整 HDR                                      | HDR 預設，高壓縮比 |
 | JPEG XL   | 8bit / 16bit         | 完整 HDR                                      | HDR 備選，可逆壓縮 |
 | PNGv3     | 16bit                | cICP 標註，瀏覽器支援（圖片檢視器普遍不支援） | HDR 備選           |
-| UHDR JPEG | 8bit + gain map      | SDR 相容 HDR 回退                             | HDR 額外產出       |
+| Ultra HDR JPEG | 8bit + gain map      | SDR 相容 HDR 回退                             | HDR 額外產出       |
 
 ### 檔案名稱範本
 
@@ -211,16 +211,19 @@ HDR 截圖可同時儲存一份 Ultra HDR JPEG（SDR 基圖 + HDR gain map），
 - 拖入檔案直接開啟
 - 右鍵選單：複製 檔案 / 路徑 / 圖像、刪除、在資源管理器中開啟、開啟方式
 - **編輯面板**：HDR / SDR / Auto 顯示模式切換、SDR 亮度滑桿（100–500 nit）、圖像與顯示器資訊
-- **格式互轉**：匯出為 PNG / AVIF / JPEG XL（SDR 顯示器）或 UHDR JPEG / AVIF / JPEG XL（HDR 顯示器）
+- **格式互轉**：匯出為 PNG / AVIF / JPEG XL（SDR 顯示器）或 Ultra HDR JPEG / AVIF / JPEG XL（HDR 顯示器）
 - **色彩管理**：讀取顯示器 ICC profile 與 AdvancedColorInfo
 
 ### 批次格式轉換
 
+輸出格式：SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG，品質預設 100（無損檔）。
+
 | 轉換方向                          | 引擎                                 |
 | --------------------------------- | ------------------------------------ |
 | JPG / PNG → AVIF / JXL            | avifenc.exe / cjxl.exe（CLI）        |
-| AVIF / JXL → JPG / PNG            | avifdec.exe / djxl.exe（CLI）        |
+| AVIF / JXL → JPG / PNG            | 處理序內解碼 + HDR 過截圖同款色調映射（與截圖直出 SDR 同一條線） |
 | JXR / WEBP / HEIC 等 → AVIF / JXL | 處理序內 ImageSaver（avifEncoderLite） |
+| 任意 → Ultra HDR JPG              | 處理序內 ImageSaver（UhdrEncoder）   |
 
 ### 個性化外觀
 
@@ -307,7 +310,7 @@ C++ 原生程式（~400KB）。讀 `version.ini` 決定啟動 `app-{version}/Sta
 | UI 框架        | WinUI 3（Windows App SDK 1.8）                                    |
 | 執行階段       | .NET 10                                                           |
 | 圖形           | Win2D 1.3（D3D11 互操作、HDR 色調映射、直方圖效果）              |
-| 編解碼         | Starward.Codec NuGet（libavif / libjxl / UltraHDR P/Invoke 封裝） |
+| 編解碼         | Starward.Codec NuGet（libavif / libjxl / Ultra HDR P/Invoke 封裝） |
 | 資料儲存       | SQLite + Dapper                                                   |
 | 日誌           | Serilog                                                           |
 | 工作列         | H.NotifyIcon.WinUI                                                |
@@ -405,7 +408,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 <details>
 <summary><b>HDR PNG（PNGv3）在圖片檢視器裡顯示偏灰/偏暗？</b></summary>
 
-PNGv3（W3C PNG 第三版，2025 年定稿）的 HDR 依靠 cICP 中繼資料標註 BT.2020 + PQ，是剛落地的標準。目前 Chrome / Edge / Firefox 等瀏覽器可以正確渲染其 HDR 效果，但大多數圖片檢視器（如 Windows 相片）仍把它當普通 PNG 解碼，顯示會偏灰/偏暗——這是生態現狀，不是檔案損壞。需要廣泛相容請選 AVIF（HDR 分發主流），或開啟 UHDR JPEG 回退。
+PNGv3（W3C PNG 第三版，2025 年定稿）的 HDR 依靠 cICP 中繼資料標註 BT.2020 + PQ，是剛落地的標準。目前 Chrome / Edge / Firefox 等瀏覽器可以正確渲染其 HDR 效果，但大多數圖片檢視器（如 Windows 相片）仍把它當普通 PNG 解碼，顯示會偏灰/偏暗——這是生態現狀，不是檔案損壞。需要廣泛相容請選 AVIF（HDR 分發主流），或開啟 Ultra HDR JPEG 回退。
 
 </details>
 

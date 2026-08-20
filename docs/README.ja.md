@@ -34,7 +34,7 @@ Starshot は DXGI レイヤーからディスプレイ出力の生の `R16G16B16
 - 🧠 **スマート HDR/SDR 判定** — 真の HDR コンテンツと HDR フォーマットに包まれた SDR コンテンツを自動で区別し、無駄な容量を省く
 - ✂️ **領域スクリーンショット** — フリーズフレーム・マルチディスプレイオーバーレイ、ウィンドウ検出 + 拡大鏡による精密なポイント選択
 - 📋 **クリップボードサポート** — スクリーンショットを自動でクリップボードに書き込み、クリップボード履歴の画像を独立ページで閲覧、プレビュー / 再コピー / 削除
-- 🗂️ **マルチフォーマット対応** — AVIF / JPEG XL / PNGv3 / UHDR JPEG / PNG、バッチ変換ツール付き
+- 🗂️ **マルチフォーマット対応** — AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG、バッチ変換ツール付き
 - 🖥️ **マルチディスプレイ** — 領域スクリーンショットは画面をまたいで選択でき、複数画面にまたがる画像をそのまま合成キャプチャ
 - 🔄 **自動更新チェック** — 内蔵の更新チェック、新バージョン発見時にストリーミングでダウンロード・解凍・置換
 
@@ -106,7 +106,7 @@ HDR ディスプレイでは、デスクトップと SDR アプリケーショ�
 - **デフォルト**：引き続き HDR フォーマットで保存（16bit）、**8bit トーンマッピングは行わず**、劣化や色ずれを防止します
 - **SDR コンテンツの HDR 削除スイッチ**（オプション）：有効にすると maxCLL 閾値で検出し、基準に満たないコンテンツは自動的に SDR に変換（ユーザー設定の SDR 保存形式に従う）し、HDR ファイルを削除して容量を節約します
 
-#### UHDR JPEG フォールバック
+#### Ultra HDR JPEG フォールバック
 
 HDR スクリーンショットは Ultra HDR JPEG（SDR ベース画像 + HDR ゲインマップ）を同時に保存でき、HDR 非対応のソフトウェアでも正常に表示されます。`Starward.Codec` の `UhdrEncoder` でエンコードされます。
 
@@ -159,7 +159,7 @@ HDR スクリーンショットは Ultra HDR JPEG（SDR ベース画像 + HDR �
 | AVIF         | 8bit / 10bit / 12bit    | 完全 HDR                                        | HDR デフォルト、高圧縮率 |
 | JPEG XL      | 8bit / 16bit            | 完全 HDR                                        | HDR 代替、可逆圧縮       |
 | PNGv3        | 16bit                   | cICP による HDR（ブラウザ対応、ビューアは未対応が多い） | HDR 代替            |
-| UHDR JPEG    | 8bit + ゲインマップ     | SDR 互換 HDR フォールバック                     | HDR 追加出力             |
+| Ultra HDR JPEG    | 8bit + ゲインマップ     | SDR 互換 HDR フォールバック                     | HDR 追加出力             |
 
 ### ファイル名テンプレート
 
@@ -211,16 +211,19 @@ HDR スクリーンショットは Ultra HDR JPEG（SDR ベース画像 + HDR �
 - ファイルをドラッグ＆ドロップして直接開く
 - 右クリックメニュー：ファイル / パス / 画像をコピー、削除、エクスプローラーで開く、プログラムを開く
 - **編集パネル**：HDR / SDR / Auto 表示モード切り替え、SDR 輝度スライダー（100–500 nit）、画像とディスプレイ情報
-- **フォーマット変換**：PNG / AVIF / JPEG XL（SDR ディスプレイ）または UHDR JPEG / AVIF / JPEG XL（HDR ディスプレイ）としてエクスポート
+- **フォーマット変換**：PNG / AVIF / JPEG XL（SDR ディスプレイ）または Ultra HDR JPEG / AVIF / JPEG XL（HDR ディスプレイ）としてエクスポート
 - **カラーマネジメント**：ディスプレイ ICC プロファイルと AdvancedColorInfo を読み取り
 
 ### バッチフォーマット変換
 
+出力フォーマット：SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG、品質デフォルト 100（ロスレス档）。
+
 | 変換方向                             | エンジン                             |
 | ------------------------------------ | ------------------------------------ |
 | JPG / PNG → AVIF / JXL               | avifenc.exe / cjxl.exe（CLI）        |
-| AVIF / JXL → JPG / PNG               | avifdec.exe / djxl.exe（CLI）        |
+| AVIF / JXL → JPG / PNG               | プロセス内デコード + HDR をスクリーンショット直出し SDR と同じトーンマップ処理 |
 | JXR / WEBP / HEIC 等 → AVIF / JXL    | プロセス内 ImageSaver（avifEncoderLite） |
+| 任意 → Ultra HDR JPG                 | プロセス内 ImageSaver（UhdrEncoder） |
 
 ### パーソナライゼーション
 
@@ -307,7 +310,7 @@ C++ ネイティブプログラム（~400KB）。`version.ini` を読み取り�
 | UI フレームワーク    | WinUI 3（Windows App SDK 1.8）                                      |
 | ランタイム           | .NET 10                                                             |
 | グラフィックス       | Win2D 1.3（D3D11 相互運用、HDR トーンマッピング、ヒストグラム効果） |
-| コーデック           | Starward.Codec NuGet（libavif / libjxl / UltraHDR P/Invoke ラッパー） |
+| コーデック           | Starward.Codec NuGet（libavif / libjxl / Ultra HDR P/Invoke ラッパー） |
 | データストレージ     | SQLite + Dapper                                                     |
 | ログ                 | Serilog                                                             |
 | システムトレイ       | H.NotifyIcon.WinUI                                                  |
@@ -405,7 +408,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 <details>
 <summary><b>HDR PNG（PNGv3）が画像ビューアで灰色っぽく/暗く表示される？</b></summary>
 
-PNGv3（W3C PNG 第 3 版、2025 年策定）の HDR は cICP メタデータによる BT.2020 + PQ の標註に依存しており、まだ新しい規格です。現在は Chrome / Edge / Firefox などのブラウザが HDR 効果を正しくレンダリングできますが、大半の画像ビューア（Windows フォトなど）は通常の PNG としてデコードするため、灰色っぽく/暗く表示されます——ファイルの破損ではなく、現状のエコシステムによるものです。幅広い互換性が必要な場合は AVIF（HDR 配布の主流）を選ぶか、UHDR JPEG フォールバックを有効にしてください。
+PNGv3（W3C PNG 第 3 版、2025 年策定）の HDR は cICP メタデータによる BT.2020 + PQ の標註に依存しており、まだ新しい規格です。現在は Chrome / Edge / Firefox などのブラウザが HDR 効果を正しくレンダリングできますが、大半の画像ビューア（Windows フォトなど）は通常の PNG としてデコードするため、灰色っぽく/暗く表示されます——ファイルの破損ではなく、現状のエコシステムによるものです。幅広い互換性が必要な場合は AVIF（HDR 配布の主流）を選ぶか、Ultra HDR JPEG フォールバックを有効にしてください。
 
 </details>
 

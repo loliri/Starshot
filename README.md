@@ -32,7 +32,7 @@ Starshot directly captures the raw `R16G16B16A16Float` scRGB framebuffer from th
 - 🧠 **Smart HDR/SDR Detection** — Automatically distinguishes genuine HDR content from SDR content wrapped in an HDR format, avoiding wasted space.
 - ✂️ **Region Screenshot** — Frozen-frame multi-monitor overlay with window detection and magnifier for pixel-precise selection.
 - 📋 **Clipboard Support** — Screenshots auto-copy to clipboard; browse clipboard history images in a dedicated page, preview / recopy / delete
-- 🗂️ **Multi-format Support** — AVIF / JPEG XL / PNGv3 / UHDR JPEG / PNG, including a batch conversion tool.
+- 🗂️ **Multi-format Support** — AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG, including a batch conversion tool.
 - 🖥️ **Multi-Monitor** — Region screenshots can span across monitors, composing captures that cross screen boundaries.
 - 🔄 **Auto Update Check** — Built-in update check; on a new release it streams the download, extracts, and replaces in place.
 
@@ -104,7 +104,7 @@ On an HDR display, the desktop and SDR applications are also captured in the HDR
 - **Default**: Still saved in HDR format (16bit), **no 8bit tone mapping**, avoiding degradation and color shifts.
 - **Delete HDR for SDR Content** (optional): When enabled, content below the maxCLL threshold is automatically converted to SDR (using the user's configured SDR storage format) and the HDR file is deleted to save space.
 
-#### UHDR JPEG Fallback
+#### Ultra HDR JPEG Fallback
 
 HDR screenshots can simultaneously produce an Ultra HDR JPEG (SDR base image + HDR gain map), which displays correctly even in software that doesn't support HDR. Encoded via `Starward.Codec`'s `UhdrEncoder`.
 
@@ -151,13 +151,13 @@ The WinRT `Clipboard.SetContent` from unpackaged WinUI apps is unreliable (defer
 
 #### Supported Formats
 
-| Format    | Bit Depth            | HDR Support                                      | Use Case                      |
-| --------- | -------------------- | ------------------------------------------------ | ----------------------------- |
-| PNG       | 8bit / 16bit         | —                                                | SDR default, lossless         |
-| AVIF      | 8bit / 10bit / 12bit | Full HDR                                         | HDR default, high compression |
-| JPEG XL   | 8bit / 16bit         | Full HDR                                         | HDR alternative, reversible   |
-| PNGv3     | 16bit                | cICP-tagged HDR; browsers yes, viewers mostly no | HDR alternative               |
-| UHDR JPEG | 8bit + gain map      | SDR-compatible HDR fallback                      | HDR bonus output              |
+| Format         | Bit Depth            | HDR Support                                      | Use Case                      |
+| -------------- | -------------------- | ------------------------------------------------ | ----------------------------- |
+| PNG            | 8bit / 16bit         | —                                                | SDR default, lossless         |
+| AVIF           | 8bit / 10bit / 12bit | Full HDR                                         | HDR default, high compression |
+| JPEG XL        | 8bit / 16bit         | Full HDR                                         | HDR alternative, reversible   |
+| PNGv3          | 16bit                | cICP-tagged HDR; browsers yes, viewers mostly no | HDR alternative               |
+| Ultra HDR JPEG | 8bit + gain map      | SDR-compatible HDR fallback                      | HDR bonus output              |
 
 ### Filename Templates
 
@@ -209,16 +209,19 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - Drag-and-drop files to open directly.
 - Context menu: Copy File / Path / Image, Delete, Open in Explorer, Open With.
 - **Edit Panel**: HDR / SDR / Auto display mode toggle, SDR brightness slider (100–500 nits), image and display info.
-- **Format Conversion**: Export as PNG / AVIF / JPEG XL (SDR display) or UHDR JPEG / AVIF / JPEG XL (HDR display).
+- **Format Conversion**: Export as PNG / AVIF / JPEG XL (SDR display) or Ultra HDR JPEG / AVIF / JPEG XL (HDR display).
 - **Color Management**: Reads display ICC profile and AdvancedColorInfo.
 
 ### Batch Format Conversion
 
-| Conversion Direction                | Engine                                  |
-| ----------------------------------- | --------------------------------------- |
-| JPG / PNG → AVIF / JXL              | avifenc.exe / cjxl.exe (CLI)            |
-| AVIF / JXL → JPG / PNG              | avifdec.exe / djxl.exe (CLI)            |
-| JXR / WEBP / HEIC etc. → AVIF / JXL | In-process ImageSaver (avifEncoderLite) |
+Output formats: SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG, quality defaults to 100 (lossless tier).
+
+| Conversion Direction                | Engine                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------ |
+| JPG / PNG → AVIF / JXL              | avifenc.exe / cjxl.exe (CLI)                                                         |
+| AVIF / JXL → JPG / PNG              | In-process decode + HDR through the same tone-mapping line as direct SDR screenshots |
+| JXR / WEBP / HEIC etc. → AVIF / JXL | In-process ImageSaver (avifEncoderLite)                                              |
+| Any → Ultra HDR JPG                 | In-process ImageSaver (UhdrEncoder)                                                  |
 
 ### Personalization
 
@@ -299,19 +302,19 @@ Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `ap
 
 ### Tech Stack
 
-| Layer          | Technology                                                          |
-| -------------- | ------------------------------------------------------------------- |
-| UI Framework   | WinUI 3 (Windows App SDK 1.8)                                       |
-| Runtime        | .NET 10                                                             |
-| Graphics       | Win2D 1.3 (D3D11 interop, HDR tone mapping, histogram effects)      |
-| Codecs         | Starward.Codec NuGet (libavif / libjxl / UltraHDR P/Invoke wrapper) |
-| Data Storage   | SQLite + Dapper                                                     |
-| Logging        | Serilog                                                             |
-| System Tray    | H.NotifyIcon.WinUI                                                  |
-| Thumbnails     | Scighost.WinUI ImageEx + custom CachedImage                         |
-| Region Overlay | Win2D CanvasControl (frozen-frame rendering + selection drawing)    |
-| Clipboard      | Win32 native API (OpenClipboard / SetClipboardData)                 |
-| Launcher       | Native C++ (v145 toolset, static CRT)                               |
+| Layer          | Technology                                                           |
+| -------------- | -------------------------------------------------------------------- |
+| UI Framework   | WinUI 3 (Windows App SDK 1.8)                                        |
+| Runtime        | .NET 10                                                              |
+| Graphics       | Win2D 1.3 (D3D11 interop, HDR tone mapping, histogram effects)       |
+| Codecs         | Starward.Codec NuGet (libavif / libjxl / Ultra HDR P/Invoke wrapper) |
+| Data Storage   | SQLite + Dapper                                                      |
+| Logging        | Serilog                                                              |
+| System Tray    | H.NotifyIcon.WinUI                                                   |
+| Thumbnails     | Scighost.WinUI ImageEx + custom CachedImage                          |
+| Region Overlay | Win2D CanvasControl (frozen-frame rendering + selection drawing)     |
+| Clipboard      | Win32 native API (OpenClipboard / SetClipboardData)                  |
+| Launcher       | Native C++ (v145 toolset, static CRT)                                |
 
 ### Re-entry Protection
 
@@ -402,7 +405,7 @@ Restart Starshot after updating. If the issue persists, please [submit an Issue]
 <details>
 <summary><b>HDR PNG (PNGv3) looks grayish/dim in image viewers?</b></summary>
 
-HDR in PNGv3 (W3C PNG Third Edition, finalized in 2025) relies on cICP metadata tagging BT.2020 + PQ — a brand-new standard. Chrome / Edge / Firefox render its HDR correctly, but most image viewers (e.g. Windows Photos) still decode it as a plain PNG, so it looks grayish/dim. This is the current ecosystem, not a broken file. For broad compatibility choose AVIF (the mainstream HDR format) or enable the UHDR JPEG fallback.
+HDR in PNGv3 (W3C PNG Third Edition, finalized in 2025) relies on cICP metadata tagging BT.2020 + PQ — a brand-new standard. Chrome / Edge / Firefox render its HDR correctly, but most image viewers (e.g. Windows Photos) still decode it as a plain PNG, so it looks grayish/dim. This is the current ecosystem, not a broken file. For broad compatibility choose AVIF (the mainstream HDR format) or enable the Ultra HDR JPEG fallback.
 
 </details>
 

@@ -34,7 +34,7 @@ Starshot 直接从 DXGI 层获取显示器输出的原始 `R16G16B16A16Float` sc
 - 🧠 **智能 HDR/SDR 判定**——自动区分真实 HDR 内容与 HDR 格式包裹的 SDR 内容，避免无谓占空间
 - ✂️ **区域截图**——冻结帧多显示器覆盖层，窗口检测 + 放大镜精确选点
 - 📋 **剪贴板支持**——截图可自动写入剪贴板，独立页面浏览剪贴板历史图片，预览 / 重新复制 / 删除
-- 🗂️ **多格式支持**——AVIF / JPEG XL / PNGv3 / UHDR JPEG / PNG，含批量转换工具
+- 🗂️ **多格式支持**——AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG，含批量转换工具
 - 🖥️ **多显示器**——区域截图可跨屏框选，直接组合截取横跨多屏的图像
 - 🔄 **自动检查更新**——内置更新检查，发现新版流式下载解压替换
 
@@ -106,7 +106,7 @@ HDR 显示器上，桌面和 SDR 应用也以 HDR 格式（R16G16B16A16Float）�
 - **默认**：仍以 HDR 格式保存（16bit），**不做 8bit 色调映射**，避免降级偏色
 - **SDR 内容删 HDR 开关**（可选）：启用后检测 maxCLL 阈值，内容不达标则自动转 SDR（遵循用户设置的 SDR 存储格式）并删除 HDR 文件，节省空间
 
-#### UHDR JPEG 回退
+#### Ultra HDR JPEG 回退
 
 HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），在不支持 HDR 的软件中也能正常显示。通过 `Starward.Codec` 的 `UhdrEncoder` 编码。
 
@@ -153,13 +153,13 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 #### 支持的格式
 
-| 格式      | 色深                 | HDR 支持                                      | 用途               |
-| --------- | -------------------- | --------------------------------------------- | ------------------ |
-| PNG       | 8bit / 16bit         | —                                             | SDR 默认，无损     |
-| AVIF      | 8bit / 10bit / 12bit | 完整 HDR                                      | HDR 默认，高压缩比 |
-| JPEG XL   | 8bit / 16bit         | 完整 HDR                                      | HDR 备选，可逆压缩 |
-| PNGv3     | 16bit                | cICP 标注，浏览器支持（图片查看器普遍不支持） | HDR 备选           |
-| UHDR JPEG | 8bit + gain map      | SDR 兼容 HDR 回退                             | HDR 额外产出       |
+| 格式           | 色深                 | HDR 支持                                      | 用途               |
+| -------------- | -------------------- | --------------------------------------------- | ------------------ |
+| PNG            | 8bit / 16bit         | —                                             | SDR 默认，无损     |
+| AVIF           | 8bit / 10bit / 12bit | 完整 HDR                                      | HDR 默认，高压缩比 |
+| JPEG XL        | 8bit / 16bit         | 完整 HDR                                      | HDR 备选，可逆压缩 |
+| PNGv3          | 16bit                | cICP 标注，浏览器支持（图片查看器普遍不支持） | HDR 备选           |
+| Ultra HDR JPEG | 8bit + gain map      | SDR 兼容 HDR 回退                             | HDR 额外产出       |
 
 ### 文件名模板
 
@@ -209,18 +209,21 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 缩放（滑块 / 按钮 / 鼠标滚轮平滑动画 / 双击适配）、全屏模式（F11）
 - 上一张 / 下一张（方向键、鼠标滚轮、底部缩略图条）
 - 拖入文件直接打开
-- 右键菜单：复制 文件 / 路径 / 图像、删除、在资源管理器中打开、打开方式
+- 右键菜单：复制 文件 / 路径 / 到剪贴板（HDR 源自动色调映射，全程内存零写盘）、删除、在资源管理器中打开、打开方式
 - **编辑面板**：HDR / SDR / Auto 显示模式切换、SDR 亮度滑块（100–500 nit）、图像与显示器信息
-- **格式互转**：导出为 PNG / AVIF / JPEG XL（SDR 显示器）或 UHDR JPEG / AVIF / JPEG XL（HDR 显示器）
+- **格式互转（导出）**：HDR 显示模式 → AVIF / JPEG XL；SDR 显示模式 + HDR 源 → SDR JPEG / Ultra HDR JPEG / SDR PNG（均为所见即所得的色调映射输出）；SDR 源 → PNG / AVIF / JPEG XL
 - **色彩管理**：读取显示器 ICC profile 与 AdvancedColorInfo
 
 ### 批量格式转换
 
-| 转换方向                          | 引擎                                 |
-| --------------------------------- | ------------------------------------ |
-| JPG / PNG → AVIF / JXL            | avifenc.exe / cjxl.exe（CLI）        |
-| AVIF / JXL → JPG / PNG            | avifdec.exe / djxl.exe（CLI）        |
-| JXR / WEBP / HEIC 等 → AVIF / JXL | 进程内 ImageSaver（avifEncoderLite） |
+输出格式：SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG，质量默认 100（无损档）。
+
+| 转换方向                          | 引擎                                                           |
+| --------------------------------- | -------------------------------------------------------------- |
+| JPG / PNG → AVIF / JXL            | avifenc.exe / cjxl.exe（CLI）                                  |
+| AVIF / JXL → JPG / PNG            | 进程内解码 + HDR 过截图同款色调映射（与截图直出 SDR 同一条线） |
+| JXR / WEBP / HEIC 等 → AVIF / JXL | 进程内 ImageSaver（avifEncoderLite）                           |
+| 任意 → Ultra HDR JPG              | 进程内 ImageSaver（UhdrEncoder）                               |
 
 ### 个性化外观
 
@@ -302,19 +305,19 @@ C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Sta
 
 ### 技术栈
 
-| 层             | 技术                                                              |
-| -------------- | ----------------------------------------------------------------- |
-| UI 框架        | WinUI 3（Windows App SDK 1.8）                                    |
-| 运行时         | .NET 10                                                           |
-| 图形           | Win2D 1.3（D3D11 互操作、HDR 色调映射、直方图效果）               |
-| 编解码         | Starward.Codec NuGet（libavif / libjxl / UltraHDR P/Invoke 封装） |
-| 数据存储       | SQLite + Dapper                                                   |
-| 日志           | Serilog                                                           |
-| 托盘           | H.NotifyIcon.WinUI                                                |
-| 缩略图         | Scighost.WinUI ImageEx + 自定义 CachedImage                       |
-| 区域截图覆盖层 | Win2D CanvasControl（冻结帧渲染 + 选区绘制）                      |
-| 剪贴板         | Win32 原生 API（OpenClipboard / SetClipboardData）                |
-| 启动器         | C++ 原生（v145 工具集，静态 CRT）                                 |
+| 层             | 技术                                                               |
+| -------------- | ------------------------------------------------------------------ |
+| UI 框架        | WinUI 3（Windows App SDK 1.8）                                     |
+| 运行时         | .NET 10                                                            |
+| 图形           | Win2D 1.3（D3D11 互操作、HDR 色调映射、直方图效果）                |
+| 编解码         | Starward.Codec NuGet（libavif / libjxl / Ultra HDR P/Invoke 封装） |
+| 数据存储       | SQLite + Dapper                                                    |
+| 日志           | Serilog                                                            |
+| 托盘           | H.NotifyIcon.WinUI                                                 |
+| 缩略图         | Scighost.WinUI ImageEx + 自定义 CachedImage                        |
+| 区域截图覆盖层 | Win2D CanvasControl（冻结帧渲染 + 选区绘制）                       |
+| 剪贴板         | Win32 原生 API（OpenClipboard / SetClipboardData）                 |
+| 启动器         | C++ 原生（v145 工具集，静态 CRT）                                  |
 
 ### 重入保护
 
@@ -405,7 +408,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 <details>
 <summary><b>HDR PNG（PNGv3）在图片查看器里显示偏灰/偏暗？</b></summary>
 
-PNGv3（W3C PNG 第三版，2025 年定稿）的 HDR 依靠 cICP 元数据标注 BT.2020 + PQ，是刚落地的标准。目前 Chrome / Edge / Firefox 等浏览器可以正确渲染其 HDR 效果，但绝大多数图片查看器（如 Windows 照片）仍把它当普通 PNG 解码，显示会偏灰/偏暗——这是生态现状，不是文件损坏。需要广泛兼容请选 AVIF（HDR 分发主流），或开启 UHDR JPEG 回退。
+PNGv3（W3C PNG 第三版，2025 年定稿）的 HDR 依靠 cICP 元数据标注 BT.2020 + PQ，是刚落地的标准。目前 Chrome / Edge / Firefox 等浏览器可以正确渲染其 HDR 效果，但绝大多数图片查看器（如 Windows 照片）仍把它当普通 PNG 解码，显示会偏灰/偏暗——这是生态现状，不是文件损坏。需要广泛兼容请选 AVIF（HDR 分发主流），或开启 Ultra HDR JPEG 回退。
 
 </details>
 

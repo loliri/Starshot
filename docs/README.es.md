@@ -34,7 +34,7 @@ Starshot captura directamente el framebuffer bruto `R16G16B16A16Float` scRGB des
 - 🧠 **Detección inteligente HDR/SDR**: distingue automáticamente el contenido HDR real del contenido SDR envuelto en un formato HDR, evitando ocupar espacio en vano.
 - ✂️ **Captura de región**: superposición multimonitor con fotograma congelado, detección de ventanas y lupa para selección precisa al píxel.
 - 📋 **Soporte de portapapeles** — Las capturas se copian automáticamente al portapapeles; explorar el historial de imágenes del portapapeles en una página dedicada, vista previa / recopiar / eliminar
-- 🗂️ **Soporte multiformato**: AVIF / JPEG XL / PNGv3 / UHDR JPEG / PNG, incluyendo herramienta de conversión por lotes.
+- 🗂️ **Soporte multiformato**: AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG, incluyendo herramienta de conversión por lotes.
 - 🖥️ **Multimonitor**: la captura de región puede seleccionar abarcando varios monitores, componiendo directamente imágenes que cruzan los límites de pantalla.
 - 🔄 **Comprobación automática de actualizaciones**: comprobación integrada; al detectar una nueva versión, descarga por streaming, extracción y reemplazo.
 
@@ -106,7 +106,7 @@ En una pantalla HDR, el escritorio y las aplicaciones SDR también se capturan e
 - **Por defecto**: se guarda igualmente en formato HDR (16 bits), **sin mapeo tonal de 8 bits**, evitando degradación y cambios de color
 - **Opción Eliminar HDR para contenido SDR** (opcional): al activarla, el contenido por debajo del umbral maxCLL se convierte automáticamente a SDR (según el formato de guardado SDR configurado) y se elimina el archivo HDR para ahorrar espacio
 
-#### Respaldo UHDR JPEG
+#### Respaldo Ultra HDR JPEG
 
 Las capturas HDR pueden producir simultáneamente un Ultra HDR JPEG (imagen base SDR + gain map HDR), que se muestra correctamente incluso en software sin soporte HDR. Codificado mediante `UhdrEncoder` de `Starward.Codec`.
 
@@ -159,7 +159,7 @@ El `Clipboard.SetContent` de WinRT en aplicaciones WinUI no empaquetadas no es f
 | AVIF       | 8 bits / 10 bits / 12 bits      | HDR completo                                      | HDR por defecto, alta compresión     |
 | JPEG XL    | 8 bits / 16 bits                | HDR completo                                      | Alternativa HDR, compresión reversible |
 | PNGv3      | 16 bits                         | HDR vía cICP (navegadores; visores casi no lo admiten) | Alternativa HDR                  |
-| UHDR JPEG  | 8 bits + gain map               | Respaldo HDR compatible con SDR                  | Salida HDR adicional                 |
+| Ultra HDR JPEG  | 8 bits + gain map               | Respaldo HDR compatible con SDR                  | Salida HDR adicional                 |
 
 ### Plantillas de nombre de archivo
 
@@ -211,16 +211,19 @@ Después de una captura, aparece una miniatura + notificación de estado (no int
 - Arrastrar y soltar archivos para abrirlos directamente
 - Menú contextual: Copiar archivo / ruta / imagen, Eliminar, Abrir en Explorador, Abrir con
 - **Panel de edición**: cambio de modo de visualización HDR / SDR / Auto, deslizador de brillo SDR (100–500 nits), información de imagen y pantalla
-- **Conversión de formato**: exportar como PNG / AVIF / JPEG XL (pantalla SDR) o UHDR JPEG / AVIF / JPEG XL (pantalla HDR)
+- **Conversión de formato**: exportar como PNG / AVIF / JPEG XL (pantalla SDR) o Ultra HDR JPEG / AVIF / JPEG XL (pantalla HDR)
 - **Gestión del color**: lee el perfil ICC de la pantalla y AdvancedColorInfo
 
 ### Conversión por lotes de formato
 
+Formatos de salida: SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG, calidad por defecto 100 (nivel sin pérdidas).
+
 | Dirección de conversión              | Motor                                 |
 | ------------------------------------ | ------------------------------------- |
 | JPG / PNG → AVIF / JXL               | avifenc.exe / cjxl.exe (CLI)          |
-| AVIF / JXL → JPG / PNG               | avifdec.exe / djxl.exe (CLI)          |
+| AVIF / JXL → JPG / PNG               | Decodificación en proceso + HDR por la misma línea de mapeo tonal que las capturas SDR directas |
 | JXR / WEBP / HEIC etc. → AVIF / JXL  | ImageSaver en proceso (avifEncoderLite) |
+| Cualquiera → Ultra HDR JPG           | ImageSaver en proceso (UhdrEncoder)   |
 
 ### Personalización
 
@@ -306,7 +309,7 @@ Programa nativo en C++ (~400 KB). Lee `version.ini` para decidir si lanzar `app-
 | Framework UI             | WinUI 3 (Windows App SDK 1.8)                                           |
 | Tiempo de ejecución      | .NET 10                                                                 |
 | Gráficos                 | Win2D 1.3 (interoperabilidad D3D11, mapeo tonal HDR, efectos de histograma) |
-| Códecs                   | Starward.Codec NuGet (wrapper P/Invoke de libavif / libjxl / UltraHDR)  |
+| Códecs                   | Starward.Codec NuGet (wrapper P/Invoke de libavif / libjxl / Ultra HDR)  |
 | Almacenamiento de datos  | SQLite + Dapper                                                         |
 | Registro (logs)          | Serilog                                                                 |
 | Bandeja del sistema      | H.NotifyIcon.WinUI                                                      |
@@ -404,7 +407,7 @@ Reinicia Starshot después de actualizar. Si el problema persiste, [abre un Issu
 <details>
 <summary><b>¿El PNG HDR (PNGv3) se ve grisáceo/oscuro en los visores de imágenes?</b></summary>
 
-El HDR de PNGv3 (tercera edición del PNG del W3C, finalizada en 2025) depende de metadatos cICP que marcan BT.2020 + PQ: una norma muy reciente. Chrome / Edge / Firefox lo renderizan correctamente en HDR, pero la mayoría de los visores (por ejemplo, Fotos de Windows) aún lo decodifican como un PNG normal, por lo que se ve grisáceo/oscuro. Es el estado actual del ecosistema, no un archivo dañado. Para máxima compatibilidad elige AVIF (el formato HDR dominante) o activa el respaldo UHDR JPEG.
+El HDR de PNGv3 (tercera edición del PNG del W3C, finalizada en 2025) depende de metadatos cICP que marcan BT.2020 + PQ: una norma muy reciente. Chrome / Edge / Firefox lo renderizan correctamente en HDR, pero la mayoría de los visores (por ejemplo, Fotos de Windows) aún lo decodifican como un PNG normal, por lo que se ve grisáceo/oscuro. Es el estado actual del ecosistema, no un archivo dañado. Para máxima compatibilidad elige AVIF (el formato HDR dominante) o activa el respaldo Ultra HDR JPEG.
 
 </details>
 
