@@ -485,19 +485,21 @@ public sealed partial class ScreenshotPage : PageBase
                     var bitmap = imageInfo.CanvasBitmap;
                     int width = (int)bitmap.SizeInPixels.Width;
                     int height = (int)bitmap.SizeInPixels.Height;
-                    byte[] bgra;
+                    // 统一画进 B8G8R8A8 再取字节：CF_DIB 要 BGRA。HDR 先过 tonemap——
+                    // TonemapToSdr 输出 R8G8B8A8（Rgba 字节序）直喂 SetBitmapDib 会红蓝互换
+                    CanvasRenderTarget? tonemapped = null;
+                    ICanvasImage source = bitmap;
                     if (imageInfo.HDR)
                     {
-                        using var sdr = ScreenCaptureService.TonemapToSdr(bitmap, ScreenCaptureService.GetSdrWhiteLevel());
-                        bgra = sdr.GetPixelBytes();
+                        tonemapped = ScreenCaptureService.TonemapToSdr(bitmap, ScreenCaptureService.GetSdrWhiteLevel());
+                        source = tonemapped;
                     }
-                    else
+                    byte[] bgra;
+                    using (tonemapped)
+                    using (var rt = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied))
                     {
-                        using var rt = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
-                        using (var ds = rt.CreateDrawingSession())
-                        {
-                            ds.DrawImage(bitmap);
-                        }
+                        using var ds = rt.CreateDrawingSession();
+                        ds.DrawImage(source);
                         bgra = rt.GetPixelBytes();
                     }
                     ClipboardHelper.SetBitmapDib(width, height, bgra);
