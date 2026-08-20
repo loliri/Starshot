@@ -1232,10 +1232,17 @@ public sealed partial class ImageViewWindow : Window
             }
             else if (_sourceBitmap is not null && _sourceBitmap.Format is DirectXPixelFormat.B8G8R8A8UIntNormalized)
             {
-                // 内存对象（无文件）：直接从 _sourceBitmap 拷 BGRA 到剪贴板
+                // 内存对象（无文件）：直接从 _sourceBitmap 拷 BGRA 到剪贴板。
+                // 回读与 CF_DIB 重试都是长阻塞，挪出 UI 线程（与图库复制同款做法）
                 int w = (int)_sourceBitmap.SizeInPixels.Width;
                 int h = (int)_sourceBitmap.SizeInPixels.Height;
-                ClipboardHelper.SetBitmapDib(w, h, _sourceBitmap.GetPixelBytes());
+                var bitmap = _sourceBitmap;
+                bool copied = await Task.Run(() => ClipboardHelper.SetBitmapDib(w, h, bitmap.GetPixelBytes()));
+                if (!copied)
+                {
+                    ShowInfo(InfoBarSeverity.Error, Lang.ImageViewWindow_CopyToClipboard, "", 5000);
+                    return;
+                }
                 ShowInfo(InfoBarSeverity.Success, Lang.ImageViewWindow_CopiedToClipboard, "", 2000);
             }
             else
