@@ -487,29 +487,20 @@ public sealed partial class ScreenshotPage : PageBase
                     var bitmap = imageInfo.CanvasBitmap;
                     int width = (int)bitmap.SizeInPixels.Width;
                     int height = (int)bitmap.SizeInPixels.Height;
-                    // 像素回读（GPU→CPU 数千万字节）与 CF_DIB 写入（被占用时最多 10×20ms 重试）都是长阻塞，
-                    // 挪出 UI 线程（区域截图 CopyCaptureToClipboardAsync 同款做法）
-                    bool copied = await Task.Run(() =>
+                    // 走区域「仅复制」同款管线（CopyCaptureToClipboardAsync）：后台线程转 BGRA + CF_DIB 写剪贴板。
+                    // TonemapToSdr 输出 R8G8B8A8，管线内 ConvertToBgra 换通道序（直取字节会红蓝互换）
+                    CanvasRenderTarget? tonemapped = null;
+                    CanvasBitmap source = bitmap;
+                    if (imageInfo.HDR)
                     {
-                        // 统一画进 B8G8R8A8 再取字节：CF_DIB 要 BGRA。HDR 先过 tonemap——
-                        // TonemapToSdr 输出 R8G8B8A8（Rgba 字节序）直喂 SetBitmapDib 会红蓝互换
-                        CanvasRenderTarget? tonemapped = null;
-                        ICanvasImage source = bitmap;
-                        if (imageInfo.HDR)
-                        {
-                            tonemapped = ScreenCaptureService.TonemapToSdr(bitmap, ScreenCaptureService.GetSdrWhiteLevel());
-                            source = tonemapped;
-                        }
-                        byte[] bgra;
-                        using (tonemapped)
-                        using (var rt = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied))
-                        {
-                            using var ds = rt.CreateDrawingSession();
-                            ds.DrawImage(source);
-                            bgra = rt.GetPixelBytes();
-                        }
-                        return ClipboardHelper.SetBitmapDib(width, height, bgra);
-                    });
+                        tonemapped = ScreenCaptureService.TonemapToSdr(bitmap, ScreenCaptureService.GetSdrWhiteLevel());
+                        source = tonemapped;
+                    }
+                    bool copied;
+                    using (tonemapped)
+                    {
+                        copied = await ScreenCaptureService.CopyCaptureToClipboardAsync(source, force: true);
+                    }
                     if (!copied)
                     {
                         InAppToast.MainWindow?.Error(Lang.ImageViewWindow_CopyToClipboard, null, 5000);

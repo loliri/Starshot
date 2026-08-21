@@ -534,16 +534,18 @@ internal class ScreenCaptureService
     /// <summary>
     /// 直接从内存 SDR 位图复制到剪贴板（Win32 CF_DIB，不读文件、不经 WinRT DataPackage）。
     /// 输入需已是 SDR（区域截图用覆盖层裁好的 SdrCrop）。与保存流程平级、独立，可复用。
+    /// 返回是否写入成功（跳过开关/位图为空/剪贴板占用均返回 false）。
     /// </summary>
-    public static async Task CopyCaptureToClipboardAsync(CanvasBitmap? sdrBitmap, bool force = false)
+    public static async Task<bool> CopyCaptureToClipboardAsync(CanvasBitmap? sdrBitmap, bool force = false)
     {
-        if (sdrBitmap is null) return;
+        if (sdrBitmap is null) return false;
         var log = AppConfig.GetLogger<ScreenCaptureService>();
         if (!force && !AppConfig.AutoCopyScreenshotToClipboard)
         {
             log.LogInformation("CopyCaptureToClipboardAsync: skipped (disabled)");
-            return;
+            return false;
         }
+        bool ok = false;
         await Task.Run(() =>
         {
             try
@@ -562,12 +564,15 @@ internal class ScreenCaptureService
                     int h = (int)src.SizeInPixels.Height;
                     byte[] pixels = src.GetPixelBytes(); // BGRA top-down
                     log.LogInformation("CopyCaptureToClipboardAsync: DIB {W}x{H}, {Len} bytes", w, h, pixels.Length);
-                    if (!ClipboardHelper.SetBitmapDib(w, h, pixels))
+                    ok = ClipboardHelper.SetBitmapDib(w, h, pixels);
+                    if (ok)
+                    {
+                        log.LogInformation("CopyCaptureToClipboardAsync: SetClipboardData done");
+                    }
+                    else
                     {
                         log.LogWarning("CopyCaptureToClipboardAsync: SetBitmapDib failed (clipboard busy)");
-                        return;
                     }
-                    log.LogInformation("CopyCaptureToClipboardAsync: SetClipboardData done");
                 }
                 finally
                 {
@@ -579,6 +584,7 @@ internal class ScreenCaptureService
                 log.LogError(ex, "Copy capture to clipboard failed");
             }
         });
+        return ok;
     }
 
 
