@@ -80,8 +80,8 @@ public partial class ScreenshotItem : ObservableObject
     }
 
     /// <summary>
-    /// 当前剪贴板内容项（非历史条目）：HistoryItem=null，右键只有「信息 / 打开」
-    /// （重新复制无意义、删除没有历史条目可删）。
+    /// 当前剪贴板内容项（非历史条目）：HistoryItem=null，信息（尺寸/大小）直接展示在卡上，
+    /// 不挂右键菜单（重新复制/删除对无历史条目的内容无意义）。
     /// </summary>
     public static ScreenshotItem FromCurrentClipboard(RandomAccessStreamReference stream)
     {

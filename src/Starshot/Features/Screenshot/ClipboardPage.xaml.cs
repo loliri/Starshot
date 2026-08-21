@@ -392,7 +392,9 @@ public sealed partial class ClipboardPage : PageBase
     }
 
 
-    /// <summary>当前剪贴板卡的承载项（点击打开查看器用）；无卡时为 null</summary>
+    /// <summary>
+    /// 当前剪贴板卡的承载项（点击打开查看器用）；无卡时为 null
+    /// </summary>
     private ScreenshotItem? _currentItem;
 
 
@@ -410,13 +412,15 @@ public sealed partial class ClipboardPage : PageBase
                 HideCurrentClipboardCard();
                 return;
             }
-            // 尺寸和缩略图各开一次流：decoder 与 SetSourceAsync 不能共用（流位置会被前者推进）
+            // 尺寸/大小与缩略图各开一次流：decoder 与 SetSourceAsync 不能共用（流位置会被前者推进）
             uint width, height;
+            long streamByteSize;
             using (var read = await streamRef.OpenReadAsync())
             {
                 var decoder = await BitmapDecoder.CreateAsync(read);
                 width = decoder.PixelWidth;
                 height = decoder.PixelHeight;
+                streamByteSize = (long)read.Size;
             }
             if (await IsSameAsFirstHistoryItem(streamRef))
             {
@@ -431,8 +435,9 @@ public sealed partial class ClipboardPage : PageBase
             _currentItem = ScreenshotItem.FromCurrentClipboard(streamRef);
             _currentItem.ThumbImage = bmp;
             CachedImage_Current.Source = bmp;
-            TextBlock_CurrentDims.Text = $"{width}×{height}";
-            Border_CurrentClipboard.ContextFlyout = BuildCurrentClipboardFlyout(_currentItem);
+            const double KB = 1 << 10, MB = 1 << 20;
+            string sizeStr = streamByteSize >= MB ? $"{streamByteSize / MB:F2} MB" : $"{streamByteSize / KB:F2} KB";
+            TextBlock_CurrentDims.Text = $"{width}×{height}  ·  {sizeStr}";
             Border_CurrentClipboard.Visibility = Visibility.Visible;
         }
         catch (Exception ex)
@@ -482,31 +487,6 @@ public sealed partial class ClipboardPage : PageBase
         {
             OpenClipboardItem(_currentItem);
         }
-    }
-
-
-    /// <summary>当前剪贴板卡的右键菜单：信息 / 打开（无历史条目，重新复制与删除不适用）</summary>
-    private MenuFlyout BuildCurrentClipboardFlyout(ScreenshotItem item)
-    {
-        var stream = item.ClipboardStream!;
-        var flyout = new MenuFlyout();
-        var info = new MenuFlyoutItem
-        {
-            MinWidth = 208,
-            FontSize = 12,
-            IsEnabled = false,
-            IsTextScaleFactorEnabled = false,
-            Text = "…"
-        };
-        info.Icon = new FontIcon { Glyph = "", IsTextScaleFactorEnabled = false };
-        _ = LoadClipboardInfoAsync(info, stream);
-        flyout.Items.Add(info);
-        flyout.Items.Add(new MenuFlyoutSeparator());
-        var open = new MenuFlyoutItem { Text = Lang.Common_Open, IsTextScaleFactorEnabled = false };
-        open.Icon = new FontIcon { Glyph = "", IsTextScaleFactorEnabled = false };
-        open.Click += (_, _) => OpenClipboardItem(item);
-        flyout.Items.Add(open);
-        return flyout;
     }
 
 
