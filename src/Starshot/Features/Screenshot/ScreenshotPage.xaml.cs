@@ -454,35 +454,14 @@ public sealed partial class ScreenshotPage : PageBase
 
     private async void MenuFlyoutItem_CopyImage_Click(object sender, RoutedEventArgs e)
     {
-        static string GetSizeString(long size)
-        {
-            const double KB = 1 << 10;
-            const double MB = 1 << 20;
-            if (size >= MB)
-            {
-                return $"{size / MB:F2} MB";
-            }
-            else
-            {
-                return $"{size / KB:F2} KB";
-            }
-        }
         try
         {
             if (sender is FrameworkElement fe && fe.DataContext is ScreenshotItem item)
             {
                 if (File.Exists(item.FilePath))
                 {
-                    // 全程内存、零写盘：.jpg 源直接复制原文件；其余解码到内存，
-                    // HDR 过截图同款 TonemapToSdr（此前 CLI avifdec/djxl 直转对 PQ 不做色调映射，画面发灰），
-                    // 以 CF_DIB 进剪贴板（区域截图同款可靠路径）
-                    if (Path.GetExtension(item.FilePath).Equals(".jpg", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var file = await StorageFile.GetFileFromPathAsync(item.FilePath);
-                        ClipboardHelper.SetStorageItems(DataPackageOperation.Copy, file);
-                        InAppToast.MainWindow?.Success($"{Lang.ImageViewWindow_CopiedToClipboard} ({GetSizeString(new FileInfo(item.FilePath).Length)})", null, 1500);
-                        return;
-                    }
+                    // 复制图像：所有格式统一解码到内存（HDR 过 TonemapToSdr）走 CF_DIB 位图，全程零写盘。
+                    // 复制文件另有独立菜单项；此前 .jpg 特殊走 SetStorageItems 复制原文件，与「复制图像」语义不符已删
                     using var imageInfo = await ImageLoader.LoadImageAsync(item.FilePath);
                     var bitmap = imageInfo.CanvasBitmap;
                     int width = (int)bitmap.SizeInPixels.Width;
