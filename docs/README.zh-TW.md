@@ -211,7 +211,7 @@ HDR 截圖可同時儲存一份 Ultra HDR JPEG（SDR 基圖 + HDR gain map），
 - 拖入檔案直接開啟
 - 右鍵選單：複製 檔案 / 路徑 / 圖像、刪除、在資源管理器中開啟、開啟方式
 - **編輯面板**：HDR / SDR / Auto 顯示模式切換、SDR 亮度滑桿（100–500 nit）、圖像與顯示器資訊
-- **格式互轉**：匯出為 PNG / AVIF / JPEG XL（SDR 顯示器）或 Ultra HDR JPEG / AVIF / JPEG XL（HDR 顯示器）
+- **格式互轉**：HDR 顯示模式 → AVIF / JPEG XL；SDR 顯示模式 + HDR 來源 → SDR JPEG / Ultra HDR JPEG / SDR PNG（均為所見即所得的色調映射輸出）；SDR 來源 → PNG / AVIF / JPEG XL
 - **色彩管理**：讀取顯示器 ICC profile 與 AdvancedColorInfo
 
 ### 批次格式轉換
@@ -327,13 +327,13 @@ C++ 原生程式（~400KB）。讀 `version.ini` 決定啟動 `app-{version}/Sta
 
 |                    | Debug                                | Release                                                           |
 | ------------------ | ------------------------------------ | ----------------------------------------------------------------- |
-| .NET Runtime       | 自包含                               | 自包含                                                            |
-| 原生庫             | 僅 win-x64（預設 RuntimeIdentifier） | 同 Debug；arm64 需明確 `-r win-arm64`                             |
+| .NET Runtime       | 框架相依                             | 自包含                                                            |
+| 原生庫             | 僅 win-x64                           | 同 Debug；arm64 需明確 `-r win-arm64`                             |
 | Trim               | 不生效（不裁剪）                     | 部分（partial）                                                   |
 | CsWinRT AOT 最佳化器 | 關（建置快）                       | 開，Trim 下保證 WinRT interop 不被裁壞                            |
 | ReadyToRun         | 不生效（標準 JIT）                   | AOT 預編譯                                                        |
 | 輸出路徑           | `build/app/`                         | `build/release/app/`；若先編譯了啟動器會自動拷到 `build/release/` |
-| 大小               | ~260MB（自包含 runtime 佔大頭）      | 更小（Trim）                                                      |
+| 大小               | ~80MB                                | ~160MB（Trim）                                                    |
 
 ## 從原始碼建構
 

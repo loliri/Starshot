@@ -325,15 +325,15 @@ C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Sta
 
 ### 构建配置
 
-|                    | Debug                                | Release                                                           |
-| ------------------ | ------------------------------------ | ----------------------------------------------------------------- |
-| .NET Runtime       | 自包含                               | 自包含                                                            |
-| 原生库             | 仅 win-x64（默认 RuntimeIdentifier） | 同 Debug；arm64 需显式 `-r win-arm64`                             |
-| Trim               | 不生效（不裁剪）                     | 部分（partial）                                                   |
-| CsWinRT AOT 优化器 | 关（构建快）                         | 开，Trim 下保证 WinRT interop 不被裁坏                            |
-| ReadyToRun         | 不生效（标准 JIT）                   | AOT 预编译                                                        |
-| 输出路径           | `build/app/`                         | `build/release/app/`；若先编译了启动器会自动拷到 `build/release/` |
-| 大小               | ~260MB（自包含 runtime 占大头）      | 更小（Trim）                                                      |
+|                    | Debug              | Release                                                           |
+| ------------------ | ------------------ | ----------------------------------------------------------------- |
+| .NET Runtime       | 框架依赖           | 自包含                                                            |
+| 原生库             | 仅 win-x64         | 同 Debug；arm64 需显式 `-r win-arm64`                             |
+| Trim               | 不生效（不裁剪）   | 部分（partial）                                                   |
+| CsWinRT AOT 优化器 | 关（构建快）       | 开，Trim 下保证 WinRT interop 不被裁坏                            |
+| ReadyToRun         | 不生效（标准 JIT） | AOT 预编译                                                        |
+| 输出路径           | `build/app/`       | `build/release/app/`；若先编译了启动器会自动拷到 `build/release/` |
+| 大小               | ~80MB              | ~160MB（Trim）                                                    |
 
 ## 从源码构建
 

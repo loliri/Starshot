@@ -211,12 +211,12 @@ HDR スクリーンショットは Ultra HDR JPEG（SDR ベース画像 + HDR �
 - ファイルをドラッグ＆ドロップして直接開く
 - 右クリックメニュー：ファイル / パス / 画像をコピー、削除、エクスプローラーで開く、プログラムを開く
 - **編集パネル**：HDR / SDR / Auto 表示モード切り替え、SDR 輝度スライダー（100–500 nit）、画像とディスプレイ情報
-- **フォーマット変換**：PNG / AVIF / JPEG XL（SDR ディスプレイ）または Ultra HDR JPEG / AVIF / JPEG XL（HDR ディスプレイ）としてエクスポート
+- **フォーマット変換**：HDR 表示モード → AVIF / JPEG XL；SDR 表示モード + HDR ソース → SDR JPEG / Ultra HDR JPEG / SDR PNG（いずれも WYSIWYG のトーンマッピング出力）；SDR ソース → PNG / AVIF / JPEG XL
 - **カラーマネジメント**：ディスプレイ ICC プロファイルと AdvancedColorInfo を読み取り
 
 ### バッチフォーマット変換
 
-出力フォーマット：SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG、品質デフォルト 100（ロスレス档）。
+出力フォーマット：SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG、品質デフォルト 100（ロスレス相当）。
 
 | 変換方向                             | エンジン                             |
 | ------------------------------------ | ------------------------------------ |
@@ -327,13 +327,13 @@ C++ ネイティブプログラム（~400KB）。`version.ini` を読み取り�
 
 |                  | Debug                                        | Release                                                  |
 | ---------------- | -------------------------------------------- | -------------------------------------------------------- |
-| .NET Runtime     | 自己完結型                                   | 自己完結型                                               |
-| ネイティブライブラリ | win-x64 のみ（デフォルト RuntimeIdentifier） | Debug と同じ；arm64 は明示的な `-r win-arm64` が必要     |
+| .NET Runtime     | フレームワーク依存                   | 自己完結型                                               |
+| ネイティブライブラリ | win-x64 のみ                      | Debug と同じ；arm64 は明示的な `-r win-arm64` が必要     |
 | Trim             | 無効（トリムなし）                           | 部分的（partial）                                        |
 | CsWinRT AOT オプティマイザー | オフ（ビルド高速）                | オン，Trim 下で WinRT interop が削られないことを保証     |
 | ReadyToRun       | 無効（通常の JIT）                           | AOT 事前コンパイル                                       |
 | 出力パス         | `build/app/`                                 | `build/release/app/`；ランチャーを先にビルドしていれば `build/release/` に自動コピー |
-| サイズ           | ~260MB（自己完結ランタイムが大半）           | より小さい（Trim）                                       |
+| サイズ           | ~80MB                                | ~160MB（Trim）                                           |
 
 ## ソースからビルド
 

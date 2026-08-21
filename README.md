@@ -209,7 +209,7 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - Drag-and-drop files to open directly.
 - Context menu: Copy File / Path / Image, Delete, Open in Explorer, Open With.
 - **Edit Panel**: HDR / SDR / Auto display mode toggle, SDR brightness slider (100–500 nits), image and display info.
-- **Format Conversion**: Export as PNG / AVIF / JPEG XL (SDR display) or Ultra HDR JPEG / AVIF / JPEG XL (HDR display).
+- **Format Conversion**: HDR display mode → AVIF / JPEG XL; SDR display mode + HDR source → SDR JPEG / Ultra HDR JPEG / SDR PNG (all WYSIWYG tone-mapped output); SDR source → PNG / AVIF / JPEG XL.
 - **Color Management**: Reads display ICC profile and AdvancedColorInfo.
 
 ### Batch Format Conversion
@@ -322,15 +322,15 @@ Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `ap
 
 ### Build Configuration
 
-|                       | Debug                                     | Release                                                                                |
-| --------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------- |
-| .NET Runtime          | Self-contained                            | Self-contained                                                                         |
-| Native Libs           | win-x64 only (default RuntimeIdentifier)  | Same as Debug; arm64 requires an explicit `-r win-arm64`                               |
-| Trim                  | Not applied (no trimming)                 | Partial                                                                                |
-| CsWinRT AOT Optimizer | Off (faster builds)                       | On — keeps WinRT interop trim-safe                                                     |
-| ReadyToRun            | Not applied (standard JIT)                | AOT precompiled                                                                        |
-| Output Path           | `build/app/`                              | `build/release/app/`; the launcher is copied to `build/release/` if it was built first |
-| Size                  | ~260MB (self-contained runtime dominates) | Smaller (Trim)                                                                         |
+|                       | Debug                      | Release                                                                                |
+| --------------------- | -------------------------- | -------------------------------------------------------------------------------------- |
+| .NET Runtime          | Framework-dependent        | Self-contained                                                                         |
+| Native Libs           | win-x64 only               | Same as Debug; arm64 requires an explicit `-r win-arm64`                               |
+| Trim                  | Not applied (no trimming)  | Partial                                                                                |
+| CsWinRT AOT Optimizer | Off (faster builds)        | On — keeps WinRT interop trim-safe                                                     |
+| ReadyToRun            | Not applied (standard JIT) | AOT precompiled                                                                        |
+| Output Path           | `build/app/`               | `build/release/app/`; the launcher is copied to `build/release/` if it was built first |
+| Size                  | ~80MB                      | ~160MB (Trim)                                                                          |
 
 ## Build from Source
 

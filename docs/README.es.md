@@ -211,7 +211,7 @@ Después de una captura, aparece una miniatura + notificación de estado (no int
 - Arrastrar y soltar archivos para abrirlos directamente
 - Menú contextual: Copiar archivo / ruta / imagen, Eliminar, Abrir en Explorador, Abrir con
 - **Panel de edición**: cambio de modo de visualización HDR / SDR / Auto, deslizador de brillo SDR (100–500 nits), información de imagen y pantalla
-- **Conversión de formato**: exportar como PNG / AVIF / JPEG XL (pantalla SDR) o Ultra HDR JPEG / AVIF / JPEG XL (pantalla HDR)
+- **Conversión de formato**: modo de pantalla HDR → AVIF / JPEG XL; modo de pantalla SDR + origen HDR → SDR JPEG / Ultra HDR JPEG / SDR PNG (salidas con mapeo tonal WYSIWYG); origen SDR → PNG / AVIF / JPEG XL
 - **Gestión del color**: lee el perfil ICC de la pantalla y AdvancedColorInfo
 
 ### Conversión por lotes de formato
@@ -326,13 +326,13 @@ Guarda global `Interlocked.CompareExchange`. Los modos de pantalla completa, reg
 
 |                       | Debug                              | Release                                            |
 | --------------------- | ---------------------------------- | -------------------------------------------------- |
-| .NET Runtime          | Autocontenido                      | Autocontenido                                      |
-| Librerías nativas     | Solo win-x64 (RuntimeIdentifier por defecto) | Igual que Debug; arm64 requiere `-r win-arm64` explícito |
+| .NET Runtime          | Dependiente del framework       | Autocontenido                                      |
+| Librerías nativas     | Solo win-x64                    | Igual que Debug; arm64 requiere `-r win-arm64` explícito |
 | Trim                  | No aplicado (sin recorte)          | Parcial                                            |
 | Optimizador AOT CsWinRT | Desactivado (compilación más rápida) | Activado — garantiza que la interoperabilidad WinRT sobreviva al trimming |
 | ReadyToRun            | No aplicado (JIT estándar)         | Precompilado AOT                                   |
 | Ruta de salida        | `build/app/`                       | `build/release/app/`; el lanzador se copia a `build/release/` si se compiló antes |
-| Tamaño                | ~260 MB (el runtime autocontenido domina) | Más pequeño (Trim)                          |
+| Tamaño                | ~80 MB                           | ~160 MB (Trim)                                     |
 
 ## Compilar desde el código fuente
 
