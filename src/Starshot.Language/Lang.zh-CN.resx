@@ -181,11 +181,17 @@
   <data name="ClipboardPage_NotEnabled" xml:space="preserve">
     <value>未开启剪贴板历史功能</value>
   </data>
+  <data name="ClipboardPage_CurrentClipboard" xml:space="preserve">
+    <value>当前剪贴板</value>
+  </data>
   <data name="ClipboardPage_GoToSettings" xml:space="preserve">
     <value>前往 Windows 剪贴板设置</value>
   </data>
   <data name="ClipboardPage_NoImages" xml:space="preserve">
     <value>剪贴板历史中暂无图片</value>
+  </data>
+  <data name="ClipboardPage_NotInHistory" xml:space="preserve">
+    <value>未进入历史记录（内容过大）</value>
   </data>
   <data name="GachaImportAndExportWindow_Import" xml:space="preserve">
     <value>导入</value>

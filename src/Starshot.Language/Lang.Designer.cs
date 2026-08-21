@@ -141,6 +141,15 @@
         }
 
         /// <summary>
+        ///   查找类似 Current Clipboard 的本地化字符串。
+        /// </summary>
+        public static string ClipboardPage_CurrentClipboard {
+            get {
+                return ResourceManager.GetString("ClipboardPage_CurrentClipboard", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Clipboard history is not enabled 的本地化字符串。
         /// </summary>
         public static string ClipboardPage_NotEnabled {
@@ -164,6 +173,15 @@
         public static string ClipboardPage_NoImages {
             get {
                 return ResourceManager.GetString("ClipboardPage_NoImages", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Not in clipboard history (content too large) 的本地化字符串。
+        /// </summary>
+        public static string ClipboardPage_NotInHistory {
+            get {
+                return ResourceManager.GetString("ClipboardPage_NotInHistory", resourceCulture);
             }
         }
         

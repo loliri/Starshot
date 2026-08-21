@@ -79,6 +79,26 @@ public partial class ScreenshotItem : ObservableObject
         };
     }
 
+    /// <summary>
+    /// 当前剪贴板内容项（非历史条目）：HistoryItem=null，右键只有「信息 / 打开」
+    /// （重新复制无意义、删除没有历史条目可删）。
+    /// </summary>
+    public static ScreenshotItem FromCurrentClipboard(RandomAccessStreamReference stream)
+    {
+        var now = DateTime.Now;
+        return new ScreenshotItem
+        {
+            Name = "Clipboard",
+            FilePath = "",
+            FileName = "Clipboard",
+            CreationTime = now,
+            CreationTimeText = now.ToString("yyyy-MM-dd HH:mm:ss"),
+            TimeMonthDay = Lang.ClipboardPage_CurrentClipboard,
+            HistoryItem = null,
+            ClipboardStream = stream,
+        };
+    }
+
     private ScreenshotItem() { }
 
 

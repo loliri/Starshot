@@ -48,12 +48,16 @@ public sealed partial class ClipboardPage : PageBase
     {
         await Task.Delay(16);
         await RefreshClipboard();
+        await UpdateCurrentClipboardCardAsync();
         _uiDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
         _clipboardTimer.Tick += ClipboardTimer_Tick;
         Clipboard.ContentChanged += Clipboard_ContentChanged;
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, (_, m) =>
         {
-            if (m.Activate && _clipboardDirty) AddNewClipboardItems();
+            if (m.Activate && _clipboardDirty)
+            {
+                _ = RefreshIncrementalAsync();
+            }
         });
     }
 
@@ -144,10 +148,21 @@ public sealed partial class ClipboardPage : PageBase
 
 
     /// <summary>
+    /// 增量刷新（节流 tick / 回前台）：先同步历史再更新当前卡——顺序不能反，
+    /// 否则卡片比对时新历史项还没插进列表，小图会被误判成「不在历史」而重复展示。
+    /// </summary>
+    private async Task RefreshIncrementalAsync()
+    {
+        await AddNewClipboardItems();
+        await UpdateCurrentClipboardCardAsync();
+    }
+
+
+    /// <summary>
     /// 增量同步：读历史 → 按 ClipboardHistoryItem.Id 比对 → 只把新项插到列表顶。
     /// 不动现有、不删（删除监听不到，由右键"删除"定向移除）。读失败（AccessDenied 没前台）则脏留着，回前台再试。
     /// </summary>
-    private async void AddNewClipboardItems()
+    private async Task AddNewClipboardItems()
     {
         try
         {
@@ -216,7 +231,7 @@ public sealed partial class ClipboardPage : PageBase
     private void ClipboardTimer_Tick(object? sender, object e)
     {
         _clipboardTimer.Stop();
-        AddNewClipboardItems();
+        _ = RefreshIncrementalAsync();
     }
 
 
@@ -365,7 +380,133 @@ public sealed partial class ClipboardPage : PageBase
 
     private void Button_Refresh_Click(object sender, RoutedEventArgs e)
     {
-        _ = RefreshClipboard();
+        _ = RefreshAllAsync();
+    }
+
+
+    /// <summary>全量刷新 + 当前卡更新，必须串行：并行会让卡片比对跑在历史重读前，小图被误判重复展示</summary>
+    private async Task RefreshAllAsync()
+    {
+        await RefreshClipboard();
+        await UpdateCurrentClipboardCardAsync();
+    }
+
+
+    /// <summary>当前剪贴板卡的承载项（点击打开查看器用）；无卡时为 null</summary>
+    private ScreenshotItem? _currentItem;
+
+
+    /// <summary>
+    /// 更新「当前剪贴板」卡：读当前剪贴板图像，与历史第一条内容一致（小图，已进历史）则隐藏，
+    /// 不一致（内容过大被系统历史跳过 / 历史为空或未开启）则显示。任何失败静默收卡，绝不抛。
+    /// </summary>
+    private async Task UpdateCurrentClipboardCardAsync()
+    {
+        try
+        {
+            var streamRef = await ClipboardHelper.GetClipboardImageAsync();
+            if (streamRef is null)
+            {
+                HideCurrentClipboardCard();
+                return;
+            }
+            // 尺寸和缩略图各开一次流：decoder 与 SetSourceAsync 不能共用（流位置会被前者推进）
+            uint width, height;
+            using (var read = await streamRef.OpenReadAsync())
+            {
+                var decoder = await BitmapDecoder.CreateAsync(read);
+                width = decoder.PixelWidth;
+                height = decoder.PixelHeight;
+            }
+            if (await IsSameAsFirstHistoryItem(streamRef))
+            {
+                HideCurrentClipboardCard();
+                return;
+            }
+            var bmp = new BitmapImage { DecodePixelWidth = 200 };
+            using (var read = await streamRef.OpenReadAsync())
+            {
+                await bmp.SetSourceAsync(read);
+            }
+            _currentItem = ScreenshotItem.FromCurrentClipboard(streamRef);
+            _currentItem.ThumbImage = bmp;
+            CachedImage_Current.Source = bmp;
+            TextBlock_CurrentDims.Text = $"{width}×{height}";
+            Border_CurrentClipboard.ContextFlyout = BuildCurrentClipboardFlyout(_currentItem);
+            Border_CurrentClipboard.Visibility = Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "UpdateCurrentClipboardCardAsync");
+            HideCurrentClipboardCard();
+        }
+    }
+
+
+    private void HideCurrentClipboardCard()
+    {
+        _currentItem = null;
+        Border_CurrentClipboard.Visibility = Visibility.Collapsed;
+    }
+
+
+    /// <summary>当前剪贴板图像是否与历史第一条图像逐像素一致（尺寸 + Bgra8 字节比较）</summary>
+    private async Task<bool> IsSameAsFirstHistoryItem(RandomAccessStreamReference current)
+    {
+        try
+        {
+            var first = Items.FirstOrDefault(i => i.HistoryItem is not null);
+            if (first?.ClipboardStream is null) return false;
+            using var a = await current.OpenReadAsync();
+            using var b = await first.ClipboardStream.OpenReadAsync();
+            var da = await BitmapDecoder.CreateAsync(a);
+            var db = await BitmapDecoder.CreateAsync(b);
+            if (da.PixelWidth != db.PixelWidth || da.PixelHeight != db.PixelHeight) return false;
+            var transform = new BitmapTransform();
+            var pa = await da.GetPixelDataAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transform, ExifOrientationMode.IgnoreExifOrientation, ColorManagementMode.DoNotColorManage);
+            var pb = await db.GetPixelDataAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transform, ExifOrientationMode.IgnoreExifOrientation, ColorManagementMode.DoNotColorManage);
+            byte[] ba = pa.DetachPixelData();
+            byte[] bb = pb.DetachPixelData();
+            return ba.Length == bb.Length && ba.AsSpan().SequenceEqual(bb);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    private void Border_CurrentClipboard_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        if (_currentItem is not null)
+        {
+            OpenClipboardItem(_currentItem);
+        }
+    }
+
+
+    /// <summary>当前剪贴板卡的右键菜单：信息 / 打开（无历史条目，重新复制与删除不适用）</summary>
+    private MenuFlyout BuildCurrentClipboardFlyout(ScreenshotItem item)
+    {
+        var stream = item.ClipboardStream!;
+        var flyout = new MenuFlyout();
+        var info = new MenuFlyoutItem
+        {
+            MinWidth = 208,
+            FontSize = 12,
+            IsEnabled = false,
+            IsTextScaleFactorEnabled = false,
+            Text = "…"
+        };
+        info.Icon = new FontIcon { Glyph = "", IsTextScaleFactorEnabled = false };
+        _ = LoadClipboardInfoAsync(info, stream);
+        flyout.Items.Add(info);
+        flyout.Items.Add(new MenuFlyoutSeparator());
+        var open = new MenuFlyoutItem { Text = Lang.Common_Open, IsTextScaleFactorEnabled = false };
+        open.Icon = new FontIcon { Glyph = "", IsTextScaleFactorEnabled = false };
+        open.Click += (_, _) => OpenClipboardItem(item);
+        flyout.Items.Add(open);
+        return flyout;
     }
 
 

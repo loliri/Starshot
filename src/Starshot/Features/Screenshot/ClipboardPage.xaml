@@ -17,6 +17,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="44" />
+            <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -28,8 +29,50 @@
                    Text="{x:Bind lang:Lang.Common_Clipboard}" />
 
 
+        <!--  当前剪贴板：内容过大未进系统历史时的实时展示（与历史第一条相同则隐藏，永不重复）  -->
+        <Border x:Name="Border_CurrentClipboard"
+                Grid.Row="1"
+                Margin="24,12,24,0"
+                Padding="20,12"
+                HorizontalAlignment="Stretch"
+                sh:PointerCursor.CursorShape="Hand"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Tapped="Border_CurrentClipboard_Tapped"
+                Visibility="Collapsed">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <sc:CachedImage x:Name="CachedImage_Current"
+                                Width="200"
+                                Height="112"
+                                VerticalAlignment="Center"
+                                Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                                CornerRadius="4"
+                                Stretch="UniformToFill" />
+                <StackPanel Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Spacing="4">
+                    <TextBlock FontSize="16"
+                               FontWeight="SemiBold"
+                               Text="{x:Bind lang:Lang.ClipboardPage_CurrentClipboard}" />
+                    <TextBlock x:Name="TextBlock_CurrentDims"
+                               FontSize="13"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind lang:Lang.ClipboardPage_NotInHistory}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+
         <GridView x:Name="GridView_Images"
-                  Grid.Row="1"
+                  Grid.Row="2"
                   Padding="24,16,12,12"
                   IsItemClickEnabled="True"
                   ItemClick="GridView_Images_ItemClick"
@@ -112,7 +155,7 @@
 
         <!-- 空状态：未开启剪贴板历史 -->
         <StackPanel x:Name="StackPanel_NotEnabled"
-                    Grid.Row="1"
+                    Grid.Row="2"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Spacing="12"
@@ -131,7 +174,7 @@
 
         <!-- 空状态：开了但没图片 -->
         <StackPanel x:Name="StackPanel_NoImages"
-                    Grid.Row="1"
+                    Grid.Row="2"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Spacing="12"

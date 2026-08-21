@@ -1,7 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
@@ -71,6 +73,10 @@ internal static class ClipboardHelper
     private static extern bool GlobalUnlock(IntPtr hMem);
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr GlobalFree(IntPtr hMem);
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr GetClipboardData(uint uFormat);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern UIntPtr GlobalSize(IntPtr hMem);
 
     private const uint GMEM_MOVEABLE = 0x0002;
     private const uint CF_DIB = 8;
@@ -132,6 +138,117 @@ internal static class ClipboardHelper
             GlobalFree(hMem); // 失败时自己释放
         }
         return success;
+    }
+
+
+    /// <summary>
+    /// 读当前剪贴板里的图像，返回可重复打开的流引用；非图像/空/失败一律返回 null，绝不抛
+    /// （ContentChanged 可能在本 app 写入剪贴板的中途触发，读取方要求零异常）。
+    /// 优先 WinRT 位图格式（其他 app 的复制，系统对 CF_DIB 也会合成声明），
+    /// 拿不到再直接读 CF_DIB——本 app 自己的写入路径，大图必须走这条。
+    /// </summary>
+    public static async Task<RandomAccessStreamReference?> GetClipboardImageAsync()
+    {
+        try
+        {
+            var content = Clipboard.GetContent();
+            if (content is not null && content.Contains(StandardDataFormats.Bitmap))
+            {
+                var streamRef = await content.GetBitmapAsync();
+                if (streamRef is not null)
+                {
+                    return streamRef;
+                }
+            }
+        }
+        catch { }
+        try
+        {
+            byte[]? dib = TryGetCfDibBytes();
+            if (dib is not null)
+            {
+                var png = await DibToPngStreamAsync(dib);
+                if (png is not null)
+                {
+                    return RandomAccessStreamReference.CreateFromStream(png);
+                }
+            }
+        }
+        catch { }
+        return null;
+    }
+
+
+    private static byte[]? TryGetCfDibBytes()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (OpenClipboard(IntPtr.Zero))
+            {
+                try
+                {
+                    IntPtr h = GetClipboardData(CF_DIB);
+                    if (h == IntPtr.Zero) return null;
+                    IntPtr ptr = GlobalLock(h);
+                    if (ptr == IntPtr.Zero) return null;
+                    try
+                    {
+                        int size = checked((int)GlobalSize(h));
+                        byte[] buf = new byte[size];
+                        Marshal.Copy(ptr, buf, 0, size);
+                        return buf;
+                    }
+                    finally
+                    {
+                        GlobalUnlock(h);
+                    }
+                }
+                finally
+                {
+                    CloseClipboard();
+                }
+            }
+            Thread.Sleep(20);
+        }
+        return null;
+    }
+
+
+    /// <summary>CF_DIB（32bpp BI_RGB，本 app 的写法）→ PNG 内存流；其他位深/压缩一律放弃返回 null</summary>
+    private static async Task<InMemoryRandomAccessStream?> DibToPngStreamAsync(byte[] dib)
+    {
+        if (dib.Length < 40) return null;
+        int headerSize = BitConverter.ToInt32(dib, 0);
+        int width = BitConverter.ToInt32(dib, 4);
+        int heightRaw = BitConverter.ToInt32(dib, 8);
+        short bitCount = BitConverter.ToInt16(dib, 14);
+        int compression = BitConverter.ToInt32(dib, 16);
+        if (width <= 0 || heightRaw == 0 || bitCount != 32 || compression != 0 || headerSize < 40) return null;
+        bool bottomUp = heightRaw > 0;
+        int height = Math.Abs(heightRaw);
+        int rowBytes = width * 4;
+        int pixelLen = rowBytes * height;
+        if (dib.Length < headerSize + pixelLen) return null;
+
+        // bottom-up 行序翻成 top-down
+        byte[] bgra = new byte[pixelLen];
+        if (bottomUp)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                System.Buffer.BlockCopy(dib, headerSize + (height - 1 - y) * rowBytes, bgra, y * rowBytes, rowBytes);
+            }
+        }
+        else
+        {
+            System.Buffer.BlockCopy(dib, headerSize, bgra, 0, pixelLen);
+        }
+
+        var stream = new InMemoryRandomAccessStream();
+        var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
+        encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, (uint)width, (uint)height, 96, 96, bgra);
+        await encoder.FlushAsync();
+        return stream;
     }
 
 

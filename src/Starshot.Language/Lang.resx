@@ -181,11 +181,17 @@
   <data name="ClipboardPage_NotEnabled" xml:space="preserve">
     <value>Clipboard history is not enabled</value>
   </data>
+  <data name="ClipboardPage_CurrentClipboard" xml:space="preserve">
+    <value>Current Clipboard</value>
+  </data>
   <data name="ClipboardPage_GoToSettings" xml:space="preserve">
     <value>Go to Windows clipboard settings</value>
   </data>
   <data name="ClipboardPage_NoImages" xml:space="preserve">
     <value>No images in clipboard history</value>
+  </data>
+  <data name="ClipboardPage_NotInHistory" xml:space="preserve">
+    <value>Not in clipboard history (content too large)</value>
   </data>
   <data name="GachaImportAndExportWindow_Import" xml:space="preserve">
     <value>Import</value>

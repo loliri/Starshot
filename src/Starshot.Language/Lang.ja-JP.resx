@@ -181,11 +181,17 @@
   <data name="ClipboardPage_NotEnabled" xml:space="preserve">
     <value>クリップボード履歴が有効ではありません</value>
   </data>
+  <data name="ClipboardPage_CurrentClipboard" xml:space="preserve">
+    <value>現在のクリップボード</value>
+  </data>
   <data name="ClipboardPage_GoToSettings" xml:space="preserve">
     <value>Windows クリップボード設定を開く</value>
   </data>
   <data name="ClipboardPage_NoImages" xml:space="preserve">
     <value>クリップボード履歴に画像がありません</value>
+  </data>
+  <data name="ClipboardPage_NotInHistory" xml:space="preserve">
+    <value>履歴に未保存（容量超過）</value>
   </data>
   <data name="GachaImportAndExportWindow_Import" xml:space="preserve">
     <value>インポート</value>
