@@ -32,8 +32,7 @@
                         <Run Text="{x:Bind lang:Lang.Starshot_AboutLicense}" />
                     </TextBlock>
                 </StackPanel>
-                <Image Width="80"
-                       Height="80"
+                <Image Height="80"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center"
                        Source="ms-appx:///Assets/logo.png" />
