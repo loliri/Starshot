@@ -17,7 +17,7 @@ pub fn is_chinese_ui() -> bool {
 }
 
 /// Pick a string by system UI language for pre-webview native dialogs.
-pub fn tr(zh: &str, en: &str) -> &str {
+pub fn tr<'a>(zh: &'a str, en: &'a str) -> &'a str {
     if is_chinese_ui() {
         zh
     } else {
