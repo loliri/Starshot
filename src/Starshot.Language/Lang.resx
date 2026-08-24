@@ -595,6 +595,12 @@
   <data name="Starshot_UpdaterLauncherTip" xml:space="preserve">
     <value>After you click "Launch Updater", the app will exit automatically and Starshot.Update.exe will take over (downloading, verifying and applying files).</value>
   </data>
+  <data name="Starshot_DevModeOn" xml:space="preserve">
+    <value>Developer mode enabled</value>
+  </data>
+  <data name="Starshot_DevModeOff" xml:space="preserve">
+    <value>Developer mode disabled</value>
+  </data>
   <data name="Starshot_UpdateDelta" xml:space="preserve">
     <value>Delta Update</value>
   </data>

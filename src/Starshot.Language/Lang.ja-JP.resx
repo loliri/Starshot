@@ -595,6 +595,12 @@
   <data name="Starshot_UpdaterLauncherTip" xml:space="preserve">
     <value>「更新プログラムを起動」をクリックすると、アプリは自動的に終了し、Starshot.Update.exe がダウンロード・検証・適用を引き継ぎます。</value>
   </data>
+  <data name="Starshot_DevModeOn" xml:space="preserve">
+    <value>開発者モードが有効になりました</value>
+  </data>
+  <data name="Starshot_DevModeOff" xml:space="preserve">
+    <value>開発者モードが無効になりました</value>
+  </data>
   <data name="Starshot_UpdateDelta" xml:space="preserve">
     <value>差分更新</value>
   </data>

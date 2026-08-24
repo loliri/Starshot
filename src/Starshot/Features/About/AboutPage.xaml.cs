@@ -51,6 +51,29 @@ public sealed partial class AboutPage : PageBase
     }
 
 
+    private int _logoTaps;
+    private DateTime _lastLogoTap = DateTime.MinValue;
+
+
+    /// <summary>
+    /// logo 点 5 次开/关开发者模式（2.5 秒内连点算连续；开发者模式的唯一 UI 入口，设置页调试组开着才显示）。
+    /// </summary>
+    private void Button_Logo_Click(object sender, RoutedEventArgs e)
+    {
+        if ((DateTime.Now - _lastLogoTap).TotalSeconds > 2.5)
+        {
+            _logoTaps = 0;
+        }
+        _lastLogoTap = DateTime.Now;
+        _logoTaps++;
+        if (_logoTaps < 5) return;
+        _logoTaps = 0;
+        AppConfig.DevMode = !AppConfig.DevMode;
+        InAppToast.MainWindow?.Information(
+            AppConfig.DevMode ? Lang.Starshot_DevModeOn : Lang.Starshot_DevModeOff, null, 3000);
+    }
+
+
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);

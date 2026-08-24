@@ -32,10 +32,14 @@
                         <Run Text="{x:Bind lang:Lang.Starshot_AboutLicense}" />
                     </TextBlock>
                 </StackPanel>
-                <Image Height="80"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center"
-                       Source="ms-appx:///Assets/logo.png" />
+                <!--  logo 可点：原生 Button 悬停出主题填充/描边 + 按压反馈；点 5 次开/关开发者模式  -->
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Padding="8"
+                        Click="Button_Logo_Click"
+                        CornerRadius="8">
+                    <Image Height="80" Source="ms-appx:///Assets/logo.png" />
+                </Button>
             </Grid>
 
             <Border Padding="24"

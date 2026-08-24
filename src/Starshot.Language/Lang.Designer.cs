@@ -1858,6 +1858,24 @@
         }
 
         /// <summary>
+        ///   查找类似 Developer mode enabled 的本地化字符串。
+        /// </summary>
+        public static string Starshot_DevModeOn {
+            get {
+                return ResourceManager.GetString("Starshot_DevModeOn", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Developer mode disabled 的本地化字符串。
+        /// </summary>
+        public static string Starshot_DevModeOff {
+            get {
+                return ResourceManager.GetString("Starshot_DevModeOff", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Delta Update 的本地化字符串。
         /// </summary>
         public static string Starshot_UpdateDelta {
