@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="../src/logo.png" width="120" alt="Logo Starshot">
+<img src="../src/logo.png" width="300" alt="Logo Starshot">
 
 # Starshot
 
