@@ -42,12 +42,16 @@ public static partial class AppConfig
         string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot");
 
 #if !DEBUG
-        // database.json 锚定数据库位置：安装版线欢迎页写入 / 用户「更改数据库文件夹」写入。
-        // 不存在 = 便携版默认（父目录）。启动期只认这个文件，不做任何环境探测——此时探测不可靠。
-        // Debug 锁死父目录（开发机上有安装线的 JSON 会劫持调试构建的数据位置），不读不写
+        // database.json 锚定数据库位置，覆盖优先级：当前目录 > LocalAppData > 父目录默认。
+        // 当前目录的 database.json 是便携化锚定（随程序走，比如 U 盘）——存在即用，且不看 LocalAppData；
+        // LocalAppData 那份是安装版线欢迎页/更改位置按钮写的。Debug 锁死父目录，不读不写
         try
         {
-            string anchorPath = Path.Combine(localAppData, "database.json");
+            string? anchorPath = Path.Combine(AppContext.BaseDirectory, "database.json");
+            if (!File.Exists(anchorPath))
+            {
+                anchorPath = Path.Combine(localAppData, "database.json");
+            }
             if (File.Exists(anchorPath))
             {
                 using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(anchorPath));

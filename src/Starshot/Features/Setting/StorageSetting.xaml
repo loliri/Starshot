@@ -73,7 +73,8 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0"
+                    <Button x:Name="Button_ChangeDatabaseFolder"
+                            Grid.Column="0"
                             Height="40"
                             Padding="16,0,16,0"
                             BorderThickness="0"

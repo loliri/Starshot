@@ -92,6 +92,12 @@ public sealed partial class StorageSetting : PageBase
         // Debug 数据库锁死父目录，不读写 database.json，更改位置入口隐藏
         Grid_ChangeDatabaseFolder.Visibility = Visibility.Collapsed;
 #endif
+        // 当前目录存在 database.json（便携化锚定，优先级高于 LocalAppData）时不允许再改：
+        // 按钮只写 LocalAppData 那份，写了也会被当前目录的压住，改了无效
+        if (File.Exists(Path.Combine(AppContext.BaseDirectory, "database.json")))
+        {
+            Button_ChangeDatabaseFolder.IsEnabled = false;
+        }
         InitializeScreenshotFolder();
         LogFolder = AppConfig.LogFolder;
         _lastFocusedTemplateBox = FileNameTextBox;
