@@ -41,8 +41,10 @@ public static partial class AppConfig
         // LocalAppData 根（日志/缓存默认家，database.json 锚定也放这）
         string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot");
 
+#if !DEBUG
         // database.json 锚定数据库位置：安装版线欢迎页写入 / 用户「更改数据库文件夹」写入。
         // 不存在 = 便携版默认（父目录）。启动期只认这个文件，不做任何环境探测——此时探测不可靠。
+        // Debug 锁死父目录（开发机上有安装线的 JSON 会劫持调试构建的数据位置），不读不写
         try
         {
             string anchorPath = Path.Combine(localAppData, "database.json");
@@ -57,6 +59,7 @@ public static partial class AppConfig
             }
         }
         catch { }
+#endif
 
         // 版本号：Debug 构建显示 "Debug"（日志 Starshot_Debug_*.log + 启动 vDebug）；Release 读 assembly 内嵌
 #if DEBUG
@@ -82,8 +85,10 @@ public static partial class AppConfig
             {
                 Environment.Exit(0);
             }
+#if !DEBUG
             // 安装版线（kachina）首启判定——只在欢迎页做这一次：包内带更新器 →
-            // 数据落 LocalAppData 并写 database.json 锚定（此后启动靠 JSON 定位，不再探测）
+            // 数据落 LocalAppData 并写 database.json 锚定（此后启动靠 JSON 定位，不再探测）。
+            // Debug 不参与安装线（数据库锁死父目录）
             if (File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")))
             {
                 UserDataFolder = localAppData;
@@ -95,6 +100,7 @@ public static partial class AppConfig
                 }
                 catch { }
             }
+#endif
         }
 
         DatabaseService.SetDatabase(UserDataFolder);
@@ -133,8 +139,10 @@ public static partial class AppConfig
             {
                 AppConfig.ScreenshotFolder = welcome.ScreenshotFolderPath;
             }
+#if !DEBUG
             // 更新线锚定：安装版线把 installer 标志写进 DB，此后运行期更新分派/设置显隐只看它
             AppConfig.Installer = File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"));
+#endif
         }
 
         // 应用强调色与语言

@@ -88,6 +88,10 @@ public sealed partial class StorageSetting : PageBase
     {
         InitializeComponent();
         DatabaseFolder = AppConfig.UserDataFolder;
+#if DEBUG
+        // Debug 数据库锁死父目录，不读写 database.json，更改位置入口隐藏
+        Grid_ChangeDatabaseFolder.Visibility = Visibility.Collapsed;
+#endif
         InitializeScreenshotFolder();
         LogFolder = AppConfig.LogFolder;
         _lastFocusedTemplateBox = FileNameTextBox;
@@ -103,6 +107,9 @@ public sealed partial class StorageSetting : PageBase
     [RelayCommand]
     private async Task ChangeDatabaseFolder()
     {
+#if DEBUG
+        return; // Debug 数据库锁死父目录，不产生任何锚定写入
+#else
         try
         {
             var folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
@@ -124,6 +131,7 @@ public sealed partial class StorageSetting : PageBase
         {
             _logger.LogError(ex, "ChangeDatabaseFolder");
         }
+#endif
     }
 
 

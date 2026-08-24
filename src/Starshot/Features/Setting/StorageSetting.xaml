@@ -67,8 +67,8 @@
             <StackPanel Spacing="8">
                 <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Database}" />
 
-                <!--  更改位置：快照拷库到新位置 + 写 database.json 锚定，重启后生效；右侧显示当前库目录，点击打开  -->
-                <Grid ColumnSpacing="0">
+                <!--  更改位置：快照拷库到新位置 + 写 database.json 锚定，重启后生效；右侧显示当前库目录，点击打开（Debug 隐藏：数据库锁死父目录）  -->
+                <Grid x:Name="Grid_ChangeDatabaseFolder" ColumnSpacing="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
