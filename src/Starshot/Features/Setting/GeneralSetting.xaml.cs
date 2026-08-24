@@ -76,10 +76,11 @@ public sealed partial class GeneralSetting : PageBase
     public GeneralSetting()
     {
         InitializeComponent();
-        // 安装版线（kachina）：更新源在 kachina config 写死，用户无从选择，整块隐藏
+        // 安装版线（kachina）：更新源在 kachina config 写死，只藏源选择；
+        // GitHub 直连开关保留——release notes 仍走 GitHub API 拉取
         if (AppConfig.Installer)
         {
-            StackPanel_UpdateSource.Visibility = Visibility.Collapsed;
+            Segmented_UpdateSource.Visibility = Visibility.Collapsed;
         }
         s_activeInstance = this;
         LoadShieldIcon();
