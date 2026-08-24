@@ -685,6 +685,9 @@
   <data name="Starshot_AboutThanksShareX" xml:space="preserve">
     <value>区域截图覆盖层的窗口检测和交互设计参考</value>
   </data>
+  <data name="Starshot_AboutThanksKachina" xml:space="preserve">
+    <value>安装版线的安装器与更新器（在线安装、文件级差分、逐文件校验）</value>
+  </data>
   <data name="Starshot_AboutProjectHome" xml:space="preserve">
     <value>项目主页</value>
   </data>

@@ -220,7 +220,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_LogFolder}" />
                     <TextBlock VerticalAlignment="Center"
-                                                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                Text="{x:Bind lang:Lang.Starshot_LogFolderRestartTip}" />
                 </StackPanel>
                 <Grid ColumnSpacing="0">

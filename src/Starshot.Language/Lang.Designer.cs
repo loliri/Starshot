@@ -1013,6 +1013,15 @@
                 return ResourceManager.GetString("Starshot_AboutThanksShareX", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Installer and updater powering the installer line 的本地化字符串。
+        /// </summary>
+        public static string Starshot_AboutThanksKachina {
+            get {
+                return ResourceManager.GetString("Starshot_AboutThanksKachina", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Screenshot core, codec engine, and window framework all originate from Starward, developed by @Scighost. 的本地化字符串。

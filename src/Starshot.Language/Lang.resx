@@ -685,6 +685,9 @@
   <data name="Starshot_AboutThanksShareX" xml:space="preserve">
     <value>Reference for the window detection and interaction design of the region capture overlay.</value>
   </data>
+  <data name="Starshot_AboutThanksKachina" xml:space="preserve">
+    <value>Installer and updater powering the installer line (online install, per-file delta, per-file verification).</value>
+  </data>
   <data name="Starshot_AboutProjectHome" xml:space="preserve">
     <value>Project Homepage</value>
   </data>

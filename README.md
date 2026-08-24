@@ -14,7 +14,7 @@ Full 16-bit HDR Pipeline · Region Screenshot · AVIF / JPEG XL / PNGv3 Encoding
 
 [Download](../../releases) · [Quick Start](#quick-start) · [Features](#features) · [Build from Source](#build-from-source)
 
-**English** | **[简体中文](docs/README.zh-CN.md)** | **[繁體中文](docs/README.zh-TW.md)** | **[日本語](docs/README.ja.md)** | **[Français](docs/README.fr.md)** | **[Русский](docs/README.ru.md)** | **[Español](docs/README.es.md)**
+**English** | **[简体中文](README.zh-CN.md)** | **[繁體中文](docs/README.zh-TW.md)** | **[日本語](docs/README.ja.md)** | **[Français](docs/README.fr.md)** | **[Русский](docs/README.ru.md)** | **[Español](docs/README.es.md)**
 
 </div>
 
@@ -74,7 +74,7 @@ Download the archive from [Releases](../../releases), extract it, and run `Stars
 
 ## Screenshots
 
-![Screenshot](docs/Screenshot.jpg)
+![Screenshot](Screenshot.jpg)
 
 ## Quick Start
 

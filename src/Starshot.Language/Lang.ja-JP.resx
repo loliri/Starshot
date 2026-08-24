@@ -685,6 +685,9 @@
   <data name="Starshot_AboutThanksShareX" xml:space="preserve">
     <value>領域キャプチャオーバーレイのウィンドウ検出とインタラクション設計を参考にしました。</value>
   </data>
+  <data name="Starshot_AboutThanksKachina" xml:space="preserve">
+    <value>インストーラー線のインストーラーおよびアップデーター（オンラインインストール、ファイル単位差分、ファイル単位検証）。</value>
+  </data>
   <data name="Starshot_AboutProjectHome" xml:space="preserve">
     <value>プロジェクトホームページ</value>
   </data>

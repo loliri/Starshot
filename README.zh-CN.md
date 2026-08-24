@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="../src/logo.png" width="300" alt="Starshot Logo">
+<img src="src/logo.png" width="300" alt="Starshot Logo">
 
 # Starshot
 
@@ -10,13 +10,13 @@
 
 16bit 全链路捕获 · 区域截图 · AVIF / JPEG XL / PNGv3 编码 · 色彩管理
 
-[![Release](https://img.shields.io/github/v/release/loliri/Starshot?style=flat-square)](../../../releases)
+[![Release](https://img.shields.io/github/v/release/loliri/Starshot?style=flat-square)](../../releases)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/loliri/Starshot?tab=MIT-1-ov-file)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=flat-square&logo=windows)](../../../releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=flat-square&logo=windows)](../../releases)
 
-[下载](../../../releases) · [快速上手](#快速上手) · [功能详解](#功能详解) · [从源码构建](#从源码构建)
+[下载](../../releases) · [快速上手](#快速上手) · [功能详解](#功能详解) · [从源码构建](#从源码构建)
 
-**[English](../README.md)** | **简体中文** | **[繁體中文](README.zh-TW.md)** | **[日本語](README.ja.md)** | **[Français](README.fr.md)** | **[Русский](README.ru.md)** | **[Español](README.es.md)**
+**[English](README.md)** | **简体中文** | **[繁體中文](README.zh-TW.md)** | **[日本語](README.ja.md)** | **[Français](README.fr.md)** | **[Русский](README.ru.md)** | **[Español](README.es.md)**
 
 </div>
 
@@ -72,7 +72,7 @@ SDR 显示器上，Starshot 自动走标准 SDR 截图路径，是一款通用�
 
 ## 下载
 
-从 [Releases](../../../releases) 下载压缩包，解压后运行根目录的 `Starshot.exe` 启动器。无需安装，解压即用。
+从 [Releases](../../releases) 下载压缩包，解压后运行根目录的 `Starshot.exe` 启动器。无需安装，解压即用。
 
 ## 软件截图
 
@@ -385,9 +385,9 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 
 欢迎参与：
 
-- 发现 Bug？[提交 Issue](../../../issues/new)
-- 有功能建议？[发起讨论](../../../issues/new)
-- 想贡献代码？欢迎提交 [Pull Request](../../../pulls)
+- 发现 Bug？[提交 Issue](../../issues/new)
+- 有功能建议？[发起讨论](../../issues/new)
+- 想贡献代码？欢迎提交 [Pull Request](../../pulls)
 
 ## 常见问题
 
@@ -401,7 +401,7 @@ dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64
 - **HEVC Video Extensions**
 - **Webp Image Extensions**
 
-更新后重启 Starshot。如果问题持续，请 [提交 Issue](../../../issues/new) 并附上截图。
+更新后重启 Starshot。如果问题持续，请 [提交 Issue](../../issues/new) 并附上截图。
 
 </details>
 

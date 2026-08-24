@@ -113,6 +113,15 @@
                     <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_AboutThanksShareX}" />
                 </TextBlock>
 
+                <TextBlock FontSize="13" TextWrapping="Wrap">
+                    <Run Foreground="{ThemeResource TextFillColorTertiaryBrush}" Text="•  " />
+                    <Hyperlink NavigateUri="https://github.com/YuehaiTeam/kachina-installer" UnderlineStyle="None">
+                        <Run FontWeight="SemiBold" Text="kachina-installer" />
+                    </Hyperlink>
+                    <Run Text=" — " />
+                    <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.Starshot_AboutThanksKachina}" />
+                </TextBlock>
+
             </StackPanel>
 
             <StackPanel Margin="0,8,0,0"
