@@ -117,14 +117,7 @@ public sealed partial class StorageSetting : PageBase
             await File.WriteAllTextAsync(Path.Combine(localAppData, "database.json"),
                 System.Text.Json.JsonSerializer.Serialize(new { DatabaseFolder = folder }));
             DatabaseFolder = folder;
-            var dialog = new ContentDialog
-            {
-                Title = Lang.Starshot_DatabaseLocationChangedTitle,
-                Content = Lang.Starshot_DatabaseLocationChangedMessage,
-                CloseButtonText = Lang.Common_Apply,
-                DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.XamlRoot,
-            };
+            var dialog = new DatabaseLocationDialog { XamlRoot = this.XamlRoot };
             await dialog.ShowAsync();
         }
         catch (Exception ex)
