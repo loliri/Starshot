@@ -2,6 +2,7 @@ import { hybridPatch, InstallFile } from './api/installFile';
 import { ipc, log, warn, addInsightWithMode } from './api/ipc';
 import { invoke } from './tauri';
 import { clearNetworkInsights } from './networkInsights';
+import { t } from './i18n';
 import { KachinaInstallSource, pluginManager } from './plugins';
 import { registerAllPlugins } from './plugins/registry';
 import {
@@ -493,7 +494,7 @@ export const getDfsFileUrl = async (
   if (!url && dfs_result.source) url = dfs_result.source;
   if (!url && dfs_result.tests?.length) url = dfs_result.tests[0][1];
   if (!url) {
-    throw new Error('没有可用的下载节点：' + JSON.stringify(dfs_result));
+    throw new Error(t('err.noNode') + JSON.stringify(dfs_result));
   }
   return url;
 };

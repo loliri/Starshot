@@ -26,6 +26,8 @@ export type ProjectConfig = {
   // prefer-user: 只在用户没有权限写入的目录请求UAC
   // force: 强制请求UAC
   uacStrategy: 'prefer-admin' | 'prefer-user' | 'force';
+  // 安装器界面语言，auto（默认，跟随系统）、zh（中文）、en（英文）
+  language?: 'auto' | 'zh' | 'en';
   runtimes?: string[];
   windowBorderless?: boolean;
 };
@@ -76,7 +78,7 @@ export interface MergedGroupInfo {
   totalDownloadSize: number;
   totalEffectiveSize: number;
   wasteRatio: number;
-  gaps: Array<{start: number, end: number}>;
+  gaps: Array<{ start: number; end: number }>;
 }
 
 export interface VirtualMergedFile extends DfsUpdateTask {
@@ -215,11 +217,7 @@ export interface InstallerConfig {
   install_path: string;
   install_path_exists: boolean;
   install_path_source:
-    | 'CURRENT_DIR'
-    | 'PARENT_DIR'
-    | 'REG'
-    | 'REG_FOLDED'
-    | 'DEFAULT';
+    'CURRENT_DIR' | 'PARENT_DIR' | 'REG' | 'REG_FOLDED' | 'DEFAULT';
   is_uninstall: boolean;
   embedded_files: Embedded[] | null;
   embedded_index: Embedded[] | null;

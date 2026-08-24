@@ -31,16 +31,16 @@
         <div v-if="step === 1" class="actions">
           <div v-if="!isUpdate && !INSTALLER_CONFIG.is_uninstall" class="lnk">
             <Checkbox v-model="createLnk" />
-            创建桌面快捷方式
+            {{ t('step1.createShortcut') }}
           </div>
           <div v-if="!isUpdate && !INSTALLER_CONFIG.is_uninstall" class="read">
             <Checkbox v-model="acceptEula" />
-            我已阅读并同意
-            <a> 用户协议 </a>
+            {{ t('step1.eulaRead') }}
+            <a> {{ t('step1.eula') }} </a>
           </div>
           <div v-if="INSTALLER_CONFIG.is_uninstall" class="read">
             <Checkbox v-model="deleteUserData" />
-            同时删除用户数据
+            {{ t('step1.deleteUserData') }}
           </div>
           <div class="more">
             <span>
@@ -52,29 +52,34 @@
                   !INSTALLER_CONFIG.embedded_index?.length
                 "
               >
-                <span>从 </span>
-                <a @click="dialog = 'source'" title="点击切换安装源">
+                <span>{{ t('common.from') }} </span>
+                <a
+                  @click="dialog = 'source'"
+                  :title="t('step1.clickSwitchSource')"
+                >
                   {{
                     PROJECT_CONFIG.source.find((e) => e.uri === selectedSource)
                       ?.name
                   }}<template v-if="installMode === 'mirrorc'"
-                    >({{ mirrorcKey ? markedKey : '无CDK' }})</template
+                    >({{ mirrorcKey ? markedKey : t('step1.noCdk') }})</template
                   >
                   <IconEdit />
                 </a>
               </template>
               <span v-if="!isUpdate && !INSTALLER_CONFIG.is_uninstall">
-                安装到
+                {{ t('common.installTo') }}
               </span>
               <span v-if="isUpdate && !INSTALLER_CONFIG.is_uninstall">
-                更新到
+                {{ t('common.updateTo') }}
               </span>
-              <span v-if="INSTALLER_CONFIG.is_uninstall"> 卸载自 </span>
+              <span v-if="INSTALLER_CONFIG.is_uninstall">
+                {{ t('common.uninstallFrom') }}
+              </span>
             </span>
             <a
               v-if="!INSTALLER_CONFIG.is_uninstall"
               @click="changeSource"
-              title="点击修改安装路径"
+              :title="t('step1.clickChangePath')"
               >{{ source }}<IconEdit
             /></a>
             <a v-else>{{ source }}</a>
@@ -94,7 +99,7 @@
               "
               v-if="needElevate || INSTALLER_CONFIG.elevated"
             />
-            {{ isUpdate ? '更新' : '安装' }}
+            {{ isUpdate ? t('common.update') : t('common.install') }}
           </button>
           <button
             v-if="INSTALLER_CONFIG.is_uninstall"
@@ -110,7 +115,7 @@
               "
               v-if="needElevate || INSTALLER_CONFIG.elevated"
             />
-            卸载
+            {{ t('common.uninstall') }}
           </button>
         </div>
         <div class="progress" v-if="step === 2">
@@ -139,16 +144,20 @@
         <div class="finish" v-if="step === 3">
           <div class="finish-text">
             <CircleSuccess />
-            {{ isUpdate ? '更新' : '安装' }}完成
+            {{ isUpdate ? t('finish.updated') : t('finish.installed') }}
           </div>
-          <button class="btn btn-install" @click="launch">启动</button>
+          <button class="btn btn-install" @click="launch">
+            {{ t('common.launch') }}
+          </button>
         </div>
         <div class="finish" v-if="step === 4">
           <div class="finish-text">
             <CircleSuccess />
-            您已安装最新版本
+            {{ t('finish.alreadyLatest') }}
           </div>
-          <button class="btn btn-install" @click="launch">启动</button>
+          <button class="btn btn-install" @click="launch">
+            {{ t('common.launch') }}
+          </button>
         </div>
         <div class="uninstall" v-if="step === 5">
           <button class="btn btn-install" disabled>
@@ -158,24 +167,28 @@
             >
               <span class="fui-Spinner__spinnerTail"></span>
             </span>
-            卸载中
+            {{ t('finish.uninstalling') }}
           </button>
         </div>
         <div class="finish" v-if="step === 6">
           <div class="finish-text">
             <CircleSuccess />
-            卸载成功
+            {{ t('finish.uninstallDone') }}
           </div>
-          <button class="btn btn-install" @click="exit">关闭</button>
+          <button class="btn btn-install" @click="exit">
+            {{ t('common.close') }}
+          </button>
         </div>
       </div>
     </div>
     <Dialog v-show="dialog === 'source'" @keydown="handleKeyDown">
       <template #title>
-        <div class="title">选择安装源</div>
+        <div class="title">{{ t('dialog.selectSource') }}</div>
       </template>
       <template #desc>
-        <div class="desc">{{ PROJECT_CONFIG.title }}支持多种在线安装方式。</div>
+        <div class="desc">
+          {{ t('dialog.selectSourceDesc', { title: PROJECT_CONFIG.title }) }}
+        </div>
       </template>
       <template #body v-if="Array.isArray(PROJECT_CONFIG.source)">
         <div class="card-container">
@@ -202,22 +215,23 @@
       </template>
     </Dialog>
     <Dialog v-show="dialog === 'mirrorc'">
-      <template #title><div class="title">设置 Mirror酱 CDK</div></template>
+      <template #title>
+        <div class="title">{{ t('dialog.mirrorcTitle') }}</div>
+      </template>
       <template #desc>
-        <div class="desc">
-          Mirror酱是独立的第三方软件下载平台，提供付费的软件下载加速服务。<br />
-          如果你有 Mirror酱的 CDK，可以在这里输入。
-        </div>
+        <div class="desc" v-html="t('dialog.mirrorcDesc')"></div>
       </template>
       <template #body>
         <FInput
           class="cdk-input"
           v-model="mirrorcTempKey"
           type="text"
-          placeholder="请输入 Mirror酱 CDK"
+          :placeholder="t('dialog.mirrorcPlaceholder')"
         />
         <div class="desc">
-          <a style="cursor: pointer" @click="openMirrorc">获取 CDK</a>
+          <a style="cursor: pointer" @click="openMirrorc">{{
+            t('dialog.getCdk')
+          }}</a>
         </div>
       </template>
       <template #footer>
@@ -225,7 +239,7 @@
           class="btn btn-install btn-install-2rd neutral"
           @click="dialog = ''"
         >
-          取消
+          {{ t('common.cancel') }}
         </button>
         <button
           class="btn btn-install"
@@ -239,7 +253,7 @@
           >
             <span class="fui-Spinner__spinnerTail"></span>
           </span>
-          确定
+          {{ t('common.confirm') }}
         </button>
       </template>
     </Dialog>
@@ -671,21 +685,22 @@ import {
 } from './types.ts';
 import IconMinimize from './IconMinimize.vue';
 import IconClose from './IconClose.vue';
+import { setLanguage, t, tFor } from './i18n';
 
 const init = ref(0);
 
-const subStepList: ReadonlyArray<string> = [
-  '获取最新版本',
-  '校验更新内容',
-  '下载和解压文件',
-  '准备运行环境',
-];
-const subStepListMirrorc: ReadonlyArray<string> = [
-  '从 Mirror酱 获取最新版本',
-  '下载数据包',
-  '解压文件',
-  '准备运行环境',
-];
+const subStepList = computed<ReadonlyArray<string>>(() => [
+  t('substep.getLatest'),
+  t('substep.verify'),
+  t('substep.download'),
+  t('substep.env'),
+]);
+const subStepListMirrorc = computed<ReadonlyArray<string>>(() => [
+  t('substep.mirrorcGetLatest'),
+  t('substep.mirrorcDownload'),
+  t('substep.mirrorcExtract'),
+  t('substep.env'),
+]);
 
 const isUpdate = ref<boolean>(false);
 const acceptEula = ref<boolean>(true);
@@ -774,6 +789,7 @@ const PROJECT_CONFIG: ProjectConfig = reactive({
   description: 'description',
   windowTitle: ' ',
   uacStrategy: 'prefer-admin',
+  language: 'auto',
   windowBorderless: false,
 });
 
@@ -873,8 +889,8 @@ async function installPrepare(
       INSTALLER_CONFIG.args.non_interactive ||
       INSTALLER_CONFIG.args.silent ||
       (await confirm(
-        `检测到${PROJECT_CONFIG.appName}正在运行，是否结束进程并继续安装？`,
-        '提示',
+        t('confirm.appRunning', { appName: PROJECT_CONFIG.appName }),
+        t('common.notice'),
       ));
     if (!result) {
       step.value = 1;
@@ -891,7 +907,10 @@ async function installPrepare(
         return true;
       } catch (e) {
         error(e);
-        await dialog_error(`结束进程失败: ${e}`, '出错了');
+        await dialog_error(
+          t('err.killFailed', { err: String(e) }),
+          t('common.error'),
+        );
         step.value = 1;
         return false;
       }
@@ -904,10 +923,12 @@ async function installRuntimes() {
   if (PROJECT_CONFIG.runtimes) {
     log('latest_meta.runtimes', PROJECT_CONFIG.runtimes);
     subStep.value = 3;
-    current.value = '安装运行库……';
+    current.value = t('status.runtimeInstalling');
     for (const tag of PROJECT_CONFIG.runtimes) {
       log(`Installing runtime: ${tag}`);
-      current.value = `安装${getRuntimeName(tag)}……`;
+      current.value = t('status.runtimeInstallName', {
+        name: getRuntimeName(tag),
+      });
       const tryTimes = 3;
       const embedRuntime = INSTALLER_CONFIG.embedded_files?.find(
         (e) => e.name === tag,
@@ -922,9 +943,11 @@ async function installRuntimes() {
               const currentSize = formatSize(payload[0]);
               const targetSize = payload[1] ? formatSize(payload[1]) : '';
               if (payload[0] >= payload[1] - 1) {
-                current.value = `安装 ${getRuntimeName(tag)} ……`;
+                current.value = t('status.runtimeInstallName', {
+                  name: getRuntimeName(tag),
+                });
               } else {
-                current.value = `下载 ${getRuntimeName(tag)} ……<br>${currentSize}${targetSize ? ` / ${targetSize}` : ''}`;
+                current.value = `${t('status.runtimeDownloadName', { name: getRuntimeName(tag) })}<br>${currentSize}${targetSize ? ` / ${targetSize}` : ''}`;
               }
             },
             needElevate.value,
@@ -934,8 +957,11 @@ async function installRuntimes() {
           if (i === tryTimes - 1) {
             error(e);
             await dialog_error(
-              `安装${getRuntimeName(tag)}失败: ${e}，请手动安装`,
-              '出错了',
+              t('err.runtimeInstallFailed', {
+                name: getRuntimeName(tag),
+                err: String(e),
+              }),
+              t('common.error'),
             );
             break;
           } else {
@@ -963,9 +989,9 @@ async function runInstall(): Promise<void> {
   let meta_tag = '';
   if (!latest_meta && !online_meta) {
     await dialog_error(
-      '获取更新信息失败，请检查网络连接' +
-        (online_meta_err ? `\n${online_meta_err}` : '：未知错误，请检查日志'),
-      '出错了',
+      t('err.getMetaFailed') +
+        (online_meta_err ? `\n${online_meta_err}` : t('err.unknownCheckLog')),
+      t('common.error'),
     );
     step.value = 1;
     return;
@@ -983,7 +1009,7 @@ async function runInstall(): Promise<void> {
       !INSTALLER_CONFIG.args.silent &&
       ((isUpdate.value &&
         (INSTALLER_CONFIG.embedded_index?.length || 0) <= 0) ||
-        (await confirm('当前安装包不是最新版本，是否直接安装最新版本？')))
+        (await confirm(t('confirm.notLatest'))))
     ) {
       meta_tag = latest_meta.tag_name;
       latest_meta = online_meta;
@@ -1023,7 +1049,7 @@ async function runInstall(): Promise<void> {
   } else if (latest_meta.hashed.every((e) => e.xxh)) {
     hashKey = 'xxh';
   } else {
-    throw new Error('更新服务端配置有误，不支持的哈希算法');
+    throw new Error(t('err.unsupportedHash'));
   }
   subStep.value = 1;
   percent.value = 5;
@@ -1047,7 +1073,7 @@ async function runInstall(): Promise<void> {
       file_name: e.file_name.replace(source.value, ''),
     };
   });
-  current.value = '校验本地文件……';
+  current.value = t('status.verifyLocal');
   const diff_files: Array<DfsUpdateTask> = [];
   const strip_first_slash = (s: string) => {
     let ss = s.replace(/\\/g, '/');
@@ -1145,7 +1171,7 @@ async function runInstall(): Promise<void> {
       !INSTALLER_CONFIG.args.non_interactive &&
       !INSTALLER_CONFIG.args.silent &&
       !(await confirm(
-        '检测到部分文件被占用，继续安装可能无法成功，是否继续？\n\n被占用的文件列表：' +
+        t('confirm.filesInUse') +
           diff_files
             .filter(
               (e) => e.unwritable && e.file_name !== PROJECT_CONFIG.updaterName,
@@ -1162,7 +1188,7 @@ async function runInstall(): Promise<void> {
 
   // Create DFS2 session if using DFS2 source
   if (selectedSource.value.startsWith('dfs2+')) {
-    current.value = '创建下载会话……';
+    current.value = t('status.creatingSession');
     try {
       const ranges = collectDfs2Ranges(
         diff_files,
@@ -1189,7 +1215,7 @@ async function runInstall(): Promise<void> {
       }
     } catch (e) {
       error('Failed to create DFS2 session:', e);
-      await dialog_error(`创建下载会话失败: ${e}`);
+      await dialog_error(t('err.createSessionFailed', { err: String(e) }));
       step.value = 1;
       return;
     }
@@ -1215,14 +1241,14 @@ async function runInstall(): Promise<void> {
       }
     } catch (e) {
       error('Failed to create plugin session:', e);
-      await dialog_error(`创建下载会话失败: ${e}`);
+      await dialog_error(t('err.createSessionFailed', { err: String(e) }));
       step.value = 1;
       return;
     }
   }
 
   subStep.value = 2;
-  current.value = '准备下载……';
+  current.value = t('status.prepareDownload');
 
   // 预处理文件，进行合并分组
   const { processedFiles } = preprocessFiles(
@@ -1410,7 +1436,7 @@ async function runInstall(): Promise<void> {
     Array.isArray(latest_meta.deletes) &&
     latest_meta.deletes.length > 0
   ) {
-    current.value = '删除旧版残留文件……';
+    current.value = t('status.deletingOld');
     try {
       // 过滤掉 ignoreFolderPath 中的文件
       const filesToDelete = latest_meta.deletes.filter((deleteFile) => {
@@ -1444,9 +1470,9 @@ async function runInstall(): Promise<void> {
 
   await installRuntimes();
 
-  current.value = '很快就好……';
+  current.value = t('status.almostDone');
   await finishInstall(latest_meta);
-  current.value = '安装完成';
+  current.value = isUpdate.value ? t('finish.updated') : t('finish.installed');
   step.value = 3;
   percent.value = 100;
 }
@@ -1471,8 +1497,8 @@ async function runMirrorcInstall() {
   const source_url = new URL(selectedSource.value);
   if (!source_url.hostname) {
     await dialog_error(
-      '无法获取Mirror酱数据，安装包可能已经损坏：' + selectedSource.value,
-      '出错了',
+      t('err.mirrorcBadSource', { url: selectedSource.value }),
+      t('common.error'),
     );
     error('Invalid Mirrorc source URL:', selectedSource.value);
     step.value = 1;
@@ -1486,11 +1512,11 @@ async function runMirrorcInstall() {
     arch: source_url.searchParams.get('arch') || undefined,
     os: source_url.searchParams.get('os') || undefined,
   }).catch((e) => {
-    return Promise.reject(`从获取Mirror酱获取更新数据失败: ${e}`);
+    return Promise.reject(t('err.mirrorcFetchFailed', { err: String(e) }));
   });
   const errorResult = processMirrorcError(mirrorc_status, 'install');
   if (errorResult) {
-    await dialog_error(errorResult.message, '出错了');
+    await dialog_error(errorResult.message, t('common.error'));
     if (errorResult.showSourceDialog) {
       dialog.value = 'source';
     }
@@ -1511,17 +1537,11 @@ async function runMirrorcInstall() {
   )
     return runMirrorcInstall();
   if (!mirrorc_status.data?.url) {
-    await dialog_error(
-      '从Mirror酱获取更新失败: 下载地址为空，请联系Mirror酱客服',
-      '出错了',
-    );
+    await dialog_error(t('err.mirrorcNoUrl'), t('common.error'));
     return;
   }
   if (!mirrorc_status.data?.sha256) {
-    await dialog_error(
-      '从Mirror酱获取更新失败: 校验数据为空，请联系Mirror酱客服',
-      '出错了',
-    );
+    await dialog_error(t('err.mirrorcNoSha'), t('common.error'));
     return;
   }
   console.log(mirrorc_status);
@@ -1533,7 +1553,7 @@ async function runMirrorcInstall() {
   const mirrorc_zip_path = `${source.value}${sep()}KachinaInstaller_Mirrorc_${mirrorc_status.data.sha256}.zip`;
   subStep.value = 1;
   percent.value = 5;
-  current.value = '准备从Mirror酱下载……';
+  current.value = t('status.mirrorcPreparing');
   let lastDownloaded = 0;
   let lastSpeedCalcTime = 0;
   let lastSpeedStr = '';
@@ -1565,7 +1585,7 @@ async function runMirrorcInstall() {
     needElevate.value,
   );
   subStep.value = 2;
-  current.value = '检查压缩包……';
+  current.value = t('status.checkingZip');
   const [meta, changeset] = await ipcRunMirrorcInstall(
     mirrorc_zip_path,
     source.value,
@@ -1573,11 +1593,11 @@ async function runMirrorcInstall() {
       console.log(payload);
       switch (payload.type) {
         case 'extract':
-          current.value = `<div class="d-single-stat">解压 ${payload.file}</div>`;
+          current.value = `<div class="d-single-stat">${t('status.extracting', { file: payload.file })}</div>`;
           percent.value = 70 + (payload.count / payload.total) * 25;
           break;
         case 'delete':
-          current.value = `<div class="d-single-stat">删除 ${payload.file}</div>`;
+          current.value = `<div class="d-single-stat">${t('status.deleting', { file: payload.file })}</div>`;
           percent.value = 97;
           break;
       }
@@ -1587,9 +1607,9 @@ async function runMirrorcInstall() {
   console.log(changeset, meta);
   await installRuntimes();
 
-  current.value = '很快就好……';
+  current.value = t('status.almostDone');
   await finishInstall(meta);
-  current.value = '安装完成';
+  current.value = isUpdate.value ? t('finish.updated') : t('finish.installed');
   step.value = 3;
   percent.value = 100;
 }
@@ -1602,7 +1622,7 @@ async function getLnkPath() {
     programFolder: `${program}${sep()}${PROJECT_CONFIG.appName}`,
     program: `${program}${sep()}${PROJECT_CONFIG.appName}${sep()}${PROJECT_CONFIG.appName}.lnk`,
     desktop: `${desktop}${sep()}${PROJECT_CONFIG.appName}.lnk`,
-    uninstall: `${program}${sep()}${PROJECT_CONFIG.appName}${sep()}卸载${PROJECT_CONFIG.appName}.lnk`,
+    uninstall: `${program}${sep()}${PROJECT_CONFIG.appName}${sep()}${t('lnk.uninstallName', { appName: PROJECT_CONFIG.appName })}.lnk`,
   };
 }
 
@@ -1630,35 +1650,63 @@ async function finishInstall(
         needElevate.value,
       );
     } catch (e) {
-      dialog_error(`创建卸载程序失败: ${e}`, '出错了');
+      dialog_error(
+        t('err.createUninstallerFailed', { err: String(e) }),
+        t('common.error'),
+      );
       warn(e);
     }
-    if (latest_meta) {
-      try {
-        await ipcWriteRegistry(
-          {
-            reg_name: PROJECT_CONFIG.regName,
-            name: PROJECT_CONFIG.appName,
-            version: latest_meta.tag_name || '0.0',
-            exe: `${source.value}${sep()}${PROJECT_CONFIG.exeName}`,
-            source: source.value,
-            uninstaller: `${source.value}${sep()}${PROJECT_CONFIG.uninstallName}`,
-            metadata: JSON.stringify(latest_meta),
-            size: latest_meta.hashed.reduce((acc, cur) => acc + cur.size, 0),
-            publisher: PROJECT_CONFIG.publisher,
-          },
-          needElevate.value,
-        );
-      } catch (e) {
-        dialog_error(`写入注册表失败: ${e}`, '出错了');
-        warn(e);
-      }
+    // 卸载快捷方式文件名随界面语言变化，清理另一种语言可能残留的旧快捷方式
+    const otherLang = t('lnk.uninstallName', {
+      appName: PROJECT_CONFIG.appName,
+    }).startsWith('卸载')
+      ? tFor('en', 'lnk.uninstallName', {
+          appName: PROJECT_CONFIG.appName,
+        })
+      : tFor('zh', 'lnk.uninstallName', {
+          appName: PROJECT_CONFIG.appName,
+        });
+    const staleUninstallLnk = `${program}${sep()}${PROJECT_CONFIG.appName}${sep()}${otherLang}.lnk`;
+    if (staleUninstallLnk.toLowerCase() !== uninstall.toLowerCase()) {
+      await ipcRmList([staleUninstallLnk], needElevate.value).catch(log);
     }
     await ipcCreateLnk(
       `${source.value}${sep()}${PROJECT_CONFIG.uninstallName}`,
       uninstall,
       needElevate.value,
     ).catch(log);
+  }
+  if (latest_meta) {
+    try {
+      await ipcWriteRegistry(
+        {
+          reg_name: PROJECT_CONFIG.regName,
+          name: PROJECT_CONFIG.appName,
+          version: latest_meta.tag_name || '0.0',
+          exe: `${source.value}${sep()}${PROJECT_CONFIG.exeName}`,
+          source: source.value,
+          uninstaller: `${source.value}${sep()}${PROJECT_CONFIG.uninstallName}`,
+          metadata: JSON.stringify(latest_meta),
+          size:
+            latest_meta.hashed?.reduce((acc, cur) => acc + cur.size, 0) ?? 0,
+          publisher: PROJECT_CONFIG.publisher,
+        },
+        needElevate.value,
+      );
+    } catch (e) {
+      warn(e);
+      // 安装或注册表定位到的更新（旧行为）写入失败时提示用户；
+      // 从安装目录直接运行的更新（新行为）失败时只记日志，避免每次更新后弹无法处理的错误
+      if (
+        !isUpdate.value ||
+        INSTALLER_CONFIG.install_path_source.startsWith('REG')
+      ) {
+        dialog_error(
+          t('err.writeRegistryFailed', { err: String(e) }),
+          t('common.error'),
+        );
+      }
+    }
   }
   if (INSTALLER_CONFIG.args.silent) {
     const win = getCurrentWindow();
@@ -1790,6 +1838,7 @@ onMounted(async () => {
     });
     if (INSTALLER_CONFIG.embedded_config) {
       Object.assign(PROJECT_CONFIG, INSTALLER_CONFIG.embedded_config);
+      setLanguage(PROJECT_CONFIG.language || 'auto');
       // Process embedded image/CSS
       processEmbeddedImage(INSTALLER_CONFIG.embedded_image);
 
@@ -1799,20 +1848,20 @@ onMounted(async () => {
           INSTALLER_CONFIG.embedded_files.length > 0 &&
           !INSTALLER_CONFIG.embedded_files.find((e) => e.name === '\0CONFIG')
         ) {
-          dialog_error('打包错误，请确保配置文件被正确打包');
+          dialog_error(t('err.packConfigMissing'));
         }
       }
     } else if (process.env.NODE_ENV === 'development') {
-      dialog_error('未找到配置文件，请将配置文件放在exe同目录下');
+      dialog_error(t('err.configNotFoundDev'));
     } else {
-      await dialog_error('安装包损坏，请重新下载');
+      await dialog_error(t('err.packBroken'));
       const win = getCurrentWindow();
       win.close();
       return;
     }
     const xsrc = rsrc.embedded_config?.source;
     if (!xsrc) {
-      throw new Error('打包错误，请确保配置文件被正确打包');
+      throw new Error(t('err.packConfigMissing'));
     }
     if (!Array.isArray(xsrc)) {
       selectedSource.value = xsrc;
@@ -1848,9 +1897,9 @@ onMounted(async () => {
       }
       if (hasWrongIndex) {
         if (process.env.NODE_ENV === 'development') {
-          dialog_error('打包错误，请确保索引文件正确');
+          dialog_error(t('err.packIndexWrong'));
         } else {
-          await dialog_error('安装包损坏，请重新下载');
+          await dialog_error(t('err.packBroken'));
           const win = getCurrentWindow();
           win.close();
           return;
@@ -1869,7 +1918,7 @@ onMounted(async () => {
       ).catch(log);
       log('UNINSTALL_METADATA: ', uninstallConfig);
       if (!uninstallConfig) {
-        await dialog_error('未找到卸载配置文件，请重新安装后再卸载');
+        await dialog_error(t('err.uninstallMetaMissing'));
         if (process.env.NODE_ENV !== 'development') {
           const win = getCurrentWindow();
           win.close();
@@ -1903,11 +1952,11 @@ onMounted(async () => {
   } catch (e) {
     error(e);
     if (e instanceof Error)
-      await dialog_error(e.stack || e.toString(), '安装程序初始化失败');
+      await dialog_error(e.stack || e.toString(), t('err.initFailed'));
     else
       await dialog_error(
         typeof e === 'string' ? e : JSON.stringify(e),
-        '安装程序初始化失败',
+        t('err.initFailed'),
       );
     if (process.env.NODE_ENV !== 'development') {
       const win = getCurrentWindow();
@@ -1960,10 +2009,7 @@ async function changeSource() {
       const isDriveRoot = seldir.path.replace(/\\/g, '/').match(/^\w:\/$/);
       const confirmRes =
         isDriveRoot ||
-        (await confirm(
-          '您选择的目录不为空，是否创建新文件夹再安装？选【否】将可能影响原有数据。',
-          '提示',
-        ));
+        (await confirm(t('confirm.dirNotEmpty'), t('common.notice')));
       if (confirmRes) {
         source.value =
           `${seldir.path}${sep()}${PROJECT_CONFIG.appName}`.replace(
@@ -2022,8 +2068,8 @@ async function changeMirrorcKey() {
     const source_url = new URL(mirrorcTempUrl.value);
     if (!source_url.hostname) {
       await dialog_error(
-        '无法获取Mirror酱数据，安装包可能已经损坏：' + selectedSource.value,
-        '出错了',
+        t('err.mirrorcBadSource', { url: selectedSource.value }),
+        t('common.error'),
       );
       mirrorcChecking.value = false;
       return;
@@ -2038,7 +2084,7 @@ async function changeMirrorcKey() {
     });
     const errorResult = processMirrorcError(mirrorc_status, 'cdk-validation');
     if (errorResult) {
-      await dialog_error(errorResult.message, '出错了');
+      await dialog_error(errorResult.message, t('common.error'));
       mirrorcChecking.value = false;
       return;
     }
@@ -2058,7 +2104,10 @@ async function changeMirrorcKey() {
   mirrorcChecking.value = false;
 }
 
-async function dialog_error(message: string, title = '出错了'): Promise<void> {
+async function dialog_error(
+  message: string,
+  title = t('common.error'),
+): Promise<void> {
   await invoke('error_dialog', {
     message: message.replace(new RegExp(location.origin, 'g'), ''),
     title,
@@ -2068,7 +2117,10 @@ async function dialog_error(message: string, title = '出错了'): Promise<void>
     win.close();
   }
 }
-async function confirm(message: string, title = '提示'): Promise<boolean> {
+async function confirm(
+  message: string,
+  title = t('common.notice'),
+): Promise<boolean> {
   return await invoke<boolean>('confirm_dialog', { message, title });
 }
 async function uninstall() {
@@ -2080,7 +2132,7 @@ async function uninstall() {
       PROJECT_CONFIG,
     )) as InvokeGetDfsMetadataRes;
     if (!uninstallConfig) {
-      throw new Error('未找到卸载配置文件，请重新安装后再卸载');
+      throw new Error(t('err.uninstallMetaMissing'));
     }
     await ipPrepare(needElevate.value);
     const { programFolder, desktop } = await getLnkPath();

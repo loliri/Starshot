@@ -13,6 +13,7 @@ import {
 } from './dfs';
 import { log, error } from './api/ipc';
 import { friendlyError } from './utils/friendlyError';
+import { t } from './i18n';
 
 // 格式化文件大小
 const formatFileSize = (size: number): string => {
@@ -518,7 +519,13 @@ export class DownloadTaskManager {
             // 失败：统一日志格式将在task.execute()内部处理
             // 停止安装流程，使用用户友好的错误格式
             throw new Error(
-              `释放文件 ${task.getDisplayName()} 失败：\n${typeof lastError === 'string' ? lastError : friendlyError(lastError)}`,
+              t('err.releaseFileFailed', {
+                name: task.getDisplayName(),
+                err:
+                  typeof lastError === 'string'
+                    ? lastError
+                    : friendlyError(lastError),
+              }),
             );
           }
         }

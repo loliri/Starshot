@@ -16,7 +16,10 @@ use windows::{
     },
 };
 
-use crate::{utils::url::HttpContextExt, REQUEST_CLIENT};
+use crate::{
+    utils::{gui::tr, url::HttpContextExt},
+    REQUEST_CLIENT,
+};
 
 pub struct SendableHwnd(pub *mut Option<HWND>);
 unsafe impl Send for SendableHwnd {}
@@ -31,9 +34,12 @@ pub async fn install_webview2() {
     unsafe {
         let _ = windows::Win32::UI::WindowsAndMessaging::SetProcessDPIAware();
     }
-    let title = "安装 WebView2 运行时";
-    let heading = "当前系统缺少 WebView2 运行时，正在安装...";
-    let content = "正在下载安装程序...";
+    let title = tr("安装 WebView2 运行时", "Installing WebView2 Runtime");
+    let heading = tr(
+        "当前系统缺少 WebView2 运行时，正在安装...",
+        "WebView2 Runtime is missing, installing...",
+    );
+    let content = tr("正在下载安装程序...", "Downloading the installer...");
     let title_utf16_nul = title
         .encode_utf16()
         .chain(std::iter::once(0))
@@ -121,8 +127,11 @@ pub async fn install_webview2() {
             SendMessageW(hwnd.unwrap(), WM_CLOSE, Some(WPARAM(0)), Some(LPARAM(0)));
         }
         rfd::MessageDialog::new()
-            .set_title("出错了")
-            .set_description(format!("WebView2 运行时下载失败: {e}"))
+            .set_title(tr("出错了", "Error"))
+            .set_description(format!(
+                "{}{e}",
+                tr("WebView2 运行时下载失败: ", "Failed to download WebView2 Runtime: ")
+            ))
             .set_level(rfd::MessageLevel::Error)
             .show();
         std::process::exit(0);
@@ -138,8 +147,11 @@ pub async fn install_webview2() {
             SendMessageW(hwnd.unwrap(), WM_CLOSE, Some(WPARAM(0)), Some(LPARAM(0)));
         }
         rfd::MessageDialog::new()
-            .set_title("出错了")
-            .set_description(format!("WebView2 运行时下载失败: {e}"))
+            .set_title(tr("出错了", "Error"))
+            .set_description(format!(
+                "{}{e}",
+                tr("WebView2 运行时下载失败: ", "Failed to download WebView2 Runtime: ")
+            ))
             .set_level(rfd::MessageLevel::Error)
             .show();
         std::process::exit(0);
@@ -156,14 +168,23 @@ pub async fn install_webview2() {
             SendMessageW(hwnd.unwrap(), WM_CLOSE, Some(WPARAM(0)), Some(LPARAM(0)));
         }
         rfd::MessageDialog::new()
-            .set_title("出错了")
-            .set_description(format!("WebView2 运行时安装程序写入失败: {e}"))
+            .set_title(tr("出错了", "Error"))
+            .set_description(format!(
+                "{}{e}",
+                tr(
+                    "WebView2 运行时安装程序写入失败: ",
+                    "Failed to write the WebView2 installer: "
+                )
+            ))
             .set_level(rfd::MessageLevel::Error)
             .show();
         std::process::exit(0);
     }
     // change content of the dialog
-    let content = "正在安装 WebView2 运行时...";
+    let content = tr(
+        "正在安装 WebView2 运行时...",
+        "Installing WebView2 Runtime...",
+    );
     let content_utf16_nul = content
         .encode_utf16()
         .chain(std::iter::once(0))
@@ -187,8 +208,14 @@ pub async fn install_webview2() {
             SendMessageW(hwnd.unwrap(), WM_CLOSE, Some(WPARAM(0)), Some(LPARAM(0)));
         }
         rfd::MessageDialog::new()
-            .set_title("出错了")
-            .set_description(format!("WebView2 运行时安装失败: {e}"))
+            .set_title(tr("出错了", "Error"))
+            .set_description(format!(
+                "{}{e}",
+                tr(
+                    "WebView2 运行时安装失败: ",
+                    "Failed to install WebView2 Runtime: "
+                )
+            ))
             .set_level(rfd::MessageLevel::Error)
             .show();
         std::process::exit(0);
@@ -210,8 +237,11 @@ pub async fn install_webview2() {
             SendMessageW(hwnd.unwrap(), WM_CLOSE, Some(WPARAM(0)), Some(LPARAM(0)));
         }
         rfd::MessageDialog::new()
-            .set_title("出错了")
-            .set_description("WebView2 运行时安装失败")
+            .set_title(tr("出错了", "Error"))
+            .set_description(tr(
+                "WebView2 运行时安装失败",
+                "Failed to install WebView2 Runtime",
+            ))
             .set_level(rfd::MessageLevel::Error)
             .show();
         std::process::exit(0);

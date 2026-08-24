@@ -221,8 +221,11 @@ async fn tauri_main(args: InstallArgs) {
     let res = std::env::set_current_dir(&temp_dir);
     if res.is_err() {
         rfd::MessageDialog::new()
-            .set_title("错误")
-            .set_description("无法访问临时文件夹")
+            .set_title(utils::gui::tr("错误", "Error"))
+            .set_description(utils::gui::tr(
+                "无法访问临时文件夹",
+                "Cannot access the temporary folder",
+            ))
             .show();
         return;
     }
