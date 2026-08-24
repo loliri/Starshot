@@ -44,6 +44,7 @@ public sealed partial class MainWindow : WindowEx
         Title = "Starshot";
         // 任务管理器图标：AppWindow.SetIcon 走系统图标管线（LoadIcon 直挂 WM_SETICON 会被拉伸畸形）
         SetIcon();
+        LoadPaneLogo();
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         AdaptTitleBarButtonColorToActuallTheme();
@@ -61,6 +62,17 @@ public sealed partial class MainWindow : WindowEx
         Activated += MainWindow_Activated;
         AppWindow.Closing += AppWindow_Closing;
         ((FrameworkElement)Content).Loaded += MainWindow_Loaded;
+    }
+
+
+    /// <summary>
+    /// 导航栏 logo：exe 内嵌图标资源抽取（AppIconHelper，与托盘同源），不随包带文件。
+    /// </summary>
+    private void LoadPaneLogo()
+    {
+        using var icon = AppIconHelper.GetAppIcon();
+        if (icon is null) return;
+        Image_PaneLogo.Source = AppIconHelper.ToBitmapImage(icon);
     }
 
 

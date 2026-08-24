@@ -106,9 +106,7 @@ public sealed partial class SystemTrayWindow : WindowEx
     {
         try
         {
-            nint hInstance = Kernel32.GetModuleHandle(null).DangerousGetHandle();
-            nint hIcon = User32.LoadIcon(hInstance, "#32512").DangerousGetHandle();
-            trayIcon.Icon = System.Drawing.Icon.FromHandle(hIcon);
+            trayIcon.Icon = AppIconHelper.GetAppIcon();
         }
         catch { }
     }

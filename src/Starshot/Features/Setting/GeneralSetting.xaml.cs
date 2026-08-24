@@ -367,13 +367,7 @@ public sealed partial class GeneralSetting : PageBase
             IntPtr hIcon = LoadIcon(IntPtr.Zero, (IntPtr)32518);
             if (hIcon == IntPtr.Zero) return;
             using var icon = System.Drawing.Icon.FromHandle(hIcon);
-            using var bmp = icon.ToBitmap();
-            using var ms = new MemoryStream();
-            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-            ms.Position = 0;
-            var bitmap = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage();
-            bitmap.SetSource(ms.AsRandomAccessStream());
-            ShieldSource = bitmap;
+            ShieldSource = AppIconHelper.ToBitmapImage(icon);
         }
         catch { }
     }
