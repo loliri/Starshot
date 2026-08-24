@@ -67,5 +67,7 @@ jobs:
           files: |
             x64/Starshot-${{ needs.build.outputs.vl }}-win-x64.zip
             arm64/Starshot-${{ needs.build.outputs.vl }}-win-arm64.zip
+            x64/Starshot-installer-win-x64.exe
+            arm64/Starshot-installer-win-arm64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

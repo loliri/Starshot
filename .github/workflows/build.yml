@@ -135,6 +135,11 @@ jobs:
             try { [void][System.Globalization.CultureInfo]::GetCultureInfo($_.Name); return $true } catch { return $false }
           } | Remove-Item -Recurse -Force
 
+      - name: Preserve flat layout for kachina
+        run: |
+          # kachina 安装版线要平铺目录（原始文件名）；下面的 Version layout 会把 app/ 改名成 app-{vl}/，先拷一份
+          Copy-Item build/release/app kachina-flat -Recurse -Force
+
       - name: Version layout
         run: |
           Move-Item build/release/app "build/release/app-${{ needs.resolve-version.outputs.vl }}" -Force
@@ -303,12 +308,81 @@ jobs:
           if (Test-Path $zip) { Remove-Item $zip }
           [System.IO.Compression.ZipFile]::CreateFromDirectory("build/release", $zip, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
 
+      # ===== kachina 安装版线（只加不改：以上便携版线步骤与以下互不影响） =====
+
+      - name: Setup kachina-builder
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 版本 pin 死；tag 无 v 前缀，资产名 kachina-builder.exe（本地 0.5.1 实测 12.3MB）
+          $url = gh api repos/YuehaiTeam/kachina-installer/releases/tags/0.5.1 --jq '.assets[] | select(.name == "kachina-builder.exe") | .browser_download_url'
+          if ([string]::IsNullOrEmpty($url)) { Write-Error "kachina-builder.exe not found in tag 0.5.1"; exit 1 }
+          Invoke-WebRequest $url -OutFile kachina-builder.exe
+          ./kachina-builder.exe --help | Select-Object -First 1
+
+      - name: Build kachina installer package
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $arch = "${{ matrix.platform }}"
+          $vl = "${{ needs.resolve-version.outputs.vl }}"
+          $cdn = "https://starshot-release.cialo.site"
+          # 源=CDN 根固定 URL（与版本无关，全在线，无备用源）；差分基线=上一版原始目录 zip（固定名，stable 每版覆盖）
+          # 注意：builder 的 extract 吐的是 zstd 存储形态不是原始字节，不能当基线（本地实测），必须存原始目录
+          $config = @{
+            source = "$cdn/Starshot-installer-win-$arch.exe"
+            appName = "Starshot"
+            publisher = "loliri"
+            regName = "Starshot"
+            exeName = "Starshot.exe"
+            uninstallName = "Uninstall.exe"
+            updaterName = "Kachina.update.exe"
+            programFilesPath = "Starshot"
+            userDataPath = @()
+            extraUninstallPath = @()
+            title = "Starshot"
+            description = "Windows HDR Screenshot Tool"
+            windowTitle = "Starshot Installer"
+            uacStrategy = "prefer-user"
+          }
+          # serde_json 不吃 BOM，必须无 BOM UTF-8 写入（本地实测 PS 的 utf8 带 BOM 会解析失败）
+          [System.IO.File]::WriteAllText("$PWD/kachina.config.json", ($config | ConvertTo-Json -Depth 5), [System.Text.UTF8Encoding]::new($false))
+          ./kachina-builder.exe pack -c kachina.config.json -o Kachina.update.exe --icon src/logo.ico
+          if (!(Test-Path Kachina.update.exe)) { Write-Error "updater build failed"; exit 1 }
+
+          # 差分基线：拉上一版原始目录 zip 解压（404=首个安装版，跳过差分纯全量）。
+          # zip 打包时不含包裹目录，解压后 baseline/ 即原始平铺目录
+          $diffArgs = @()
+          try {
+            Invoke-WebRequest "$cdn/kachina/baseline-win-$arch.zip" -OutFile baseline.zip
+            Expand-Archive baseline.zip -DestinationPath baseline -Force
+            if (Test-Path baseline) { $diffArgs = @("-d", (Resolve-Path baseline).Path) }
+          } catch {
+            Write-Host "No baseline yet, building full-only package"
+          }
+
+          ./kachina-builder.exe gen -j 8 -i kachina-flat -m kachina-metadata.json -o kachina-hashed -r loliri/Starshot -t $vl -u Kachina.update.exe @diffArgs
+          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -o "Starshot-installer-win-$arch.exe"
+          if (!(Test-Path "Starshot-installer-win-$arch.exe")) { Write-Error "installer build failed"; exit 1 }
+
+          # 本版原始目录 zip = 下一版的差分基线
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          if (Test-Path "baseline-win-$arch.zip") { Remove-Item "baseline-win-$arch.zip" }
+          [System.IO.Compression.ZipFile]::CreateFromDirectory("kachina-flat", "baseline-win-$arch.zip", [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
+          Remove-Item baseline.zip -Force -ErrorAction SilentlyContinue
+          Remove-Item baseline -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item kachina-hashed -Recurse -Force -ErrorAction SilentlyContinue
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
           path: |
             Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip
+            Starshot-installer-win-${{ matrix.platform }}.exe
+            baseline-win-${{ matrix.platform }}.zip
             diff-*-win-${{ matrix.platform }}.patch
             launcher-*-win-${{ matrix.platform }}.exe
 
@@ -443,6 +517,36 @@ jobs:
             echo "new_latest=$NEW_LATEST"
             echo "new_latest_preview=$NEW_LATEST_PREVIEW"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Upload kachina installer to CDN (stable only)
+        if: ${{ inputs.prerelease != true }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: |
+          # 安装版线固定 URL：bucket 根的 Starshot-installer-win-{arch}.exe 每版覆盖 + 下一版差分基线 zip。
+          # 固定 URL 被 CDN 缓存，必须 no-cache（回源校验），绝不能 immutable。
+          # 仅 stable 覆盖：预览不碰这两个 URL，安装版线恒为稳定渠道
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$R2_BUCKET" ] || [ -z "$R2_ENDPOINT" ]; then
+            echo "::error::R2 secrets not configured"
+            exit 1
+          fi
+          for arch in x64 arm64; do
+            if [ -f "upload/Starshot-installer-win-$arch.exe" ]; then
+              aws s3 cp "upload/Starshot-installer-win-$arch.exe" "s3://$R2_BUCKET/Starshot-installer-win-$arch.exe" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --content-type "application/octet-stream" \
+                --cache-control "no-cache, must-revalidate"
+            fi
+            if [ -f "upload/baseline-win-$arch.zip" ]; then
+              aws s3 cp "upload/baseline-win-$arch.zip" "s3://$R2_BUCKET/kachina/baseline-win-$arch.zip" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --content-type "application/zip" \
+                --cache-control "no-cache, must-revalidate"
+            fi
+          done
 
   clean-old-versions:
     needs: upload-cdn
