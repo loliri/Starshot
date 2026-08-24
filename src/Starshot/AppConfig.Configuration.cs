@@ -84,7 +84,7 @@ public static partial class AppConfig
             }
             // 安装版线（kachina）首启判定——只在欢迎页做这一次：包内带更新器 →
             // 数据落 LocalAppData 并写 database.json 锚定（此后启动靠 JSON 定位，不再探测）
-            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "Kachina.update.exe")))
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")))
             {
                 UserDataFolder = localAppData;
                 try
@@ -134,7 +134,7 @@ public static partial class AppConfig
                 AppConfig.ScreenshotFolder = welcome.ScreenshotFolderPath;
             }
             // 更新线锚定：安装版线把 installer 标志写进 DB，此后运行期更新分派/设置显隐只看它
-            AppConfig.Installer = File.Exists(Path.Combine(AppContext.BaseDirectory, "Kachina.update.exe"));
+            AppConfig.Installer = File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"));
         }
 
         // 应用强调色与语言

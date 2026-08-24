@@ -240,7 +240,7 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 安装版线（kachina）：true 时更新拉起 Kachina.update.exe、隐藏更新源/打开数据目录等便携版专属 UI。
+    /// 安装版线（kachina）：true 时更新拉起 Starshot.Update.exe、隐藏更新源等便携版专属 UI。
     /// 首次启动由欢迎页流程按包内更新器存在与否写入，之后一直不变（更新线与数据位置独立锚定）。
     /// </summary>
     public static bool Installer { get => GetValue(false); set => SetValue(value); }

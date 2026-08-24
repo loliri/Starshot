@@ -134,7 +134,7 @@ public static class UpdateService
         // 安装版线（kachina）：更新交给包内更新器（GUI 自带进度/差分/hash 校验/断点自愈），app 退出让它接管
         if (AppConfig.Installer)
         {
-            string updaterExe = Path.Combine(AppContext.BaseDirectory, "Kachina.update.exe");
+            string updaterExe = Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe");
             if (File.Exists(updaterExe))
             {
                 Process.Start(new ProcessStartInfo(updaterExe) { UseShellExecute = true });
@@ -142,7 +142,7 @@ public static class UpdateService
                 App.Current.Exit();
                 return;
             }
-            _logger?.LogWarning("Installer mode but Kachina.update.exe missing, falling back to portable update");
+            _logger?.LogWarning("Installer mode but Starshot.Update.exe missing, falling back to portable update");
         }
 
         string root = AppConfig.UserDataFolder;
