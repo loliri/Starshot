@@ -338,7 +338,7 @@ jobs:
             regName = "Starshot"
             exeName = "Starshot.exe"
             uninstallName = "Uninstall.exe"
-            updaterName = "Kachina.update.exe"
+            updaterName = "Starshot.Update.exe"
             programFilesPath = "Starshot"
             userDataPath = @()
             extraUninstallPath = @()
@@ -349,8 +349,8 @@ jobs:
           }
           # serde_json 不吃 BOM，必须无 BOM UTF-8 写入（本地实测 PS 的 utf8 带 BOM 会解析失败）
           [System.IO.File]::WriteAllText("$PWD/kachina.config.json", ($config | ConvertTo-Json -Depth 5), [System.Text.UTF8Encoding]::new($false))
-          ./kachina-builder.exe pack -c kachina.config.json -o Kachina.update.exe --icon src/logo.ico
-          if (!(Test-Path Kachina.update.exe)) { Write-Error "updater build failed"; exit 1 }
+          ./kachina-builder.exe pack -c kachina.config.json -o Starshot.Update.exe --icon src/logo.ico
+          if (!(Test-Path Starshot.Update.exe)) { Write-Error "updater build failed"; exit 1 }
 
           # 差分基线：拉上一版原始目录 zip 解压（404=首个安装版，跳过差分纯全量）。
           # zip 打包时不含包裹目录，解压后 baseline/ 即原始平铺目录
@@ -363,7 +363,7 @@ jobs:
             Write-Host "No baseline yet, building full-only package"
           }
 
-          ./kachina-builder.exe gen -j 8 -i kachina-flat -m kachina-metadata.json -o kachina-hashed -r loliri/Starshot -t $vl -u Kachina.update.exe @diffArgs
+          ./kachina-builder.exe gen -j 8 -i kachina-flat -m kachina-metadata.json -o kachina-hashed -r loliri/Starshot -t $vl -u Starshot.Update.exe @diffArgs
           ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -o "Starshot-installer-win-$arch.exe"
           if (!(Test-Path "Starshot-installer-win-$arch.exe")) { Write-Error "installer build failed"; exit 1 }
 
