@@ -17,8 +17,11 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<WindowsPackageType>None</WindowsPackageType>
 		<!-- 自包含仅 Release（CI 发布产物）：Debug 框架依赖构建更快更省盘 -->
-		<WindowsAppSDKSelfContained Condition="'$(Configuration)' != 'Debug'">true</WindowsAppSDKSelfContained>
-		<SelfContained Condition="'$(Configuration)' != 'Debug'">true</SelfContained>
+		<!-- <WindowsAppSDKSelfContained Condition="'$(Configuration)' != 'Debug'">true</WindowsAppSDKSelfContained>
+		<SelfContained Condition="'$(Configuration)' != 'Debug'">true</SelfContained> -->
+		<!-- 调试机 runtime 坏了，暂时先全部自包含，好了调回来 -->
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<SelfContained>true</SelfContained>
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
