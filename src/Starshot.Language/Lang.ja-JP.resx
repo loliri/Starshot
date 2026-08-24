@@ -142,6 +142,9 @@
   <data name="Common_Apply" xml:space="preserve">
     <value>適用</value>
   </data>
+  <data name="Common_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
   <data name="Common_Refresh" xml:space="preserve">
     <value>更新</value>
   </data>

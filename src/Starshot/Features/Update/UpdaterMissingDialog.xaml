@@ -24,6 +24,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Margin="24,24,0,12"
@@ -38,20 +39,18 @@
                    TextWrapping="Wrap" />
 
         <!--  下载源：目前 GitHub，之后可在此追加  -->
-        <TextBlock Grid.Row="1"
-                   Margin="24,16,24,0"
-                   VerticalAlignment="Bottom">
+        <TextBlock Grid.Row="2" Margin="24,16,24,0">
             <Hyperlink NavigateUri="https://github.com/loliri/Starshot/releases"
                        UnderlineStyle="None">
                 <Run FontWeight="SemiBold" Text="GitHub Releases" />
             </Hyperlink>
         </TextBlock>
 
-        <Button Grid.Row="2"
+        <Button Grid.Row="3"
                 Margin="24"
                 HorizontalAlignment="Right"
-                Click="Button_Apply_Click"
-                Content="{x:Bind lang:Lang.Common_Apply}"
+                Click="Button_OK_Click"
+                Content="{x:Bind lang:Lang.Common_OK}"
                 Style="{ThemeResource AccentButtonStyle}" />
 
     </Grid>

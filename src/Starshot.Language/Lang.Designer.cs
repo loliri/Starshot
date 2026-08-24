@@ -58,6 +58,15 @@
                 return ResourceManager.GetString("Common_Apply", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 OK 的本地化字符串。
+        /// </summary>
+        public static string Common_OK {
+            get {
+                return ResourceManager.GetString("Common_OK", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Cancel 的本地化字符串。

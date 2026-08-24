@@ -142,6 +142,9 @@
   <data name="Common_Apply" xml:space="preserve">
     <value>应用</value>
   </data>
+  <data name="Common_OK" xml:space="preserve">
+    <value>确定</value>
+  </data>
   <data name="Common_Refresh" xml:space="preserve">
     <value>刷新</value>
   </data>

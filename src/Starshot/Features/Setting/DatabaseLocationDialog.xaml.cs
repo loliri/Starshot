@@ -16,7 +16,7 @@ public sealed partial class DatabaseLocationDialog : ContentDialog
     }
 
 
-    private void Button_Apply_Click(object sender, RoutedEventArgs e)
+    private void Button_OK_Click(object sender, RoutedEventArgs e)
     {
         Hide();
     }

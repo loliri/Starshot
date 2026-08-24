@@ -40,8 +40,8 @@
         <Button Grid.Row="2"
                 Margin="24"
                 HorizontalAlignment="Right"
-                Click="Button_Apply_Click"
-                Content="{x:Bind lang:Lang.Common_Apply}"
+                Click="Button_OK_Click"
+                Content="{x:Bind lang:Lang.Common_OK}"
                 Style="{ThemeResource AccentButtonStyle}" />
 
     </Grid>
