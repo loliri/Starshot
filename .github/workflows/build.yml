@@ -320,9 +320,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 版本 pin 死；tag 无 v 前缀，资产名 kachina-builder.exe（本地 0.5.1 实测 12.3MB）
-          $url = gh api repos/YuehaiTeam/kachina-installer/releases/tags/0.5.1 --jq '.assets[] | select(.name == "kachina-builder.exe") | .browser_download_url'
-          if ([string]::IsNullOrEmpty($url)) { Write-Error "kachina-builder.exe not found in tag 0.5.1"; exit 1 }
+          # 跟最新版（不 pin）：新版接口变了这里直接炸掉，提醒适配；资产名 kachina-builder.exe（0.5.1 实测 12.3MB）
+          $url = gh api repos/YuehaiTeam/kachina-installer/releases/latest --jq '.assets[] | select(.name == "kachina-builder.exe") | .browser_download_url'
+          if ([string]::IsNullOrEmpty($url)) { Write-Error "kachina-builder.exe not found in latest release"; exit 1 }
           Invoke-WebRequest $url -OutFile kachina-builder.exe
           ./kachina-builder.exe --help | Select-Object -First 1
 
