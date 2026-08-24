@@ -694,6 +694,9 @@
   <data name="Starshot_DataFolder" xml:space="preserve">
     <value>データフォルダー</value>
   </data>
+  <data name="Starshot_Database" xml:space="preserve">
+    <value>データベース</value>
+  </data>
   <data name="Starshot_UpdateLinks" xml:space="preserve">
     <value>リンク</value>
   </data>

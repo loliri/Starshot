@@ -1210,6 +1210,15 @@
                 return ResourceManager.GetString("Starshot_DataFolder", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Database 的本地化字符串。
+        /// </summary>
+        public static string Starshot_Database {
+            get {
+                return ResourceManager.GetString("Starshot_Database", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Extract 的本地化字符串。

@@ -204,7 +204,7 @@
             <!--  数据库备份  -->
             <StackPanel Spacing="8">
                 <TextBlock FontSize="20"
-                           Text="{x:Bind lang:Lang.Starshot_BackupDatabase}" />
+                           Text="{x:Bind lang:Lang.Starshot_Database}" />
                 <Grid ColumnSpacing="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
