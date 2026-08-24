@@ -589,6 +589,9 @@
   <data name="Starshot_UpdateAvailableTitle" xml:space="preserve">
     <value>发现新版本！</value>
   </data>
+  <data name="Starshot_LaunchUpdater" xml:space="preserve">
+    <value>启动更新程序</value>
+  </data>
   <data name="Starshot_UpdateDelta" xml:space="preserve">
     <value>差分更新</value>
   </data>

@@ -141,6 +141,18 @@
                         VerticalAlignment="Bottom"
                         Orientation="Horizontal"
                         Spacing="24">
+                <!--  安装版线（kachina）：无差分/全量之分，拉起更新器，非下拉单按钮  -->
+                <Button x:Name="Button_UpdateInstaller"
+                        Height="40"
+                        Padding="24,0,24,0"
+                        BorderThickness="0"
+                        Command="{x:Bind UpdateNowCommand}"
+                        CornerRadius="20"
+                        Style="{ThemeResource AccentButtonStyle}"
+                        Visibility="Collapsed">
+                    <TextBlock Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                               Text="{x:Bind lang:Lang.Starshot_LaunchUpdater}" />
+                </Button>
                 <SplitButton x:Name="Button_Update"
                              Height="40"
                              Padding="24,0,24,0"

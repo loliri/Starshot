@@ -589,6 +589,9 @@
   <data name="Starshot_UpdateAvailableTitle" xml:space="preserve">
     <value>New version available!</value>
   </data>
+  <data name="Starshot_LaunchUpdater" xml:space="preserve">
+    <value>Launch Updater</value>
+  </data>
   <data name="Starshot_UpdateDelta" xml:space="preserve">
     <value>Delta Update</value>
   </data>

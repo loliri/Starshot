@@ -1842,6 +1842,15 @@
         /// <summary>
         ///   查找类似 Delta Update 的本地化字符串。
         /// </summary>
+        public static string Starshot_LaunchUpdater {
+            get {
+                return ResourceManager.GetString("Starshot_LaunchUpdater", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Delta Update 的本地化字符串。
+        /// </summary>
         public static string Starshot_UpdateDelta {
             get {
                 return ResourceManager.GetString("Starshot_UpdateDelta", resourceCulture);

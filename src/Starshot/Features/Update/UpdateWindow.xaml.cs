@@ -39,6 +39,12 @@ public sealed partial class UpdateWindow : WindowEx
     {
         InitializeComponent();
         Title = "Starshot";
+        // 安装版线（kachina）：更新由外部更新器接管，无差分/全量之分，主按钮换成单按钮
+        if (AppConfig.Installer)
+        {
+            Button_Update.Visibility = Visibility.Collapsed;
+            Button_UpdateInstaller.Visibility = Visibility.Visible;
+        }
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         // Labs MarkdownTextBlock 只认系统主题（不看 app 主题），窗口也跟随系统保持一致
         RootGrid.RequestedTheme = ElementTheme.Default;
