@@ -42,6 +42,12 @@ public sealed partial class AboutPage : PageBase
         CheckUpdateButton.Visibility = Visibility.Collapsed;
         PreReleaseSwitch.Visibility = Visibility.Collapsed;
 #endif
+        // 安装版线（kachina）当前只走 stable 渠道，预览开关会误导（检查到预览版但更新器按 hash 只认 stable）；
+        // devmode 开发者保留（调双渠道用）
+        if (AppConfig.Installer && !AppConfig.DevMode)
+        {
+            PreReleaseSwitch.Visibility = Visibility.Collapsed;
+        }
     }
 
 

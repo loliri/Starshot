@@ -1849,6 +1849,15 @@
         }
 
         /// <summary>
+        ///   查找类似 After you click "Launch Updater" 的本地化字符串。
+        /// </summary>
+        public static string Starshot_UpdaterLauncherTip {
+            get {
+                return ResourceManager.GetString("Starshot_UpdaterLauncherTip", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Delta Update 的本地化字符串。
         /// </summary>
         public static string Starshot_UpdateDelta {

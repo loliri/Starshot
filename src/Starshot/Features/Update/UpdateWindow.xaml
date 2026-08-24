@@ -102,6 +102,13 @@
                 </Grid>
 
                 <MenuFlyoutSeparator />
+
+                <!--  安装版线说明：更新流程与便携版不同（外部更新器接管），首次见需要解释  -->
+                <TextBlock x:Name="TextBlock_InstallerTip"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                           Text="{x:Bind lang:Lang.Starshot_UpdaterLauncherTip}"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed" />
             </StackPanel>
 
 

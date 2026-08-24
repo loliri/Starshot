@@ -44,6 +44,7 @@ public sealed partial class UpdateWindow : WindowEx
         {
             Button_Update.Visibility = Visibility.Collapsed;
             Button_UpdateInstaller.Visibility = Visibility.Visible;
+            TextBlock_InstallerTip.Visibility = Visibility.Visible;
         }
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         // Labs MarkdownTextBlock 只认系统主题（不看 app 主题），窗口也跟随系统保持一致
