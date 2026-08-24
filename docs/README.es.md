@@ -22,6 +22,9 @@ Captura 16bit de pipeline completo · Captura de región · Codificación AVIF /
 
 ---
 
+> [!WARNING]
+> Este documento ya no se mantiene y su contenido puede estar desactualizado. Se recomienda leer directamente la [documentación en inglés](../README.md), o utilizar IA / software de traducción para leer la versión en inglés.
+
 ## Por qué Starshot
 
 La herramienta de recortes integrada de Windows (Snipping Tool, Win+Shift+S) solo puede capturar imágenes SDR de 8 bits incluso en monitores HDR: el compositor del sistema comprime los fotogramas HDR de 16 bits, lo que provoca recorte de altas luces y reducción de la gama de colores, resultando en capturas apagadas, sobreexpuestas o con errores de mapeo de color. Las herramientas de captura de pantalla más comunes también están limitadas por el pipeline tradicional GDI/BitBlt y no pueden procesar datos HDR.
