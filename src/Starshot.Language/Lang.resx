@@ -698,7 +698,7 @@
     <value>Database</value>
   </data>
   <data name="Starshot_ChangeDatabaseFolder" xml:space="preserve">
-    <value>Change Database Folder</value>
+    <value>Change Location</value>
   </data>
   <data name="Starshot_DatabaseLocationChangedTitle" xml:space="preserve">
     <value>Database Location Changed</value>

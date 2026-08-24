@@ -87,11 +87,7 @@ public sealed partial class StorageSetting : PageBase
     public StorageSetting()
     {
         InitializeComponent();
-        // 安装版线（kachina）：数据在 LocalAppData，「打开数据目录」无意义；更改数据库文件夹行保留（数据位置与更新线独立）
-        if (AppConfig.Installer)
-        {
-            StackPanel_DataFolder.Visibility = Visibility.Collapsed;
-        }        DatabaseFolder = AppConfig.UserDataFolder;
+        DatabaseFolder = AppConfig.UserDataFolder;
         InitializeScreenshotFolder();
         LogFolder = AppConfig.LogFolder;
         _lastFocusedTemplateBox = FileNameTextBox;

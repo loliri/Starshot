@@ -698,7 +698,7 @@
     <value>データベース</value>
   </data>
   <data name="Starshot_ChangeDatabaseFolder" xml:space="preserve">
-    <value>データベースフォルダーを変更</value>
+    <value>場所を変更</value>
   </data>
   <data name="Starshot_DatabaseLocationChangedTitle" xml:space="preserve">
     <value>データベースの場所を変更しました</value>

@@ -698,7 +698,7 @@
     <value>数据库</value>
   </data>
   <data name="Starshot_ChangeDatabaseFolder" xml:space="preserve">
-    <value>更改数据库文件夹</value>
+    <value>更改位置</value>
   </data>
   <data name="Starshot_DatabaseLocationChangedTitle" xml:space="preserve">
     <value>数据库位置已更改</value>
