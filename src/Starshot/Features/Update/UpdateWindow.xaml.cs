@@ -6,6 +6,7 @@ using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,9 @@ public sealed partial class UpdateWindow : WindowEx
 {
     private ReleaseInfo? _release;
     private CancellationTokenSource? _cts;
+
+    /// <summary>装线已拉起更新器、窗口即将随 App.Current.Exit 关闭——退出不是用户取消</summary>
+    private bool _launchingUpdater;
     private bool _userClosed;
 
 
@@ -54,7 +58,8 @@ public sealed partial class UpdateWindow : WindowEx
         CenterInScreen(1000, 680);
         this.Closed += (_, _) =>
         {
-            if (_cts is null) return; // 没在下载，正常关闭不提示
+            // 拉起更新器后的退出是装线正常流程，不当用户取消处理（否则误弹「更新失败」）
+            if (_cts is null || _launchingUpdater) return;
             _userClosed = true;
             _cts?.Cancel();
             // 马上提示（不等 StartUpdateAsync 的 catch 链走完）
@@ -121,8 +126,17 @@ public sealed partial class UpdateWindow : WindowEx
     private async Task RunUpdateAsync(bool forceFull)
     {
         if (_release is null) return;
+        // 装线缺更新器：只弹重下载提示，不走后续任何流程（便携回退在装线布局下会装出错误布局）
+        if (AppConfig.Installer && !File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")))
+        {
+            var dialog = new UpdaterMissingDialog { XamlRoot = RootGrid.XamlRoot };
+            await dialog.ShowAsync();
+            return;
+        }
         Button_Update.IsEnabled = false;
+        Button_UpdateInstaller.IsEnabled = false;
         Button_Remind.IsEnabled = false;
+        if (AppConfig.Installer) _launchingUpdater = true;
         IsProgressVisible = Visibility.Visible;
         HasError = Visibility.Collapsed;
         ProgressValue = 0;

@@ -1858,6 +1858,24 @@
         }
 
         /// <summary>
+        ///   查找类似 Missing required files 的本地化字符串。
+        /// </summary>
+        public static string Starshot_UpdaterMissingTitle {
+            get {
+                return ResourceManager.GetString("Starshot_UpdaterMissingTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The program is corrupted 的本地化字符串。
+        /// </summary>
+        public static string Starshot_UpdaterMissingMessage {
+            get {
+                return ResourceManager.GetString("Starshot_UpdaterMissingMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Developer mode enabled 的本地化字符串。
         /// </summary>
         public static string Starshot_DevModeOn {

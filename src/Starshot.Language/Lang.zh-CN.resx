@@ -595,6 +595,12 @@
   <data name="Starshot_UpdaterLauncherTip" xml:space="preserve">
     <value>点击「启动更新程序」后，程序会自动退出，由 Starshot.Update.exe 接管（下载、校验并应用更新文件）。</value>
   </data>
+  <data name="Starshot_UpdaterMissingTitle" xml:space="preserve">
+    <value>缺少必要文件</value>
+  </data>
+  <data name="Starshot_UpdaterMissingMessage" xml:space="preserve">
+    <value>程序已损坏（缺少更新组件），请重新下载安装程序。</value>
+  </data>
   <data name="Starshot_DevModeOn" xml:space="preserve">
     <value>开发者模式已开启</value>
   </data>

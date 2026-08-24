@@ -142,7 +142,8 @@ public static class UpdateService
                 App.Current.Exit();
                 return;
             }
-            _logger?.LogWarning("Installer mode but Starshot.Update.exe missing, falling back to portable update");
+            // 更新器是装线更新链唯一入口，缺了不能回退便携流程（装线布局下会装出错误布局）——UI 层已拦弹重下载提示，这里兜底直接抛
+            throw new InvalidOperationException("Starshot.Update.exe missing (installer mode)");
         }
 
         string root = AppConfig.UserDataFolder;

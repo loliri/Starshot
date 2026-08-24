@@ -595,6 +595,12 @@
   <data name="Starshot_UpdaterLauncherTip" xml:space="preserve">
     <value>「更新プログラムを起動」をクリックすると、アプリは自動的に終了し、Starshot.Update.exe がダウンロード・検証・適用を引き継ぎます。</value>
   </data>
+  <data name="Starshot_UpdaterMissingTitle" xml:space="preserve">
+    <value>必要なファイルがありません</value>
+  </data>
+  <data name="Starshot_UpdaterMissingMessage" xml:space="preserve">
+    <value>プログラムが破損しています（更新コンポーネント不足）。インストーラーを再ダウンロードしてください。</value>
+  </data>
   <data name="Starshot_DevModeOn" xml:space="preserve">
     <value>開発者モードが有効になりました</value>
   </data>
