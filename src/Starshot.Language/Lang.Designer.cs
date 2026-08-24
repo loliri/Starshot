@@ -1219,6 +1219,33 @@
                 return ResourceManager.GetString("Starshot_Database", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Change Database Folder 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ChangeDatabaseFolder {
+            get {
+                return ResourceManager.GetString("Starshot_ChangeDatabaseFolder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Database Location Changed 的本地化字符串。
+        /// </summary>
+        public static string Starshot_DatabaseLocationChangedTitle {
+            get {
+                return ResourceManager.GetString("Starshot_DatabaseLocationChangedTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Takes effect after restart. 的本地化字符串。
+        /// </summary>
+        public static string Starshot_DatabaseLocationChangedMessage {
+            get {
+                return ResourceManager.GetString("Starshot_DatabaseLocationChangedMessage", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Extract 的本地化字符串。

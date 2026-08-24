@@ -63,8 +63,8 @@
             </StackPanel>
 
 
-            <!--  数据文件夹  -->
-            <StackPanel Spacing="8">
+            <!--  数据文件夹（安装版线隐藏：数据在 LocalAppData，打开无意义）  -->
+            <StackPanel x:Name="StackPanel_DataFolder" Spacing="8">
                 <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_DataFolder}" />
                 <Button Height="40"
                         Padding="16,0,16,0"
@@ -205,6 +205,54 @@
             <StackPanel Spacing="8">
                 <TextBlock FontSize="20"
                            Text="{x:Bind lang:Lang.Starshot_Database}" />
+
+                <!--  更改数据库文件夹：快照拷库到新位置 + 写 database.json 锚定，重启后生效  -->
+                <Grid ColumnSpacing="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0"
+                            Height="40"
+                            Padding="16,0,16,0"
+                            BorderThickness="0"
+                            Command="{x:Bind ChangeDatabaseFolderCommand}"
+                            CornerRadius="8,20,20,8"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8DE;" />
+                            <TextBlock Text="{x:Bind lang:Lang.Starshot_ChangeDatabaseFolder}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1"
+                            Height="40"
+                            Margin="16,0,0,0"
+                            Padding="20,0,20,1"
+                            HorizontalContentAlignment="Left"
+                            BorderThickness="0"
+                            Command="{x:Bind OpenDataFolderCommand}"
+                            CornerRadius="20">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                                       MaxLines="2"
+                                       Text="{x:Bind DatabaseFolder}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" />
+                            <FontIcon Grid.Column="1"
+                                      Margin="0,2,2,0"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE8A7;" />
+                        </Grid>
+                    </Button>
+                </Grid>
+
                 <Grid ColumnSpacing="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />

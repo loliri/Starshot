@@ -131,6 +131,20 @@ public static class UpdateService
 
     public static async Task StartUpdateAsync(ReleaseInfo info, IProgress<(int percent, string bytesText)> progress, CancellationToken ct = default, bool forceFull = false)
     {
+        // 安装版线（kachina）：更新交给包内更新器（GUI 自带进度/差分/hash 校验/断点自愈），app 退出让它接管
+        if (AppConfig.Installer)
+        {
+            string updaterExe = Path.Combine(AppContext.BaseDirectory, "Kachina.update.exe");
+            if (File.Exists(updaterExe))
+            {
+                Process.Start(new ProcessStartInfo(updaterExe) { UseShellExecute = true });
+                _ = Task.Run(async () => { await Task.Delay(2000); Environment.Exit(0); });
+                App.Current.Exit();
+                return;
+            }
+            _logger?.LogWarning("Installer mode but Kachina.update.exe missing, falling back to portable update");
+        }
+
         string root = AppConfig.UserDataFolder;
         string versionIni = Path.Combine(root, "version.ini");
         string launcherExe = Path.Combine(root, "Starshot.exe");

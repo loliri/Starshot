@@ -33,8 +33,8 @@
             </StackPanel>
 
 
-            <!--  更新源  -->
-            <StackPanel Spacing="8">
+            <!--  更新源（安装版线隐藏：源在 kachina config 写死）  -->
+            <StackPanel x:Name="StackPanel_UpdateSource" Spacing="8">
                 <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Update}" />
                 <cwc:Segmented SelectedIndex="{x:Bind UpdateSource, Mode=TwoWay}">
                     <cwc:SegmentedItem Content="Cloudflare" />

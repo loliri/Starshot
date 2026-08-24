@@ -697,6 +697,15 @@
   <data name="Starshot_Database" xml:space="preserve">
     <value>Database</value>
   </data>
+  <data name="Starshot_ChangeDatabaseFolder" xml:space="preserve">
+    <value>Change Database Folder</value>
+  </data>
+  <data name="Starshot_DatabaseLocationChangedTitle" xml:space="preserve">
+    <value>Database Location Changed</value>
+  </data>
+  <data name="Starshot_DatabaseLocationChangedMessage" xml:space="preserve">
+    <value>Takes effect after restart. The new location stores a snapshot of your current data — changes made from now on will not be kept, so please restart soon. The database in the old location is left in place; delete it manually if no longer needed.</value>
+  </data>
   <data name="Starshot_UpdateLinks" xml:space="preserve">
     <value>Links</value>
   </data>

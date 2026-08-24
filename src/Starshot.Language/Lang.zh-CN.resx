@@ -697,6 +697,15 @@
   <data name="Starshot_Database" xml:space="preserve">
     <value>数据库</value>
   </data>
+  <data name="Starshot_ChangeDatabaseFolder" xml:space="preserve">
+    <value>更改数据库文件夹</value>
+  </data>
+  <data name="Starshot_DatabaseLocationChangedTitle" xml:space="preserve">
+    <value>数据库位置已更改</value>
+  </data>
+  <data name="Starshot_DatabaseLocationChangedMessage" xml:space="preserve">
+    <value>重启后生效。新位置保存的是当前数据的快照，此后所做的更改不会保留，请尽快重启。原位置的数据库保留不动，如不再需要请手动删除。</value>
+  </data>
   <data name="Starshot_UpdateLinks" xml:space="preserve">
     <value>相关链接</value>
   </data>

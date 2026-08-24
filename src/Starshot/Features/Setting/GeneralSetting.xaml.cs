@@ -76,6 +76,11 @@ public sealed partial class GeneralSetting : PageBase
     public GeneralSetting()
     {
         InitializeComponent();
+        // 安装版线（kachina）：更新源在 kachina config 写死，用户无从选择，整块隐藏
+        if (AppConfig.Installer)
+        {
+            StackPanel_UpdateSource.Visibility = Visibility.Collapsed;
+        }
         s_activeInstance = this;
         LoadShieldIcon();
     }
@@ -348,6 +353,11 @@ public sealed partial class GeneralSetting : PageBase
     private static string GetLauncherPath()
     {
         string exePath = Environment.ProcessPath ?? "";
+        // 安装版线（kachina）：扁平目录，主程序就在根，自启直接指向自身
+        if (AppConfig.Installer)
+        {
+            return exePath;
+        }
         string appDir = Path.GetDirectoryName(exePath) ?? "";
         string rootDir = Path.GetDirectoryName(appDir) ?? "";
         string launcher = Path.Combine(rootDir, "Starshot.exe");

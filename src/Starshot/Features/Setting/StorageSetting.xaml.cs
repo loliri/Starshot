@@ -87,12 +87,54 @@ public sealed partial class StorageSetting : PageBase
     public StorageSetting()
     {
         InitializeComponent();
+        // 安装版线（kachina）：数据在 LocalAppData，「打开数据目录」无意义；更改数据库文件夹行保留（数据位置与更新线独立）
+        if (AppConfig.Installer)
+        {
+            StackPanel_DataFolder.Visibility = Visibility.Collapsed;
+        }        DatabaseFolder = AppConfig.UserDataFolder;
         InitializeScreenshotFolder();
         LogFolder = AppConfig.LogFolder;
         _lastFocusedTemplateBox = FileNameTextBox;
         BuildPlaceholderLinks();
         RefreshLastBackup();
         _ = RefreshStatsAsync();
+    }
+
+
+    public string DatabaseFolder { get; set => SetProperty(ref field, value); } = "";
+
+
+    [RelayCommand]
+    private async Task ChangeDatabaseFolder()
+    {
+        try
+        {
+            var folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
+            if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return;
+            folder = Path.GetFullPath(folder);
+            if (string.Equals(folder, Path.GetFullPath(AppConfig.UserDataFolder), StringComparison.OrdinalIgnoreCase)) return;
+            // 复用备份逻辑把当前库整套快照到新位置（原库不动，保兼容）
+            await Task.Run(() => DatabaseService.BackupDatabase(Path.Combine(folder, "StarshotDatabase.db")));
+            // 写锚定 JSON，下次启动按它定位数据库
+            string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot");
+            Directory.CreateDirectory(localAppData);
+            await File.WriteAllTextAsync(Path.Combine(localAppData, "database.json"),
+                System.Text.Json.JsonSerializer.Serialize(new { DatabaseFolder = folder }));
+            DatabaseFolder = folder;
+            var dialog = new ContentDialog
+            {
+                Title = Lang.Starshot_DatabaseLocationChangedTitle,
+                Content = Lang.Starshot_DatabaseLocationChangedMessage,
+                CloseButtonText = Lang.Common_Apply,
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot,
+            };
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ChangeDatabaseFolder");
+        }
     }
 
 
@@ -320,7 +362,8 @@ public sealed partial class StorageSetting : PageBase
 
     private string? _lastBackupPath;
 
-    private static string DatabaseBackupFolder => Path.Combine(AppConfig.UserDataFolder, "backup");
+    // 安装版线备份进日志文件夹体系（LocalAppData）；便携版照旧在数据目录（便携布局的根）
+    private static string DatabaseBackupFolder => Path.Combine(AppConfig.Installer ? AppConfig.LogFolder : AppConfig.UserDataFolder, "backup");
 
 
     private void RefreshLastBackup()

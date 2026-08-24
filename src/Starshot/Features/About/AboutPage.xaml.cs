@@ -19,7 +19,8 @@ public sealed partial class AboutPage : PageBase
 #if DEBUG
         "Debug";
 #else
-        $"Release {AppConfig.AppVersion}";
+        // 安装版线（kachina）带 Installer 后缀，两条线在关于页可辨
+        $"Release {AppConfig.AppVersion}{(AppConfig.Installer ? " Installer" : "")}";
 #endif
 
 

@@ -38,6 +38,26 @@ public static partial class AppConfig
         string baseDir = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         UserDataFolder = Path.GetDirectoryName(baseDir) ?? baseDir;
 
+        // LocalAppData 根（日志/缓存默认家，database.json 锚定也放这）
+        string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot");
+
+        // database.json 锚定数据库位置：安装版线欢迎页写入 / 用户「更改数据库文件夹」写入。
+        // 不存在 = 便携版默认（父目录）。启动期只认这个文件，不做任何环境探测——此时探测不可靠。
+        try
+        {
+            string anchorPath = Path.Combine(localAppData, "database.json");
+            if (File.Exists(anchorPath))
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(anchorPath));
+                if (doc.RootElement.TryGetProperty("DatabaseFolder", out var folder)
+                    && folder.GetString() is { Length: > 0 } dbFolder && Directory.Exists(dbFolder))
+                {
+                    UserDataFolder = dbFolder;
+                }
+            }
+        }
+        catch { }
+
         // 版本号：Debug 构建显示 "Debug"（日志 Starshot_Debug_*.log + 启动 vDebug）；Release 读 assembly 内嵌
 #if DEBUG
         AppVersion = "Debug";
@@ -61,6 +81,19 @@ public static partial class AppConfig
             if (!await welcome.WaitAsync())
             {
                 Environment.Exit(0);
+            }
+            // 安装版线（kachina）首启判定——只在欢迎页做这一次：包内带更新器 →
+            // 数据落 LocalAppData 并写 database.json 锚定（此后启动靠 JSON 定位，不再探测）
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "Kachina.update.exe")))
+            {
+                UserDataFolder = localAppData;
+                try
+                {
+                    Directory.CreateDirectory(localAppData);
+                    File.WriteAllText(Path.Combine(localAppData, "database.json"),
+                        System.Text.Json.JsonSerializer.Serialize(new { DatabaseFolder = UserDataFolder }));
+                }
+                catch { }
             }
         }
 
@@ -100,6 +133,8 @@ public static partial class AppConfig
             {
                 AppConfig.ScreenshotFolder = welcome.ScreenshotFolderPath;
             }
+            // 更新线锚定：安装版线把 installer 标志写进 DB，此后运行期更新分派/设置显隐只看它
+            AppConfig.Installer = File.Exists(Path.Combine(AppContext.BaseDirectory, "Kachina.update.exe"));
         }
 
         // 应用强调色与语言
