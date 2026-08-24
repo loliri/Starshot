@@ -16,7 +16,8 @@
 
 [下载](../../releases) · [快速上手](#快速上手) · [功能详解](#功能详解) · [从源码构建](#从源码构建)
 
-**[English](README.md)** | **简体中文** | **[繁體中文](README.zh-TW.md)** | **[日本語](README.ja.md)** | **[Français](README.fr.md)** | **[Русский](README.ru.md)** | **[Español](README.es.md)**
+**[English](README.md)** | **简体中文** |
+[繁體中文](docs/README.zh-TW.md) | [日本語](docs/README.ja.md) | [Français](docs/README.fr.md) | [Русский](docs/README.ru.md) | [Español](docs/README.es.md)
 
 </div>
 
@@ -36,7 +37,7 @@ Starshot 直接从 DXGI 层获取显示器输出的原始 `R16G16B16A16Float` sc
 - 📋 **剪贴板支持**——截图可自动写入剪贴板，独立页面浏览剪贴板历史图片，预览 / 重新复制 / 删除
 - 🗂️ **多格式支持**——AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG，含批量转换工具
 - 🖥️ **多显示器**——区域截图可跨屏框选，直接组合截取横跨多屏的图像
-- 🔄 **自动检查更新**——内置更新检查，发现新版流式下载解压替换
+- 🔄 **自动检查更新**——内置更新检查，发现新版可直接差量更新
 
 <div align="center">
 <table>
@@ -72,11 +73,14 @@ SDR 显示器上，Starshot 自动走标准 SDR 截图路径，是一款通用�
 
 ## 下载
 
-从 [Releases](../../releases) 下载压缩包，解压后运行根目录的 `Starshot.exe` 启动器。无需安装，解压即用。
+两种分发方式，装哪种就走哪条更新线，互不交叉：
+
+- **便携版**：下载压缩包，解压后运行根目录的 `Starshot.exe` 启动器。无需安装，解压即用，数据存在解压目录。
+- **安装版**：下载在线安装程序（约 10MB，不含应用文件），安装时从 CDN 在线获取全部内容，需联网。应用装为扁平目录，安装信息存储在注册表，更新由更新器接管，支持差量更新、卸载等功能。
 
 ## 软件截图
 
-![Screenshot](Screenshot.jpg)
+![Screenshot](docs/Screenshot.jpg)
 
 ## 快速上手
 
@@ -191,17 +195,18 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 多文件夹浏览（默认截图目录 + 用户自加文件夹）
 - `FileSystemWatcher` 实时感知新增/删除
 - 按日期分组、缩略图懒加载
-- 右键菜单：打开 / 复制文件 / 复制为 JPG / 在资源管理器中打开 / 打开方式 / 删除
+- 右键菜单：打开 / 复制文件 / 复制图像 / 在资源管理器中打开 / 打开方式 / 删除
 - 多选 + 拖出 + 批量转换入口
 
 ### 剪贴板历史
 
 - 独立页面浏览 Windows 剪贴板历史（Win+V）中的图片项
 - 读取 `Clipboard.GetHistoryItemsAsync`，按时间倒序平铺
+- **当前剪贴板卡片**：超过系统历史单条目大小上限（约 4MB）的大图能正常放上剪贴板但不进 Win+V——页面顶部实时展示当前剪贴板内容补上这块反馈；与历史第一条逐像素比对，相同则隐藏（小图不重复出现）
 - 剪贴板变化自动刷新（ContentChanged 监听 + 节流）+ 回前台补刷
 - 点击预览（图片查看器，支持上一张/下一张）
 - 右键菜单：信息（格式/尺寸/大小）/ 打开 / 重新复制 / 从历史删除
-- 前提：用户在 Windows 设置中开启剪贴板历史
+- 前提：用户在 Windows 设置中开启剪贴板历史；当前剪贴板卡片不依赖历史开启
 - 未开启时显示提示并提供快捷链接（`ms-settings:clipboard`）；开启但无图片时显示空状态提示
 
 ### 图片查看器
@@ -209,7 +214,6 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 缩放（滑块 / 按钮 / 鼠标滚轮平滑动画 / 双击适配）、全屏模式（F11）
 - 上一张 / 下一张（方向键、鼠标滚轮、底部缩略图条）
 - 拖入文件直接打开
-- 右键菜单：复制 文件 / 路径 / 到剪贴板（HDR 源自动色调映射，全程内存零写盘）、删除、在资源管理器中打开、打开方式
 - **编辑面板**：HDR / SDR / Auto 显示模式切换、SDR 亮度滑块（100–500 nit）、图像与显示器信息
 - **格式互转（导出）**：HDR 显示模式 → AVIF / JPEG XL；SDR 显示模式 + HDR 源 → SDR JPEG / Ultra HDR JPEG / SDR PNG（均为所见即所得的色调映射输出）；SDR 源 → PNG / AVIF / JPEG XL
 - **色彩管理**：读取显示器 ICC profile 与 AdvancedColorInfo
@@ -250,20 +254,11 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 ### 开机自启
 
-- 注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`，指向启动器（根目录 `Starshot.exe`）
+- 注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`，指向启动器（根目录 `Starshot.exe`；安装版直接指向主程序自身）
+- 可选「高优先级启动」开关：改用计划任务（登录触发），启动时机优先于注册表排队；进程优先级另由「高优先级运行」开关控制（应用自提升）
 - 可选 `--hide` 最小化到托盘启动（需托盘已开启）
 - 开关实时读注册表（不缓存数据库）：任务管理器禁用只动 StartupApproved、不删 Run 项，开关仍显示开
 - 启动时检测自启项指向的 exe 是否存在，不存在则自动清除启动项并 toast 提示
-
-### 检查更新
-
-- 启动时节流检查（≥24h + 开关开启）GitHub Releases 最新版，或 About 页手动检查
-- **差分优先**：优先用链式差分包（只含变化文件，几 MB vs 整包 80MB）；从当前版本逐层向上匹配，最多 5 层（设置 → 高级可调）；跨版本太多或匹配不到则自动回退整包
-- **手动全量**：更新窗口主按钮下拉可选「全量更新」，跳过差分直接下整包
-- 整包/差分都用 SharpCompress 真流式解压（网络流直连，不落 zip），逐 entry 直接写到根目录
-- 失败还原，成功重启启动器带 `--clean` 清旧
-- 仅 CI/CD release 检查（读 `version.ini` 版本号）；本地构建（无 `version.ini`，`AppVersion = Local`）按 0.0.0 处理，可更新到任意 CI/CD release
-- 版本大小写约定：GitHub tag、zip 名、`app-{version}/` 目录一律小写（如 `0.3.1-preview`）；`version.ini` 内容保留原始大小写（`0.3.1-Preview`，About 页显示用），启动器读取时自己转小写定位目录
 
 ## 已知限制
 
@@ -278,7 +273,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 ### 目录结构
 
 ```
-根目录/
+根目录/（便携版）
   Starshot.exe            ← C++ 启动器（读 version.ini 决定启哪个 app 目录）
   StarshotDatabase.db     ← SQLite 设置数据库
   version.ini             ← 版本号（仅 CI/CD release 有，本地构建无）
@@ -287,10 +282,19 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
     *.dll                 ← 依赖库
     avifenc.exe 等        ← 编解码工具（来自 Starward.Codec NuGet）
   backup/                 ← 数据库备份
-%LOCALAPPDATA%/Starshot/ （默认，可配置）
+
+安装目录/（安装版，扁平）
+  Starshot.exe            ← 主程序（无启动器，无版本目录）
+  Starshot.Update.exe     ← kachina 更新器
+  Starshot.Uninst.exe     ← 卸载器
+  *.dll 等                ← 全部依赖平铺
+
+%LOCALAPPDATA%/Starshot/ （共用，可自定义其中部分内容存储位置）
   log/                    ← 日志
   bg/                     ← 壁纸
+  backup/                 ← 数据库备份（安装版；便携版在根目录）
   thumb/                  ← 缩略图缓存
+  database.json           ← 数据库位置锚定（查找优先级：应用目录 > 此处 > 便携版父目录默认）
 ```
 
 ### 启动器
@@ -437,6 +441,7 @@ Starshot 使用 Win32 原生剪贴板 API 写入，理论上比 WinRT 更可靠�
 
 - [Starward](https://github.com/Scighost/Starward) — 截图核心、编解码引擎、窗口框架均源自 Starward，由 [@Scighost](https://github.com/Scighost) 开发
 - [ShareX](https://github.com/ShareX/ShareX) — 区域截图覆盖层的窗口检测和交互设计参考
+- [kachina-installer](https://github.com/YuehaiTeam/kachina-installer) — 安装版线的安装器与更新器（在线安装、文件级差分、逐文件校验）
 
 **和所有用到的第三方库**：
 

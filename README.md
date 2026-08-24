@@ -14,7 +14,8 @@ Full 16-bit HDR Pipeline · Region Screenshot · AVIF / JPEG XL / PNGv3 Encoding
 
 [Download](../../releases) · [Quick Start](#quick-start) · [Features](#features) · [Build from Source](#build-from-source)
 
-**English** | **[简体中文](README.zh-CN.md)** | **[繁體中文](docs/README.zh-TW.md)** | **[日本語](docs/README.ja.md)** | **[Français](docs/README.fr.md)** | **[Русский](docs/README.ru.md)** | **[Español](docs/README.es.md)**
+**English** | **[简体中文](README.zh-CN.md)** |
+[繁體中文](docs/README.zh-TW.md) | [日本語](docs/README.ja.md) | [Français](docs/README.fr.md) | [Русский](docs/README.ru.md) | [Español](docs/README.es.md)
 
 </div>
 
@@ -34,7 +35,7 @@ Starshot directly captures the raw `R16G16B16A16Float` scRGB framebuffer from th
 - 📋 **Clipboard Support** — Screenshots auto-copy to clipboard; browse clipboard history images in a dedicated page, preview / recopy / delete
 - 🗂️ **Multi-format Support** — AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG, including a batch conversion tool.
 - 🖥️ **Multi-Monitor** — Region screenshots can span across monitors, composing captures that cross screen boundaries.
-- 🔄 **Auto Update Check** — Built-in update check; on a new release it streams the download, extracts, and replaces in place.
+- 🔄 **Auto Update Check** — Built-in update check; delta updates on new releases.
 
 <div align="center">
 <table>
@@ -70,11 +71,14 @@ On SDR displays, Starshot automatically falls back to the standard SDR screensho
 
 ## Download
 
-Download the archive from [Releases](../../releases), extract it, and run `Starshot.exe` from the root directory. No installation needed — just extract and run.
+Two distribution lines — whichever you install is the line you stay on; they never cross:
+
+- **Portable**: Download the archive from [Releases](../../releases), extract it, and run `Starshot.exe` from the root directory. No installation needed — just extract and run. Data lives in the extract folder.
+- **Installer**: Download the online installer (about 10MB, contains no app files); all content is fetched from the CDN during installation, so a network connection is required. The app installs into a flat directory, installation info is stored in the registry, and updates are handled by the bundled updater with delta updates, uninstall, and more.
 
 ## Screenshots
 
-![Screenshot](Screenshot.jpg)
+![Screenshot](docs/Screenshot.jpg)
 
 ## Quick Start
 
@@ -189,17 +193,18 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - Multi-folder browsing (default screenshot directory + user-added folders).
 - `FileSystemWatcher` for real-time add/delete detection.
 - Grouped by date, lazy-loaded thumbnails.
-- Context menu: Open / Copy File / Copy as JPG / Open in Explorer / Open With / Delete.
+- Context menu: Open / Copy File / Copy Image / Open in Explorer / Open With / Delete.
 - Multi-select + drag-out + batch conversion entry point.
 
 ### Clipboard History
 
 - Dedicated page for browsing Windows clipboard history (Win+V) image items
 - Reads `Clipboard.GetHistoryItemsAsync`, flat layout sorted by time
+- **Current-clipboard card**: images above the system history per-item size limit (~4MB) still land on the clipboard but never enter Win+V — the card shows the current clipboard content in real time at the top of the page; pixel-compared against the first history entry and hidden when identical (small images never appear twice)
 - Auto-refresh on clipboard change (ContentChanged + throttle) + refresh on window activation
 - Click to preview (image viewer, with previous/next navigation)
 - Context menu: Info (format/size/dimensions) / Open / Recopy / Delete from history
-- Requires clipboard history enabled in Windows Settings
+- Requires clipboard history enabled in Windows Settings; the current-clipboard card works regardless
 - Empty state: prompt + link to `ms-settings:clipboard` when not enabled; "no images" when empty
 
 ### Image Viewer
@@ -207,7 +212,6 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - Zoom (slider / buttons / mouse wheel smooth animation / double-click to fit), fullscreen mode (F11).
 - Previous / Next (arrow keys, mouse wheel, bottom thumbnail strip).
 - Drag-and-drop files to open directly.
-- Context menu: Copy File / Path / Image, Delete, Open in Explorer, Open With.
 - **Edit Panel**: HDR / SDR / Auto display mode toggle, SDR brightness slider (100–500 nits), image and display info.
 - **Format Conversion**: HDR display mode → AVIF / JPEG XL; SDR display mode + HDR source → SDR JPEG / Ultra HDR JPEG / SDR PNG (all WYSIWYG tone-mapped output); SDR source → PNG / AVIF / JPEG XL.
 - **Color Management**: Reads display ICC profile and AdvancedColorInfo.
@@ -248,19 +252,11 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 
 ### Auto-start on Boot
 
-- Registry key `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, pointing to the launcher (root `Starshot.exe`).
+- Registry key `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, pointing to the launcher (root `Starshot.exe`; the installer line points directly at the main program itself).
+- Optional "Priority start" toggle: switches to a scheduled task (logon trigger) whose launch timing takes priority over registry queuing; process priority is separately controlled by the "High priority run" toggle (app self-elevation).
 - Optional `--hide` flag to start minimized to tray (requires tray to be enabled).
 - The toggle reads the registry in real time (no cached database): Task Manager disabling only touches StartupApproved without removing the Run entry — the toggle still shows as on.
 - On startup, checks whether the exe pointed to by the auto-start entry exists; if not, automatically removes the startup entry and shows a toast.
-
-### Check for Updates
-
-- Throttled check on startup (≥24h + toggle on) against GitHub Releases latest version, or manual check from the About page.
-- Updates prefer chained delta packages (only changed files, a few MB vs ~80MB full package); matches layer by layer from the current version upward, up to 5 layers (adjustable in Settings → Advanced); falls back to the full package if too many versions behind or no match is found.
-- **Manual full update**: The update window's main button dropdown lets you pick "Full update" to skip delta and download the full package directly.
-- Both full and delta packages use SharpCompress true streaming extraction (direct network stream, no zip saved to disk), writing each entry directly to the root directory. On failure, the previous state is restored. On success, restarts the launcher with `--clean` to remove old versions.
-- Only checks CI/CD releases (reads `version.ini` version number). Local builds (no `version.ini`, `AppVersion = Local`) are treated as 0.0.0, so they can update to any CI/CD release.
-- Version case convention: the GitHub tag, zip name, and `app-{version}/` dir are all lowercase (e.g. `0.3.1-preview`); `version.ini` keeps the original case (`0.3.1-Preview`, shown on the About page), and the launcher lowercases it when locating the dir.
 
 ## Known Limitations
 
@@ -275,7 +271,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 ### Directory Structure
 
 ```
-Root/
+Root/ (portable)
   Starshot.exe            ← C++ launcher (reads version.ini to decide which app dir to launch)
   StarshotDatabase.db     ← SQLite settings database
   version.ini             ← Version number (CI/CD release only; absent in local builds)
@@ -284,10 +280,19 @@ Root/
     *.dll                 ← Dependencies
     avifenc.exe etc.      ← Codec tools (from Starward.Codec NuGet)
   backup/                 ← Database backups
-%LOCALAPPDATA%/Starshot/  (default, configurable)
+
+Install dir/ (installer, flat)
+  Starshot.exe            ← Main program (no launcher, no version dirs)
+  Starshot.Update.exe     ← kachina updater
+  Starshot.Uninst.exe     ← Uninstaller
+  *.dll etc.              ← All dependencies flat
+
+%LOCALAPPDATA%/Starshot/  (shared; some sub-locations are configurable)
   log/                    ← Logs
   bg/                     ← Wallpapers
+  backup/                 ← Database backups (installer line; portable keeps them in the root)
   thumb/                  ← Thumbnail cache
+  database.json           ← Database location anchor (lookup priority: app dir > here > portable parent-dir default)
 ```
 
 ### Launcher
@@ -434,6 +439,7 @@ Starshot uses the Win32 native clipboard API for writing, which is theoretically
 
 - [Starward](https://github.com/Scighost/Starward) — Screenshot core, codec engine, and window framework all originate from Starward, developed by [@Scighost](https://github.com/Scighost).
 - [ShareX](https://github.com/ShareX/ShareX) — Reference for the region screenshot overlay's window detection and interaction design.
+- [kachina-installer](https://github.com/YuehaiTeam/kachina-installer) — Installer and updater powering the installer line (online install, per-file delta, per-file verification).
 
 **And all the third-party libraries**:
 
