@@ -32,11 +32,12 @@
                         <Run Text="{x:Bind lang:Lang.Starshot_AboutLicense}" />
                     </TextBlock>
                 </StackPanel>
-                <!--  logo 可点：常态透明，悬停出主题填充 + 按压反馈；点 5 次开启开发者模式（只开不关）  -->
+                <!--  logo 可点：常态全透明（无背景无边框），悬停出主题填充 + 按压反馈；点 5 次开启开发者模式（只开不关）  -->
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Padding="8"
                         Background="Transparent"
+                        BorderThickness="0"
                         Click="Button_Logo_Click"
                         CornerRadius="8">
                     <Image Height="80" Source="ms-appx:///Assets/logo.png" />
