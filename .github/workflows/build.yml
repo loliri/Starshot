@@ -28,6 +28,11 @@ on:
         type: boolean
         required: false
         default: false
+      upload_kachina:
+        description: '预发布也上传 kachina 安装版产物到 CDN（stable 恒传，此开关只对 preview 生效）'
+        type: boolean
+        required: false
+        default: false
     outputs:
       v:
         description: '显示版本（原大小写）'
@@ -321,6 +326,21 @@ jobs:
           Invoke-WebRequest $url -OutFile kachina-builder.exe
           ./kachina-builder.exe --help | Select-Object -First 1
 
+      - name: Convert logo to webp
+        run: |
+          # 安装器左侧图只支持 webp；仓库只留 logo.png 源，CI 现场转换。
+          # libwebp 在 GitHub 无任何 release（实测 /releases 为空），二进制在官方下载站——URL 已本地验证
+          $url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.5.0-windows-x64.zip"
+          Invoke-WebRequest -Uri $url -OutFile libwebp.zip
+          if (!(Test-Path libwebp.zip) -or (Get-Item libwebp.zip).Length -lt 1MB) { Write-Error "libwebp zip download failed"; exit 1 }
+          Expand-Archive libwebp.zip -DestinationPath libwebp -Force
+          $cwebp = (Get-ChildItem libwebp -Filter cwebp.exe -Recurse | Select-Object -First 1).FullName
+          if ([string]::IsNullOrEmpty($cwebp)) { Write-Error "cwebp.exe not found in zip"; exit 1 }
+          & $cwebp -version
+          & $cwebp -q 95 src/logo.png -o logo.webp
+          if (!(Test-Path logo.webp)) { Write-Error "webp convert failed"; exit 1 }
+          Remove-Item libwebp.zip, libwebp -Recurse -Force
+
       - name: Build kachina installer package
         shell: pwsh
         env:
@@ -332,12 +352,12 @@ jobs:
           # 源=CDN 根固定 URL（与版本无关，全在线，无备用源）；差分基线=上一版原始目录 zip（固定名，stable 每版覆盖）
           # 注意：builder 的 extract 吐的是 zstd 存储形态不是原始字节，不能当基线（本地实测），必须存原始目录
           $config = @{
-            source = "$cdn/Starshot-installer-win-$arch.exe"
+            source = "$cdn/kachina/Starshot-full-win-$arch.exe"
             appName = "Starshot"
             publisher = "loliri"
             regName = "Starshot"
             exeName = "Starshot.exe"
-            uninstallName = "Uninstall.exe"
+            uninstallName = "Starshot.Uninst.exe"
             updaterName = "Starshot.Update.exe"
             programFilesPath = "Starshot"
             userDataPath = @()
@@ -349,7 +369,9 @@ jobs:
           }
           # serde_json 不吃 BOM，必须无 BOM UTF-8 写入（本地实测 PS 的 utf8 带 BOM 会解析失败）
           [System.IO.File]::WriteAllText("$PWD/kachina.config.json", ($config | ConvertTo-Json -Depth 5), [System.Text.UTF8Encoding]::new($false))
-          ./kachina-builder.exe pack -c kachina.config.json -o Starshot.Update.exe --icon src/logo.ico
+          # 品牌参数：--icon exe 图标（ico）+ -t 安装器左侧图片（仅支持 webp，本地实测 -m 是 metadata 不是图片——README 过时）；
+          # 更新器与离线包必须同参数，否则自更新时界面风格跳变
+          ./kachina-builder.exe pack -c kachina.config.json -o Starshot.Update.exe -t logo.webp --icon src/logo.ico
           if (!(Test-Path Starshot.Update.exe)) { Write-Error "updater build failed"; exit 1 }
 
           # 差分基线：拉上一版原始目录 zip 解压（404=首个安装版，跳过差分纯全量）。
@@ -364,8 +386,13 @@ jobs:
           }
 
           ./kachina-builder.exe gen -j 8 -i kachina-flat -m kachina-metadata.json -o kachina-hashed -r loliri/Starshot -t $vl -u Starshot.Update.exe @diffArgs
-          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -o "Starshot-installer-win-$arch.exe"
-          if (!(Test-Path "Starshot-installer-win-$arch.exe")) { Write-Error "installer build failed"; exit 1 }
+          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -t logo.webp --icon src/logo.ico -o "Starshot-full-win-$arch.exe"
+          if (!(Test-Path "Starshot-full-win-$arch.exe")) { Write-Error "full package build failed"; exit 1 }
+
+          # 分发用纯在线安装器 Starshot-installer：与更新器同体（零 app 内嵌，安装时 HTTP 206 对 CDN
+          # kachina/ 下的全量包远程寻址，全部内容在线获取），进 GitHub Release + CDN 根目录；
+          # 全量包 Starshot-full 只传 CDN kachina/ 子路径（内容源），不进 GitHub Release
+          Copy-Item Starshot.Update.exe "Starshot-installer-win-$arch.exe"
 
           # 本版原始目录 zip = 下一版的差分基线
           Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -382,6 +409,7 @@ jobs:
           path: |
             Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip
             Starshot-installer-win-${{ matrix.platform }}.exe
+            Starshot-full-win-${{ matrix.platform }}.exe
             baseline-win-${{ matrix.platform }}.zip
             diff-*-win-${{ matrix.platform }}.patch
             launcher-*-win-${{ matrix.platform }}.exe
@@ -518,17 +546,18 @@ jobs:
             echo "new_latest_preview=$NEW_LATEST_PREVIEW"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Upload kachina installer to CDN (stable only)
-        if: ${{ inputs.prerelease != true }}
+      - name: Upload kachina to CDN
+        if: ${{ inputs.prerelease != true || inputs.upload_kachina }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
         run: |
-          # 安装版线固定 URL：bucket 根的 Starshot-installer-win-{arch}.exe 每版覆盖 + 下一版差分基线 zip。
-          # 固定 URL 被 CDN 缓存，必须 no-cache（回源校验），绝不能 immutable。
-          # 仅 stable 覆盖：预览不碰这两个 URL，安装版线恒为稳定渠道
+          # 根目录摆纯在线安装器（与 GitHub Release 同物同名）；全量包是更新/在线安装的内容源，
+          # 收进 kachina/ 子路径（config.source 指向它）。固定 URL 被 CDN 缓存，一律 no-cache。
+          # 仅 stable 覆盖（预览只出包不传 CDN）。
+          # 未来的双渠道方案（用户已验证可行）：stable/preview 两个文件夹各一套 + SourceItem 双发布源
           if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$R2_BUCKET" ] || [ -z "$R2_ENDPOINT" ]; then
             echo "::error::R2 secrets not configured"
             exit 1
@@ -536,6 +565,12 @@ jobs:
           for arch in x64 arm64; do
             if [ -f "upload/Starshot-installer-win-$arch.exe" ]; then
               aws s3 cp "upload/Starshot-installer-win-$arch.exe" "s3://$R2_BUCKET/Starshot-installer-win-$arch.exe" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --content-type "application/octet-stream" \
+                --cache-control "no-cache, must-revalidate"
+            fi
+            if [ -f "upload/Starshot-full-win-$arch.exe" ]; then
+              aws s3 cp "upload/Starshot-full-win-$arch.exe" "s3://$R2_BUCKET/kachina/Starshot-full-win-$arch.exe" \
                 --endpoint-url "$R2_ENDPOINT" \
                 --content-type "application/octet-stream" \
                 --cache-control "no-cache, must-revalidate"
