@@ -1004,6 +1004,15 @@
                 return ResourceManager.GetString("Starshot_AboutProjectHome", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Repository 的本地化字符串。
+        /// </summary>
+        public static string Starshot_AboutProjectRepo {
+            get {
+                return ResourceManager.GetString("Starshot_AboutProjectRepo", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Next-generation native Windows HDR screenshot tool 的本地化字符串。
@@ -1890,6 +1899,15 @@
         public static string Starshot_UpdaterMissingMessage {
             get {
                 return ResourceManager.GetString("Starshot_UpdaterMissingMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Official Website 的本地化字符串。
+        /// </summary>
+        public static string Starshot_UpdaterMissingWebSite {
+            get {
+                return ResourceManager.GetString("Starshot_UpdaterMissingWebSite", resourceCulture);
             }
         }
 

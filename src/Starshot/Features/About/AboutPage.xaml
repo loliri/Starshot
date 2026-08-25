@@ -76,8 +76,20 @@
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.Starshot_AboutProjectHome}" />
                         <TextBlock FontSize="13">
-                            <Hyperlink NavigateUri="https://github.com/loliri/Starshot" UnderlineStyle="None">
-                                <Run Text="https://github.com/loliri/Starshot" />
+                            <Hyperlink x:Name="WebSiteLink" UnderlineStyle="None">
+                                <Run x:Name="WebSiteUrlText" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Margin="0,4,0,0"
+                                Orientation="Horizontal"
+                                Spacing="6">
+                        <TextBlock FontSize="13"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.Starshot_AboutProjectRepo}" />
+                        <TextBlock FontSize="13">
+                            <Hyperlink x:Name="RepoLink" UnderlineStyle="None">
+                                <Run x:Name="RepoUrlText" />
                             </Hyperlink>
                         </TextBlock>
                     </StackPanel>

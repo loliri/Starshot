@@ -283,9 +283,27 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 官网地址（下载页等由此拼接）
+    /// </summary>
+    public const string WebSiteUrl = "https://starshot.cialo.site";
+
+
+    /// <summary>
     /// CDN 更新源基址（UpdateSource=Cloudflare 时用）
     /// </summary>
     public const string CdnBase = "https://starshot-release.cialo.site";
+
+
+    /// <summary>
+    /// GitHub 仓库基址（网页版；releases / blob 等链接由此拼接）
+    /// </summary>
+    public const string RepoBaseUrl = "https://github.com/loliri/Starshot";
+
+
+    /// <summary>
+    /// GitHub API 基址（查 release 信息用）
+    /// </summary>
+    public const string RepoApiBaseUrl = "https://api.github.com/repos/loliri/Starshot";
 
 
     /// <summary>

@@ -604,6 +604,9 @@
   <data name="Starshot_UpdaterMissingMessage" xml:space="preserve">
     <value>The program is corrupted (update component missing). Please re-download the installer.</value>
   </data>
+  <data name="Starshot_UpdaterMissingWebSite" xml:space="preserve">
+    <value>Official Website</value>
+  </data>
   <data name="Starshot_DevModeOn" xml:space="preserve">
     <value>Developer mode enabled</value>
   </data>
@@ -693,6 +696,9 @@
   </data>
   <data name="Starshot_AboutProjectHome" xml:space="preserve">
     <value>Project Homepage</value>
+  </data>
+  <data name="Starshot_AboutProjectRepo" xml:space="preserve">
+    <value>Repository</value>
   </data>
   <data name="Starshot_OpenDataFolder" xml:space="preserve">
     <value>Open Data Folder</value>

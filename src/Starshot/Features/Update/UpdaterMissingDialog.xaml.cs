@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 
 namespace Starshot.Features.Update;
 
@@ -13,6 +14,8 @@ public sealed partial class UpdaterMissingDialog : ContentDialog
     public UpdaterMissingDialog()
     {
         InitializeComponent();
+        WebSiteDownloadLink.NavigateUri = new Uri(AppConfig.WebSiteUrl + "/download");
+        ReleasesLink.NavigateUri = new Uri(AppConfig.RepoBaseUrl + "/releases");
     }
 
 

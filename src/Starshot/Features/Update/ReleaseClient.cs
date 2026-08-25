@@ -36,8 +36,8 @@ public sealed class DeltaChainLink
 
 public static class ReleaseClient
 {
-    private const string LatestReleaseUrl = "https://api.github.com/repos/loliri/Starshot/releases/latest";
-    private const string AllReleasesUrl = "https://api.github.com/repos/loliri/Starshot/releases";
+    private const string LatestReleaseUrl = AppConfig.RepoApiBaseUrl + "/releases/latest";
+    private const string AllReleasesUrl = AppConfig.RepoApiBaseUrl + "/releases";
 
     private static readonly HttpClient _http = CreateClient();
     private static readonly HttpClient _cdnHttp = CreateCdnClient();
@@ -307,7 +307,7 @@ public static class ReleaseClient
     {
         try
         {
-            using var resp = await _http.GetAsync($"https://api.github.com/repos/loliri/Starshot/releases/tags/{tag}", ct);
+            using var resp = await _http.GetAsync($"{AppConfig.RepoApiBaseUrl}/releases/tags/{tag}", ct);
             if (!resp.IsSuccessStatusCode) return null;
             await using var stream = await resp.Content.ReadAsStreamAsync(ct);
             var payload = await JsonSerializer.DeserializeAsync<GitHubReleasePayload>(stream, cancellationToken: ct);

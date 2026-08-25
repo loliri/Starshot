@@ -604,6 +604,9 @@
   <data name="Starshot_UpdaterMissingMessage" xml:space="preserve">
     <value>プログラムが破損しています（更新コンポーネント不足）。インストーラーを再ダウンロードしてください。</value>
   </data>
+  <data name="Starshot_UpdaterMissingWebSite" xml:space="preserve">
+    <value>公式サイト</value>
+  </data>
   <data name="Starshot_DevModeOn" xml:space="preserve">
     <value>開発者モードが有効になりました</value>
   </data>
@@ -693,6 +696,9 @@
   </data>
   <data name="Starshot_AboutProjectHome" xml:space="preserve">
     <value>プロジェクトホームページ</value>
+  </data>
+  <data name="Starshot_AboutProjectRepo" xml:space="preserve">
+    <value>リポジトリ</value>
   </data>
   <data name="Starshot_OpenDataFolder" xml:space="preserve">
     <value>データフォルダーを開く</value>

@@ -108,7 +108,7 @@ public sealed partial class UpdateWindow : WindowEx
         string? tag = (sender as FrameworkElement)?.Tag?.ToString();
         string? url = tag switch
         {
-            "release" => $"https://github.com/loliri/Starshot/releases/tag/{_release.TagName}",
+            "release" => $"{AppConfig.RepoBaseUrl}/releases/tag/{_release.TagName}",
             "package" => _release.ZipUrl,
             _ => null,
         };

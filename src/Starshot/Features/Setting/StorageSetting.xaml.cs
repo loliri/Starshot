@@ -172,7 +172,7 @@ public sealed partial class StorageSetting : PageBase
 
     private static string GetHelpUrl()
     {
-        const string repo = "https://github.com/loliri/Starshot";
+        string repo = AppConfig.RepoBaseUrl;
         return AppConfig.Language switch
         {
             "zh-CN" => $"{repo}/blob/main/docs/README.zh-CN.md#文件名模板",

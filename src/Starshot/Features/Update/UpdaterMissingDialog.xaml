@@ -38,13 +38,19 @@
                    Text="{x:Bind lang:Lang.Starshot_UpdaterMissingMessage}"
                    TextWrapping="Wrap" />
 
-        <!--  下载源：目前 GitHub，之后可在此追加  -->
-        <TextBlock Grid.Row="2" Margin="24,16,24,0">
-            <Hyperlink NavigateUri="https://github.com/loliri/Starshot/releases"
-                       UnderlineStyle="None">
-                <Run FontWeight="SemiBold" Text="GitHub Releases" />
-            </Hyperlink>
-        </TextBlock>
+        <!--  下载源：官网下载页自动识别架构，GitHub 兜底  -->
+        <StackPanel Grid.Row="2" Margin="24,16,24,0" Spacing="6">
+            <TextBlock>
+                <Hyperlink x:Name="WebSiteDownloadLink" UnderlineStyle="None">
+                    <Run FontWeight="SemiBold" Text="{x:Bind lang:Lang.Starshot_UpdaterMissingWebSite}" />
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock>
+                <Hyperlink x:Name="ReleasesLink" UnderlineStyle="None">
+                    <Run FontWeight="SemiBold" Text="GitHub Releases" />
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
 
         <Button Grid.Row="3"
                 Margin="24"

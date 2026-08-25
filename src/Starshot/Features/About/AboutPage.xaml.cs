@@ -48,6 +48,12 @@ public sealed partial class AboutPage : PageBase
         {
             PreReleaseSwitch.Visibility = Visibility.Collapsed;
         }
+
+        // 仓库地址单一来源：NavigateUri 与显示文本都从 AppConfig 常量来，XAML 不再硬编码
+        WebSiteLink.NavigateUri = new Uri(AppConfig.WebSiteUrl);
+        WebSiteUrlText.Text = AppConfig.WebSiteUrl;
+        RepoLink.NavigateUri = new Uri(AppConfig.RepoBaseUrl);
+        RepoUrlText.Text = AppConfig.RepoBaseUrl;
     }
 
 
