@@ -90,12 +90,23 @@ public static partial class AppConfig
                 Environment.Exit(0);
             }
 #if !DEBUG
-            // 安装版线（kachina）首启判定——只在欢迎页做这一次：包内带更新器 →
-            // 数据落 LocalAppData 并写 database.json 锚定（此后启动靠 JSON 定位，不再探测）。
-            // Debug 不参与安装线（数据库锁死父目录）
-            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")))
+            // 欢迎页选了数据库文件夹 → 首启直接采用（定终身，绕开设置页改位置的迁移链路）
+            bool pickedDb = welcome.DatabaseFolderPath is { Length: > 0 } pickedFolder && Directory.Exists(pickedFolder);
+            if (pickedDb)
+            {
+                UserDataFolder = welcome.DatabaseFolderPath!;
+            }
+            // 安装版线（kachina）首启判定——只在欢迎页做这一次：包内带更新器、用户没选位置 →
+            // 数据落 LocalAppData。锚定 database.json 统一写 LocalAppData（不写 app 目录）：
+            // 安装版必写；便携版只在选了位置时写（没选默认就是父目录，锚定冗余）。
+            // 此后启动靠 JSON 定位，不再探测。Debug 不参与（数据库锁死父目录）
+            bool isInstallerLine = File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"));
+            if (isInstallerLine && !pickedDb)
             {
                 UserDataFolder = localAppData;
+            }
+            if (isInstallerLine || pickedDb)
+            {
                 try
                 {
                     Directory.CreateDirectory(localAppData);
@@ -138,10 +149,6 @@ public static partial class AppConfig
                 if (File.Exists(assetPath)) File.Copy(assetPath, bgPath, overwrite: true);
                 AppConfig.WallpaperFile = "pic.jpg";
                 AppConfig.WallpaperMode = 1;
-            }
-            if (!string.IsNullOrWhiteSpace(welcome.ScreenshotFolderPath))
-            {
-                AppConfig.ScreenshotFolder = welcome.ScreenshotFolderPath;
             }
 #if !DEBUG
             // 更新线锚定：安装版线把 installer 标志写进 DB，此后运行期更新分派/设置显隐只看它

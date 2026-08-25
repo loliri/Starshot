@@ -77,24 +77,29 @@
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
-            <!--  截图存放位置  -->
+            <!--  数据库存放位置  -->
             <TextBlock Margin="0,12,0,0"
                        FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.Starshot_WelcomeScreenshotFolderTitle}" />
+                       Text="{x:Bind lang:Lang.Starshot_WelcomeDatabaseFolderTitle}" />
             <TextBlock FontSize="13"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.Starshot_WelcomeScreenshotFolderDesc}"
-                       TextWrapping="Wrap" />
+                       TextWrapping="Wrap">
+                <Run Text="{x:Bind lang:Lang.Starshot_WelcomeEditionPrefix}" />
+                <Run FontWeight="SemiBold"
+                     Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                     Text="{x:Bind EditionName}" />
+                <Run Text="{x:Bind DbFolderDescTail}" />
+            </TextBlock>
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <Button BorderThickness="0"
-                        Command="{x:Bind PickScreenshotFolderCommand}"
+                        Command="{x:Bind PickDatabaseFolderCommand}"
                         Content="{x:Bind lang:Lang.Starshot_WelcomePickFolder}"
                         Style="{ThemeResource AccentButtonStyle}" />
                 <TextBlock VerticalAlignment="Center"
                            FontSize="13"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="{x:Bind ScreenshotFolderDisplay}"
+                           Text="{x:Bind DatabaseFolderDisplay}"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
 

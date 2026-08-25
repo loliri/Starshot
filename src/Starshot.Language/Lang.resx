@@ -769,6 +769,24 @@
   <data name="Starshot_WelcomeDxgiTitle" xml:space="preserve">
     <value>DXGI Interface</value>
   </data>
+  <data name="Starshot_WelcomeDatabaseFolderTitle" xml:space="preserve">
+    <value>Database Location</value>
+  </data>
+  <data name="Starshot_WelcomeEditionPrefix" xml:space="preserve">
+    <value>You are using the </value>
+  </data>
+  <data name="Starshot_EditionInstaller" xml:space="preserve">
+    <value>installer build</value>
+  </data>
+  <data name="Starshot_EditionPortable" xml:space="preserve">
+    <value>portable build</value>
+  </data>
+  <data name="Starshot_WelcomeDbDescInstaller" xml:space="preserve">
+    <value>, settings and data are stored in the user data folder by default.</value>
+  </data>
+  <data name="Starshot_WelcomeDbDescPortable" xml:space="preserve">
+    <value>, settings and data are stored in the app folder by default.</value>
+  </data>
   <data name="Starshot_WelcomeDxgiSupported" xml:space="preserve">
     <value>Supported. All screenshot features are available.</value>
   </data>

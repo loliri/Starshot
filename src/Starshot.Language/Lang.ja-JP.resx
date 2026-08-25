@@ -769,6 +769,24 @@
   <data name="Starshot_WelcomeDxgiTitle" xml:space="preserve">
     <value>DXGIインターフェース</value>
   </data>
+  <data name="Starshot_WelcomeDatabaseFolderTitle" xml:space="preserve">
+    <value>データベースの保存場所</value>
+  </data>
+  <data name="Starshot_WelcomeEditionPrefix" xml:space="preserve">
+    <value>現在使用しているのは</value>
+  </data>
+  <data name="Starshot_EditionInstaller" xml:space="preserve">
+    <value>インストーラー版</value>
+  </data>
+  <data name="Starshot_EditionPortable" xml:space="preserve">
+    <value>ポータブル版</value>
+  </data>
+  <data name="Starshot_WelcomeDbDescInstaller" xml:space="preserve">
+    <value>です。設定などのデータは既定でユーザーデータフォルダーに保存されます。</value>
+  </data>
+  <data name="Starshot_WelcomeDbDescPortable" xml:space="preserve">
+    <value>です。設定などのデータは既定でアプリのフォルダーに保存されます。</value>
+  </data>
   <data name="Starshot_WelcomeDxgiSupported" xml:space="preserve">
     <value>サポートされています。すべてのスクリーンショット機能が利用可能です。</value>
   </data>

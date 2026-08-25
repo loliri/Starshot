@@ -4,6 +4,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Starshot.Frameworks;
 using Starshot.Helpers;
+using Starshot.Language;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ public sealed partial class WelcomeWindow : WindowEx
     public string? WallpaperFileName { get; private set; }
     public string? WallpaperVideoPath { get; private set; }
     public bool WallpaperIsVideo { get; private set; }
-    public string? ScreenshotFolderPath { get; private set; }
+    public string? DatabaseFolderPath { get; private set; }
 
 
     public WelcomeWindow()
@@ -73,7 +74,14 @@ public sealed partial class WelcomeWindow : WindowEx
     // 选完显示选中路径
     public string WallpaperDisplay { get; set => SetProperty(ref field, value); } = "";
 
-    public string ScreenshotFolderDisplay { get; set => SetProperty(ref field, value); } = "";
+    public string DatabaseFolderDisplay { get; set => SetProperty(ref field, value); } = "";
+
+    // 安装版线判定（包内带更新器）：desc 文案按当前线只写对应一半，不让用户自己对号
+    private bool IsInstallerLine => File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"));
+
+    public string EditionName => IsInstallerLine ? Lang.Starshot_EditionInstaller : Lang.Starshot_EditionPortable;
+
+    public string DbFolderDescTail => IsInstallerLine ? Lang.Starshot_WelcomeDbDescInstaller : Lang.Starshot_WelcomeDbDescPortable;
 
 
     private async void Grid_Loaded(object sender, RoutedEventArgs e)
@@ -141,15 +149,15 @@ public sealed partial class WelcomeWindow : WindowEx
 
 
     [RelayCommand]
-    private async Task PickScreenshotFolder()
+    private async Task PickDatabaseFolder()
     {
         try
         {
             var folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
             if (!string.IsNullOrWhiteSpace(folder))
             {
-                ScreenshotFolderPath = folder;
-                ScreenshotFolderDisplay = folder;
+                DatabaseFolderPath = folder;
+                DatabaseFolderDisplay = folder;
             }
         }
         catch { }

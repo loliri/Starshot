@@ -2125,6 +2125,60 @@
                 return ResourceManager.GetString("Starshot_WelcomeDxgiSupported", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Database Location 的本地化字符串。
+        /// </summary>
+        public static string Starshot_WelcomeDatabaseFolderTitle {
+            get {
+                return ResourceManager.GetString("Starshot_WelcomeDatabaseFolderTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 You are using the  的本地化字符串。
+        /// </summary>
+        public static string Starshot_WelcomeEditionPrefix {
+            get {
+                return ResourceManager.GetString("Starshot_WelcomeEditionPrefix", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 installer build 的本地化字符串。
+        /// </summary>
+        public static string Starshot_EditionInstaller {
+            get {
+                return ResourceManager.GetString("Starshot_EditionInstaller", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 portable build 的本地化字符串。
+        /// </summary>
+        public static string Starshot_EditionPortable {
+            get {
+                return ResourceManager.GetString("Starshot_EditionPortable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 , settings and data are stored in the user data folder by default. 的本地化字符串。
+        /// </summary>
+        public static string Starshot_WelcomeDbDescInstaller {
+            get {
+                return ResourceManager.GetString("Starshot_WelcomeDbDescInstaller", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 , settings and data are stored in the app folder by default. 的本地化字符串。
+        /// </summary>
+        public static string Starshot_WelcomeDbDescPortable {
+            get {
+                return ResourceManager.GetString("Starshot_WelcomeDbDescPortable", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 DXGI Interface 的本地化字符串。
