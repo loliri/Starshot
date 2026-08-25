@@ -14,7 +14,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/loliri/Starshot?tab=MIT-1-ov-file)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=flat-square&logo=windows)](../../releases)
 
-[下载](../../releases) · [快速上手](#快速上手) · [功能详解](#功能详解) · [从源码构建](#从源码构建)
+[官网](https://starshot.cialo.site) · [下载](https://starshot.cialo.site/download) · [快速上手](#快速上手) · [功能详解](#功能详解) · [从源码构建](#从源码构建)
 
 **[English](README.md)** | **简体中文** |
 [繁體中文](docs/README.zh-TW.md) | [日本語](docs/README.ja.md) | [Français](docs/README.fr.md) | [Русский](docs/README.ru.md) | [Español](docs/README.es.md)
@@ -61,7 +61,7 @@ Starshot 直接从 DXGI 层获取显示器输出的原始 `R16G16B16A16Float` sc
 </br>
 
 > [!NOTE]
-> 由于 GitHub 平台不支持 AVIF 渲染，因此展示的是 Ultra HDR JPEG。AVIF 原图可以点击 [这里查看](https://r2.cialo.site/endfield/3840x2160.dlaa.avif)。
+> 由于 GitHub 平台不支持 AVIF 渲染，因此展示的是 Ultra HDR JPEG。AVIF 原图可以点击 [这里查看](https://r2.cialo.site/endfield/3840x2160.dlaa.avif)，也可以在[官网](https://starshot.cialo.site)拖动分割线直观对比两种效果。
 
 SDR 显示器上，Starshot 自动走标准 SDR 截图路径，是一款通用截图工具；HDR 显示器上，它是目前少数能够完整保留 HDR 数据的桌面截图方案。
 
@@ -72,6 +72,8 @@ SDR 显示器上，Starshot 自动走标准 SDR 截图路径，是一款通用�
 - **HDR 截图功能需要 HDR 显示器**（SDR 显示器上自动走 SDR 路径）
 
 ## 下载
+
+全部安装包可在[官网下载页](https://starshot.cialo.site/download)获取（自动识别 x64 / arm64），也可在 [GitHub Releases](../../releases) 下载。
 
 两种分发方式，装哪种就走哪条更新线，互不交叉：
 

@@ -12,7 +12,7 @@ Full 16-bit HDR Pipeline · Region Screenshot · AVIF / JPEG XL / PNGv3 Encoding
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/loliri/Starshot?tab=MIT-1-ov-file)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=flat-square&logo=windows)](../../releases)
 
-[Download](../../releases) · [Quick Start](#quick-start) · [Features](#features) · [Build from Source](#build-from-source)
+[Website](https://starshot.cialo.site) · [Download](https://starshot.cialo.site/download) · [Quick Start](#quick-start) · [Features](#features) · [Build from Source](#build-from-source)
 
 **English** | **[简体中文](README.zh-CN.md)** |
 [繁體中文](docs/README.zh-TW.md) | [日本語](docs/README.ja.md) | [Français](docs/README.fr.md) | [Русский](docs/README.ru.md) | [Español](docs/README.es.md)
@@ -59,7 +59,7 @@ Starshot directly captures the raw `R16G16B16A16Float` scRGB framebuffer from th
 </br>
 
 > [!NOTE]
-> GitHub does not support AVIF rendering, so the comparison above uses Ultra HDR JPEG. The original AVIF image can be viewed [here](https://r2.cialo.site/endfield/3840x2160.dlaa.avif).
+> GitHub does not support AVIF rendering, so the comparison above uses Ultra HDR JPEG. The original AVIF image can be viewed [here](https://r2.cialo.site/endfield/3840x2160.dlaa.avif), or drag the divider on the [website](https://starshot.cialo.site) to compare both side by side.
 
 On SDR displays, Starshot automatically falls back to the standard SDR screenshot path and works as a general-purpose screenshot tool. On HDR displays, it is one of the few desktop screenshot solutions that can fully preserve HDR data.
 
@@ -71,9 +71,11 @@ On SDR displays, Starshot automatically falls back to the standard SDR screensho
 
 ## Download
 
+All installers can be downloaded from the [website download page](https://starshot.cialo.site/download) (auto-detects x64 / arm64), or from [GitHub Releases](../../releases).
+
 Two distribution lines — whichever you install is the line you stay on; they never cross:
 
-- **Portable**: Download the archive from [Releases](../../releases), extract it, and run `Starshot.exe` from the root directory. No installation needed — just extract and run. Data lives in the extract folder.
+- **Portable**: Download the archive, extract it, and run `Starshot.exe` from the root directory. No installation needed — just extract and run. Data lives in the extract folder.
 - **Installer**: Download the online installer (about 10MB, contains no app files); all content is fetched from the CDN during installation, so a network connection is required. The app installs into a flat directory, installation info is stored in the registry, and updates are handled by the bundled updater with delta updates, uninstall, and more.
 
 ## Screenshots
