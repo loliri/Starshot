@@ -326,20 +326,36 @@ jobs:
           Invoke-WebRequest $url -OutFile kachina-builder.exe
           ./kachina-builder.exe --help | Select-Object -First 1
 
-      - name: Convert logo to webp
+      - name: Prepare kachina branding assets
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
         run: |
-          # 安装器左侧图只支持 webp；仓库只留 logo.png 源，CI 现场转换。
-          # libwebp 在 GitHub 无任何 release（实测 /releases 为空），二进制在官方下载站——URL 已本地验证
+          # 品牌资产源图放 R2 根（走现成 R2 secrets 的 S3 通路拉取，与上传同一条），现场转两种格式：
+          # installer.webp（安装器左侧图，仅支持 webp）+ installer.ico（exe 图标，Windows 只认 ico）
+          if ([string]::IsNullOrEmpty($env:AWS_ACCESS_KEY_ID) -or [string]::IsNullOrEmpty($env:R2_BUCKET) -or [string]::IsNullOrEmpty($env:R2_ENDPOINT)) {
+            Write-Error "R2 secrets not configured"; exit 1
+          }
+          aws s3 cp "s3://$env:R2_BUCKET/insqr.png" installer.png --endpoint-url "$env:R2_ENDPOINT"
+          if (!(Test-Path installer.png) -or (Get-Item installer.png).Length -lt 1KB) { Write-Error "insqr.png download failed"; exit 1 }
+
+          # webp：libwebp 在 GitHub 无任何 release（实测 /releases 为空），二进制在官方下载站——URL 已本地验证
           $url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.5.0-windows-x64.zip"
           Invoke-WebRequest -Uri $url -OutFile libwebp.zip
           if (!(Test-Path libwebp.zip) -or (Get-Item libwebp.zip).Length -lt 1MB) { Write-Error "libwebp zip download failed"; exit 1 }
           Expand-Archive libwebp.zip -DestinationPath libwebp -Force
           $cwebp = (Get-ChildItem libwebp -Filter cwebp.exe -Recurse | Select-Object -First 1).FullName
           if ([string]::IsNullOrEmpty($cwebp)) { Write-Error "cwebp.exe not found in zip"; exit 1 }
-          & $cwebp -version
-          & $cwebp -q 95 src/logo.png -o logo.webp
-          if (!(Test-Path logo.webp)) { Write-Error "webp convert failed"; exit 1 }
+          & $cwebp -q 95 installer.png -o installer.webp
+          if (!(Test-Path installer.webp)) { Write-Error "webp convert failed"; exit 1 }
           Remove-Item libwebp.zip, libwebp -Recurse -Force
+
+          # ico：Pillow 多尺寸（256/128/64/48/32/16），命令已本地验证
+          python -m pip install --quiet pillow
+          python -c "from PIL import Image; Image.open('installer.png').save('installer.ico', sizes=[(256,256),(128,128),(64,64),(48,48),(32,32),(16,16)])"
+          if (!(Test-Path installer.ico)) { Write-Error "ico convert failed"; exit 1 }
 
       - name: Build kachina installer package
         shell: pwsh
@@ -371,7 +387,7 @@ jobs:
           [System.IO.File]::WriteAllText("$PWD/kachina.config.json", ($config | ConvertTo-Json -Depth 5), [System.Text.UTF8Encoding]::new($false))
           # 品牌参数：--icon exe 图标（ico）+ -t 安装器左侧图片（仅支持 webp，本地实测 -m 是 metadata 不是图片——README 过时）；
           # 更新器与离线包必须同参数，否则自更新时界面风格跳变
-          ./kachina-builder.exe pack -c kachina.config.json -o Starshot.Update.exe -t logo.webp --icon src/logo.ico
+          ./kachina-builder.exe pack -c kachina.config.json -o Starshot.Update.exe -t installer.webp --icon installer.ico
           if (!(Test-Path Starshot.Update.exe)) { Write-Error "updater build failed"; exit 1 }
 
           # 差分基线：拉上一版原始目录 zip 解压（404=首个安装版，跳过差分纯全量）。
@@ -386,7 +402,7 @@ jobs:
           }
 
           ./kachina-builder.exe gen -j 8 -i kachina-flat -m kachina-metadata.json -o kachina-hashed -r loliri/Starshot -t $vl -u Starshot.Update.exe @diffArgs
-          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -t logo.webp --icon src/logo.ico -o "Starshot-full-win-$arch.exe"
+          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -t installer.webp --icon installer.ico -o "Starshot-full-win-$arch.exe"
           if (!(Test-Path "Starshot-full-win-$arch.exe")) { Write-Error "full package build failed"; exit 1 }
 
           # 分发用纯在线安装器 Starshot-installer：与更新器同体（零 app 内嵌，安装时 HTTP 206 对 CDN
