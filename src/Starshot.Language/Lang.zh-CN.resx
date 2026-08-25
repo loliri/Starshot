@@ -596,7 +596,7 @@
     <value>启动更新程序</value>
   </data>
   <data name="Starshot_UpdaterLauncherTip" xml:space="preserve">
-    <value>点击「启动更新程序」后，程序会自动退出，由 Starshot.Update.exe 接管（下载、校验并应用更新文件）。</value>
+    <value>点击「启动更新程序」后，&#10;程序会自动退出，&#10;由 Starshot.Update.exe 接管，&#10;负责下载 校验 应用更新文件</value>
   </data>
   <data name="Starshot_UpdaterMissingTitle" xml:space="preserve">
     <value>缺少必要文件</value>

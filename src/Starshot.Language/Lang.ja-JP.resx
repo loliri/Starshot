@@ -596,7 +596,7 @@
     <value>更新プログラムを起動</value>
   </data>
   <data name="Starshot_UpdaterLauncherTip" xml:space="preserve">
-    <value>「更新プログラムを起動」をクリックすると、アプリは自動的に終了し、Starshot.Update.exe がダウンロード・検証・適用を引き継ぎます。</value>
+    <value>「更新プログラムを起動」をクリックすると、&#10;アプリは自動的に終了し、&#10;Starshot.Update.exe が&#10;ダウンロード・検証・適用を引き継ぎます</value>
   </data>
   <data name="Starshot_UpdaterMissingTitle" xml:space="preserve">
     <value>必要なファイルがありません</value>

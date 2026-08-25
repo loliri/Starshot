@@ -596,7 +596,7 @@
     <value>Launch Updater</value>
   </data>
   <data name="Starshot_UpdaterLauncherTip" xml:space="preserve">
-    <value>After you click "Launch Updater", the app will exit automatically and Starshot.Update.exe will take over (downloading, verifying and applying files).</value>
+    <value>After you click "Launch Updater",&#10;the app will exit automatically,&#10;and Starshot.Update.exe will take over,&#10;downloading, verifying and applying files</value>
   </data>
   <data name="Starshot_UpdaterMissingTitle" xml:space="preserve">
     <value>Missing required files</value>
