@@ -47,6 +47,41 @@ public sealed partial class HotkeySetting : PageBase
     }
 
 
+    /// <summary>
+    /// 恢复默认快捷键：注销当前 → 按默认值重注册（值变化时 RegisterHotkey 内部写 DB）→ 刷新输入框
+    /// </summary>
+    private void Button_RestoreDefault_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            foreach (var input in new[] { HotkeyInput_ScreenshotCapture, HotkeyInput_RegionCapture, HotkeyInput_RegionCopy })
+            {
+                if (HotkeyManager.GetHotkeyInfo(input.HotkeyId) is not { } info) continue;
+                HotkeyManager.UnregisterHotkey(WindowHandle, input.HotkeyId);
+                Win32Error error = HotkeyManager.RegisterHotkey(WindowHandle, input.HotkeyId, info.DefaultModifiers, info.DefaultKey);
+                input.SetHotkey((uint)info.DefaultModifiers, (uint)info.DefaultKey);
+                input.State = error.Succeeded ? HoykeyInputState.None : HoykeyInputState.Warning;
+                if (error.Failed)
+                {
+                    string? hotkey = HotkeyInput.GetHotkeyText((uint)info.DefaultModifiers, (uint)info.DefaultKey);
+                    if (error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
+                    {
+                        InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUse, hotkey), 5000);
+                    }
+                    else
+                    {
+                        InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0, hotkey), 5000);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Restore default hotkeys");
+        }
+    }
+
+
     private void HotkeyInput_HotkeyDeleted(object sender, HotkeyInputEventArg e)
     {
         try

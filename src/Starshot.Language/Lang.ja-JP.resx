@@ -346,6 +346,9 @@
   <data name="HotkeySetting_FailedToRegisterTheShortcutKeys" xml:space="preserve">
     <value>ショートカットキーを登録できませんでした。</value>
   </data>
+  <data name="Starshot_RestoreDefaultHotkeys" xml:space="preserve">
+    <value>デフォルトのショートカットに戻す</value>
+  </data>
   <data name="ScreenshotSetting_AutoConvertToSDRImage" xml:space="preserve">
     <value>SDR 画像に自動変換</value>
   </data>

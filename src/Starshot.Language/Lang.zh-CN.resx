@@ -346,6 +346,9 @@
   <data name="HotkeySetting_FailedToRegisterTheShortcutKeys" xml:space="preserve">
     <value>快捷键注册失败</value>
   </data>
+  <data name="Starshot_RestoreDefaultHotkeys" xml:space="preserve">
+    <value>恢复默认快捷键</value>
+  </data>
   <data name="ScreenshotSetting_AutoConvertToSDRImage" xml:space="preserve">
     <value>自动转换为 SDR 图片</value>
   </data>

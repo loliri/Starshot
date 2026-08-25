@@ -346,6 +346,9 @@
   <data name="HotkeySetting_FailedToRegisterTheShortcutKeys" xml:space="preserve">
     <value>Failed to register the shortcut keys.</value>
   </data>
+  <data name="Starshot_RestoreDefaultHotkeys" xml:space="preserve">
+    <value>Restore Default Shortcuts</value>
+  </data>
   <data name="ScreenshotSetting_AutoConvertToSDRImage" xml:space="preserve">
     <value>Auto Convert to SDR Image</value>
   </data>

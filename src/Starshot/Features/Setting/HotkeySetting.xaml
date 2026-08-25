@@ -14,9 +14,17 @@
         <StackPanel Padding="36,24,36,36"
                     Spacing="20">
 
-            <TextBlock FontSize="28"
-                       FontWeight="Bold"
-                       Text="{x:Bind lang:Lang.Starshot_Nav_Hotkey}" />
+            <Grid>
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Text="{x:Bind lang:Lang.Starshot_Nav_Hotkey}" />
+                <Button x:Name="Button_RestoreDefault"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Click="Button_RestoreDefault_Click"
+                        Content="{x:Bind lang:Lang.Starshot_RestoreDefaultHotkeys}" />
+            </Grid>
 
             <!--  快捷键列表  -->
             <StackPanel Spacing="16">

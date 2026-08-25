@@ -418,6 +418,15 @@
                 return ResourceManager.GetString("HotkeySetting_FailedToRegisterTheShortcutKeys", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Restore Default Shortcuts 的本地化字符串。
+        /// </summary>
+        public static string Starshot_RestoreDefaultHotkeys {
+            get {
+                return ResourceManager.GetString("Starshot_RestoreDefaultHotkeys", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Convert failed 的本地化字符串。
