@@ -180,8 +180,20 @@ public static class UpdateService
             string updaterExe = Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe");
             if (File.Exists(updaterExe))
             {
-                Process.Start(new ProcessStartInfo(updaterExe) { UseShellExecute = true });
-                _ = Task.Run(async () => { await Task.Delay(2000); Environment.Exit(0); });
+                // -I 非交互自动更新，占用文件自动结束应用进程；渠道透传 --source 锁定 config 里 source[].id
+                string source = AppConfig.EnablePreReleaseUpdateCheck ? "preview" : "stable";
+                Process.Start(
+                    new ProcessStartInfo(updaterExe)
+                    {
+                        UseShellExecute = true,
+                        Arguments = $"-I --source {source}",
+                    }
+                );
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(2000);
+                    Environment.Exit(0);
+                });
                 App.Current.Exit();
                 return;
             }
