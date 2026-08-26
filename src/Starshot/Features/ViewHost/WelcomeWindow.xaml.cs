@@ -1,15 +1,15 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Starshot.Features.Screenshot;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Windows.Graphics;
-using Starshot.Features.Screenshot;
 
 namespace Starshot.Features.ViewHost;
 
@@ -18,9 +18,18 @@ public sealed partial class WelcomeWindow : WindowEx
 {
     private TaskCompletionSource<bool> _tcs;
 
-    private static readonly (string, string)[] WallpaperFilters = {
-        ("Image", ".jpg"), ("Image", ".jpeg"), ("Image", ".png"), ("Image", ".bmp"), ("Image", ".webp"),
-        ("Video", ".mp4"), ("Video", ".mkv"), ("Video", ".mov"), ("Video", ".avi"), ("Video", ".webm"),
+    private static readonly (string, string)[] WallpaperFilters =
+    {
+        ("Image", ".jpg"),
+        ("Image", ".jpeg"),
+        ("Image", ".png"),
+        ("Image", ".bmp"),
+        ("Image", ".webp"),
+        ("Video", ".mp4"),
+        ("Video", ".mkv"),
+        ("Video", ".mov"),
+        ("Video", ".avi"),
+        ("Video", ".webm"),
     };
 
     // 欢迎页选的配置：暂存，不直接写 AppConfig（DB 还没创建），CheckEnviromentAsync 在 SetDatabase 后读
@@ -29,14 +38,12 @@ public sealed partial class WelcomeWindow : WindowEx
     public bool WallpaperIsVideo { get; private set; }
     public string? DatabaseFolderPath { get; private set; }
 
-
     public WelcomeWindow()
     {
         InitializeComponent();
         InitializeWindow();
         _tcs = new();
     }
-
 
     private void InitializeWindow()
     {
@@ -54,35 +61,52 @@ public sealed partial class WelcomeWindow : WindowEx
         new SystemBackdropHelper(this).TrySetAcrylic();
     }
 
-
     public async Task<bool> WaitAsync()
     {
         Activate();
         return await _tcs.Task;
     }
 
-
     // Window 没有 XamlRoot，包装 Content 的 XamlRoot 给 Picker 用
     public XamlRoot XamlRoot => (Content as FrameworkElement)?.XamlRoot!;
 
-
     // DXGI 支持检测结果（互补的 Visibility）
-    public Visibility DxgiSupported { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
+    public Visibility DxgiSupported
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = Visibility.Collapsed;
 
-    public Visibility DxgiNotSupported { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
+    public Visibility DxgiNotSupported
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = Visibility.Collapsed;
 
     // 选完显示选中路径
-    public string WallpaperDisplay { get; set => SetProperty(ref field, value); } = "";
+    public string WallpaperDisplay
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
 
-    public string DatabaseFolderDisplay { get; set => SetProperty(ref field, value); } = "";
+    public string DatabaseFolderDisplay
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
 
     // 安装版线判定（包内带更新器）：desc 文案按当前线只写对应一半，不让用户自己对号
-    private bool IsInstallerLine => File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"));
+    private bool IsInstallerLine =>
+        File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"));
 
-    public string EditionName => IsInstallerLine ? Lang.Starshot_EditionInstaller : Lang.Starshot_EditionPortable;
+    public string EditionName =>
+        IsInstallerLine ? Lang.Starshot_EditionInstaller : Lang.Starshot_EditionPortable;
 
-    public string DbFolderDescTail => IsInstallerLine ? Lang.Starshot_WelcomeDbDescInstaller : Lang.Starshot_WelcomeDbDescPortable;
-
+    public string DbFolderDescTail =>
+        IsInstallerLine
+            ? Lang.Starshot_WelcomeDbDescInstaller
+            : Lang.Starshot_WelcomeDbDescPortable;
 
     private async void Grid_Loaded(object sender, RoutedEventArgs e)
     {
@@ -99,7 +123,11 @@ public sealed partial class WelcomeWindow : WindowEx
                 DxgiNotSupported = Visibility.Visible;
                 return;
             }
-            using var bitmap = await ScreenCaptureHelper.CaptureMonitorAsync((nint)mainDisplay.DisplayId.Value, Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized, default);
+            using var bitmap = await ScreenCaptureHelper.CaptureMonitorAsync(
+                (nint)mainDisplay.DisplayId.Value,
+                Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized,
+                default
+            );
             if (bitmap is null || bitmap.ContentSize.Width == 0 || bitmap.ContentSize.Height == 0)
             {
                 DxgiSupported = Visibility.Collapsed;
@@ -116,14 +144,17 @@ public sealed partial class WelcomeWindow : WindowEx
         }
     }
 
-
     [RelayCommand]
     private async Task PickWallpaper()
     {
         try
         {
-            string? path = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot, WallpaperFilters);
-            if (string.IsNullOrWhiteSpace(path)) return;
+            string? path = await FileDialogHelper.PickSingleFileAsync(
+                this.XamlRoot,
+                WallpaperFilters
+            );
+            if (string.IsNullOrWhiteSpace(path))
+                return;
 
             string ext = Path.GetExtension(path).ToLowerInvariant();
             WallpaperIsVideo = ext is ".mp4" or ".mkv" or ".mov" or ".avi" or ".webm";
@@ -147,7 +178,6 @@ public sealed partial class WelcomeWindow : WindowEx
         catch { }
     }
 
-
     [RelayCommand]
     private async Task PickDatabaseFolder()
     {
@@ -162,7 +192,6 @@ public sealed partial class WelcomeWindow : WindowEx
         }
         catch { }
     }
-
 
     [RelayCommand]
     private void Start()

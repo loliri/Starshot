@@ -1,9 +1,9 @@
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
-using Microsoft.UI.Xaml;
 using System;
 using System.Net;
 using System.Runtime.InteropServices;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Xaml;
 using Windows.UI;
 using WinRT;
 
@@ -11,7 +11,6 @@ namespace Starshot.Helpers;
 
 public class SystemBackdropHelper
 {
-
     private readonly Window _window;
 
     private WindowsSystemDispatcherQueueHelper? wsdqHelper; // See below for implementation.
@@ -26,17 +25,12 @@ public class SystemBackdropHelper
 
     private bool alwaysActive;
 
-
-
-
     public SystemBackdropHelper(Window window, SystemBackdropProperty? backdropProperty = null)
     {
         ArgumentNullException.ThrowIfNull(window);
         _window = window;
         this.backdropProperty = backdropProperty;
     }
-
-
 
     public void ResetBackdrop()
     {
@@ -51,8 +45,6 @@ public class SystemBackdropHelper
         alwaysActive = false;
     }
 
-
-
     public void SetBackdropProperty(SystemBackdropProperty? backdropProperty = null)
     {
         micaController?.ResetProperties();
@@ -61,9 +53,11 @@ public class SystemBackdropHelper
         SetControllerProperties();
     }
 
-
-
-    public bool TrySetMica(bool useMicaAlt = false, bool fallbackToAcrylic = false, bool alwaysActive = false)
+    public bool TrySetMica(
+        bool useMicaAlt = false,
+        bool fallbackToAcrylic = false,
+        bool alwaysActive = false
+    )
     {
         ResetBackdrop();
         if (MicaController.IsSupported())
@@ -81,12 +75,17 @@ public class SystemBackdropHelper
             configurationSource.IsInputActive = true;
             SetConfigurationSourceTheme();
 
-            micaController = new MicaController { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base };
+            micaController = new MicaController
+            {
+                Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base,
+            };
             SetControllerProperties();
 
             // Enable the system backdrop.
             // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
-            micaController.AddSystemBackdropTarget(_window.As<ICompositionSupportsSystemBackdrop>());
+            micaController.AddSystemBackdropTarget(
+                _window.As<ICompositionSupportsSystemBackdrop>()
+            );
             micaController.SetSystemBackdropConfiguration(configurationSource);
 
             this.alwaysActive = alwaysActive;
@@ -101,8 +100,6 @@ public class SystemBackdropHelper
             return false;
         }
     }
-
-
 
     public bool TrySetAcrylic(bool alwaysActive = false)
     {
@@ -127,7 +124,9 @@ public class SystemBackdropHelper
 
             // Enable the system backdrop.
             // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
-            acrylicController.AddSystemBackdropTarget(_window.As<ICompositionSupportsSystemBackdrop>());
+            acrylicController.AddSystemBackdropTarget(
+                _window.As<ICompositionSupportsSystemBackdrop>()
+            );
             acrylicController.SetSystemBackdropConfiguration(configurationSource);
 
             this.alwaysActive = alwaysActive;
@@ -139,17 +138,14 @@ public class SystemBackdropHelper
         }
     }
 
-
-
-
     private void Window_Activated(object sender, WindowActivatedEventArgs args)
     {
         if (configurationSource != null)
         {
-            configurationSource.IsInputActive = alwaysActive || args.WindowActivationState != WindowActivationState.Deactivated;
+            configurationSource.IsInputActive =
+                alwaysActive || args.WindowActivationState != WindowActivationState.Deactivated;
         }
     }
-
 
     private void Window_ThemeChanged(FrameworkElement sender, object args)
     {
@@ -163,13 +159,10 @@ public class SystemBackdropHelper
         }
     }
 
-
     private void Window_Closed(object sender, WindowEventArgs args)
     {
         ResetBackdrop();
     }
-
-
 
     private void SetConfigurationSourceTheme()
     {
@@ -183,8 +176,6 @@ public class SystemBackdropHelper
             };
         }
     }
-
-
 
     private void SetControllerProperties()
     {
@@ -233,8 +224,6 @@ public class SystemBackdropHelper
         }
     }
 
-
-
     private class WindowsSystemDispatcherQueueHelper
     {
         [StructLayout(LayoutKind.Sequential)]
@@ -246,9 +235,13 @@ public class SystemBackdropHelper
         }
 
         [DllImport("CoreMessaging.dll")]
-        private static extern int CreateDispatcherQueueController(in DispatcherQueueOptions options, out nint dispatcherQueueController);
+        private static extern int CreateDispatcherQueueController(
+            in DispatcherQueueOptions options,
+            out nint dispatcherQueueController
+        );
 
         nint m_dispatcherQueueController;
+
         public void EnsureWindowsSystemDispatcherQueueController()
         {
             if (Windows.System.DispatcherQueue.GetForCurrentThread() != null)
@@ -261,22 +254,17 @@ public class SystemBackdropHelper
             {
                 DispatcherQueueOptions options;
                 options.dwSize = Marshal.SizeOf(typeof(DispatcherQueueOptions));
-                options.threadType = 2;    // DQTYPE_THREAD_CURRENT
+                options.threadType = 2; // DQTYPE_THREAD_CURRENT
                 options.apartmentType = 2; // DQTAT_COM_STA
 
                 _ = CreateDispatcherQueueController(options, out m_dispatcherQueueController);
             }
         }
     }
-
-
 }
-
-
 
 public record SystemBackdropProperty
 {
-
     public required uint FallbackColorDark { get; init; }
 
     public required uint FallbackColorLight { get; init; }
@@ -292,8 +280,6 @@ public record SystemBackdropProperty
     public required float TintOpacityDark { get; init; }
 
     public required float TintOpacityLight { get; init; }
-
-
 
     public static readonly SystemBackdropProperty AcrylicDefault = new()
     {
@@ -330,9 +316,7 @@ public record SystemBackdropProperty
         TintOpacityDark = 0,
         TintOpacityLight = 0.5f,
     };
-
 }
-
 
 file static class UInt32ToColorHelper
 {

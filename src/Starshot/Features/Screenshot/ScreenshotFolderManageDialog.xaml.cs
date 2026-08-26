@@ -1,33 +1,26 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Starshot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Starshot.Helpers;
 using Windows.System;
-
 
 namespace Starshot.Features.Screenshot;
 
 [INotifyPropertyChanged]
 public sealed partial class ScreenshotFolderManageDialog : ContentDialog
 {
-
-
-    private ILogger<ScreenshotFolderManageDialog> _logger = AppConfig.GetLogger<ScreenshotFolderManageDialog>();
-
+    private ILogger<ScreenshotFolderManageDialog> _logger =
+        AppConfig.GetLogger<ScreenshotFolderManageDialog>();
 
     public List<ScreenshotFolder> Folders { get; set; }
-
-
-
-
 
     public ScreenshotFolderManageDialog()
     {
@@ -36,18 +29,15 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         Unloaded += ScreenshotFolderManageDialog_Unloaded;
     }
 
-
-
-
     public ObservableCollection<ScreenshotFolder> ScreenshotFolders { get; set; } = new();
-
 
     public bool FolderChanged { get; set; }
 
-
-    public bool CanSave { get; set => SetProperty(ref field, value); }
-
-
+    public bool CanSave
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     private void ScreenshotFolderManageDialog_Loaded(object sender, RoutedEventArgs e)
     {
@@ -64,8 +54,6 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         catch { }
     }
 
-
-
     private void ScreenshotFolderManageDialog_Unloaded(object sender, RoutedEventArgs e)
     {
         try
@@ -75,9 +63,6 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         }
         catch { }
     }
-
-
-
 
     [RelayCommand]
     private async Task AddFolderAsync()
@@ -100,9 +85,6 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         }
     }
 
-
-
-
     private async void Button_OpenFolder_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -118,8 +100,6 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         catch { }
     }
 
-
-
     private void Button_RemoveFolder_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -132,9 +112,6 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         }
         catch { }
     }
-
-
-
 
     [RelayCommand]
     private void Save()
@@ -153,13 +130,9 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         }
     }
 
-
-
     [RelayCommand]
     private void Cancel()
     {
         this.Hide();
     }
-
-
 }

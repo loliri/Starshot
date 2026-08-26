@@ -9,6 +9,9 @@
       <Platform Solution="*|arm64" Project="arm64" />
     </Project>
     <Project Path="src/Starshot.Language/Starshot.Language.csproj" />
-    <Project Path="src/Starshot.Launcher/Starshot.Launcher.vcxproj" Id="a1b2c3d4-e5f6-4789-9abc-def012345678" />
+    <Project
+      Path="src/Starshot.Launcher/Starshot.Launcher.vcxproj"
+      Id="a1b2c3d4-e5f6-4789-9abc-def012345678"
+    />
   </Folder>
 </Solution>

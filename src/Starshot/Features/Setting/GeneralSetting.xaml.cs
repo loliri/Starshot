@@ -1,12 +1,3 @@
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Navigation;
-using Starshot.Features.Codec;
-using Starshot.Features.Update;
-using Starshot.Frameworks;
-using Starshot.Helpers;
-using Starshot.Language;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -14,17 +5,25 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Win32;
-using TaskService = Microsoft.Win32.TaskScheduler.TaskService;
-using LogonTrigger = Microsoft.Win32.TaskScheduler.LogonTrigger;
-using ExecAction = Microsoft.Win32.TaskScheduler.ExecAction;
+using Starshot.Features.Codec;
+using Starshot.Features.Update;
+using Starshot.Frameworks;
+using Starshot.Helpers;
+using Starshot.Language;
 using Windows.System;
+using ExecAction = Microsoft.Win32.TaskScheduler.ExecAction;
+using LogonTrigger = Microsoft.Win32.TaskScheduler.LogonTrigger;
+using TaskService = Microsoft.Win32.TaskScheduler.TaskService;
 
 namespace Starshot.Features.Setting;
 
 public sealed partial class GeneralSetting : PageBase
 {
-
     private readonly ILogger<GeneralSetting> _logger = AppConfig.GetLogger<GeneralSetting>();
 
     public string? DebugDest
@@ -47,7 +46,6 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
     // 禁用证书校验：调试流式解压用（自签测试服务器），进程级不写 DB
     private static bool s_disableCert;
 
@@ -61,9 +59,14 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
     // 解压状态进程级：切走设置页再回来恢复（后台任务继续跑）
-    private enum ExtractState { Idle, Running, Completed, Failed }
+    private enum ExtractState
+    {
+        Idle,
+        Running,
+        Completed,
+        Failed,
+    }
 
     private static ExtractState s_extractState = ExtractState.Idle;
     private static int s_extractPercent;
@@ -72,11 +75,10 @@ public sealed partial class GeneralSetting : PageBase
     // 当前活动实例：progress handler 通过它刷新当前页面（切 tab 回来新实例能收到更新）
     private static GeneralSetting? s_activeInstance;
 
-
     public GeneralSetting()
     {
         InitializeComponent();
-        // 安装版线（kachina）：更新源在 kachina config 写死，只藏源选择；
+        // 安装版线：更新源在 kachina config 写死，只藏源选择；
         // GitHub 直连开关保留——release notes 仍走 GitHub API 拉取
         if (AppConfig.Installer)
         {
@@ -86,7 +88,6 @@ public sealed partial class GeneralSetting : PageBase
         LoadShieldIcon();
     }
 
-
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
@@ -94,39 +95,42 @@ public sealed partial class GeneralSetting : PageBase
         RefreshExtractState();
     }
 
-
     private void RefreshExtractState()
     {
         DebugProgressBar.Value = s_extractPercent;
-        DebugProgressBar.Visibility = s_extractState == ExtractState.Running ? Visibility.Visible : Visibility.Collapsed;
-        DebugCompletedIcon.Visibility = s_extractState == ExtractState.Completed ? Visibility.Visible : Visibility.Collapsed;
+        DebugProgressBar.Visibility =
+            s_extractState == ExtractState.Running ? Visibility.Visible : Visibility.Collapsed;
+        DebugCompletedIcon.Visibility =
+            s_extractState == ExtractState.Completed ? Visibility.Visible : Visibility.Collapsed;
         DebugStatus.Text = s_extractStatus;
     }
-
 
     public bool EnableAutoStart
     {
         get;
         set
         {
-            if (SetProperty(ref field, value)) _ = ApplyEnableAutoStartAsync(value);
+            if (SetProperty(ref field, value))
+                _ = ApplyEnableAutoStartAsync(value);
         }
     } = IsAutoStartActive();
-
 
     private async Task ApplyEnableAutoStartAsync(bool value)
     {
         if (value)
         {
-            if (PriorityStart) await UpdateAutoStartTaskAsync(true);
-            else UpdateAutoStartRegistry(true);
+            if (PriorityStart)
+                await UpdateAutoStartTaskAsync(true);
+            else
+                UpdateAutoStartRegistry(true);
         }
         else
         {
             UpdateAutoStartRegistry(false);
             if (_priorityStart)
             {
-                if (await UpdateAutoStartTaskAsync(false)) _priorityStart = false;
+                if (await UpdateAutoStartTaskAsync(false))
+                    _priorityStart = false;
             }
         }
         OnPropertyChanged(nameof(AutoStartMinimizedVisibility));
@@ -134,44 +138,52 @@ public sealed partial class GeneralSetting : PageBase
         OnPropertyChanged(nameof(PriorityStart));
     }
 
-
     private static bool IsAutoStartActive()
     {
-        if (AppConfig.EnableAutoStart) return true;
-        try { using var ts = new TaskService(); return ts.GetTask("Starshot") is not null; }
-        catch { return false; }
+        if (AppConfig.EnableAutoStart)
+            return true;
+        try
+        {
+            using var ts = new TaskService();
+            return ts.GetTask("Starshot") is not null;
+        }
+        catch
+        {
+            return false;
+        }
     }
-
 
     public bool AutoStartMinimized
     {
         get;
         set
         {
-            if (SetProperty(ref field, value)) _ = ApplyAutoStartMinimizedAsync(value);
+            if (SetProperty(ref field, value))
+                _ = ApplyAutoStartMinimizedAsync(value);
         }
     } = AppConfig.AutoStartMinimized;
-
 
     private async Task ApplyAutoStartMinimizedAsync(bool value)
     {
         AppConfig.AutoStartMinimized = value;
         if (EnableAutoStart)
         {
-            if (PriorityStart) await UpdateAutoStartTaskAsync(true);
-            else UpdateAutoStartRegistry(true);
+            if (PriorityStart)
+                await UpdateAutoStartTaskAsync(true);
+            else
+                UpdateAutoStartRegistry(true);
         }
     }
 
-
-    public Visibility AutoStartMinimizedVisibility => EnableAutoStart ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility AutoStartMinimizedVisibility =>
+        EnableAutoStart ? Visibility.Visible : Visibility.Collapsed;
 
     public Microsoft.UI.Xaml.Media.ImageSource? ShieldSource { get; set; }
 
-    public Visibility PriorityStartVisibility => EnableAutoStart ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility PriorityStartVisibility =>
+        EnableAutoStart ? Visibility.Visible : Visibility.Collapsed;
 
     public bool AutoStartEnabled => !PriorityStart;
-
 
     /// <summary>
     /// Task Scheduler 高优先级启动（ONLOGON + High），独立于注册表 Run
@@ -189,7 +201,6 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
     private async Task ApplyPriorityStartAsync(bool value)
     {
         bool ok = await UpdateAutoStartTaskAsync(value);
@@ -206,23 +217,27 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
-    public Visibility PriorityStartHintVisibility => _priorityStart ? Visibility.Visible : Visibility.Collapsed;
-
+    public Visibility PriorityStartHintVisibility =>
+        _priorityStart ? Visibility.Visible : Visibility.Collapsed;
 
     private static bool IsTaskExists()
     {
-        try { using var ts = new TaskService(); return ts.GetTask("Starshot") is not null; }
-        catch { return false; }
+        try
+        {
+            using var ts = new TaskService();
+            return ts.GetTask("Starshot") is not null;
+        }
+        catch
+        {
+            return false;
+        }
     }
-
 
     public int UpdateSource
     {
         get => AppConfig.UpdateSource;
         set => AppConfig.UpdateSource = value;
     }
-
 
     /// <summary>
     /// 每次启动把进程提升为高优先级（应用自设，与启动方式无关）。改后重启生效。
@@ -237,7 +252,6 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
     /// <summary>
     /// GitHub API 不走系统代理（仅 GitHub 源生效；CDN 源走系统代理不受影响）。改后重启生效。
     /// </summary>
@@ -250,7 +264,6 @@ public sealed partial class GeneralSetting : PageBase
             InAppToast.MainWindow?.Information(null, Lang.Starshot_RestartToTakeEffect, 3000);
         }
     }
-
 
     /// <summary>
     /// 开发者模式：显示调试组（流式解压测试）
@@ -267,7 +280,6 @@ public sealed partial class GeneralSetting : PageBase
 
     public Visibility DevModeVisibility => DevMode ? Visibility.Visible : Visibility.Collapsed;
 
-
     public int LanguageIndex
     {
         get;
@@ -275,31 +287,48 @@ public sealed partial class GeneralSetting : PageBase
         {
             if (SetProperty(ref field, value))
             {
-                string? lang = value switch { 1 => "en-US", 2 => "zh-CN", 3 => "ja-JP", _ => null };
+                string? lang = value switch
+                {
+                    1 => "en-US",
+                    2 => "zh-CN",
+                    3 => "ja-JP",
+                    _ => null,
+                };
                 AppConfig.Language = lang;
                 AppConfig.SetLanguage(lang);
-                Process.Start(new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = true });
+                Process.Start(
+                    new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = true }
+                );
                 Environment.Exit(0);
             }
         }
-    } = AppConfig.Language switch { "en-US" => 1, "zh-CN" => 2, "ja-JP" => 3, _ => 0 };
-
+    } =
+        AppConfig.Language switch
+        {
+            "en-US" => 1,
+            "zh-CN" => 2,
+            "ja-JP" => 3,
+            _ => 0,
+        };
 
     private static readonly string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string RunValueName = "Starshot";
-
 
     private void UpdateAutoStartRegistry(bool enable)
     {
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: true);
-            if (key is null) return;
+            if (key is null)
+                return;
 
             if (enable)
             {
                 string launcherPath = GetLauncherPath();
-                string args = (AppConfig.AutoStartMinimized && AppConfig.EnableSystemTrayIcon) ? " --hide" : "";
+                string args =
+                    (AppConfig.AutoStartMinimized && AppConfig.EnableSystemTrayIcon)
+                        ? " --hide"
+                        : "";
                 key.SetValue(RunValueName, $"\"{launcherPath}\"{args}");
             }
             else
@@ -313,7 +342,6 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
     /// <summary>
     /// Task Scheduler 高优先级启动（ONLOGON 触发 + High 优先级），独立于注册表 Run。
     /// </summary>
@@ -323,23 +351,32 @@ public sealed partial class GeneralSetting : PageBase
         try
         {
             string launcherPath = GetLauncherPath();
-            string taskArgs = (AppConfig.AutoStartMinimized && AppConfig.EnableSystemTrayIcon) ? "--hide" : "";
+            string taskArgs =
+                (AppConfig.AutoStartMinimized && AppConfig.EnableSystemTrayIcon) ? "--hide" : "";
             string mode = enable ? "create" : "delete";
             // 提权子进程：UAC 弹窗，admin 权限调 TaskScheduler API（同步）；await 不阻塞 UI
-            var psi = new ProcessStartInfo(Environment.ProcessPath!, $"--manage-task {mode} \"{launcherPath}\" \"{taskArgs}\"")
+            var psi = new ProcessStartInfo(
+                Environment.ProcessPath!,
+                $"--manage-task {mode} \"{launcherPath}\" \"{taskArgs}\""
+            )
             {
                 Verb = "runas",
                 UseShellExecute = true,
             };
             var p = Process.Start(psi);
-            if (p is null) return false;
+            if (p is null)
+                return false;
             await p.WaitForExitAsync();
             return p.ExitCode == 0;
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
             _logger.LogError(ex, "Failed to update auto-start task");
-            InAppToast.MainWindow?.Warning(null, new System.ComponentModel.Win32Exception(ex.NativeErrorCode).Message, 5000);
+            InAppToast.MainWindow?.Warning(
+                null,
+                new System.ComponentModel.Win32Exception(ex.NativeErrorCode).Message,
+                5000
+            );
             return false;
         }
         catch (Exception ex)
@@ -350,11 +387,10 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
     private static string GetLauncherPath()
     {
         string exePath = Environment.ProcessPath ?? "";
-        // 安装版线（kachina）：扁平目录，主程序就在根，自启直接指向自身
+        // 安装版线：扁平目录，主程序就在根，自启直接指向自身
         if (AppConfig.Installer)
         {
             return exePath;
@@ -365,10 +401,8 @@ public sealed partial class GeneralSetting : PageBase
         return File.Exists(launcher) ? launcher : exePath;
     }
 
-
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     private static extern IntPtr LoadIcon(IntPtr hInstance, IntPtr lpIconName);
-
 
     private void LoadShieldIcon()
     {
@@ -376,13 +410,13 @@ public sealed partial class GeneralSetting : PageBase
         {
             // IDI_SHIELD = 32518，系统标准 UAC 盾牌图标
             IntPtr hIcon = LoadIcon(IntPtr.Zero, (IntPtr)32518);
-            if (hIcon == IntPtr.Zero) return;
+            if (hIcon == IntPtr.Zero)
+                return;
             using var icon = System.Drawing.Icon.FromHandle(hIcon);
             ShieldSource = AppIconHelper.ToBitmapImage(icon);
         }
         catch { }
     }
-
 
     [RelayCommand]
     private async Task BrowseDest()
@@ -394,14 +428,13 @@ public sealed partial class GeneralSetting : PageBase
         }
     }
 
-
     [RelayCommand]
     private async Task OpenDest()
     {
-        if (string.IsNullOrWhiteSpace(DebugDest) || !Directory.Exists(DebugDest)) return;
+        if (string.IsNullOrWhiteSpace(DebugDest) || !Directory.Exists(DebugDest))
+            return;
         await Launcher.LaunchFolderPathAsync(DebugDest);
     }
-
 
     [RelayCommand]
     private async Task DebugExtract()
@@ -424,11 +457,20 @@ public sealed partial class GeneralSetting : PageBase
         {
             s_extractPercent = p.percent;
             s_extractStatus = $"{p.percent}%  {p.stage}";
-            try { s_activeInstance?.RefreshExtractState(); } catch { }
+            try
+            {
+                s_activeInstance?.RefreshExtractState();
+            }
+            catch { }
         });
         try
         {
-            await UpdateService.ExtractToDirectoryAsync(url, dest, progress, disableCert: DisableCert);
+            await UpdateService.ExtractToDirectoryAsync(
+                url,
+                dest,
+                progress,
+                disableCert: DisableCert
+            );
             s_extractState = ExtractState.Completed;
             s_extractPercent = 100;
             s_extractStatus = Lang.Starshot_DebugExtractDone;
@@ -440,9 +482,11 @@ public sealed partial class GeneralSetting : PageBase
         }
         finally
         {
-            try { s_activeInstance?.RefreshExtractState(); } catch { }
+            try
+            {
+                s_activeInstance?.RefreshExtractState();
+            }
+            catch { }
         }
     }
-
-
 }

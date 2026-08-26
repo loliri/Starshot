@@ -12,13 +12,23 @@ namespace Starshot.Helpers;
 /// </summary>
 public static class StorageStatsHelper
 {
-
     private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".png", ".apng", ".jpg", ".jpeg", ".jpe", ".jfif",
-        ".avif", ".heic", ".heif", ".jxl", ".webp", ".bmp", ".tif", ".tiff",
+        ".png",
+        ".apng",
+        ".jpg",
+        ".jpeg",
+        ".jpe",
+        ".jfif",
+        ".avif",
+        ".heic",
+        ".heif",
+        ".jxl",
+        ".webp",
+        ".bmp",
+        ".tif",
+        ".tiff",
     };
-
 
     /// <summary>
     /// 递归求目录总大小（字节）。目录不存在返回 0。
@@ -73,7 +83,6 @@ public static class StorageStatsHelper
         return total;
     }
 
-
     /// <summary>
     /// 递归统计图片文件数量（按扩展名）。
     /// </summary>
@@ -99,7 +108,6 @@ public static class StorageStatsHelper
         return count;
     }
 
-
     /// <summary>
     /// 字节 → 人类可读（如 "1.2 GB"）。1024 进制，保留一位小数（KB 以下取整）。
     /// </summary>
@@ -119,5 +127,4 @@ public static class StorageStatsHelper
         }
         return u == 0 ? $"{(long)size} {units[u]}" : $"{size:F1} {units[u]}";
     }
-
 }

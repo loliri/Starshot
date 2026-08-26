@@ -1,19 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.Logging;
-using Microsoft.Graphics.Canvas;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Starward.Codec.AVIF;
-using Starward.Codec.ICC;
-using Starward.Codec.JpegXL;
-using Starward.Codec.JpegXL.CMS;
-using Starward.Codec.JpegXL.CodeStream;
-using Starward.Codec.JpegXL.Encode;
-using Starshot.Features.Codec;
-using Starshot.Frameworks;
-using Starshot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,6 +6,22 @@ using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Logging;
+using Microsoft.Graphics.Canvas;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
+using Starshot.Features.Codec;
+using Starshot.Frameworks;
+using Starshot.Helpers;
+using Starward.Codec.AVIF;
+using Starward.Codec.ICC;
+using Starward.Codec.JpegXL;
+using Starward.Codec.JpegXL.CMS;
+using Starward.Codec.JpegXL.CodeStream;
+using Starward.Codec.JpegXL.Encode;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Graphics.DirectX;
@@ -29,27 +29,29 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.System;
 
-
 namespace Starshot.Features.Screenshot;
 
 public sealed partial class ImageBatchConvertWindow : PageBase
 {
+    private readonly ILogger<ImageBatchConvertWindow> _logger =
+        AppConfig.GetLogger<ImageBatchConvertWindow>();
 
-    private readonly ILogger<ImageBatchConvertWindow> _logger = AppConfig.GetLogger<ImageBatchConvertWindow>();
+    private readonly Brush _deltaAddBrush = (
+        App.Current.Resources["SystemFillColorCriticalBrush"] as Brush
+    )!;
 
+    private readonly Brush _deltaDecreseBrush = (
+        App.Current.Resources["SystemFillColorSuccessBrush"] as Brush
+    )!;
 
-    private readonly Brush _deltaAddBrush = (App.Current.Resources["SystemFillColorCriticalBrush"] as Brush)!;
-
-    private readonly Brush _deltaDecreseBrush = (App.Current.Resources["SystemFillColorSuccessBrush"] as Brush)!;
-
-    private readonly Brush _deltaZeroBrush = (App.Current.Resources["TextFillColorSecondaryBrush"] as Brush)!;
-
+    private readonly Brush _deltaZeroBrush = (
+        App.Current.Resources["TextFillColorSecondaryBrush"] as Brush
+    )!;
 
     public ImageBatchConvertWindow()
     {
         InitializeComponent();
     }
-
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -60,14 +62,7 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
-
-
-    private void RootGrid_Loaded(object sender, RoutedEventArgs e)
-    {
-
-    }
-
+    private void RootGrid_Loaded(object sender, RoutedEventArgs e) { }
 
     private void Button_Back_Click(object sender, RoutedEventArgs e)
     {
@@ -76,8 +71,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             Frame.GoBack();
         }
     }
-
-
 
     private void RootGrid_Unloaded(object sender, RoutedEventArgs e)
     {
@@ -102,8 +95,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         catch { }
     }
 
-
-
     public void LoadItems(List<ScreenshotItem> items)
     {
         try
@@ -127,31 +118,59 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
-
     private CancellationTokenSource? _cancellationTokenSource;
 
     private Dictionary<string, ImageConvertItem> _itemsDict = new();
 
     public ObservableCollection<ImageConvertItem> ImageConvertItems { get; set; } = new();
 
-    public string OutputFolder { get; set => SetProperty(ref field, value); } = Lang.ImageBatchConvertWindow_OriginalFileFolder;
+    public string OutputFolder
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = Lang.ImageBatchConvertWindow_OriginalFileFolder;
 
-    public int TotalCount { get; set => SetProperty(ref field, value); }
+    public int TotalCount
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public int SuccessCount { get; set => SetProperty(ref field, value); }
+    public int SuccessCount
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public int ErrorCount { get; set => SetProperty(ref field, value); }
+    public int ErrorCount
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public bool DisplayInfo { get; set => SetProperty(ref field, value); }
+    public bool DisplayInfo
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public bool IsConverting { get; set => SetProperty(ref field, value); }
+    public bool IsConverting
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public long TotalSourceFileSize { get; set => SetProperty(ref field, value); }
+    public long TotalSourceFileSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public long TotalOutputFileSize { get; set => SetProperty(ref field, value); }
-
-
+    public long TotalOutputFileSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     private async void Button_Import_Click(object sender, RoutedEventArgs e)
     {
@@ -177,7 +196,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
     private async void Button_OutputFolder_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -193,8 +211,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             _logger.LogError(ex, "Pick output folder failed");
         }
     }
-
-
 
     private async void Button_StartConvert_Click(object sender, RoutedEventArgs e)
     {
@@ -226,7 +242,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
     private void Button_Stop_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -255,7 +270,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
     private void Button_Clear_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -273,7 +287,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         catch { }
     }
 
-
     private void ListView_ImageConvertItems_DragOver(object sender, DragEventArgs e)
     {
         try
@@ -282,7 +295,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
         catch { }
     }
-
 
     private async void ListView_ImageConvertItems_Drop(object sender, DragEventArgs e)
     {
@@ -293,7 +305,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             var list = new List<string>();
             foreach (IStorageItem? item in items)
             {
-                if (item is StorageFile { Path: not "" } file && ScreenshotHelper.IsSupportedExtension(file.FileType))
+                if (
+                    item is StorageFile { Path: not "" } file
+                    && ScreenshotHelper.IsSupportedExtension(file.FileType)
+                )
                 {
                     if (!_itemsDict.ContainsKey(file.Path))
                     {
@@ -307,7 +322,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
                     var files = await folder.GetFilesAsync();
                     foreach (var file1 in files)
                     {
-                        if (ScreenshotHelper.IsSupportedExtension(file1.FileType) && !_itemsDict.ContainsKey(file1.Path))
+                        if (
+                            ScreenshotHelper.IsSupportedExtension(file1.FileType)
+                            && !_itemsDict.ContainsKey(file1.Path)
+                        )
                         {
                             var convertItem = new ImageConvertItem(file1.Path);
                             ImageConvertItems.Add(convertItem);
@@ -322,7 +340,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             _logger.LogError(ex, "Drop images");
         }
     }
-
 
     private async void HyperlinkButton_SourceFileName_Click(object sender, RoutedEventArgs e)
     {
@@ -340,7 +357,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         catch { }
     }
 
-
     private async void HyperlinkButton_OutputFileName_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -357,8 +373,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         catch { }
     }
 
-
-
     private void DisableControls()
     {
         Button_Import.IsEnabled = false;
@@ -369,8 +383,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         Slider_Quality.IsEnabled = false;
         Button_StartConvert.Content = Lang.DownloadGamePage_Pause;
     }
-
-
 
     private void RestoreControls()
     {
@@ -383,21 +395,16 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         Button_StartConvert.Content = Lang.ImageBatchConvertWindow_StartConvert;
     }
 
-
     private void ComboBox_OutputFormat_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         UpdateQualitySliderEnabled();
     }
-
 
     // PNG 无损、Ultra HDR JPG 基图固定默认质量：质量滑杆对这两种目标无效，置灰防误导
     private void UpdateQualitySliderEnabled()
     {
         Slider_Quality.IsEnabled = ComboBox_OutputFormat.SelectedIndex is not (1 or 4);
     }
-
-
-
 
     private string _format;
 
@@ -410,7 +417,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
     private string _avifenc;
 
     private string _cjxl;
-
 
     private async Task ConvertInternalAsync(CancellationToken cancellationToken = default)
     {
@@ -447,7 +453,6 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             _ => ComboBox_OutputFileExists.SelectedIndex,
         };
 
-
         TotalCount = ImageConvertItems.Count;
         DisplayInfo = true;
 
@@ -467,8 +472,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
-    private async Task ConvertImageAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    private async Task ConvertImageAsync(
+        ImageConvertItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         if (item.ConvertSuccess)
         {
@@ -492,14 +499,33 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             {
                 Task task = (item.SourceExtension, _format) switch
                 {
-                    (".jpg" or ".png" or ".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".uhdrjpg") => ConvertToUhdrJpgAsync(item, cancellationToken),
-                    (".jpg" or ".png", ".avif" or ".jxl") => ConvertJpegPngToAvifJxlAsync(item, cancellationToken),
+                    (
+                        ".jpg"
+                            or ".png"
+                            or ".jxr"
+                            or ".webp"
+                            or ".heic"
+                            or ".avif"
+                            or ".jxl",
+                        ".uhdrjpg"
+                    ) => ConvertToUhdrJpgAsync(item, cancellationToken),
+                    (".jpg" or ".png", ".avif" or ".jxl") => ConvertJpegPngToAvifJxlAsync(
+                        item,
+                        cancellationToken
+                    ),
                     // avif/jxl → jpg/png 走进程内管线（HDR 源过截图同款 tonemap）：CLI avifdec/djxl 直转对 PQ 内容
                     // 不做色调映射，naive 压 8bit 导致画面发灰
-                    (".avif" or ".jxl", ".jpg" or ".png") => ConvertAvifJxlToJpgPngAsync(item, cancellationToken),
-                    (".jpg" or ".png" or ".jxr" or ".webp" or ".heic", ".jpg" or ".png") => ConvertJpegPngJxrWebpHeicToJpgPngAsync(item, cancellationToken),
-                    (".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".avif" or ".jxl") => ConvertJxrWebpHeicAvifJxlToAvifJxlAsync(item, cancellationToken),
-                    _ => throw new NotSupportedException($"Unsupported conversion from '{item.SourceExtension}' to '{_format}'."),
+                    (".avif" or ".jxl", ".jpg" or ".png") => ConvertAvifJxlToJpgPngAsync(
+                        item,
+                        cancellationToken
+                    ),
+                    (".jpg" or ".png" or ".jxr" or ".webp" or ".heic", ".jpg" or ".png") =>
+                        ConvertJpegPngJxrWebpHeicToJpgPngAsync(item, cancellationToken),
+                    (".jxr" or ".webp" or ".heic" or ".avif" or ".jxl", ".avif" or ".jxl") =>
+                        ConvertJxrWebpHeicAvifJxlToAvifJxlAsync(item, cancellationToken),
+                    _ => throw new NotSupportedException(
+                        $"Unsupported conversion from '{item.SourceExtension}' to '{_format}'."
+                    ),
                 };
                 await task;
             }
@@ -549,8 +575,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
-    private async Task ConvertJpegPngToAvifJxlAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    private async Task ConvertJpegPngToAvifJxlAsync(
+        ImageConvertItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         string outputPath = GetOutputPath(item);
         if (File.Exists(outputPath) && _overwriteMode is 0)
@@ -560,16 +588,19 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
         if (_format == ".avif")
         {
-            Process? process = Process.Start(new ProcessStartInfo
-            {
-                FileName = _avifenc,
-                Arguments = $"""
-                      "{item.SourceFilePath}" "{outputPath}" -q {_quality} --cicp 1/13/1
-                      """,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            }) ?? throw new NullReferenceException("avifenc process is null");
+            Process? process =
+                Process.Start(
+                    new ProcessStartInfo
+                    {
+                        FileName = _avifenc,
+                        Arguments = $"""
+                        "{item.SourceFilePath}" "{outputPath}" -q {_quality} --cicp 1/13/1
+                        """,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                    }
+                ) ?? throw new NullReferenceException("avifenc process is null");
             await process.WaitForExitAsync(cancellationToken);
             if (process.ExitCode != 0 || !File.Exists(outputPath))
             {
@@ -580,16 +611,21 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
         if (_format == ".jxl")
         {
-            Process? process = Process.Start(new ProcessStartInfo
-            {
-                FileName = _cjxl,
-                Arguments = $"""
-                      "{item.SourceFilePath}" "{outputPath}" -q {_quality} --lossless_jpeg={(_quality == 100 ? 1 : 0)}
-                      """,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            }) ?? throw new NullReferenceException("cjxl process is null");
+            Process? process =
+                Process.Start(
+                    new ProcessStartInfo
+                    {
+                        FileName = _cjxl,
+                        Arguments = $"""
+                        "{item.SourceFilePath}" "{outputPath}" -q {_quality} --lossless_jpeg={(
+                            _quality == 100 ? 1 : 0
+                        )}
+                        """,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                    }
+                ) ?? throw new NullReferenceException("cjxl process is null");
             await process.WaitForExitAsync(cancellationToken);
             if (process.ExitCode != 0 || !File.Exists(outputPath))
             {
@@ -600,14 +636,16 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
     /// <summary>
     /// avif/jxl → jpg/png：进程内解码（ImageLoader）+ HDR 源过截图同款 TonemapToSdr。
     /// 取代原 CLI avifdec/djxl 直转——CLI 对 PQ 内容不做色调映射，naive 压 8bit 导致发灰。
     /// 编码分流：JPG 走 ImageSaver.SaveAsJpegAsync（与查看器 SDR JPEG 同一条线）；
     /// PNG 走 ImageSaver.SaveAsPngAsync（截图验证过的管线——WIC 的 PNG 编码器不认 JPEG 参数，混用会 CreateAsync 直接抛异常）。
     /// </summary>
-    private async Task ConvertAvifJxlToJpgPngAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    private async Task ConvertAvifJxlToJpgPngAsync(
+        ImageConvertItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         string outputPath = GetOutputPath(item);
         if (File.Exists(outputPath) && _overwriteMode is 0)
@@ -615,7 +653,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             item.OutputFilePath = outputPath;
             return;
         }
-        using var imageInfo = await ImageLoader.LoadImageAsync(item.SourceFilePath, cancellationToken);
+        using var imageInfo = await ImageLoader.LoadImageAsync(
+            item.SourceFilePath,
+            cancellationToken
+        );
         int width = (int)imageInfo.CanvasBitmap.SizeInPixels.Width;
         int height = (int)imageInfo.CanvasBitmap.SizeInPixels.Height;
 
@@ -623,11 +664,21 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         CanvasRenderTarget rt8;
         if (imageInfo.HDR)
         {
-            rt8 = ScreenCaptureService.TonemapToSdr(imageInfo.CanvasBitmap, ScreenCaptureService.GetSdrWhiteLevel());
+            rt8 = ScreenCaptureService.TonemapToSdr(
+                imageInfo.CanvasBitmap,
+                ScreenCaptureService.GetSdrWhiteLevel()
+            );
         }
         else
         {
-            rt8 = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+            rt8 = new CanvasRenderTarget(
+                CanvasDevice.GetSharedDevice(),
+                width,
+                height,
+                96,
+                DirectXPixelFormat.B8G8R8A8UIntNormalized,
+                CanvasAlphaMode.Premultiplied
+            );
             using (var ds = rt8.CreateDrawingSession())
             {
                 ds.DrawImage(imageInfo.CanvasBitmap);
@@ -638,7 +689,13 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         {
             if (_format == ".png")
             {
-                await ImageSaver.SaveAsPngAsync(rt8, ms, ColorPrimaries.BT709, ScreenCaptureService.BuildXMPMetadata(item.SourceFileTime), false);
+                await ImageSaver.SaveAsPngAsync(
+                    rt8,
+                    ms,
+                    ColorPrimaries.BT709,
+                    ScreenCaptureService.BuildXMPMetadata(item.SourceFileTime),
+                    false
+                );
             }
             else
             {
@@ -651,8 +708,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         item.OutputFilePath = outputPath;
     }
 
-
-    private async Task ConvertJpegPngJxrWebpHeicToJpgPngAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    private async Task ConvertJpegPngJxrWebpHeicToJpgPngAsync(
+        ImageConvertItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         string outputPath = GetOutputPath(item);
         if (File.Exists(outputPath) && _overwriteMode is 0)
@@ -661,7 +720,9 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             return;
         }
         using var fs_read = File.OpenRead(item.SourceFilePath);
-        var decoder = await BitmapDecoder.CreateAsync(fs_read.AsRandomAccessStream()).AsTask(cancellationToken);
+        var decoder = await BitmapDecoder
+            .CreateAsync(fs_read.AsRandomAccessStream())
+            .AsTask(cancellationToken);
         var encoderId = _format switch
         {
             ".jpg" => BitmapEncoder.JpegEncoderId,
@@ -671,10 +732,23 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         using var ms = new MemoryStream();
         // JPEG 专用参数只给 JPEG 编码器；WIC 的 PNG 编码器不认这些参数，混用 CreateAsync 直接抛异常。
         // PNG 分支必须传空集——传 null 会在 WinRT 边界炸 NullReferenceException
-        List<KeyValuePair<string, BitmapTypedValue>> options = _format == ".jpg"
-            ? [KeyValuePair.Create("ImageQuality", new BitmapTypedValue(_quality / 100f, PropertyType.Single)), KeyValuePair.Create("JpegYCrCbSubsampling", new BitmapTypedValue(3, PropertyType.UInt8))]
-            : [];
-        var encoder = await BitmapEncoder.CreateAsync(encoderId, ms.AsRandomAccessStream(), options).AsTask(cancellationToken);
+        List<KeyValuePair<string, BitmapTypedValue>> options =
+            _format == ".jpg"
+                ?
+                [
+                    KeyValuePair.Create(
+                        "ImageQuality",
+                        new BitmapTypedValue(_quality / 100f, PropertyType.Single)
+                    ),
+                    KeyValuePair.Create(
+                        "JpegYCrCbSubsampling",
+                        new BitmapTypedValue(3, PropertyType.UInt8)
+                    ),
+                ]
+                : [];
+        var encoder = await BitmapEncoder
+            .CreateAsync(encoderId, ms.AsRandomAccessStream(), options)
+            .AsTask(cancellationToken);
         encoder.SetSoftwareBitmap(await decoder.GetSoftwareBitmapAsync().AsTask(cancellationToken));
         await encoder.FlushAsync().AsTask(cancellationToken);
         using var fs_write = File.Create(outputPath);
@@ -683,12 +757,14 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         item.OutputFilePath = outputPath;
     }
 
-
     /// <summary>
     /// HDR PNG（pngv3）目标：ImageLoader 解码保位深/CICP，ImageSaver 按 位图格式分流——
     /// HDR 源出 16bit PQ/BT2020 + cICP，SDR 源出带真实色域的 sRGB PNG。输出扩展名 .png。
     /// </summary>
-    private async Task ConvertToHdrPngAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    private async Task ConvertToHdrPngAsync(
+        ImageConvertItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         string outputPath = GetOutputPath(item);
         if (File.Exists(outputPath) && _overwriteMode is 0)
@@ -696,21 +772,31 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             item.OutputFilePath = outputPath;
             return;
         }
-        using var imageInfo = await ImageLoader.LoadImageAsync(item.SourceFilePath, cancellationToken);
+        using var imageInfo = await ImageLoader.LoadImageAsync(
+            item.SourceFilePath,
+            cancellationToken
+        );
         using var ms = new MemoryStream();
-        await ImageSaver.SaveAsPngAsync(imageInfo.CanvasBitmap, ms, imageInfo.ColorPrimaries ?? ColorPrimaries.BT709, ScreenCaptureService.BuildXMPMetadata(item.SourceFileTime));
+        await ImageSaver.SaveAsPngAsync(
+            imageInfo.CanvasBitmap,
+            ms,
+            imageInfo.ColorPrimaries ?? ColorPrimaries.BT709,
+            ScreenCaptureService.BuildXMPMetadata(item.SourceFileTime)
+        );
         using var fs = File.Create(outputPath);
         ms.Position = 0;
         await ms.CopyToAsync(fs, CancellationToken.None);
         item.OutputFilePath = outputPath;
     }
 
-
     /// <summary>
     /// Ultra HDR JPG（SDR 基图 + HDR gain map）目标：走 ImageSaver.SaveAsUhdrAsync。
     /// 仅对 HDR 源有意义——SDR 源没有可编码的增益，报错跳过该文件。
     /// </summary>
-    private async Task ConvertToUhdrJpgAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    private async Task ConvertToUhdrJpgAsync(
+        ImageConvertItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         string outputPath = GetOutputPath(item);
         if (File.Exists(outputPath) && _overwriteMode is 0)
@@ -718,7 +804,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             item.OutputFilePath = outputPath;
             return;
         }
-        using var imageInfo = await ImageLoader.LoadImageAsync(item.SourceFilePath, cancellationToken);
+        using var imageInfo = await ImageLoader.LoadImageAsync(
+            item.SourceFilePath,
+            cancellationToken
+        );
         if (!imageInfo.HDR)
         {
             throw new NotSupportedException("Ultra HDR JPG is only applicable to HDR images.");
@@ -733,8 +822,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         item.OutputFilePath = outputPath;
     }
 
-
-    private async Task ConvertJxrWebpHeicAvifJxlToAvifJxlAsync(ImageConvertItem item, CancellationToken cancellationToken = default)
+    private async Task ConvertJxrWebpHeicAvifJxlToAvifJxlAsync(
+        ImageConvertItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         string outputPath = GetOutputPath(item);
         if (File.Exists(outputPath) && _overwriteMode is 0)
@@ -742,11 +833,20 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             item.OutputFilePath = outputPath;
             return;
         }
-        using var imageInfo = await ImageLoader.LoadImageAsync(item.SourceFilePath, cancellationToken);
+        using var imageInfo = await ImageLoader.LoadImageAsync(
+            item.SourceFilePath,
+            cancellationToken
+        );
         if (_format == ".avif")
         {
             using var ms = new MemoryStream();
-            await SaveAsAvifAsync(imageInfo.CanvasBitmap, ms, item.SourceFileTime, _quality, cancellationToken);
+            await SaveAsAvifAsync(
+                imageInfo.CanvasBitmap,
+                ms,
+                item.SourceFileTime,
+                _quality,
+                cancellationToken
+            );
             using var fs = File.Create(outputPath);
             ms.Position = 0;
             await ms.CopyToAsync(fs, CancellationToken.None);
@@ -755,7 +855,13 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         if (_format == ".jxl")
         {
             using var ms = new MemoryStream();
-            await SaveAsJxlAsync(imageInfo.CanvasBitmap, ms, item.SourceFileTime, _quality, cancellationToken);
+            await SaveAsJxlAsync(
+                imageInfo.CanvasBitmap,
+                ms,
+                item.SourceFileTime,
+                _quality,
+                cancellationToken
+            );
             using var fs = File.Create(outputPath);
             ms.Position = 0;
             await ms.CopyToAsync(fs, CancellationToken.None);
@@ -763,64 +869,109 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
-    public static async Task SaveAsAvifAsync(CanvasBitmap bitmap, Stream stream, DateTimeOffset frameTime, int quality, CancellationToken cancellationToken = default)
+    public static async Task SaveAsAvifAsync(
+        CanvasBitmap bitmap,
+        Stream stream,
+        DateTimeOffset frameTime,
+        int quality,
+        CancellationToken cancellationToken = default
+    )
     {
         uint width = bitmap.SizeInPixels.Width;
         uint height = bitmap.SizeInPixels.Height;
-        if (bitmap.Format is DirectXPixelFormat.R8G8B8A8UIntNormalized or DirectXPixelFormat.B8G8R8A8UIntNormalized)
+        if (
+            bitmap.Format
+            is DirectXPixelFormat.R8G8B8A8UIntNormalized
+                or DirectXPixelFormat.B8G8R8A8UIntNormalized
+        )
         {
-            await Task.Run(() =>
-            {
-                avifRGBFormat format = bitmap.Format switch
-                {
-                    DirectXPixelFormat.R8G8B8A8UIntNormalized => avifRGBFormat.RGBA,
-                    DirectXPixelFormat.B8G8R8A8UIntNormalized => avifRGBFormat.BGRA,
-                    _ => throw new NotSupportedException($"{bitmap.Format} is not supported for AVIF encoding."),
-                };
-                using var encoder = new avifEncoderLite();
-                encoder.Quality = quality;
-                encoder.QualityAlpha = quality;
-                using var rgb = new avifRGBImageWrapper(width, height, 8, format);
-                rgb.SetPixelBytes(bitmap.GetPixelBytes());
-                using var image = new avifImageWrapper(width, height, 8, avifPixelFormat.YUV444);
-                image.ColorPrimaries = avifColorPrimaries.BT709;
-                image.TransferCharacteristics = avifTransferCharacteristics.SRGB;
-                image.MatrixCoefficients = avifMatrixCoefficients.BT709;
-                image.SetXMPMetadata(ScreenCaptureService.BuildXMPMetadata(frameTime));
-                image.FromRGBImage(rgb);
-                encoder.AddImage(image, 1, avifAddImageFlag.Single);
-                stream.Write(encoder.Encode());
-            }, cancellationToken).ConfigureAwait(false);
-        }
-        else if (bitmap.Format is DirectXPixelFormat.R16G16B16A16Float or DirectXPixelFormat.R32G32B32A32Float)
-        {
-            await Task.Run(() =>
-            {
-                using var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.R16G16B16A16UIntNormalized, CanvasAlphaMode.Premultiplied);
-                using (var ds = renderTarget.CreateDrawingSession())
-                {
-                    var effect = new ScRGBToHDR10Effect
+            await Task.Run(
+                    () =>
                     {
-                        Source = bitmap,
-                        BufferPrecision = CanvasBufferPrecision.Precision16Float,
-                    };
-                    ds.DrawImage(effect);
-                }
-                using var encoder = new avifEncoderLite();
-                encoder.Quality = quality;
-                encoder.QualityAlpha = quality;
-                using var rgb = new avifRGBImageWrapper(width, height, 16, avifRGBFormat.RGBA);
-                rgb.SetPixelBytes(renderTarget.GetPixelBytes());
-                using var image = new avifImageWrapper(width, height, 12, avifPixelFormat.YUV444);
-                image.ColorPrimaries = avifColorPrimaries.BT2020;
-                image.TransferCharacteristics = avifTransferCharacteristics.SMPTE2084;
-                image.MatrixCoefficients = avifMatrixCoefficients.BT2020_NCL;
-                image.SetXMPMetadata(ScreenCaptureService.BuildXMPMetadata(frameTime));
-                image.FromRGBImage(rgb);
-                encoder.AddImage(image, 1, avifAddImageFlag.Single);
-                stream.Write(encoder.Encode());
-            }, cancellationToken).ConfigureAwait(false);
+                        avifRGBFormat format = bitmap.Format switch
+                        {
+                            DirectXPixelFormat.R8G8B8A8UIntNormalized => avifRGBFormat.RGBA,
+                            DirectXPixelFormat.B8G8R8A8UIntNormalized => avifRGBFormat.BGRA,
+                            _ => throw new NotSupportedException(
+                                $"{bitmap.Format} is not supported for AVIF encoding."
+                            ),
+                        };
+                        using var encoder = new avifEncoderLite();
+                        encoder.Quality = quality;
+                        encoder.QualityAlpha = quality;
+                        using var rgb = new avifRGBImageWrapper(width, height, 8, format);
+                        rgb.SetPixelBytes(bitmap.GetPixelBytes());
+                        using var image = new avifImageWrapper(
+                            width,
+                            height,
+                            8,
+                            avifPixelFormat.YUV444
+                        );
+                        image.ColorPrimaries = avifColorPrimaries.BT709;
+                        image.TransferCharacteristics = avifTransferCharacteristics.SRGB;
+                        image.MatrixCoefficients = avifMatrixCoefficients.BT709;
+                        image.SetXMPMetadata(ScreenCaptureService.BuildXMPMetadata(frameTime));
+                        image.FromRGBImage(rgb);
+                        encoder.AddImage(image, 1, avifAddImageFlag.Single);
+                        stream.Write(encoder.Encode());
+                    },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
+        }
+        else if (
+            bitmap.Format
+            is DirectXPixelFormat.R16G16B16A16Float
+                or DirectXPixelFormat.R32G32B32A32Float
+        )
+        {
+            await Task.Run(
+                    () =>
+                    {
+                        using var renderTarget = new CanvasRenderTarget(
+                            CanvasDevice.GetSharedDevice(),
+                            width,
+                            height,
+                            96,
+                            DirectXPixelFormat.R16G16B16A16UIntNormalized,
+                            CanvasAlphaMode.Premultiplied
+                        );
+                        using (var ds = renderTarget.CreateDrawingSession())
+                        {
+                            var effect = new ScRGBToHDR10Effect
+                            {
+                                Source = bitmap,
+                                BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                            };
+                            ds.DrawImage(effect);
+                        }
+                        using var encoder = new avifEncoderLite();
+                        encoder.Quality = quality;
+                        encoder.QualityAlpha = quality;
+                        using var rgb = new avifRGBImageWrapper(
+                            width,
+                            height,
+                            16,
+                            avifRGBFormat.RGBA
+                        );
+                        rgb.SetPixelBytes(renderTarget.GetPixelBytes());
+                        using var image = new avifImageWrapper(
+                            width,
+                            height,
+                            12,
+                            avifPixelFormat.YUV444
+                        );
+                        image.ColorPrimaries = avifColorPrimaries.BT2020;
+                        image.TransferCharacteristics = avifTransferCharacteristics.SMPTE2084;
+                        image.MatrixCoefficients = avifMatrixCoefficients.BT2020_NCL;
+                        image.SetXMPMetadata(ScreenCaptureService.BuildXMPMetadata(frameTime));
+                        image.FromRGBImage(rgb);
+                        encoder.AddImage(image, 1, avifAddImageFlag.Single);
+                        stream.Write(encoder.Encode());
+                    },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
         }
         else
         {
@@ -828,19 +979,35 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         }
     }
 
-
-    public static async Task SaveAsJxlAsync(CanvasBitmap bitmap, Stream stream, DateTimeOffset frameTime, int quality, CancellationToken cancellationToken = default)
+    public static async Task SaveAsJxlAsync(
+        CanvasBitmap bitmap,
+        Stream stream,
+        DateTimeOffset frameTime,
+        int quality,
+        CancellationToken cancellationToken = default
+    )
     {
         uint width = bitmap.SizeInPixels.Width;
         uint height = bitmap.SizeInPixels.Height;
         bool lossless = quality == 100;
 
-        if (bitmap.Format is DirectXPixelFormat.R8G8B8A8UIntNormalized or DirectXPixelFormat.B8G8R8A8UIntNormalized)
+        if (
+            bitmap.Format
+            is DirectXPixelFormat.R8G8B8A8UIntNormalized
+                or DirectXPixelFormat.B8G8R8A8UIntNormalized
+        )
         {
             byte[] pixelBytes;
             if (bitmap.Format is DirectXPixelFormat.B8G8R8A8UIntNormalized)
             {
-                using var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.R8G8B8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+                using var renderTarget = new CanvasRenderTarget(
+                    CanvasDevice.GetSharedDevice(),
+                    width,
+                    height,
+                    96,
+                    DirectXPixelFormat.R8G8B8A8UIntNormalized,
+                    CanvasAlphaMode.Premultiplied
+                );
                 using (var ds = renderTarget.CreateDrawingSession())
                 {
                     ds.DrawImage(bitmap);
@@ -851,51 +1018,91 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             {
                 pixelBytes = bitmap.GetPixelBytes();
             }
-            await Task.Run(() =>
-            {
-                using var encoder = new JxlEncoder();
-                encoder.SetBasicInfo(new JxlBasicInfo(width, height, JxlPixelFormat.R8G8B8A8UInt, true) { UsesOriginalProfile = lossless });
-                encoder.SetColorEncoding(JxlColorEncoding.SRGB);
-                encoder.AddBox(JxlBoxType.XMP, ScreenCaptureService.BuildXMPMetadata(frameTime), false);
-                var frameSettings = encoder.CreateFrameSettings();
-                frameSettings.Quality = quality;
-                frameSettings.Lossless = lossless;
-                frameSettings.AddImageFrame(JxlPixelFormat.R8G8B8A8UInt, pixelBytes);
-                encoder.Encode(stream);
-            }, cancellationToken).ConfigureAwait(false);
-        }
-        else if (bitmap.Format is DirectXPixelFormat.R16G16B16A16Float or DirectXPixelFormat.R32G32B32A32Float)
-        {
-            await Task.Run(() =>
-            {
-                using var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.R16G16B16A16UIntNormalized, CanvasAlphaMode.Premultiplied);
-                using (var ds = renderTarget.CreateDrawingSession())
-                {
-                    var effect = new ScRGBToHDR10Effect
+            await Task.Run(
+                    () =>
                     {
-                        Source = bitmap,
-                        BufferPrecision = CanvasBufferPrecision.Precision16Float,
-                    };
-                    ds.DrawImage(effect);
-                }
-                using var encoder = new JxlEncoder();
-                encoder.SetBasicInfo(new JxlBasicInfo(width, height, JxlPixelFormat.R16G16B16A16UInt, true) { UsesOriginalProfile = lossless });
-                encoder.SetColorEncoding(JxlColorEncoding.HDR10);
-                encoder.AddBox(JxlBoxType.XMP, ScreenCaptureService.BuildXMPMetadata(frameTime), false);
-                var frameSettings = encoder.CreateFrameSettings();
-                frameSettings.Quality = quality;
-                frameSettings.Lossless = lossless;
-                frameSettings.AddImageFrame(JxlPixelFormat.R16G16B16A16UInt, renderTarget.GetPixelBytes());
-                encoder.Encode(stream);
-            }, cancellationToken).ConfigureAwait(false);
+                        using var encoder = new JxlEncoder();
+                        encoder.SetBasicInfo(
+                            new JxlBasicInfo(width, height, JxlPixelFormat.R8G8B8A8UInt, true)
+                            {
+                                UsesOriginalProfile = lossless,
+                            }
+                        );
+                        encoder.SetColorEncoding(JxlColorEncoding.SRGB);
+                        encoder.AddBox(
+                            JxlBoxType.XMP,
+                            ScreenCaptureService.BuildXMPMetadata(frameTime),
+                            false
+                        );
+                        var frameSettings = encoder.CreateFrameSettings();
+                        frameSettings.Quality = quality;
+                        frameSettings.Lossless = lossless;
+                        frameSettings.AddImageFrame(JxlPixelFormat.R8G8B8A8UInt, pixelBytes);
+                        encoder.Encode(stream);
+                    },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
+        }
+        else if (
+            bitmap.Format
+            is DirectXPixelFormat.R16G16B16A16Float
+                or DirectXPixelFormat.R32G32B32A32Float
+        )
+        {
+            await Task.Run(
+                    () =>
+                    {
+                        using var renderTarget = new CanvasRenderTarget(
+                            CanvasDevice.GetSharedDevice(),
+                            width,
+                            height,
+                            96,
+                            DirectXPixelFormat.R16G16B16A16UIntNormalized,
+                            CanvasAlphaMode.Premultiplied
+                        );
+                        using (var ds = renderTarget.CreateDrawingSession())
+                        {
+                            var effect = new ScRGBToHDR10Effect
+                            {
+                                Source = bitmap,
+                                BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                            };
+                            ds.DrawImage(effect);
+                        }
+                        using var encoder = new JxlEncoder();
+                        encoder.SetBasicInfo(
+                            new JxlBasicInfo(width, height, JxlPixelFormat.R16G16B16A16UInt, true)
+                            {
+                                UsesOriginalProfile = lossless,
+                            }
+                        );
+                        encoder.SetColorEncoding(JxlColorEncoding.HDR10);
+                        encoder.AddBox(
+                            JxlBoxType.XMP,
+                            ScreenCaptureService.BuildXMPMetadata(frameTime),
+                            false
+                        );
+                        var frameSettings = encoder.CreateFrameSettings();
+                        frameSettings.Quality = quality;
+                        frameSettings.Lossless = lossless;
+                        frameSettings.AddImageFrame(
+                            JxlPixelFormat.R16G16B16A16UInt,
+                            renderTarget.GetPixelBytes()
+                        );
+                        encoder.Encode(stream);
+                    },
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
         }
         else
         {
-            throw new NotSupportedException($"{bitmap.Format} is not supported for JPEG XL encoding.");
+            throw new NotSupportedException(
+                $"{bitmap.Format} is not supported for JPEG XL encoding."
+            );
         }
     }
-
-
 
     private string GetOutputPath(ImageConvertItem item, bool doNotRename = false)
     {
@@ -921,20 +1128,15 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         return outputPath;
     }
 
-
     public static string SizeToString(long size)
     {
         const double MB = 1 << 20;
         return $"{size / MB:F2} MB";
     }
-
 }
-
-
 
 public class ImageConvertItem : ObservableObject
 {
-
     public string SourceFilePath { get; set; }
 
     public string SourceFileName { get; set; }
@@ -947,29 +1149,61 @@ public class ImageConvertItem : ObservableObject
 
     public DateTimeOffset SourceFileTime { get; set; }
 
+    public bool Converting
+    {
+        get => field;
+        set => SetProperty(ref field, value);
+    }
 
-    public bool Converting { get => field; set => SetProperty(ref field, value); }
+    public bool ConvertSuccess
+    {
+        get => field;
+        set => SetProperty(ref field, value);
+    }
 
-    public bool ConvertSuccess { get => field; set => SetProperty(ref field, value); }
-
-    public bool ConvertError { get; set => SetProperty(ref field, value); }
-
+    public bool ConvertError
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     public string OutputFilePath { get; set; }
 
-    public string OutputFileName { get; set => SetProperty(ref field, value); }
+    public string OutputFileName
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public long OutputFileSize { get; set => SetProperty(ref field, value); }
+    public long OutputFileSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public string OutputFileSizeText { get => field; set => SetProperty(ref field, value); }
+    public string OutputFileSizeText
+    {
+        get => field;
+        set => SetProperty(ref field, value);
+    }
 
-    public Brush FileDeltaTextBrush { get; set => SetProperty(ref field, value); }
+    public Brush FileDeltaTextBrush
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public string FileDeltaPercent { get; set => SetProperty(ref field, value); }
+    public string FileDeltaPercent
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-
-    public string ErrorMessage { get; set => SetProperty(ref field, value); }
-
+    public string ErrorMessage
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     public ImageConvertItem(string filePath)
     {
@@ -981,5 +1215,4 @@ public class ImageConvertItem : ObservableObject
         SourceFileSizeText = $"{SourceFileSize / 1024:N0} KB";
         SourceFileTime = fileInfo.CreationTime;
     }
-
 }

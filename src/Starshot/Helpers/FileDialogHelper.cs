@@ -1,6 +1,5 @@
 // https://referencesource.microsoft.com/#system.windows.forms/winforms/Managed/System/WinForms/FileDialog_Vista_Interop.cs
 
-using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.UI.Xaml;
 using Vanara.PInvoke;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -26,13 +26,16 @@ internal static class FileDialogHelper
     /// </remarks>
     private const int ERROR_CANCELLED = 0x000004C7;
 
-    public static async Task<string?> PickSingleFileAsync(nint parentWindow, params (string Name, string Extension)[] fileTypeFilter)
+    public static async Task<string?> PickSingleFileAsync(
+        nint parentWindow,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
     {
         try
         {
             var picker = new FileOpenPicker
             {
-                SuggestedStartLocation = PickerLocationId.ComputerFolder
+                SuggestedStartLocation = PickerLocationId.ComputerFolder,
             };
             foreach (var filter in fileTypeFilter)
             {
@@ -45,51 +48,61 @@ internal static class FileDialogHelper
         catch (COMException)
         {
             return await Task.Run(() =>
-            {
-                IFileOpenDialog? dialog = null;
-                IShellItem? shell = null;
-                try
                 {
-                    dialog = new NativeFileOpenDialog();
-                    dialog.GetOptions(out var options);
-                    options |= FOS.FOS_DONTADDTORECENT;
-                    dialog.SetOptions(options);
-                    SetFileTypeFilter(dialog, fileTypeFilter);
+                    IFileOpenDialog? dialog = null;
+                    IShellItem? shell = null;
                     try
                     {
-                        ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                        dialog = new NativeFileOpenDialog();
+                        dialog.GetOptions(out var options);
+                        options |= FOS.FOS_DONTADDTORECENT;
+                        dialog.SetOptions(options);
+                        SetFileTypeFilter(dialog, fileTypeFilter);
+                        try
+                        {
+                            ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                        }
+                        catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                        {
+                            return null;
+                        }
+                        dialog.GetResult(out shell);
+                        shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
+                        return name;
                     }
-                    catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                    finally
                     {
-                        return null;
+                        if (dialog != null)
+                            Marshal.FinalReleaseComObject(dialog);
+                        if (shell != null)
+                            Marshal.FinalReleaseComObject(shell);
                     }
-                    dialog.GetResult(out shell);
-                    shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
-                    return name;
-                }
-                finally
-                {
-                    if (dialog != null) Marshal.FinalReleaseComObject(dialog);
-                    if (shell != null) Marshal.FinalReleaseComObject(shell);
-                }
-            }).ConfigureAwait(false);
+                })
+                .ConfigureAwait(false);
         }
     }
 
-
-    public static async Task<string?> PickSingleFileAsync(XamlRoot xamlRoot, params (string Name, string Extension)[] fileTypeFilter)
+    public static async Task<string?> PickSingleFileAsync(
+        XamlRoot xamlRoot,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
     {
-        return await PickSingleFileAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value, fileTypeFilter);
+        return await PickSingleFileAsync(
+            (nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value,
+            fileTypeFilter
+        );
     }
 
-
-    public static async Task<List<string>> PickMultipleFilesAsync(nint parentWindow, params (string Name, string Extension)[] fileTypeFilter)
+    public static async Task<List<string>> PickMultipleFilesAsync(
+        nint parentWindow,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
     {
         try
         {
             var picker = new FileOpenPicker
             {
-                SuggestedStartLocation = PickerLocationId.ComputerFolder
+                SuggestedStartLocation = PickerLocationId.ComputerFolder,
             };
             foreach (var filter in fileTypeFilter)
             {
@@ -102,59 +115,70 @@ internal static class FileDialogHelper
         catch (COMException)
         {
             return await Task.Run(() =>
-            {
-                IFileOpenDialog? dialog = null;
-                IShellItemArray? shellArray = null;
-                try
                 {
-                    dialog = new NativeFileOpenDialog();
-                    dialog.GetOptions(out var options);
-                    options |= FOS.FOS_ALLOWMULTISELECT;
-                    options |= FOS.FOS_DONTADDTORECENT;
-                    dialog.SetOptions(options);
-                    SetFileTypeFilter(dialog, fileTypeFilter);
+                    IFileOpenDialog? dialog = null;
+                    IShellItemArray? shellArray = null;
                     try
                     {
-                        ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                        dialog = new NativeFileOpenDialog();
+                        dialog.GetOptions(out var options);
+                        options |= FOS.FOS_ALLOWMULTISELECT;
+                        options |= FOS.FOS_DONTADDTORECENT;
+                        dialog.SetOptions(options);
+                        SetFileTypeFilter(dialog, fileTypeFilter);
+                        try
+                        {
+                            ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                        }
+                        catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                        {
+                            return [];
+                        }
+                        dialog.GetResults(out shellArray);
+                        shellArray.GetCount(out uint count);
+                        List<string> names = new List<string>((int)count);
+                        for (int i = 0; i < count; i++)
+                        {
+                            shellArray.GetItemAt((uint)i, out IShellItem shellItem);
+                            shellItem.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
+                            names.Add(name);
+                        }
+                        return names;
                     }
-                    catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                    finally
                     {
-                        return [];
+                        if (dialog != null)
+                            Marshal.FinalReleaseComObject(dialog);
+                        if (shellArray != null)
+                            Marshal.FinalReleaseComObject(shellArray);
                     }
-                    dialog.GetResults(out shellArray);
-                    shellArray.GetCount(out uint count);
-                    List<string> names = new List<string>((int)count);
-                    for (int i = 0; i < count; i++)
-                    {
-                        shellArray.GetItemAt((uint)i, out IShellItem shellItem);
-                        shellItem.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
-                        names.Add(name);
-                    }
-                    return names;
-                }
-                finally
-                {
-                    if (dialog != null) Marshal.FinalReleaseComObject(dialog);
-                    if (shellArray != null) Marshal.FinalReleaseComObject(shellArray);
-                }
-            }).ConfigureAwait(false);
+                })
+                .ConfigureAwait(false);
         }
     }
 
-
-    public static async Task<List<string>> PickMultipleFilesAsync(XamlRoot xamlRoot, params (string Name, string Extension)[] fileTypeFilter)
+    public static async Task<List<string>> PickMultipleFilesAsync(
+        XamlRoot xamlRoot,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
     {
-        return await PickMultipleFilesAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value, fileTypeFilter);
+        return await PickMultipleFilesAsync(
+            (nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value,
+            fileTypeFilter
+        );
     }
 
-
-    public static async Task<string?> OpenSaveFileDialogAsync(nint parentWindow, string? fileName = null, params (string Name, string Extension)[] fileTypeFilter)
+    public static async Task<string?> OpenSaveFileDialogAsync(
+        nint parentWindow,
+        string? fileName = null,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
     {
         try
         {
             var picker = new FileSavePicker
             {
-                SuggestedStartLocation = PickerLocationId.ComputerFolder
+                SuggestedStartLocation = PickerLocationId.ComputerFolder,
             };
             if (!string.IsNullOrWhiteSpace(fileName))
             {
@@ -171,6 +195,87 @@ internal static class FileDialogHelper
         catch (COMException)
         {
             return await Task.Run(() =>
+                {
+                    IFileSaveDialog? dialog = null;
+                    IShellItem? shell = null;
+                    try
+                    {
+                        dialog = new NativeFileSaveDialog();
+                        dialog.GetOptions(out var options);
+                        options |= FOS.FOS_NOREADONLYRETURN;
+                        options |= FOS.FOS_DONTADDTORECENT;
+                        options |= FOS.FOS_OVERWRITEPROMPT;
+                        dialog.SetOptions(options);
+                        if (!string.IsNullOrWhiteSpace(fileName))
+                        {
+                            dialog.SetFileName(fileName);
+                        }
+                        var types = SetFileTypeFilter(dialog, fileTypeFilter);
+                        try
+                        {
+                            ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                        }
+                        catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                        {
+                            return null;
+                        }
+                        dialog.GetResult(out shell);
+                        shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
+                        dialog.GetFileTypeIndex(out uint index);
+                        var extension = Path.GetExtension(types[index - 1].pszSpec);
+                        if (!name.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                        {
+                            name += extension;
+                        }
+                        return name;
+                    }
+                    finally
+                    {
+                        if (dialog != null)
+                            Marshal.FinalReleaseComObject(dialog);
+                        if (shell != null)
+                            Marshal.FinalReleaseComObject(shell);
+                    }
+                })
+                .ConfigureAwait(false);
+        }
+    }
+
+    public static async Task<string?> OpenSaveFileDialogAsync(
+        XamlRoot xamlRoot,
+        string? fileName = null,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
+    {
+        return await OpenSaveFileDialogAsync(
+            (nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value,
+            fileName,
+            fileTypeFilter
+        );
+    }
+
+    /// <summary>
+    /// 带 filter 序号返回的保存对话框（WinRT picker 拿不到用户选了哪个 filter，只能走 Win32 IFileSaveDialog）。
+    /// 用于同扩展名多语义的场景（如 .jpg 同时是 SDR JPEG 与 Ultra HDR JPEG），按序号区分。
+    /// filterIndex 为 0 基，对应 fileTypeFilter 参数下标；取消返回 null。
+    /// </summary>
+    public static async Task<(
+        string Path,
+        int FilterIndex
+    )?> OpenSaveFileDialogWithFilterIndexAsync(
+        nint parentWindow,
+        string? fileName = null,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
+    {
+        if (fileTypeFilter is null || fileTypeFilter.Length == 0)
+        {
+            throw new ArgumentException(
+                "At least one file type filter is required.",
+                nameof(fileTypeFilter)
+            );
+        }
+        return await Task.Run<(string Path, int FilterIndex)?>(() =>
             {
                 IFileSaveDialog? dialog = null;
                 IShellItem? shell = null;
@@ -186,7 +291,15 @@ internal static class FileDialogHelper
                     {
                         dialog.SetFileName(fileName);
                     }
-                    var types = SetFileTypeFilter(dialog, fileTypeFilter);
+                    // 不预置 All 条目：filter 序号与参数下标一一对应（GetFileTypeIndex 1 基 → 减 1）
+                    var types = fileTypeFilter
+                        .Select(x => new COMDLG_FILTERSPEC
+                        {
+                            pszName = x.Name,
+                            pszSpec = "*" + x.Extension,
+                        })
+                        .ToArray();
+                    dialog.SetFileTypes((uint)types.Length, types);
                     try
                     {
                         ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
@@ -203,88 +316,39 @@ internal static class FileDialogHelper
                     {
                         name += extension;
                     }
-                    return name;
+                    return (name, (int)index - 1);
                 }
                 finally
                 {
-                    if (dialog != null) Marshal.FinalReleaseComObject(dialog);
-                    if (shell != null) Marshal.FinalReleaseComObject(shell);
+                    if (dialog != null)
+                        Marshal.FinalReleaseComObject(dialog);
+                    if (shell != null)
+                        Marshal.FinalReleaseComObject(shell);
                 }
-            }).ConfigureAwait(false);
-        }
+            })
+            .ConfigureAwait(false);
     }
 
-
-    public static async Task<string?> OpenSaveFileDialogAsync(XamlRoot xamlRoot, string? fileName = null, params (string Name, string Extension)[] fileTypeFilter)
+    public static async Task<(
+        string Path,
+        int FilterIndex
+    )?> OpenSaveFileDialogWithFilterIndexAsync(
+        XamlRoot xamlRoot,
+        string? fileName = null,
+        params (string Name, string Extension)[] fileTypeFilter
+    )
     {
-        return await OpenSaveFileDialogAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value, fileName, fileTypeFilter);
+        return await OpenSaveFileDialogWithFilterIndexAsync(
+            (nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value,
+            fileName,
+            fileTypeFilter
+        );
     }
 
-
-    /// <summary>
-    /// 带 filter 序号返回的保存对话框（WinRT picker 拿不到用户选了哪个 filter，只能走 Win32 IFileSaveDialog）。
-    /// 用于同扩展名多语义的场景（如 .jpg 同时是 SDR JPEG 与 Ultra HDR JPEG），按序号区分。
-    /// filterIndex 为 0 基，对应 fileTypeFilter 参数下标；取消返回 null。
-    /// </summary>
-    public static async Task<(string Path, int FilterIndex)?> OpenSaveFileDialogWithFilterIndexAsync(nint parentWindow, string? fileName = null, params (string Name, string Extension)[] fileTypeFilter)
-    {
-        if (fileTypeFilter is null || fileTypeFilter.Length == 0)
-        {
-            throw new ArgumentException("At least one file type filter is required.", nameof(fileTypeFilter));
-        }
-        return await Task.Run<(string Path, int FilterIndex)?>(() =>
-        {
-            IFileSaveDialog? dialog = null;
-            IShellItem? shell = null;
-            try
-            {
-                dialog = new NativeFileSaveDialog();
-                dialog.GetOptions(out var options);
-                options |= FOS.FOS_NOREADONLYRETURN;
-                options |= FOS.FOS_DONTADDTORECENT;
-                options |= FOS.FOS_OVERWRITEPROMPT;
-                dialog.SetOptions(options);
-                if (!string.IsNullOrWhiteSpace(fileName))
-                {
-                    dialog.SetFileName(fileName);
-                }
-                // 不预置 All 条目：filter 序号与参数下标一一对应（GetFileTypeIndex 1 基 → 减 1）
-                var types = fileTypeFilter.Select(x => new COMDLG_FILTERSPEC { pszName = x.Name, pszSpec = "*" + x.Extension }).ToArray();
-                dialog.SetFileTypes((uint)types.Length, types);
-                try
-                {
-                    ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
-                }
-                catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
-                {
-                    return null;
-                }
-                dialog.GetResult(out shell);
-                shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
-                dialog.GetFileTypeIndex(out uint index);
-                var extension = Path.GetExtension(types[index - 1].pszSpec);
-                if (!name.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
-                {
-                    name += extension;
-                }
-                return (name, (int)index - 1);
-            }
-            finally
-            {
-                if (dialog != null) Marshal.FinalReleaseComObject(dialog);
-                if (shell != null) Marshal.FinalReleaseComObject(shell);
-            }
-        }).ConfigureAwait(false);
-    }
-
-
-    public static async Task<(string Path, int FilterIndex)?> OpenSaveFileDialogWithFilterIndexAsync(XamlRoot xamlRoot, string? fileName = null, params (string Name, string Extension)[] fileTypeFilter)
-    {
-        return await OpenSaveFileDialogWithFilterIndexAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value, fileName, fileTypeFilter);
-    }
-
-
-    private static COMDLG_FILTERSPEC[] SetFileTypeFilter(in IFileDialog dialog, params (string Name, string Spec)[] fileTypeFilter)
+    private static COMDLG_FILTERSPEC[] SetFileTypeFilter(
+        in IFileDialog dialog,
+        params (string Name, string Spec)[] fileTypeFilter
+    )
     {
         uint count = (uint)fileTypeFilter.Length;
         COMDLG_FILTERSPEC[] types;
@@ -293,23 +357,34 @@ internal static class FileDialogHelper
             count++;
             types = [new COMDLG_FILTERSPEC { pszName = "All", pszSpec = "*" }];
         }
+        else if (count == 1)
+        {
+            types =
+            [
+                new COMDLG_FILTERSPEC
+                {
+                    pszName = fileTypeFilter[0].Name,
+                    pszSpec = "*" + fileTypeFilter[0].Spec,
+                },
+            ];
+        }
         else
-            if (count == 1)
+        {
+            count++;
+            types = new COMDLG_FILTERSPEC[count];
+            types[0] = new COMDLG_FILTERSPEC
             {
-                types = [new COMDLG_FILTERSPEC { pszName = fileTypeFilter[0].Name, pszSpec = "*" + fileTypeFilter[0].Spec }];
-            }
-            else
-            {
-                count++;
-                types = new COMDLG_FILTERSPEC[count];
-                types[0] = new COMDLG_FILTERSPEC { pszName = "All", pszSpec = string.Join(';', fileTypeFilter.Select(x => $"*{x.Spec}")) };
-                fileTypeFilter.Select(x => new COMDLG_FILTERSPEC { pszName = x.Name, pszSpec = x.Spec }).ToArray().CopyTo(types, 1);
-            }
+                pszName = "All",
+                pszSpec = string.Join(';', fileTypeFilter.Select(x => $"*{x.Spec}")),
+            };
+            fileTypeFilter
+                .Select(x => new COMDLG_FILTERSPEC { pszName = x.Name, pszSpec = x.Spec })
+                .ToArray()
+                .CopyTo(types, 1);
+        }
         dialog.SetFileTypes(count, types);
         return types;
     }
-
-
 
     public static async Task<string?> PickFolderAsync(nint parentWindow)
     {
@@ -327,45 +402,44 @@ internal static class FileDialogHelper
         catch (COMException)
         {
             return await Task.Run(() =>
-            {
-                IFileDialog? dialog = null;
-                IShellItem? shell = null;
-
-                try
                 {
-                    dialog = new NativeFileOpenDialog();
-                    dialog.GetOptions(out var options);
-                    options |= FOS.FOS_NOREADONLYRETURN;
-                    options |= FOS.FOS_DONTADDTORECENT;
-                    options |= FOS.FOS_PICKFOLDERS;
-                    dialog.SetOptions(options);
+                    IFileDialog? dialog = null;
+                    IShellItem? shell = null;
+
                     try
                     {
-                        ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                        dialog = new NativeFileOpenDialog();
+                        dialog.GetOptions(out var options);
+                        options |= FOS.FOS_NOREADONLYRETURN;
+                        options |= FOS.FOS_DONTADDTORECENT;
+                        options |= FOS.FOS_PICKFOLDERS;
+                        dialog.SetOptions(options);
+                        try
+                        {
+                            ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                        }
+                        catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                        {
+                            return null;
+                        }
+                        dialog.GetResult(out shell);
+                        shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
+                        return name;
                     }
-                    catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                    finally
                     {
-                        return null;
+                        if (dialog != null)
+                            Marshal.FinalReleaseComObject(dialog);
+                        if (shell != null)
+                            Marshal.FinalReleaseComObject(shell);
                     }
-                    dialog.GetResult(out shell);
-                    shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
-                    return name;
-                }
-                finally
-                {
-                    if (dialog != null) Marshal.FinalReleaseComObject(dialog);
-                    if (shell != null) Marshal.FinalReleaseComObject(shell);
-                }
-            }).ConfigureAwait(false);
+                })
+                .ConfigureAwait(false);
         }
     }
-
 
     public static async Task<string?> PickFolderAsync(XamlRoot xamlRoot)
     {
         return await PickFolderAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value);
     }
-
-
-
 }

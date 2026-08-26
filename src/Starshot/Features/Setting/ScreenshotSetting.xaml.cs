@@ -9,8 +9,6 @@ namespace Starshot.Features.Setting;
 
 public sealed partial class ScreenshotSetting : PageBase
 {
-
-
     public int ScreenshotSDRFormat
     {
         get;
@@ -22,7 +20,6 @@ public sealed partial class ScreenshotSetting : PageBase
             }
         }
     } = AppConfig.ScreenCaptureSDRFormat;
-
 
     public int ScreenshotHDRFormat
     {
@@ -36,10 +33,10 @@ public sealed partial class ScreenshotSetting : PageBase
         }
     } = AppConfig.ScreenCaptureHDRFormat;
 
-
     public int ScreenshotQuality
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -47,7 +44,6 @@ public sealed partial class ScreenshotSetting : PageBase
             }
         }
     } = AppConfig.ScreenCaptureEncodeQuality;
-
 
     private bool _enableColorManagement = AppConfig.EnableScreenshotColorManagement;
     public bool EnableScreenshotColorManagement
@@ -68,7 +64,6 @@ public sealed partial class ScreenshotSetting : PageBase
         }
     }
 
-
     private async Task TryEnableColorManagementAsync()
     {
         bool ok = await ScreenCaptureService.CanEnableColorManagementAsync();
@@ -80,15 +75,19 @@ public sealed partial class ScreenshotSetting : PageBase
         }
         else
         {
-            InAppToast.MainWindow?.Error((string?)null, Lang.Starshot_ColorManagementUnavailable, 7000);
-            OnPropertyChanged(nameof(EnableScreenshotColorManagement));  // 刷新绑定，UI 弹回关
+            InAppToast.MainWindow?.Error(
+                (string?)null,
+                Lang.Starshot_ColorManagementUnavailable,
+                7000
+            );
+            OnPropertyChanged(nameof(EnableScreenshotColorManagement)); // 刷新绑定，UI 弹回关
         }
     }
 
-
     public bool AutoConvertScreenshotToSDR
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -96,7 +95,6 @@ public sealed partial class ScreenshotSetting : PageBase
             }
         }
     } = AppConfig.AutoConvertScreenshotToSDR;
-
 
     public bool DeleteHDRIfSDRContent
     {
@@ -110,10 +108,10 @@ public sealed partial class ScreenshotSetting : PageBase
         }
     } = AppConfig.DeleteHDRIfSDRContent;
 
-
     public bool AutoCopyScreenshotToClipboard
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -121,7 +119,6 @@ public sealed partial class ScreenshotSetting : PageBase
             }
         }
     } = AppConfig.AutoCopyScreenshotToClipboard;
-
 
     public int CaptureMonitorSource
     {
@@ -135,11 +132,8 @@ public sealed partial class ScreenshotSetting : PageBase
         }
     } = AppConfig.ScreenshotCaptureMonitorSource;
 
-
     public ScreenshotSetting()
     {
         InitializeComponent();
     }
-
-
 }

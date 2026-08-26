@@ -1,29 +1,25 @@
+using System;
 using CommunityToolkit.WinUI.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starshot.Frameworks;
 using Starshot.Helpers;
-using System;
 using Vanara.PInvoke;
 
 namespace Starshot.Features.Setting;
 
 public sealed partial class HotkeySetting : PageBase
 {
-
     private readonly ILogger<HotkeySetting> _logger = AppConfig.GetLogger<HotkeySetting>();
 
-
     public nint WindowHandle => XamlRoot.GetWindowHandle();
-
 
     public HotkeySetting()
     {
         InitializeComponent();
         InitializeHotkeyInput();
     }
-
 
     private void InitializeHotkeyInput()
     {
@@ -36,7 +32,6 @@ public sealed partial class HotkeySetting : PageBase
         catch { }
     }
 
-
     private void HotkeyInput_HotkeyEditing(object sender, HotkeyInputEventArg e)
     {
         try
@@ -46,7 +41,6 @@ public sealed partial class HotkeySetting : PageBase
         catch { }
     }
 
-
     /// <summary>
     /// 恢复默认快捷键：注销当前 → 按默认值重注册（值变化时 RegisterHotkey 内部写 DB）→ 刷新输入框
     /// </summary>
@@ -54,23 +48,53 @@ public sealed partial class HotkeySetting : PageBase
     {
         try
         {
-            foreach (var input in new[] { HotkeyInput_ScreenshotCapture, HotkeyInput_RegionCapture, HotkeyInput_RegionCopy })
+            foreach (
+                var input in new[]
+                {
+                    HotkeyInput_ScreenshotCapture,
+                    HotkeyInput_RegionCapture,
+                    HotkeyInput_RegionCopy,
+                }
+            )
             {
-                if (HotkeyManager.GetHotkeyInfo(input.HotkeyId) is not { } info) continue;
+                if (HotkeyManager.GetHotkeyInfo(input.HotkeyId) is not { } info)
+                    continue;
                 HotkeyManager.UnregisterHotkey(WindowHandle, input.HotkeyId);
-                Win32Error error = HotkeyManager.RegisterHotkey(WindowHandle, input.HotkeyId, info.DefaultModifiers, info.DefaultKey);
+                Win32Error error = HotkeyManager.RegisterHotkey(
+                    WindowHandle,
+                    input.HotkeyId,
+                    info.DefaultModifiers,
+                    info.DefaultKey
+                );
                 input.SetHotkey((uint)info.DefaultModifiers, (uint)info.DefaultKey);
                 input.State = error.Succeeded ? HoykeyInputState.None : HoykeyInputState.Warning;
                 if (error.Failed)
                 {
-                    string? hotkey = HotkeyInput.GetHotkeyText((uint)info.DefaultModifiers, (uint)info.DefaultKey);
+                    string? hotkey = HotkeyInput.GetHotkeyText(
+                        (uint)info.DefaultModifiers,
+                        (uint)info.DefaultKey
+                    );
                     if (error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
                     {
-                        InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUse, hotkey), 5000);
+                        InAppToast.MainWindow?.Warning(
+                            null,
+                            string.Format(
+                                Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUse,
+                                hotkey
+                            ),
+                            5000
+                        );
                     }
                     else
                     {
-                        InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0, hotkey), 5000);
+                        InAppToast.MainWindow?.Warning(
+                            null,
+                            string.Format(
+                                Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0,
+                                hotkey
+                            ),
+                            5000
+                        );
                     }
                 }
             }
@@ -80,7 +104,6 @@ public sealed partial class HotkeySetting : PageBase
             _logger.LogError(ex, "Restore default hotkeys");
         }
     }
-
 
     private void HotkeyInput_HotkeyDeleted(object sender, HotkeyInputEventArg e)
     {
@@ -92,7 +115,6 @@ public sealed partial class HotkeySetting : PageBase
         catch { }
     }
 
-
     private void HotkeyInput_HotkeyEditFinished(object sender, HotkeyEditFinishedEventArg e)
     {
         try
@@ -100,7 +122,12 @@ public sealed partial class HotkeySetting : PageBase
             this.XamlRoot.Content.Focus(FocusState.Programmatic);
             if (e.HotkeyAvaliable)
             {
-                Win32Error error = HotkeyManager.RegisterHotkey(e.WindowHandle, e.HotkeyId, (User32.HotKeyModifiers)e.fsModifiers, (User32.VK)e.Key);
+                Win32Error error = HotkeyManager.RegisterHotkey(
+                    e.WindowHandle,
+                    e.HotkeyId,
+                    (User32.HotKeyModifiers)e.fsModifiers,
+                    (User32.VK)e.Key
+                );
                 if (error.Succeeded && e.HotkeyChanged)
                 {
                     ((HotkeyInput)sender).State = HoykeyInputState.Success;
@@ -112,11 +139,25 @@ public sealed partial class HotkeySetting : PageBase
                         string? hotkey = HotkeyInput.GetHotkeyText(e.fsModifiers, (uint)e.Key);
                         if (error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
                         {
-                            InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUse, hotkey), 5000);
+                            InAppToast.MainWindow?.Warning(
+                                null,
+                                string.Format(
+                                    Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUse,
+                                    hotkey
+                                ),
+                                5000
+                            );
                         }
                         else
                         {
-                            InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0, hotkey), 5000);
+                            InAppToast.MainWindow?.Warning(
+                                null,
+                                string.Format(
+                                    Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0,
+                                    hotkey
+                                ),
+                                5000
+                            );
                         }
                         ((HotkeyInput)sender).State = HoykeyInputState.Warning;
                     }
@@ -137,5 +178,4 @@ public sealed partial class HotkeySetting : PageBase
             InAppToast.MainWindow?.Error(ex, Lang.HotkeySetting_FailedToRegisterTheShortcutKeys);
         }
     }
-
 }

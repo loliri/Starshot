@@ -1,142 +1,161 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<sf:PageBase x:Class="Starshot.Features.Setting.AppearanceSetting"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:lang="using:Starshot.Language"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:sf="using:Starshot.Frameworks"
-             x:DefaultBindMode="OneWay"
-             mc:Ignorable="d">
+<sf:PageBase
+  x:Class="Starshot.Features.Setting.AppearanceSetting"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:lang="using:Starshot.Language"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:sf="using:Starshot.Frameworks"
+  x:DefaultBindMode="OneWay"
+  mc:Ignorable="d"
+>
+  <ScrollViewer Padding="0">
+    <StackPanel Width="820" Padding="36,24,36,36" Spacing="20">
+      <TextBlock
+        FontSize="28"
+        FontWeight="Bold"
+        Text="{x:Bind lang:Lang.Starshot_Nav_Appearance}"
+      />
 
-    <ScrollViewer Padding="0">
-        <StackPanel Width="820"
-                    Padding="36,24,36,36"
-                    Spacing="20">
-
-            <TextBlock FontSize="28"
-                       FontWeight="Bold"
-                       Text="{x:Bind lang:Lang.Starshot_Nav_Appearance}" />
-
-
-            <!--  壁纸  -->
-            <StackPanel Spacing="8">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Wallpaper}" />
-                <cwc:Segmented SelectedIndex="{x:Bind WallpaperMode, Mode=TwoWay}">
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeNone}" />
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeImage}" />
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeVideo}" />
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeFolder}" />
-                </cwc:Segmented>
-                <Grid ColumnSpacing="0" Visibility="{x:Bind WallpaperRowVisibility}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0"
-                            Height="40"
-                            Padding="16,0,16,0"
-                            BorderThickness="0"
-                            Command="{x:Bind ChooseWallpaperCommand}"
-                            CornerRadius="8,20,20,8"
-                            Style="{ThemeResource AccentButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE8DE;" />
-                            <TextBlock Text="{x:Bind WallpaperChooseLabel}" />
-                        </StackPanel>
-                    </Button>
-                    <Button Grid.Column="1"
-                            Height="40"
-                            Margin="16,0,0,0"
-                            Padding="20,0,20,1"
-                            HorizontalContentAlignment="Left"
-                            BorderThickness="0"
-                            Command="{x:Bind OpenWallpaperFolderCommand}"
-                            CornerRadius="20">
-                        <Grid ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
-                                       MaxLines="2"
-                                       Text="{x:Bind WallpaperValue}"
-                                       TextTrimming="CharacterEllipsis"
-                                       TextWrapping="Wrap" />
-                            <FontIcon Grid.Column="1"
-                                      Margin="0,2,2,0"
-                                      FontSize="14"
-                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                      Glyph="&#xE8A7;" />
-                        </Grid>
-                    </Button>
-                </Grid>
-                <ToggleSwitch IsOn="{x:Bind WallpaperFolderVideoOnly, Mode=TwoWay}"
-                              Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}"
-                              OffContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}"
-                              OnContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}" />
-                <TextBlock FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnlyDesc}"
-                           TextWrapping="Wrap"
-                           Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}" />
-                <TextBlock FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="{x:Bind NowPlayingDisplay, Mode=OneWay}"
-                           TextWrapping="Wrap"
-                           Visibility="{x:Bind NowPlayingVisibility, Mode=OneWay}" />
+      <!--  壁纸  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Wallpaper}" />
+        <cwc:Segmented SelectedIndex="{x:Bind WallpaperMode, Mode=TwoWay}">
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeNone}" />
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeImage}" />
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeVideo}" />
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_WallpaperModeFolder}" />
+        </cwc:Segmented>
+        <Grid ColumnSpacing="0" Visibility="{x:Bind WallpaperRowVisibility}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+          </Grid.ColumnDefinitions>
+          <Button
+            Grid.Column="0"
+            Height="40"
+            Padding="16,0,16,0"
+            BorderThickness="0"
+            Command="{x:Bind ChooseWallpaperCommand}"
+            CornerRadius="8,20,20,8"
+            Style="{ThemeResource AccentButtonStyle}"
+          >
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <FontIcon Glyph="&#xE8DE;" />
+              <TextBlock Text="{x:Bind WallpaperChooseLabel}" />
             </StackPanel>
+          </Button>
+          <Button
+            Grid.Column="1"
+            Height="40"
+            Margin="16,0,0,0"
+            Padding="20,0,20,1"
+            HorizontalContentAlignment="Left"
+            BorderThickness="0"
+            Command="{x:Bind OpenWallpaperFolderCommand}"
+            CornerRadius="20"
+          >
+            <Grid ColumnSpacing="12">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                MaxLines="2"
+                Text="{x:Bind WallpaperValue}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="Wrap"
+              />
+              <FontIcon
+                Grid.Column="1"
+                Margin="0,2,2,0"
+                FontSize="14"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Glyph="&#xE8A7;"
+              />
+            </Grid>
+          </Button>
+        </Grid>
+        <ToggleSwitch
+          IsOn="{x:Bind WallpaperFolderVideoOnly, Mode=TwoWay}"
+          Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}"
+          OffContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}"
+          OnContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}"
+        />
+        <TextBlock
+          FontSize="12"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnlyDesc}"
+          TextWrapping="Wrap"
+          Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}"
+        />
+        <TextBlock
+          FontSize="12"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="{x:Bind NowPlayingDisplay, Mode=OneWay}"
+          TextWrapping="Wrap"
+          Visibility="{x:Bind NowPlayingVisibility, Mode=OneWay}"
+        />
+      </StackPanel>
 
+      <!--  主题  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Theme}" />
+        <cwc:Segmented SelectedIndex="{x:Bind Theme, Mode=TwoWay}">
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.SettingPage_FollowSystem}" />
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_ThemeLight}" />
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_ThemeDark}" />
+        </cwc:Segmented>
+        <ToggleSwitch
+          IsOn="{x:Bind EnableAcrylic, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_Acrylic}"
+          OnContent="{x:Bind lang:Lang.Starshot_Acrylic}"
+        />
+      </StackPanel>
 
-            <!--  主题  -->
-            <StackPanel Spacing="8">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Theme}" />
-                <cwc:Segmented SelectedIndex="{x:Bind Theme, Mode=TwoWay}">
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.SettingPage_FollowSystem}" />
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_ThemeLight}" />
-                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_ThemeDark}" />
-                </cwc:Segmented>
-                <ToggleSwitch IsOn="{x:Bind EnableAcrylic, Mode=TwoWay}"
-                              OffContent="{x:Bind lang:Lang.Starshot_Acrylic}"
-                              OnContent="{x:Bind lang:Lang.Starshot_Acrylic}" />
-            </StackPanel>
-
-
-            <!--  主题色  -->
-            <StackPanel Spacing="8">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_AccentColor}" />
-                <ToggleSwitch IsOn="{x:Bind EnableAccentFromWallpaper, Mode=TwoWay}"
-                              OffContent="{x:Bind lang:Lang.Starshot_AccentFromWallpaper}"
-                              OnContent="{x:Bind lang:Lang.Starshot_AccentFromWallpaper}" />
-                <Button Height="40"
-                        Padding="16,0,16,0"
-                        BorderThickness="0"
-                        CornerRadius="8,20,20,8"
-                        Style="{ThemeResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE790;" />
-                        <TextBlock Text="{x:Bind lang:Lang.Starshot_ApplyCurrentColor}" />
-                    </StackPanel>
-                    <Button.Flyout>
-                        <Flyout x:Name="AccentColorFlyout" Placement="Bottom">
-                            <StackPanel Width="320" Spacing="12">
-                                <ColorPicker Color="{x:Bind AccentColorValue, Mode=TwoWay}"
-                                             IsAlphaEnabled="False"
-                                             IsMoreButtonVisible="True" />
-                                <Button HorizontalAlignment="Right"
-                                        Command="{x:Bind ApplyAccentCommand}"
-                                        Content="{x:Bind lang:Lang.Common_Apply}"
-                                        Style="{ThemeResource AccentButtonStyle}" />
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
-            </StackPanel>
-
-        </StackPanel>
-    </ScrollViewer>
-
+      <!--  主题色  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_AccentColor}" />
+        <ToggleSwitch
+          IsOn="{x:Bind EnableAccentFromWallpaper, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_AccentFromWallpaper}"
+          OnContent="{x:Bind lang:Lang.Starshot_AccentFromWallpaper}"
+        />
+        <Button
+          Height="40"
+          Padding="16,0,16,0"
+          BorderThickness="0"
+          CornerRadius="8,20,20,8"
+          Style="{ThemeResource AccentButtonStyle}"
+        >
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <FontIcon Glyph="&#xE790;" />
+            <TextBlock Text="{x:Bind lang:Lang.Starshot_ApplyCurrentColor}" />
+          </StackPanel>
+          <Button.Flyout>
+            <Flyout x:Name="AccentColorFlyout" Placement="Bottom">
+              <StackPanel Width="320" Spacing="12">
+                <ColorPicker
+                  Color="{x:Bind AccentColorValue, Mode=TwoWay}"
+                  IsAlphaEnabled="False"
+                  IsMoreButtonVisible="True"
+                />
+                <Button
+                  HorizontalAlignment="Right"
+                  Command="{x:Bind ApplyAccentCommand}"
+                  Content="{x:Bind lang:Lang.Common_Apply}"
+                  Style="{ThemeResource AccentButtonStyle}"
+                />
+              </StackPanel>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
 </sf:PageBase>

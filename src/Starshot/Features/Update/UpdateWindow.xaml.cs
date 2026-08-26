@@ -1,3 +1,8 @@
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
@@ -5,11 +10,6 @@ using Microsoft.UI.Xaml.Media;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.System;
 
 namespace Starshot.Features.Update;
@@ -20,30 +20,76 @@ public sealed partial class UpdateWindow : WindowEx
     private ReleaseInfo? _release;
     private CancellationTokenSource? _cts;
 
-    /// <summary>装线已拉起更新器、窗口即将随 App.Current.Exit 关闭——退出不是用户取消</summary>
+    /// <summary>安装版线已拉起更新器、窗口即将随 App.Current.Exit 关闭——退出不是用户取消</summary>
     private bool _launchingUpdater;
     private bool _userClosed;
 
-
-    public string CurrentVersionText { get; set => SetProperty(ref field, value); } = "";
-    public string ArchitectureText { get; set => SetProperty(ref field, value); } = RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant();
-    public string NewVersionText { get; set => SetProperty(ref field, value); } = "";
-    public string ReleaseNotes { get; set => SetProperty(ref field, value); } = "";
-    public string ChannelText { get; set => SetProperty(ref field, value); } = "";
-    public string BuildTimeText { get; set => SetProperty(ref field, value); } = "";
-    public string ProgressBytesText { get; set => SetProperty(ref field, value); } = "";
-    public string ProgressPercentText { get; set => SetProperty(ref field, value); } = "";
-    public double ProgressValue { get; set => SetProperty(ref field, value); }
-    public Visibility IsProgressVisible { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
-    public string ErrorMessage { get; set => SetProperty(ref field, value); } = "";
-    public Visibility HasError { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
-
+    public string CurrentVersionText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public string ArchitectureText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant();
+    public string NewVersionText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public string ReleaseNotes
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public string ChannelText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public string BuildTimeText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public string ProgressBytesText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public string ProgressPercentText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public double ProgressValue
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+    public Visibility IsProgressVisible
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = Visibility.Collapsed;
+    public string ErrorMessage
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+    public Visibility HasError
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = Visibility.Collapsed;
 
     public UpdateWindow()
     {
         InitializeComponent();
         Title = "Starshot";
-        // 安装版线（kachina）：更新由外部更新器接管，无差分/全量之分，主按钮换成单按钮
+        // 安装版线：更新由外部更新器接管，无差分/全量之分，主按钮换成单按钮
         if (AppConfig.Installer)
         {
             Button_Update.Visibility = Visibility.Collapsed;
@@ -58,8 +104,9 @@ public sealed partial class UpdateWindow : WindowEx
         CenterInScreen(1000, 680);
         this.Closed += (_, _) =>
         {
-            // 拉起更新器后的退出是装线正常流程，不当用户取消处理（否则误弹「更新失败」）
-            if (_cts is null || _launchingUpdater) return;
+            // 拉起更新器后的退出是安装版线正常流程，不当用户取消处理（否则误弹「更新失败」）
+            if (_cts is null || _launchingUpdater)
+                return;
             _userClosed = true;
             _cts?.Cancel();
             // 马上提示（不等 StartUpdateAsync 的 catch 链走完）
@@ -67,14 +114,16 @@ public sealed partial class UpdateWindow : WindowEx
         };
     }
 
-
     public void SetRelease(ReleaseInfo release)
     {
         _release = release;
         CurrentVersionText = AppConfig.AppVersion;
         NewVersionText = release.TagName;
         ChannelText = release.Prerelease ? "Preview" : "Stable";
-        BuildTimeText = release.PublishedAt == default ? "-" : release.PublishedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        BuildTimeText =
+            release.PublishedAt == default
+                ? "-"
+                : release.PublishedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss");
         ReleaseNotes = string.IsNullOrWhiteSpace(release.Notes) ? "" : release.Notes;
         Activate();
         // CDN 模式 Notes 空（检查更新时没拿 body 避免阻塞）；弹出后异步加载，在乎的直接更新不等
@@ -84,10 +133,10 @@ public sealed partial class UpdateWindow : WindowEx
         }
     }
 
-
     private async Task LoadReleaseNotesAsync()
     {
-        if (_release is null) return;
+        if (_release is null)
+            return;
         try
         {
             var body = await ReleaseClient.GetGitHubReleaseBodyAsync(_release.TagName, default);
@@ -101,10 +150,10 @@ public sealed partial class UpdateWindow : WindowEx
         }
     }
 
-
     private void Hyperlink_Click(object sender, RoutedEventArgs e)
     {
-        if (_release is null) return;
+        if (_release is null)
+            return;
         string? tag = (sender as FrameworkElement)?.Tag?.ToString();
         string? url = tag switch
         {
@@ -116,7 +165,6 @@ public sealed partial class UpdateWindow : WindowEx
             _ = Launcher.LaunchUriAsync(new Uri(url));
     }
 
-
     [RelayCommand]
     private Task UpdateNow() => RunUpdateAsync(forceFull: false);
 
@@ -125,9 +173,13 @@ public sealed partial class UpdateWindow : WindowEx
 
     private async Task RunUpdateAsync(bool forceFull)
     {
-        if (_release is null) return;
-        // 装线缺更新器：只弹重下载提示，不走后续任何流程（便携回退在装线布局下会装出错误布局）
-        if (AppConfig.Installer && !File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")))
+        if (_release is null)
+            return;
+        // 缺更新器：只弹重下载提示，不走后续任何流程
+        if (
+            AppConfig.Installer
+            && !File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"))
+        )
         {
             var dialog = new UpdaterMissingDialog { XamlRoot = RootGrid.XamlRoot };
             await dialog.ShowAsync();
@@ -136,7 +188,8 @@ public sealed partial class UpdateWindow : WindowEx
         Button_Update.IsEnabled = false;
         Button_UpdateInstaller.IsEnabled = false;
         Button_Remind.IsEnabled = false;
-        if (AppConfig.Installer) _launchingUpdater = true;
+        if (AppConfig.Installer)
+            _launchingUpdater = true;
         IsProgressVisible = Visibility.Visible;
         HasError = Visibility.Collapsed;
         ProgressValue = 0;
@@ -152,7 +205,8 @@ public sealed partial class UpdateWindow : WindowEx
                 ProgressPercentText = p.bytesText[..sep];
                 var size = p.bytesText[(sep + 2)..];
                 // 层切换过渡帧（空大小）：保留上一层最后的大小直到本层数据到达，避免"消失再出现"的空档
-                if (size.Length > 0) ProgressBytesText = size;
+                if (size.Length > 0)
+                    ProgressBytesText = size;
             }
             else
             {
@@ -162,7 +216,12 @@ public sealed partial class UpdateWindow : WindowEx
         });
         try
         {
-            await UpdateService.StartUpdateAsync(_release, progress, _cts.Token, forceFull: forceFull);
+            await UpdateService.StartUpdateAsync(
+                _release,
+                progress,
+                _cts.Token,
+                forceFull: forceFull
+            );
         }
         catch (Exception ex)
         {
@@ -171,10 +230,10 @@ public sealed partial class UpdateWindow : WindowEx
             HasError = Visibility.Visible;
             Button_Update.IsEnabled = true;
             Button_Remind.IsEnabled = true;
-            if (!_userClosed) InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed);
+            if (!_userClosed)
+                InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed);
         }
     }
-
 
     [RelayCommand]
     private void RemindLater()
@@ -183,11 +242,11 @@ public sealed partial class UpdateWindow : WindowEx
         Close();
     }
 
-
     [RelayCommand]
     private void Ignore()
     {
-        if (_release is not null) AppConfig.IgnoreVersion = _release.Version.ToString();
+        if (_release is not null)
+            AppConfig.IgnoreVersion = _release.Version.ToString();
         Close();
     }
 }

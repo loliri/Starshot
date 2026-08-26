@@ -1,3 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
@@ -9,21 +19,11 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Starward.Codec.ICC;
 using Starshot.Features.Codec;
 using Starshot.Features.Setting;
 using Starshot.Helpers;
 using Starshot.Language;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
+using Starward.Codec.ICC;
 using Vanara.PInvoke;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
@@ -34,23 +34,19 @@ using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI;
 
-
 namespace Starshot.Features.Screenshot;
 
 [INotifyPropertyChanged]
 public sealed partial class ImageViewWindow : Window
 {
-
-
     public IntPtr WindowHandle { get; private init; }
 
-    public double UIScale => Content.XamlRoot?.RasterizationScale ?? User32.GetDpiForWindow(WindowHandle) / 96.0;
+    public double UIScale =>
+        Content.XamlRoot?.RasterizationScale ?? User32.GetDpiForWindow(WindowHandle) / 96.0;
 
     private const float MAX_ZOOM_FACTOR = 5f;
 
     private readonly ILogger<ImageViewWindow> _logger = AppConfig.GetLogger<ImageViewWindow>();
-
-
 
     public ImageViewWindow()
     {
@@ -59,10 +55,11 @@ public sealed partial class ImageViewWindow : Window
         WindowHandle = (IntPtr)AppWindow.Id.Value;
         InitializeWindow();
         InitializeResource();
-        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(
+            this,
+            (_, _) => this.Bindings.Update()
+        );
     }
-
-
 
     private void InitializeWindow()
     {
@@ -74,25 +71,30 @@ public sealed partial class ImageViewWindow : Window
         ScrollViewer_Image.SetArePointerWheelEventsIgnored(true);
     }
 
-
     private void RootGrid_Loaded(object sender, RoutedEventArgs e)
     {
         _lastUIScale = Content.XamlRoot.RasterizationScale;
         Content.XamlRoot.Changed += XamlRoot_Changed;
     }
 
-
     private void Grid_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         try
         {
             double x = StackPanel_LeftTopCommands.ActualWidth * UIScale;
-            double width = (e.NewSize.Width - 144 - StackPanel_LeftTopCommands.ActualWidth - StackPanel_RightTopCommands.ActualWidth) * UIScale;
-            AppWindow.TitleBar.SetDragRectangles([new RectInt32((int)x, 0, (int)width, (int)(48 * UIScale))]);
+            double width =
+                (
+                    e.NewSize.Width
+                    - 144
+                    - StackPanel_LeftTopCommands.ActualWidth
+                    - StackPanel_RightTopCommands.ActualWidth
+                ) * UIScale;
+            AppWindow.TitleBar.SetDragRectangles([
+                new RectInt32((int)x, 0, (int)width, (int)(48 * UIScale)),
+            ]);
         }
         catch { }
     }
-
 
     private void RootGrid_Unloaded(object sender, RoutedEventArgs e)
     {
@@ -108,7 +110,8 @@ public sealed partial class ImageViewWindow : Window
             _canvasSwapChain = null!;
             _sourceBitmap?.Dispose();
             _sourceBitmap = null!;
-            _displayInformation?.AdvancedColorInfoChanged -= DisplayInformation_AdvancedColorInfoChanged;
+            _displayInformation?.AdvancedColorInfoChanged -=
+                DisplayInformation_AdvancedColorInfoChanged;
             _displayInformation?.Dispose();
             _displayInformation = null!;
             ScreenshotCollection = null;
@@ -154,7 +157,6 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private void ResetState()
     {
         try
@@ -185,51 +187,80 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
-
-
     #region Info
 
 
     public string CurrentFilePath { get; set; }
 
+    public string CurrentFileName
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public string CurrentFileName { get; set => SetProperty(ref field, value); }
+    public string CurrentPixelSizeText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
+    public string CurrentFileSizeText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public string CurrentPixelSizeText { get; set => SetProperty(ref field, value); }
+    public ScreenshotItem? CurrentScreenshot
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
+    public ObservableCollection<ScreenshotItem>? ScreenshotCollection
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public string CurrentFileSizeText { get; set => SetProperty(ref field, value); }
+    public bool IsHDRImage
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
+    public float MaxCLL
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public ScreenshotItem? CurrentScreenshot { get; set => SetProperty(ref field, value); }
+    public string ImageInformationText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
+    public string MonitorInformationText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public ObservableCollection<ScreenshotItem>? ScreenshotCollection { get; set => SetProperty(ref field, value); }
-
-
-    public bool IsHDRImage { get; set => SetProperty(ref field, value); }
-
-
-    public float MaxCLL { get; set => SetProperty(ref field, value); }
-
-
-    public string ImageInformationText { get; set => SetProperty(ref field, value); }
-
-
-    public string MonitorInformationText { get; set => SetProperty(ref field, value); }
-
-
-    private ColorPrimaries MonitorColorPrimaries { get => field ?? ColorPrimaries.BT709; set; }
-
-
+    private ColorPrimaries MonitorColorPrimaries
+    {
+        get => field ?? ColorPrimaries.BT709;
+        set;
+    }
 
     private void UpdateImageInformation(CanvasBitmap bitmap)
     {
         try
         {
-            if (bitmap.Format is not DirectXPixelFormat.B8G8R8A8UIntNormalized and not DirectXPixelFormat.R8G8B8A8UIntNormalized)
+            if (
+                bitmap.Format
+                is not DirectXPixelFormat.B8G8R8A8UIntNormalized
+                    and not DirectXPixelFormat.R8G8B8A8UIntNormalized
+            )
             {
                 IsHDRImage = true;
                 MaxCLL = ScreenCaptureService.GetMaxCLL(bitmap);
@@ -241,12 +272,13 @@ public sealed partial class ImageViewWindow : Window
             }
             ImageInformationText = $"""
                 {Lang.GenshinHDRLuminanceSettingDialog_ColorSpace}: {(IsHDRImage ? "HDR" : "SDR")}
-                {Lang.GenshinHDRLuminanceSettingDialog_MaxLuminance}: {(IsHDRImage ? ($"{MaxCLL:F0} nits") : "-")}
+                {Lang.GenshinHDRLuminanceSettingDialog_MaxLuminance}: {(
+                    IsHDRImage ? ($"{MaxCLL:F0} nits") : "-"
+                )}
                 """;
         }
         catch { }
     }
-
 
     private void UpdateMonitorInformation(DisplayInformation displayInformation)
     {
@@ -269,7 +301,6 @@ public sealed partial class ImageViewWindow : Window
         }
         catch { }
     }
-
 
     private void UpdateMonitorColorPrimaries(DisplayInformation displayInformation)
     {
@@ -306,29 +337,30 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     #endregion
 
 
-
     #region Zoom
-
 
 
     private bool _canImageMoved;
 
     private Point _imageMoveOldPosition;
 
-
-    private void ScrollViewer_Image_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void ScrollViewer_Image_PointerPressed(
+        object sender,
+        Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
+    )
     {
         _canImageMoved = true;
         ScrollViewer_Image.CapturePointer(e.Pointer);
         _imageMoveOldPosition = e.GetCurrentPoint(ScrollViewer_Image).Position;
     }
 
-
-    private void ScrollViewer_Image_PointerMoved(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void ScrollViewer_Image_PointerMoved(
+        object sender,
+        Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
+    )
     {
         if (_canImageMoved)
         {
@@ -338,20 +370,29 @@ public sealed partial class ImageViewWindow : Window
                 var deltaX = point.Position.X - _imageMoveOldPosition.X;
                 var deltaY = point.Position.Y - _imageMoveOldPosition.Y;
                 _imageMoveOldPosition = point.Position;
-                ScrollViewer_Image.ChangeView(ScrollViewer_Image.HorizontalOffset - deltaX, ScrollViewer_Image.VerticalOffset - deltaY, null, true);
+                ScrollViewer_Image.ChangeView(
+                    ScrollViewer_Image.HorizontalOffset - deltaX,
+                    ScrollViewer_Image.VerticalOffset - deltaY,
+                    null,
+                    true
+                );
             }
         }
     }
 
-
-    private void ScrollViewer_Image_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void ScrollViewer_Image_PointerReleased(
+        object sender,
+        Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
+    )
     {
         _canImageMoved = false;
         ScrollViewer_Image.ReleasePointerCapture(e.Pointer);
     }
 
-
-    private void ScrollViewer_Image_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    private void ScrollViewer_Image_DoubleTapped(
+        object sender,
+        Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e
+    )
     {
         try
         {
@@ -383,10 +424,13 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
-    private void ScrollViewer_Image_PointerWheelChanged(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void ScrollViewer_Image_PointerWheelChanged(
+        object sender,
+        Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
+    )
     {
-        if (e.KeyModifiers.HasFlag(VirtualKeyModifiers.Control)) return;
+        if (e.KeyModifiers.HasFlag(VirtualKeyModifiers.Control))
+            return;
         try
         {
             var pointer = e.GetCurrentPoint(ScrollViewer_Image);
@@ -396,11 +440,16 @@ public sealed partial class ImageViewWindow : Window
             double currentFactor = ScrollViewer_Image.ZoomFactor;
             // 连续滚轮累积：新 target 乘前 target（不乘当前显示值），×1.1 步进不变
             double baseTarget = _isZoomAnimating ? _zoomTargetFactor : currentFactor;
-            _zoomTargetFactor = Math.Clamp(baseTarget * (delta > 0 ? 1.1 : 1.0 / 1.1), ScrollViewer_Image.MinZoomFactor, MAX_ZOOM_FACTOR);
+            _zoomTargetFactor = Math.Clamp(
+                baseTarget * (delta > 0 ? 1.1 : 1.0 / 1.1),
+                ScrollViewer_Image.MinZoomFactor,
+                MAX_ZOOM_FACTOR
+            );
             _zoomStartFactor = currentFactor;
             _zoomContentPoint = new Point(
                 (ScrollViewer_Image.HorizontalOffset + cursorViewportPoint.X) / currentFactor,
-                (ScrollViewer_Image.VerticalOffset + cursorViewportPoint.Y) / currentFactor);
+                (ScrollViewer_Image.VerticalOffset + cursorViewportPoint.Y) / currentFactor
+            );
             _zoomCursorViewportPoint = cursorViewportPoint;
             _zoomAnimStart = DateTime.UtcNow;
 
@@ -414,10 +463,11 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private void OnZoomTick(object? sender, object e)
     {
-        double t = (DateTime.UtcNow - _zoomAnimStart).TotalMilliseconds / _zoomAnimDuration.TotalMilliseconds;
+        double t =
+            (DateTime.UtcNow - _zoomAnimStart).TotalMilliseconds
+            / _zoomAnimDuration.TotalMilliseconds;
         bool done = t >= 1.0;
         double eased = 1 - Math.Pow(1 - Math.Clamp(t, 0, 1), 3); // ease-out cubic
 
@@ -433,12 +483,13 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
-    private void Slider_ZoomFactor_ManipulationDelta(object sender, Microsoft.UI.Xaml.Input.ManipulationDeltaRoutedEventArgs e)
+    private void Slider_ZoomFactor_ManipulationDelta(
+        object sender,
+        Microsoft.UI.Xaml.Input.ManipulationDeltaRoutedEventArgs e
+    )
     {
         Zoom(Slider_ZoomFactor.Value, null);
     }
-
 
     private void Button_ZoomToFitFactor_Click(object sender, RoutedEventArgs e)
     {
@@ -460,7 +511,6 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private void Button_ZoomOut_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -480,7 +530,6 @@ public sealed partial class ImageViewWindow : Window
         }
         catch { }
     }
-
 
     private void Button_ZoomIn_Click(object sender, RoutedEventArgs e)
     {
@@ -502,7 +551,6 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private float? GetFitZoomFactor()
     {
         double scrollWidth = ScrollViewer_Image.ActualWidth;
@@ -515,7 +563,6 @@ public sealed partial class ImageViewWindow : Window
         }
         return (float)Math.Min(scrollWidth / imageWidth, scrollHeight / imageHeight);
     }
-
 
     private void ResetZoomFactor()
     {
@@ -530,7 +577,6 @@ public sealed partial class ImageViewWindow : Window
         }
         catch { }
     }
-
 
     private void Zoom(double factor, Point? centerPoint = null)
     {
@@ -557,9 +603,14 @@ public sealed partial class ImageViewWindow : Window
                 return;
             }
 
-            Rect image_rect = new Rect(extent_width < viewport_width ? ((viewport_width - extent_width) / 2) : -offset_x,
-                                       extent_height < viewport_height ? ((viewport_height - extent_height) / 2) : -offset_y,
-                                       extent_width, extent_height);
+            Rect image_rect = new Rect(
+                extent_width < viewport_width ? ((viewport_width - extent_width) / 2) : -offset_x,
+                extent_height < viewport_height
+                    ? ((viewport_height - extent_height) / 2)
+                    : -offset_y,
+                extent_width,
+                extent_height
+            );
 
             if (!centerPoint.HasValue || !image_rect.Contains(centerPoint.Value))
             {
@@ -567,8 +618,10 @@ public sealed partial class ImageViewWindow : Window
             }
 
             Rect image_rect_new = new Rect();
-            image_rect_new.X = (image_rect.X - centerPoint.Value.X) * fictor_scale + centerPoint.Value.X;
-            image_rect_new.Y = (image_rect.Y - centerPoint.Value.Y) * fictor_scale + centerPoint.Value.Y;
+            image_rect_new.X =
+                (image_rect.X - centerPoint.Value.X) * fictor_scale + centerPoint.Value.X;
+            image_rect_new.Y =
+                (image_rect.Y - centerPoint.Value.Y) * fictor_scale + centerPoint.Value.Y;
             image_rect_new.Width = image_rect.Width * fictor_scale;
             image_rect_new.Height = image_rect.Height * fictor_scale;
 
@@ -579,9 +632,7 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     #endregion
-
 
 
     #region Image
@@ -600,14 +651,18 @@ public sealed partial class ImageViewWindow : Window
     // 滚轮缩放自定义动画：ChangeView 动画时长系统固定无法延长，
     // 自己每帧 lerp（CompositionTarget.Rendering）+ ChangeView(disableAnimation:true)
     private bool _isZoomAnimating;
-    private double _zoomStartFactor, _zoomTargetFactor;
+    private double _zoomStartFactor,
+        _zoomTargetFactor;
     private Point _zoomContentPoint;
     private Point _zoomCursorViewportPoint;
     private DateTime _zoomAnimStart;
     private readonly TimeSpan _zoomAnimDuration = TimeSpan.FromMilliseconds(300);
 
-    private ColorPrimaries ImageColorPrimaries { get => field ?? ColorPrimaries.BT709; set; }
-
+    private ColorPrimaries ImageColorPrimaries
+    {
+        get => field ?? ColorPrimaries.BT709;
+        set;
+    }
 
     private void InitializeResource()
     {
@@ -615,10 +670,17 @@ public sealed partial class ImageViewWindow : Window
         _displayInformation.AdvancedColorInfoChanged += DisplayInformation_AdvancedColorInfoChanged;
         UpdateMonitorInformation(_displayInformation);
         UpdateMonitorColorPrimaries(_displayInformation);
-        _canvasSwapChain = new CanvasSwapChain(CanvasDevice.GetSharedDevice(), 1, 1, 96, DirectXPixelFormat.R16G16B16A16Float, 6, CanvasAlphaMode.Premultiplied);
+        _canvasSwapChain = new CanvasSwapChain(
+            CanvasDevice.GetSharedDevice(),
+            1,
+            1,
+            96,
+            DirectXPixelFormat.R16G16B16A16Float,
+            6,
+            CanvasAlphaMode.Premultiplied
+        );
         CanvasSwapChainPanel_Image.SwapChain = _canvasSwapChain;
     }
-
 
     private void XamlRoot_Changed(XamlRoot sender, XamlRootChangedEventArgs args)
     {
@@ -629,7 +691,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private void DisplayInformation_AdvancedColorInfoChanged(DisplayInformation sender, object args)
     {
         UpdateMonitorInformation(sender);
@@ -637,8 +698,10 @@ public sealed partial class ImageViewWindow : Window
         DrawImage();
     }
 
-
-    private void GridView_ImageCollection_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void GridView_ImageCollection_SelectionChanged(
+        object sender,
+        SelectionChangedEventArgs e
+    )
     {
         if (e.AddedItems.FirstOrDefault() is ScreenshotItem item && item != CurrentScreenshot)
         {
@@ -647,18 +710,15 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private void Button_PreviousImage_Click(object sender, RoutedEventArgs e)
     {
         LoadPreviewImage();
     }
 
-
     private void Button_NextImage_Click(object sender, RoutedEventArgs e)
     {
         LoadNextImage();
     }
-
 
     private async Task LoadImageAsync(string filePath)
     {
@@ -684,7 +744,8 @@ public sealed partial class ImageViewWindow : Window
                 _sourceBitmap?.Dispose();
                 _sourceBitmap = bitmap;
                 CurrentFileSizeText = GetSizeText(new FileInfo(filePath).Length);
-                CurrentPixelSizeText = $"{_sourceBitmap.SizeInPixels.Width} x {_sourceBitmap.SizeInPixels.Height}";
+                CurrentPixelSizeText =
+                    $"{_sourceBitmap.SizeInPixels.Width} x {_sourceBitmap.SizeInPixels.Height}";
                 UpdateImageInformation(_sourceBitmap);
                 DrawImage(true);
                 ResetZoomFactor();
@@ -708,7 +769,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private async Task LoadImageAsync(IStorageFile file)
     {
         try
@@ -731,7 +791,8 @@ public sealed partial class ImageViewWindow : Window
             _sourceBitmap?.Dispose();
             _sourceBitmap = bitmap;
             CurrentFileSizeText = GetSizeText((long)(await file.GetBasicPropertiesAsync()).Size);
-            CurrentPixelSizeText = $"{_sourceBitmap.SizeInPixels.Width} x {_sourceBitmap.SizeInPixels.Height}";
+            CurrentPixelSizeText =
+                $"{_sourceBitmap.SizeInPixels.Width} x {_sourceBitmap.SizeInPixels.Height}";
             UpdateImageInformation(_sourceBitmap);
             DrawImage(true);
             ResetZoomFactor();
@@ -754,7 +815,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     /// <summary>
     /// 加载内存中的 CanvasBitmap（无文件路径，如剪贴板图片）。文件相关操作
     /// （打开/删除/在资源管理器打开/复制文件/复制路径）不可用——CurrentFilePath 为空，
@@ -770,7 +830,8 @@ public sealed partial class ImageViewWindow : Window
         _sourceBitmap?.Dispose();
         _sourceBitmap = bitmap;
         CurrentFileSizeText = "-";
-        CurrentPixelSizeText = $"{_sourceBitmap.SizeInPixels.Width} x {_sourceBitmap.SizeInPixels.Height}";
+        CurrentPixelSizeText =
+            $"{_sourceBitmap.SizeInPixels.Width} x {_sourceBitmap.SizeInPixels.Height}";
         UpdateImageInformation(_sourceBitmap);
         DrawImage(true);
         ResetZoomFactor();
@@ -778,7 +839,6 @@ public sealed partial class ImageViewWindow : Window
         StackPanel_NoImage.Visibility = Visibility.Collapsed;
         StackPanel_DisplayImageError.Visibility = Visibility.Collapsed;
     }
-
 
     /// <summary>
     /// 按 item 加载：文件走 FilePath（LoadImageAsync），剪贴板历史项走 ClipboardStream（解码→LoadBitmap）。
@@ -805,7 +865,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private static string GetSizeText(long size)
     {
         const double MB = 1 << 20;
@@ -819,7 +878,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private void DrawImage(bool throwError = false)
     {
         try
@@ -832,9 +890,17 @@ public sealed partial class ImageViewWindow : Window
             double width = _sourceBitmap.SizeInPixels.Width / uiScale;
             double height = _sourceBitmap.SizeInPixels.Height / uiScale;
             uint dpi = User32.GetDpiForWindow(WindowHandle);
-            if (width != _canvasSwapChain.Size.Width || height != _canvasSwapChain.Size.Height || dpi != _canvasSwapChain.Dpi)
+            if (
+                width != _canvasSwapChain.Size.Width
+                || height != _canvasSwapChain.Size.Height
+                || dpi != _canvasSwapChain.Dpi
+            )
             {
-                _canvasSwapChain.ResizeBuffers((float)width, (float)height, User32.GetDpiForWindow(WindowHandle));
+                _canvasSwapChain.ResizeBuffers(
+                    (float)width,
+                    (float)height,
+                    User32.GetDpiForWindow(WindowHandle)
+                );
                 CanvasSwapChainPanel_Image.Width = width;
                 CanvasSwapChainPanel_Image.Height = height;
             }
@@ -855,12 +921,15 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private void LoadPreviewImage()
     {
         try
         {
-            if (CurrentScreenshot is null || ScreenshotCollection is null || ScreenshotCollection.Count < 2)
+            if (
+                CurrentScreenshot is null
+                || ScreenshotCollection is null
+                || ScreenshotCollection.Count < 2
+            )
             {
                 return;
             }
@@ -874,12 +943,15 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private void LoadNextImage()
     {
         try
         {
-            if (CurrentScreenshot is null || ScreenshotCollection is null || ScreenshotCollection.Count < 2)
+            if (
+                CurrentScreenshot is null
+                || ScreenshotCollection is null
+                || ScreenshotCollection.Count < 2
+            )
             {
                 return;
             }
@@ -893,9 +965,7 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     #endregion
-
 
 
     #region Effect
@@ -906,7 +976,8 @@ public sealed partial class ImageViewWindow : Window
     /// </summary>
     public int DisplayMode
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -915,10 +986,10 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     public float SDRLuminance
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -927,16 +998,19 @@ public sealed partial class ImageViewWindow : Window
         }
     } = 300;
 
-
-
     public ICanvasImage GetDrawOutput(out int displayMode)
     {
         displayMode = 0;
         ICanvasImage output = _sourceBitmap;
         var colorInfo = _displayInformation.GetAdvancedColorInfo();
-        bool monitorIsHDR = colorInfo.CurrentAdvancedColorKind is DisplayAdvancedColorKind.HighDynamicRange;
+        bool monitorIsHDR =
+            colorInfo.CurrentAdvancedColorKind is DisplayAdvancedColorKind.HighDynamicRange;
         float sdrWhiteLevel = (float)colorInfo.SdrWhiteLevelInNits;
-        if (_sourceBitmap.Format is DirectXPixelFormat.B8G8R8A8UIntNormalized or DirectXPixelFormat.R8G8B8A8UIntNormalized)
+        if (
+            _sourceBitmap.Format
+            is DirectXPixelFormat.B8G8R8A8UIntNormalized
+                or DirectXPixelFormat.R8G8B8A8UIntNormalized
+        )
         {
             // SDR 图像
             displayMode = 1;
@@ -983,7 +1057,12 @@ public sealed partial class ImageViewWindow : Window
             output = new ColorMatrixEffect
             {
                 Source = output,
-                ColorMatrix = ToMatrix5x4(ColorPrimaries.GetColorTransferMatrix(ImageColorPrimaries, MonitorColorPrimaries)),
+                ColorMatrix = ToMatrix5x4(
+                    ColorPrimaries.GetColorTransferMatrix(
+                        ImageColorPrimaries,
+                        MonitorColorPrimaries
+                    )
+                ),
                 ClampOutput = false,
                 BufferPrecision = CanvasBufferPrecision.Precision16Float,
             };
@@ -991,16 +1070,17 @@ public sealed partial class ImageViewWindow : Window
         return output;
     }
 
-
-
     #endregion
-
 
 
     #region Operation
 
 
-    public async Task ShowWindowAsync(Microsoft.UI.WindowId windowId, ScreenshotItem screenshotItem, ObservableCollection<ScreenshotItem>? collection)
+    public async Task ShowWindowAsync(
+        Microsoft.UI.WindowId windowId,
+        ScreenshotItem screenshotItem,
+        ObservableCollection<ScreenshotItem>? collection
+    )
     {
         try
         {
@@ -1020,7 +1100,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     public async Task ShowWindowAsync(Microsoft.UI.WindowId windowId, string file, bool showGallary)
     {
         try
@@ -1030,15 +1109,18 @@ public sealed partial class ImageViewWindow : Window
                 string? folder = Path.GetDirectoryName(file);
                 if (Directory.Exists(folder))
                 {
-                    var list = Directory.GetFiles(folder)
-                                        .Where(ScreenshotHelper.IsSupportedExtension)
-                                        .Select(x => new ScreenshotItem(x))
-                                        .OrderByDescending(x => x.CreationTime)
-                                        .ToList();
+                    var list = Directory
+                        .GetFiles(folder)
+                        .Where(ScreenshotHelper.IsSupportedExtension)
+                        .Select(x => new ScreenshotItem(x))
+                        .OrderByDescending(x => x.CreationTime)
+                        .ToList();
                     ScreenshotCollection = new(list);
                 }
             }
-            if (ScreenshotCollection?.FirstOrDefault(x => x.FilePath == file) is ScreenshotItem item)
+            if (
+                ScreenshotCollection?.FirstOrDefault(x => x.FilePath == file) is ScreenshotItem item
+            )
             {
                 CurrentScreenshot = item;
             }
@@ -1060,7 +1142,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     public void ShowWindow(Microsoft.UI.WindowId windowId)
     {
         try
@@ -1078,24 +1159,28 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private void Button_EditImage_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            Grid_EditImage.Visibility = Grid_EditImage.Visibility is Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            Grid_EditImage.Visibility =
+                Grid_EditImage.Visibility is Visibility.Visible
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
             ResetZoomFactor();
         }
         catch { }
     }
-
 
     private async void MenuFlyoutItem_OpenNewFile_Click(object sender, RoutedEventArgs e)
     {
         try
         {
             var files = await FileDialogHelper.PickMultipleFilesAsync(Content.XamlRoot);
-            var items = files.Where(ScreenshotHelper.IsSupportedExtension).Select(x => new ScreenshotItem(x)).ToList();
+            var items = files
+                .Where(ScreenshotHelper.IsSupportedExtension)
+                .Select(x => new ScreenshotItem(x))
+                .ToList();
             if (items.Count == 0)
             {
                 return;
@@ -1109,7 +1194,6 @@ public sealed partial class ImageViewWindow : Window
             _logger.LogError(ex, "Failed to open new files");
         }
     }
-
 
     private async void MenuFlyoutItem_OpenInExplorer_Click(object sender, RoutedEventArgs e)
     {
@@ -1133,7 +1217,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private async void MenuFlyoutItem_OpenWithDefault_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -1153,7 +1236,6 @@ public sealed partial class ImageViewWindow : Window
             _logger.LogError(ex, "Failed to open file with default application");
         }
     }
-
 
     private async void MenuFlyoutItem_OpenWith_Click(object sender, RoutedEventArgs e)
     {
@@ -1176,7 +1258,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private async void MenuFlyoutItem_CopyFile_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -1198,7 +1279,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private void MenuFlyoutItem_CopyPath_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -1219,7 +1299,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private async void MenuFlyoutItem_CopyImage_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -1230,14 +1309,19 @@ public sealed partial class ImageViewWindow : Window
                 ClipboardHelper.SetBitmap(file);
                 ShowInfo(InfoBarSeverity.Success, Lang.ImageViewWindow_CopiedToClipboard, "", 2000);
             }
-            else if (_sourceBitmap is not null && _sourceBitmap.Format is DirectXPixelFormat.B8G8R8A8UIntNormalized)
+            else if (
+                _sourceBitmap is not null
+                && _sourceBitmap.Format is DirectXPixelFormat.B8G8R8A8UIntNormalized
+            )
             {
                 // 内存对象（无文件）：直接从 _sourceBitmap 拷 BGRA 到剪贴板。
                 // 回读与 CF_DIB 重试都是长阻塞，挪出 UI 线程（与图库复制同款做法）
                 int w = (int)_sourceBitmap.SizeInPixels.Width;
                 int h = (int)_sourceBitmap.SizeInPixels.Height;
                 var bitmap = _sourceBitmap;
-                bool copied = await Task.Run(() => ClipboardHelper.SetBitmapDib(w, h, bitmap.GetPixelBytes()));
+                bool copied = await Task.Run(() =>
+                    ClipboardHelper.SetBitmapDib(w, h, bitmap.GetPixelBytes())
+                );
                 if (!copied)
                 {
                     ShowInfo(InfoBarSeverity.Error, Lang.ImageViewWindow_CopyToClipboard, "", 5000);
@@ -1255,8 +1339,6 @@ public sealed partial class ImageViewWindow : Window
             _logger.LogError(ex, "Failed to copy image to clipboard");
         }
     }
-
-
 
     private async void Button_DeleteImage_Click(object sender, RoutedEventArgs e)
     {
@@ -1295,22 +1377,30 @@ public sealed partial class ImageViewWindow : Window
         }
         catch (UnauthorizedAccessException ex)
         {
-            ShowInfo(InfoBarSeverity.Warning, Lang.ImageViewWindow_UnableToDeleteTheFile, Lang.ImageViewWindow_InsufficientPermissionsOrTheFileIsInUse, 5000);
+            ShowInfo(
+                InfoBarSeverity.Warning,
+                Lang.ImageViewWindow_UnableToDeleteTheFile,
+                Lang.ImageViewWindow_InsufficientPermissionsOrTheFileIsInUse,
+                5000
+            );
             _logger.LogError(ex, "Failed to delete image file");
         }
         catch (Exception ex)
         {
-            ShowInfo(InfoBarSeverity.Error, Lang.ImageViewWindow_FailedToDeleteImageFile, ex.Message, 0);
+            ShowInfo(
+                InfoBarSeverity.Error,
+                Lang.ImageViewWindow_FailedToDeleteImageFile,
+                ex.Message,
+                0
+            );
             _logger.LogError(ex, "Failed to delete image file");
         }
     }
-
 
     private void Button_OpenFullScreen_Click(object sender, RoutedEventArgs e)
     {
         FullScreen();
     }
-
 
     private void Button_Minimize_Click(object sender, RoutedEventArgs e)
     {
@@ -1321,12 +1411,10 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private void Button_CloseFullScreen_Click(object sender, RoutedEventArgs e)
     {
         FullScreen();
     }
-
 
     private void Button_CloseWindow_Click(object sender, RoutedEventArgs e)
     {
@@ -1336,7 +1424,6 @@ public sealed partial class ImageViewWindow : Window
         }
         catch { }
     }
-
 
     private void FullScreen()
     {
@@ -1364,7 +1451,6 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private void ScrollViewer_Image_DragOver(object sender, DragEventArgs e)
     {
         try
@@ -1374,13 +1460,16 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
     private async void ScrollViewer_Image_Drop(object sender, DragEventArgs e)
     {
         try
         {
             var items = await e.DataView.GetStorageItemsAsync();
-            if (items.Count == 1 && items[0] is StorageFile { Path: "" } image && ScreenshotHelper.IsSupportedExtension(image.FileType))
+            if (
+                items.Count == 1
+                && items[0] is StorageFile { Path: "" } image
+                && ScreenshotHelper.IsSupportedExtension(image.FileType)
+            )
             {
                 // 从浏览器或其他应用拖入的非本地文件图片
                 await LoadImageAsync(image);
@@ -1395,14 +1484,21 @@ public sealed partial class ImageViewWindow : Window
             var list = new List<string>();
             foreach (var item in items)
             {
-                if (item is StorageFile { Path: not "" } file && ScreenshotHelper.IsSupportedExtension(file.FileType))
+                if (
+                    item is StorageFile { Path: not "" } file
+                    && ScreenshotHelper.IsSupportedExtension(file.FileType)
+                )
                 {
                     list.Add(file.Path);
                 }
                 else if (item is StorageFolder folder)
                 {
                     var files = await folder.GetFilesAsync();
-                    list.AddRange(files.Where(x => ScreenshotHelper.IsSupportedExtension(x.FileType)).Select(x => x.Path));
+                    list.AddRange(
+                        files
+                            .Where(x => ScreenshotHelper.IsSupportedExtension(x.FileType))
+                            .Select(x => x.Path)
+                    );
                 }
             }
             var screenshotItems = list.Select(x => new ScreenshotItem(x)).ToList();
@@ -1420,13 +1516,11 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     private void Button_CloseEditGrid_Click(object sender, RoutedEventArgs e)
     {
         Grid_EditImage.Visibility = Visibility.Collapsed;
         ResetZoomFactor();
     }
-
 
     private async void Button_ExportImage_Click(object sender, RoutedEventArgs e)
     {
@@ -1437,11 +1531,15 @@ public sealed partial class ImageViewWindow : Window
                 return;
             }
             var bitmap = _sourceBitmap;
-            float maxCLL = MaxCLL, outputNits = SDRLuminance;
+            float maxCLL = MaxCLL,
+                outputNits = SDRLuminance;
             ColorPrimaries colorPrimaries = ImageColorPrimaries;
             string name = Path.GetFileNameWithoutExtension(CurrentFileName);
             ICanvasImage output = GetDrawOutput(out int displayMode);
-            bool imageHdr = bitmap.Format is DirectXPixelFormat.R16G16B16A16Float or DirectXPixelFormat.R32G32B32A32Float;
+            bool imageHdr =
+                bitmap.Format
+                is DirectXPixelFormat.R16G16B16A16Float
+                    or DirectXPixelFormat.R32G32B32A32Float;
             bool displayHdr = displayMode is 2;
             using var ms = new MemoryStream();
             bool writeColorProfile = AppConfig.EnableScreenshotColorManagement;
@@ -1454,40 +1552,94 @@ public sealed partial class ImageViewWindow : Window
             if (displayHdr)
             {
                 // hdr image & hdr display
-                path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("AVIF", ".avif"), ("JPEG XL", ".jxl"));
+                path = await FileDialogHelper.OpenSaveFileDialogAsync(
+                    Content.XamlRoot,
+                    name,
+                    ("AVIF", ".avif"),
+                    ("JPEG XL", ".jxl")
+                );
                 if (string.IsNullOrWhiteSpace(path))
                 {
                     return;
                 }
                 encodeTask = Path.GetExtension(path).ToLowerInvariant() switch
                 {
-                    ".avif" => ImageSaver.SaveAsAvifAsync(bitmap, ms, colorPrimaries, 100, null, writeColorProfile),
-                    ".jxl" => ImageSaver.SaveAsJxlAsync(bitmap, ms, colorPrimaries, 0f, null, writeColorProfile),
-                    _ => throw new ArgumentOutOfRangeException($"File extension '{Path.GetExtension(path)}' is not supported."),
+                    ".avif" => ImageSaver.SaveAsAvifAsync(
+                        bitmap,
+                        ms,
+                        colorPrimaries,
+                        100,
+                        null,
+                        writeColorProfile
+                    ),
+                    ".jxl" => ImageSaver.SaveAsJxlAsync(
+                        bitmap,
+                        ms,
+                        colorPrimaries,
+                        0f,
+                        null,
+                        writeColorProfile
+                    ),
+                    _ => throw new ArgumentOutOfRangeException(
+                        $"File extension '{Path.GetExtension(path)}' is not supported."
+                    ),
                 };
             }
             else if (!imageHdr)
             {
                 // sdr image & sdr display
-                path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("PNG", ".png"), ("AVIF", ".avif"), ("JPEG XL", ".jxl"));
+                path = await FileDialogHelper.OpenSaveFileDialogAsync(
+                    Content.XamlRoot,
+                    name,
+                    ("PNG", ".png"),
+                    ("AVIF", ".avif"),
+                    ("JPEG XL", ".jxl")
+                );
                 if (string.IsNullOrWhiteSpace(path))
                 {
                     return;
                 }
                 encodeTask = Path.GetExtension(path).ToLowerInvariant() switch
                 {
-                    ".png" => ImageSaver.SaveAsPngAsync(bitmap, ms, colorPrimaries, null, writeColorProfile),
-                    ".avif" => ImageSaver.SaveAsAvifAsync(bitmap, ms, colorPrimaries, 100, null, writeColorProfile),
-                    ".jxl" => ImageSaver.SaveAsJxlAsync(bitmap, ms, colorPrimaries, 0f, null, writeColorProfile),
-                    _ => throw new ArgumentOutOfRangeException($"File extension '{Path.GetExtension(path)}' is not supported."),
+                    ".png" => ImageSaver.SaveAsPngAsync(
+                        bitmap,
+                        ms,
+                        colorPrimaries,
+                        null,
+                        writeColorProfile
+                    ),
+                    ".avif" => ImageSaver.SaveAsAvifAsync(
+                        bitmap,
+                        ms,
+                        colorPrimaries,
+                        100,
+                        null,
+                        writeColorProfile
+                    ),
+                    ".jxl" => ImageSaver.SaveAsJxlAsync(
+                        bitmap,
+                        ms,
+                        colorPrimaries,
+                        0f,
+                        null,
+                        writeColorProfile
+                    ),
+                    _ => throw new ArgumentOutOfRangeException(
+                        $"File extension '{Path.GetExtension(path)}' is not supported."
+                    ),
                 };
             }
             else
             {
                 // hdr image & sdr display：两组同扩展名（SDR/Ultra HDR 的 .jpg、SDR/HDR 的 .png），
                 // WinRT picker 拿不到用户选了哪个 filter，走带序号的 Win32 对话框
-                var picked = await FileDialogHelper.OpenSaveFileDialogWithFilterIndexAsync(Content.XamlRoot, name,
-                    ("SDR JPEG", ".jpg"), ("Ultra HDR JPEG", ".jpg"), ("SDR PNG", ".png"));
+                var picked = await FileDialogHelper.OpenSaveFileDialogWithFilterIndexAsync(
+                    Content.XamlRoot,
+                    name,
+                    ("SDR JPEG", ".jpg"),
+                    ("Ultra HDR JPEG", ".jpg"),
+                    ("SDR PNG", ".png")
+                );
                 if (picked is null)
                 {
                     return;
@@ -1496,10 +1648,22 @@ public sealed partial class ImageViewWindow : Window
                 // SDR JPEG / SDR PNG：渲染 SDR 显示管线（HdrToneMap + 白电平 + 色彩管理）到 8bit，所见即所得
                 encodeTask = filterIndex switch
                 {
-                    0 => ImageSaver.SaveAsJpegAsync(sdr8 = RenderToSdr8bit(output, bitmap), ms, 100),
+                    0 => ImageSaver.SaveAsJpegAsync(
+                        sdr8 = RenderToSdr8bit(output, bitmap),
+                        ms,
+                        100
+                    ),
                     1 => ImageSaver.SaveAsUhdrAsync(bitmap, ms, maxCLL, outputNits),
-                    2 => ImageSaver.SaveAsPngAsync(sdr8 = RenderToSdr8bit(output, bitmap), ms, ColorPrimaries.BT709, null, false),
-                    _ => throw new ArgumentOutOfRangeException($"Unknown filter index {filterIndex}."),
+                    2 => ImageSaver.SaveAsPngAsync(
+                        sdr8 = RenderToSdr8bit(output, bitmap),
+                        ms,
+                        ColorPrimaries.BT709,
+                        null,
+                        false
+                    ),
+                    _ => throw new ArgumentOutOfRangeException(
+                        $"Unknown filter index {filterIndex}."
+                    ),
                 };
             }
             try
@@ -1527,7 +1691,6 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     /// <summary>
     /// 把显示管线图像（SDR 模式的 tonemap 链）渲染到 8bit B8G8R8A8——所见即所得的 SDR 导出像素。
     /// 链输出是线性 scRGB，画进 8bit 前必须补 sRGB OETF（显示路径由 DWM 对 float swapchain 编码，
@@ -1535,9 +1698,14 @@ public sealed partial class ImageViewWindow : Window
     /// </summary>
     private static CanvasRenderTarget RenderToSdr8bit(ICanvasImage output, CanvasBitmap sizeSource)
     {
-        var rt = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(),
-            sizeSource.SizeInPixels.Width, sizeSource.SizeInPixels.Height, 96,
-            DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+        var rt = new CanvasRenderTarget(
+            CanvasDevice.GetSharedDevice(),
+            sizeSource.SizeInPixels.Width,
+            sizeSource.SizeInPixels.Height,
+            96,
+            DirectXPixelFormat.B8G8R8A8UIntNormalized,
+            CanvasAlphaMode.Premultiplied
+        );
         try
         {
             using var ds = rt.CreateDrawingSession();
@@ -1559,7 +1727,6 @@ public sealed partial class ImageViewWindow : Window
     }
 
     #endregion
-
 
 
     #region Shortcut
@@ -1585,9 +1752,7 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     #endregion
-
 
 
     #region InfoBar
@@ -1595,8 +1760,12 @@ public sealed partial class ImageViewWindow : Window
 
     private CancellationTokenSource _infoBarCts;
 
-
-    private async void ShowInfo(InfoBarSeverity severity, string title, string content, int hideDelay = 0)
+    private async void ShowInfo(
+        InfoBarSeverity severity,
+        string title,
+        string content,
+        int hideDelay = 0
+    )
     {
         try
         {
@@ -1621,10 +1790,7 @@ public sealed partial class ImageViewWindow : Window
         catch { }
     }
 
-
-
     #endregion
-
 
 
     #region Others
@@ -1632,7 +1798,10 @@ public sealed partial class ImageViewWindow : Window
 
     public void AdaptTitleBarButtonColorToActuallTheme()
     {
-        if (AppWindowTitleBar.IsCustomizationSupported() && AppWindow.TitleBar.ExtendsContentIntoTitleBar == true)
+        if (
+            AppWindowTitleBar.IsCustomizationSupported()
+            && AppWindow.TitleBar.ExtendsContentIntoTitleBar == true
+        )
         {
             var titleBar = AppWindow.TitleBar;
             titleBar.ButtonBackgroundColor = Colors.Transparent;
@@ -1646,14 +1815,34 @@ public sealed partial class ImageViewWindow : Window
                     case ElementTheme.Light:
                         titleBar.ButtonForegroundColor = Colors.Black;
                         titleBar.ButtonHoverForegroundColor = Colors.Black;
-                        titleBar.ButtonHoverBackgroundColor = Color.FromArgb(0x20, 0x00, 0x00, 0x00);
-                        titleBar.ButtonInactiveForegroundColor = Color.FromArgb(0xFF, 0x99, 0x99, 0x99);
+                        titleBar.ButtonHoverBackgroundColor = Color.FromArgb(
+                            0x20,
+                            0x00,
+                            0x00,
+                            0x00
+                        );
+                        titleBar.ButtonInactiveForegroundColor = Color.FromArgb(
+                            0xFF,
+                            0x99,
+                            0x99,
+                            0x99
+                        );
                         break;
                     case ElementTheme.Dark:
                         titleBar.ButtonForegroundColor = Colors.White;
                         titleBar.ButtonHoverForegroundColor = Colors.White;
-                        titleBar.ButtonHoverBackgroundColor = Color.FromArgb(0x20, 0xFF, 0xFF, 0xFF);
-                        titleBar.ButtonInactiveForegroundColor = Color.FromArgb(0xFF, 0x99, 0x99, 0x99);
+                        titleBar.ButtonHoverBackgroundColor = Color.FromArgb(
+                            0x20,
+                            0xFF,
+                            0xFF,
+                            0xFF
+                        );
+                        titleBar.ButtonInactiveForegroundColor = Color.FromArgb(
+                            0xFF,
+                            0x99,
+                            0x99,
+                            0x99
+                        );
                         break;
                     default:
                         break;
@@ -1661,7 +1850,6 @@ public sealed partial class ImageViewWindow : Window
             }
         }
     }
-
 
     public void SetIcon(string? iconPath = null)
     {
@@ -1677,30 +1865,25 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-
     public static Visibility ObjectToVisibility(object obj)
     {
         return obj is null ? Visibility.Collapsed : Visibility.Visible;
     }
-
 
     public static Visibility ObjectToVisibilityReversed(bool? value)
     {
         return value is true ? Visibility.Collapsed : Visibility.Visible;
     }
 
-
     public static bool ObjectToBool(object obj)
     {
         return obj is not null;
     }
 
-
     public static string AddOne(int value)
     {
         return (value + 1).ToString();
     }
-
 
     public void CenterInScreen(DisplayArea displayArea, int width, int height)
     {
@@ -1714,24 +1897,40 @@ public sealed partial class ImageViewWindow : Window
         AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
     }
 
-
     [LibraryImport("Shcore.dll")]
-    private static partial int GetDpiForMonitor(nint hmonitor, int dpiType, out uint dpiX, out uint dpiY);
-
+    private static partial int GetDpiForMonitor(
+        nint hmonitor,
+        int dpiType,
+        out uint dpiX,
+        out uint dpiY
+    );
 
     #endregion
 
 
-
     private static Matrix5x4 ToMatrix5x4(Matrix4x4 matrix4x4)
     {
-        return new Matrix5x4(matrix4x4.M11, matrix4x4.M12, matrix4x4.M13, matrix4x4.M14,
-                             matrix4x4.M21, matrix4x4.M22, matrix4x4.M23, matrix4x4.M24,
-                             matrix4x4.M31, matrix4x4.M32, matrix4x4.M33, matrix4x4.M34,
-                             matrix4x4.M41, matrix4x4.M42, matrix4x4.M43, matrix4x4.M44,
-                             0, 0, 0, 0);
+        return new Matrix5x4(
+            matrix4x4.M11,
+            matrix4x4.M12,
+            matrix4x4.M13,
+            matrix4x4.M14,
+            matrix4x4.M21,
+            matrix4x4.M22,
+            matrix4x4.M23,
+            matrix4x4.M24,
+            matrix4x4.M31,
+            matrix4x4.M32,
+            matrix4x4.M33,
+            matrix4x4.M34,
+            matrix4x4.M41,
+            matrix4x4.M42,
+            matrix4x4.M43,
+            matrix4x4.M44,
+            0,
+            0,
+            0,
+            0
+        );
     }
-
-
-
 }

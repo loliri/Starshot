@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -11,8 +13,6 @@ using Starshot.Features.Setting;
 using Starshot.Features.Update;
 using Starshot.Frameworks;
 using Starshot.Helpers;
-using System;
-using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Windows.Graphics;
 using Windows.UI;
@@ -21,7 +21,6 @@ namespace Starshot.Features.ViewHost;
 
 public sealed partial class MainWindow : WindowEx
 {
-
     private const int HOTKEY_CAPTURE = 44445;
 
     private const int HOTKEY_REGION = 44446;
@@ -32,10 +31,11 @@ public sealed partial class MainWindow : WindowEx
 
     private SystemBackdropHelper? _backdropHelper;
 
-    private Brush? _overlayAcrylicBrush;  // 首次 ApplyBackdrop 时捕获 XAML 设的亚克力（用于亚克力开关还原）
+    private Brush? _overlayAcrylicBrush; // 首次 ApplyBackdrop 时捕获 XAML 设的亚克力（用于亚克力开关还原）
 
-    private static readonly Brush _transparentBrush = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
-
+    private static readonly Brush _transparentBrush = new SolidColorBrush(
+        Color.FromArgb(0, 0, 0, 0)
+    );
 
     public MainWindow()
     {
@@ -57,13 +57,18 @@ public sealed partial class MainWindow : WindowEx
         {
             HotkeyManager.InitializeHotkey(WindowHandle);
         }
-        WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, (_, _) => OnAccentChanged());
-        WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => ApplyBackdrop());
+        WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(
+            this,
+            (_, _) => OnAccentChanged()
+        );
+        WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(
+            this,
+            (_, _) => ApplyBackdrop()
+        );
         Activated += MainWindow_Activated;
         AppWindow.Closing += AppWindow_Closing;
         ((FrameworkElement)Content).Loaded += MainWindow_Loaded;
     }
-
 
     /// <summary>
     /// 导航栏 logo：exe 内嵌图标资源抽取（AppIconHelper，与托盘同源），不随包带文件。
@@ -71,10 +76,10 @@ public sealed partial class MainWindow : WindowEx
     private void LoadPaneLogo()
     {
         using var icon = AppIconHelper.GetAppIcon();
-        if (icon is null) return;
+        if (icon is null)
+            return;
         Image_PaneLogo.Source = AppIconHelper.ToBitmapImage(icon);
     }
-
 
     /// <summary>
     /// 启动 splash：Loaded 后固定延迟 700ms，淡出 400ms，露出就绪 UI。每个窗口实例只触发一次（托盘恢复不重播）。
@@ -83,7 +88,12 @@ public sealed partial class MainWindow : WindowEx
     {
         ((FrameworkElement)sender).Loaded -= MainWindow_Loaded;
         await Task.Delay(700);
-        var fade = new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromMilliseconds(400) };
+        var fade = new DoubleAnimation
+        {
+            From = 1,
+            To = 0,
+            Duration = TimeSpan.FromMilliseconds(400),
+        };
         Storyboard.SetTarget(fade, SplashOverlay);
         Storyboard.SetTargetProperty(fade, "Opacity");
         var sb = new Storyboard();
@@ -108,26 +118,27 @@ public sealed partial class MainWindow : WindowEx
         sb.Begin();
     }
 
-
     private static async Task TryCheckUpdateOnStartupAsync()
     {
 #if !DEBUG
         try
         {
-            if (!AppConfig.EnableAutoUpdateCheck) return;
+            if (!AppConfig.EnableAutoUpdateCheck)
+                return;
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            if (now - AppConfig.LastCheckUpdateTime < 86400) return;
+            if (now - AppConfig.LastCheckUpdateTime < 86400)
+                return;
             var (release, _) = await UpdateService.CheckUpdateAsync();
             // 成功查询后才更新时间戳：网络失败抛异常会跳过本行（catch 兜底），下次启动即重试
             AppConfig.LastCheckUpdateTime = now;
-            if (release is null) return;
+            if (release is null)
+                return;
             var window = new UpdateWindow();
             window.SetRelease(release);
         }
         catch { }
 #endif
     }
-
 
     /// <summary>
     /// 壁纸开：关 Mica + overlay 隔层显（亚克力开=磨砂，关=透明让壁纸直接透出）；壁纸关：Mica + overlay 隐。
@@ -138,8 +149,10 @@ public sealed partial class MainWindow : WindowEx
         if (AppConfig.EnableWallpaper)
         {
             _backdropHelper?.ResetBackdrop();
-            _overlayAcrylicBrush ??= Border_OverlayMask.Background;  // 首次捕获 XAML 亚克力
-            Border_OverlayMask.Background = AppConfig.EnableAcrylic ? _overlayAcrylicBrush! : _transparentBrush;
+            _overlayAcrylicBrush ??= Border_OverlayMask.Background; // 首次捕获 XAML 亚克力
+            Border_OverlayMask.Background = AppConfig.EnableAcrylic
+                ? _overlayAcrylicBrush!
+                : _transparentBrush;
             Border_OverlayMask.Opacity = 1;
         }
         else
@@ -150,15 +163,16 @@ public sealed partial class MainWindow : WindowEx
         }
     }
 
-
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs e)
     {
         Activated -= MainWindow_Activated;
         NavView.SelectedItem = NavView.MenuItems[0];
     }
 
-
-    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private void NavView_SelectionChanged(
+        NavigationView sender,
+        NavigationViewSelectionChangedEventArgs args
+    )
     {
         if (args.SelectedItem is NavigationViewItem item && item.Tag is string tag)
         {
@@ -178,7 +192,6 @@ public sealed partial class MainWindow : WindowEx
         }
     }
 
-
     private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         if (ForceExit)
@@ -192,8 +205,14 @@ public sealed partial class MainWindow : WindowEx
         }
     }
 
-
-    protected override nint WindowSubclassProc(HWND hWnd, uint uMsg, nint wParam, nint lParam, nuint uIdSubclass, nint dwRefData)
+    protected override nint WindowSubclassProc(
+        HWND hWnd,
+        uint uMsg,
+        nint wParam,
+        nint lParam,
+        nuint uIdSubclass,
+        nint dwRefData
+    )
     {
         if (uMsg == (uint)User32.WindowMessage.WM_HOTKEY)
         {
@@ -216,12 +235,13 @@ public sealed partial class MainWindow : WindowEx
             int lo = (int)((long)wParam & 0xFFFF);
             if (lo is 1 or 2)
             {
-                WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Activate = true });
+                WeakReferenceMessenger.Default.Send(
+                    new MainWindowStateChangedMessage { Activate = true }
+                );
             }
         }
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
     }
-
 
     /// <summary>
     /// 重写 Hide：隐藏后通知 AppBackground 暂停视频壁纸（避免不可见时占 GPU）。
@@ -231,7 +251,6 @@ public sealed partial class MainWindow : WindowEx
         base.Hide();
         WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Hide = true });
     }
-
 
     /// <summary>
     /// 应用主题（0跟随系统 / 1浅色 / 2深色）。先 toggle 再设回，强制 WinUI 重新解析主题资源
@@ -248,7 +267,6 @@ public sealed partial class MainWindow : WindowEx
         }
     }
 
-
     /// <summary>
     /// 强调色变更后切换主题强制 WinUI 重解析主题资源
     /// </summary>
@@ -256,6 +274,4 @@ public sealed partial class MainWindow : WindowEx
     {
         ApplyTheme();
     }
-
-
 }

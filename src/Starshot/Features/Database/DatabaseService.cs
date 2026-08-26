@@ -1,16 +1,13 @@
-using Dapper;
-using Microsoft.Data.Sqlite;
 using System.Data;
 using System.IO;
+using Dapper;
+using Microsoft.Data.Sqlite;
 
 namespace Starshot.Features.Database;
 
 internal static class DatabaseService
 {
-
-
     private static string _connectionString;
-
 
     public static SqliteConnection CreateConnection()
     {
@@ -18,7 +15,6 @@ internal static class DatabaseService
         con.Open();
         return con;
     }
-
 
     public static void SetDatabase(string folder)
     {
@@ -28,16 +24,17 @@ internal static class DatabaseService
             _connectionString = $"DataSource={path};";
             using var con = CreateConnection();
             con.Execute("PRAGMA JOURNAL_MODE = WAL;");
-            con.Execute("""
+            con.Execute(
+                """
                 CREATE TABLE IF NOT EXISTS Setting
                 (
                     Key   TEXT NOT NULL PRIMARY KEY,
                     Value TEXT
                 );
-                """);
+                """
+            );
         }
     }
-
 
     /// <summary>
     /// 在线备份：VACUUM 压缩后用 SQLite BackupDatabase API 复制到目标文件。
@@ -51,6 +48,4 @@ internal static class DatabaseService
         con.Execute("VACUUM;", commandType: CommandType.Text);
         con.BackupDatabase(backupCon);
     }
-
-
 }

@@ -9,16 +9,13 @@ namespace Starshot.Features.Setting;
 /// </summary>
 public sealed partial class DatabaseLocationDialog : ContentDialog
 {
-
     public DatabaseLocationDialog()
     {
         InitializeComponent();
     }
 
-
     private void Button_OK_Click(object sender, RoutedEventArgs e)
     {
         Hide();
     }
-
 }

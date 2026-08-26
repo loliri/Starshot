@@ -15,7 +15,11 @@ namespace Starshot.Features.Update;
 internal static class HPatchInvoker
 {
     public static async Task<bool> ApplyAsync(
-        string oldDir, string patchFile, string newDir, CancellationToken ct)
+        string oldDir,
+        string patchFile,
+        string newDir,
+        CancellationToken ct
+    )
     {
         string exe = FindHpatchz();
         if (exe is null)
@@ -40,7 +44,11 @@ internal static class HPatchInvoker
                 Log.Warning("[HPatchInvoker] Process.Start returned null");
                 return false;
             }
-            p.ErrorDataReceived += (s, e) => { if (!string.IsNullOrEmpty(e.Data)) Log.Warning("[HPatchInvoker] {Data}", e.Data); };
+            p.ErrorDataReceived += (s, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                    Log.Warning("[HPatchInvoker] {Data}", e.Data);
+            };
             p.BeginErrorReadLine();
             await p.WaitForExitAsync(ct);
             Log.Information("[HPatchInvoker] hpatchz exited with code {Code}", p.ExitCode);
@@ -48,7 +56,12 @@ internal static class HPatchInvoker
         }
         catch (OperationCanceledException)
         {
-            if (p is not null) try { p.Kill(entireProcessTree: true); } catch { }
+            if (p is not null)
+                try
+                {
+                    p.Kill(entireProcessTree: true);
+                }
+                catch { }
             throw;
         }
         catch (Exception ex)
@@ -57,7 +70,6 @@ internal static class HPatchInvoker
             return false;
         }
     }
-
 
     private static string? FindHpatchz()
     {

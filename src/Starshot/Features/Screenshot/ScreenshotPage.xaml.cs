@@ -1,3 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graphics.Canvas;
@@ -9,50 +16,32 @@ using Microsoft.UI.Xaml.Navigation;
 using Starshot.Features.Codec;
 using Starshot.Frameworks;
 using Starshot.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics.DirectX;
 using Windows.Storage;
 using Windows.System;
 
-
 namespace Starshot.Features.Screenshot;
 
 public sealed partial class ScreenshotPage : PageBase
 {
-
-
     private readonly ILogger<ScreenshotPage> _logger = AppConfig.GetLogger<ScreenshotPage>();
-
-
-
 
     public ScreenshotPage()
     {
         this.InitializeComponent();
     }
 
-
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
     }
-
-
 
     protected override async void OnLoaded()
     {
         await Task.Delay(16);
         Initialize();
     }
-
-
 
     protected override void OnUnloaded()
     {
@@ -74,20 +63,23 @@ public sealed partial class ScreenshotPage : PageBase
         catch { }
     }
 
-
-
     public bool MutliSelect
     {
-        get; set
+        get;
+        set
         {
             field = value;
-            GridView_Images.SelectionMode = value ? ListViewSelectionMode.Multiple : ListViewSelectionMode.None;
+            GridView_Images.SelectionMode = value
+                ? ListViewSelectionMode.Multiple
+                : ListViewSelectionMode.None;
         }
     }
 
-
-    public string SelectCountText { get; set => SetProperty(ref field, value); }
-
+    public string SelectCountText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     private List<FileSystemWatcher> _watchers = new();
 
@@ -97,10 +89,23 @@ public sealed partial class ScreenshotPage : PageBase
 
     private ObservableCollection<ScreenshotItem>? _screenshotItems;
 
-    public CollectionViewSource ScreenshotViewSource { get; set => SetProperty(ref field, value); } = new() { IsSourceGrouped = true };
+    public CollectionViewSource ScreenshotViewSource
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = new() { IsSourceGrouped = true };
 
-    public ObservableCollection<ScreenshotItemGroup> ScreenshotGroups { get; set { if (SetProperty(ref field, value)) { ScreenshotViewSource.Source = value; } } }
-
+    public ObservableCollection<ScreenshotItemGroup> ScreenshotGroups
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                ScreenshotViewSource.Source = value;
+            }
+        }
+    }
 
     private async void Initialize()
     {
@@ -158,7 +163,9 @@ public sealed partial class ScreenshotPage : PageBase
                     {
                         continue;
                     }
-                    if (ScreenshotHelper.IsSupportedExtension(file) /*&& !File.GetAttributes(file).HasFlag((System.IO.FileAttributes)0x440000)*/)
+                    if (
+                        ScreenshotHelper.IsSupportedExtension(file) /*&& !File.GetAttributes(file).HasFlag((System.IO.FileAttributes)0x440000)*/
+                    )
                     {
                         var item = new ScreenshotItem(file);
                         screenshots.Add(item);
@@ -168,7 +175,10 @@ public sealed partial class ScreenshotPage : PageBase
             }
 
             _screenshotItems = new(screenshots.OrderByDescending(x => x.CreationTime).ToList());
-            var groups = _screenshotItems.GroupBy(x => x.TimeMonthDay).Select(x => new ScreenshotItemGroup(x.Key, x)).ToList();
+            var groups = _screenshotItems
+                .GroupBy(x => x.TimeMonthDay)
+                .Select(x => new ScreenshotItemGroup(x.Key, x))
+                .ToList();
             ScreenshotGroups = new(groups);
         }
         catch (Exception ex)
@@ -176,7 +186,6 @@ public sealed partial class ScreenshotPage : PageBase
             _logger.LogError(ex, "Initialize");
         }
     }
-
 
     private FileSystemWatcher CreateFileSystemWatcher(string folder)
     {
@@ -192,7 +201,6 @@ public sealed partial class ScreenshotPage : PageBase
         return watcher;
     }
 
-
     private async void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
     {
         try
@@ -202,7 +210,10 @@ public sealed partial class ScreenshotPage : PageBase
                 string name = Path.GetFileName(e.FullPath);
                 if (ScreenshotHelper.IsSupportedExtension(e.FullPath) && File.Exists(e.FullPath))
                 {
-                    await ScreenshotHelper.WaitForFileReleaseAsync(e.FullPath, CancellationToken.None);
+                    await ScreenshotHelper.WaitForFileReleaseAsync(
+                        e.FullPath,
+                        CancellationToken.None
+                    );
                     var item = new ScreenshotItem(e.FullPath);
                     // 字典/集合统一只在 UI 线程动：FSW 线程池续体与 UI 线程并发读写非线程安全集合；
                     // 页面卸载后字段已置空，迟到的续体（await 跨越了卸载）直接丢弃
@@ -210,12 +221,17 @@ public sealed partial class ScreenshotPage : PageBase
                     {
                         // Initialize 半途失败（如外置文件夹失效抛异常被吞）时 ScreenshotGroups 停留 null，先兜住
                         ScreenshotGroups ??= new();
-                        if (_screenshotDict is null) return;
-                        if (_screenshotDict.ContainsKey(name)) return;
+                        if (_screenshotDict is null)
+                            return;
+                        if (_screenshotDict.ContainsKey(name))
+                            return;
                         _screenshotDict[name] = item;
                         _screenshotItems ??= new();
                         _screenshotItems.Insert(0, item);
-                        if (ScreenshotGroups.FirstOrDefault(x => x.Header == item.TimeMonthDay) is ScreenshotItemGroup group)
+                        if (
+                            ScreenshotGroups.FirstOrDefault(x => x.Header == item.TimeMonthDay)
+                            is ScreenshotItemGroup group
+                        )
                         {
                             group.Insert(0, item);
                         }
@@ -235,7 +251,6 @@ public sealed partial class ScreenshotPage : PageBase
         }
     }
 
-
     private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
     {
         // 同 Created：整体挪到 UI 线程，消除 FSW 线程与 UI 线程的并发读写
@@ -243,13 +258,17 @@ public sealed partial class ScreenshotPage : PageBase
         {
             try
             {
-                if (_screenshotDict is null) return;
+                if (_screenshotDict is null)
+                    return;
                 string name = Path.GetFileName(e.FullPath);
                 if (_screenshotDict.TryGetValue(name, out ScreenshotItem? item))
                 {
                     if (e.FullPath == item.FilePath)
                     {
-                        if (ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay) is ScreenshotItemGroup group)
+                        if (
+                            ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay)
+                            is ScreenshotItemGroup group
+                        )
                         {
                             if (group.Contains(item))
                             {
@@ -272,14 +291,14 @@ public sealed partial class ScreenshotPage : PageBase
         });
     }
 
-
-
     [RelayCommand]
     private void OpenImageBatchConvertWindow()
     {
         try
         {
-            var list = MutliSelect ? GridView_Images.SelectedItems.Cast<ScreenshotItem>().ToList() : [];
+            var list = MutliSelect
+                ? GridView_Images.SelectedItems.Cast<ScreenshotItem>().ToList()
+                : [];
             Frame.Navigate(typeof(ImageBatchConvertWindow), list);
         }
         catch (Exception ex)
@@ -287,7 +306,6 @@ public sealed partial class ScreenshotPage : PageBase
             _logger.LogError(ex, "Open image batch convert window");
         }
     }
-
 
     [RelayCommand]
     private async Task ManageScreenshotFolderAsync()
@@ -302,7 +320,10 @@ public sealed partial class ScreenshotPage : PageBase
             await dialog.ShowAsync();
             if (dialog.FolderChanged)
             {
-                string folder = string.Join(';', dialog.Folders.Where(x => x.CanRemove).Select(x => x.Folder));
+                string folder = string.Join(
+                    ';',
+                    dialog.Folders.Where(x => x.CanRemove).Select(x => x.Folder)
+                );
                 AppConfig.ScreenshotFolders = folder;
                 Initialize();
                 UpdateSelectCountText();
@@ -310,7 +331,6 @@ public sealed partial class ScreenshotPage : PageBase
         }
         catch { }
     }
-
 
     private void GridView_Images_ItemClick(object sender, ItemClickEventArgs e)
     {
@@ -320,15 +340,21 @@ public sealed partial class ScreenshotPage : PageBase
             {
                 if (e.ClickedItem is ScreenshotItem item)
                 {
-                    _ = new ImageViewWindow().ShowWindowAsync(this.XamlRoot.ContentIslandEnvironment.AppWindowId, item, _screenshotItems);
+                    _ = new ImageViewWindow().ShowWindowAsync(
+                        this.XamlRoot.ContentIslandEnvironment.AppWindowId,
+                        item,
+                        _screenshotItems
+                    );
                 }
             }
         }
         catch { }
     }
 
-
-    private async void GridView_Images_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
+    private async void GridView_Images_DragItemsStarting(
+        object sender,
+        DragItemsStartingEventArgs e
+    )
     {
         try
         {
@@ -356,12 +382,10 @@ public sealed partial class ScreenshotPage : PageBase
         }
     }
 
-
     private void GridView_Images_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         UpdateSelectCountText();
     }
-
 
     private void UpdateSelectCountText()
     {
@@ -369,7 +393,8 @@ public sealed partial class ScreenshotPage : PageBase
         {
             if (MutliSelect)
             {
-                SelectCountText = $"{GridView_Images.SelectedItems.Count}/{_screenshotItems?.Count ?? 0}";
+                SelectCountText =
+                    $"{GridView_Images.SelectedItems.Count}/{_screenshotItems?.Count ?? 0}";
             }
             else
             {
@@ -378,8 +403,6 @@ public sealed partial class ScreenshotPage : PageBase
         }
         catch { }
     }
-
-
 
     private void MenuFlyoutItem_ScreenshotInfo_Loading(FrameworkElement sender, object args)
     {
@@ -396,28 +419,35 @@ public sealed partial class ScreenshotPage : PageBase
         }
     }
 
-
     private void MenuFlyoutItem_Open_Click(object sender, RoutedEventArgs e)
     {
         try
         {
             if (sender is FrameworkElement { DataContext: ScreenshotItem item })
             {
-                _ = new ImageViewWindow().ShowWindowAsync(this.XamlRoot.ContentIslandEnvironment.AppWindowId, item, _screenshotItems);
+                _ = new ImageViewWindow().ShowWindowAsync(
+                    this.XamlRoot.ContentIslandEnvironment.AppWindowId,
+                    item,
+                    _screenshotItems
+                );
             }
         }
         catch { }
     }
 
-
     private async void MenuFlyoutItem_CopyFile_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            if (GridView_Images.SelectionMode is ListViewSelectionMode.Multiple && GridView_Images.SelectedItems.Count > 0)
+            if (
+                GridView_Images.SelectionMode is ListViewSelectionMode.Multiple
+                && GridView_Images.SelectedItems.Count > 0
+            )
             {
                 var list = new List<StorageFile>();
-                foreach (ScreenshotItem item in GridView_Images.SelectedItems.Cast<ScreenshotItem>())
+                foreach (
+                    ScreenshotItem item in GridView_Images.SelectedItems.Cast<ScreenshotItem>()
+                )
                 {
                     if (File.Exists(item.FilePath))
                     {
@@ -428,7 +458,11 @@ public sealed partial class ScreenshotPage : PageBase
                 if (list.Count > 0)
                 {
                     ClipboardHelper.SetStorageItems(DataPackageOperation.Copy, list.ToArray());
-                    InAppToast.MainWindow?.Success(Lang.ImageViewWindow_CopiedToClipboard, string.Format(Lang.ScreenshotPage_Total0Files, list.Count), 1500);
+                    InAppToast.MainWindow?.Success(
+                        Lang.ImageViewWindow_CopiedToClipboard,
+                        string.Format(Lang.ScreenshotPage_Total0Files, list.Count),
+                        1500
+                    );
                 }
             }
             else if (sender is FrameworkElement fe && fe.DataContext is ScreenshotItem item)
@@ -437,11 +471,19 @@ public sealed partial class ScreenshotPage : PageBase
                 {
                     var file = await StorageFile.GetFileFromPathAsync(item.FilePath);
                     ClipboardHelper.SetStorageItems(DataPackageOperation.Copy, file);
-                    InAppToast.MainWindow?.Success(Lang.ImageViewWindow_CopiedToClipboard, null, 1500);
+                    InAppToast.MainWindow?.Success(
+                        Lang.ImageViewWindow_CopiedToClipboard,
+                        null,
+                        1500
+                    );
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow_FileDoesNotExist, item.FilePath, 5000);
+                    InAppToast.MainWindow?.Warning(
+                        Lang.ImageViewWindow_FileDoesNotExist,
+                        item.FilePath,
+                        5000
+                    );
                 }
             }
         }
@@ -450,7 +492,6 @@ public sealed partial class ScreenshotPage : PageBase
             _logger.LogError(ex, "Failed to copy file to clipboard");
         }
     }
-
 
     private async void MenuFlyoutItem_CopyImage_Click(object sender, RoutedEventArgs e)
     {
@@ -472,24 +513,42 @@ public sealed partial class ScreenshotPage : PageBase
                     CanvasBitmap source = bitmap;
                     if (imageInfo.HDR)
                     {
-                        tonemapped = ScreenCaptureService.TonemapToSdr(bitmap, ScreenCaptureService.GetSdrWhiteLevel());
+                        tonemapped = ScreenCaptureService.TonemapToSdr(
+                            bitmap,
+                            ScreenCaptureService.GetSdrWhiteLevel()
+                        );
                         source = tonemapped;
                     }
                     bool copied;
                     using (tonemapped)
                     {
-                        copied = await ScreenCaptureService.CopyCaptureToClipboardAsync(source, force: true);
+                        copied = await ScreenCaptureService.CopyCaptureToClipboardAsync(
+                            source,
+                            force: true
+                        );
                     }
                     if (!copied)
                     {
-                        InAppToast.MainWindow?.Error(Lang.ImageViewWindow_CopyToClipboard, null, 5000);
+                        InAppToast.MainWindow?.Error(
+                            Lang.ImageViewWindow_CopyToClipboard,
+                            null,
+                            5000
+                        );
                         return;
                     }
-                    InAppToast.MainWindow?.Success($"{Lang.ImageViewWindow_CopiedToClipboard} ({width}×{height})", null, 1500);
+                    InAppToast.MainWindow?.Success(
+                        $"{Lang.ImageViewWindow_CopiedToClipboard} ({width}×{height})",
+                        null,
+                        1500
+                    );
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow_FileDoesNotExist, item.FilePath, 5000);
+                    InAppToast.MainWindow?.Warning(
+                        Lang.ImageViewWindow_FileDoesNotExist,
+                        item.FilePath,
+                        5000
+                    );
                 }
             }
         }
@@ -499,7 +558,6 @@ public sealed partial class ScreenshotPage : PageBase
             _logger.LogError(ex, "Failed to copy image to clipboard");
         }
     }
-
 
     private async void MenuFlyoutItem_OpenInExplorer_Click(object sender, RoutedEventArgs e)
     {
@@ -516,7 +574,11 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow_FileDoesNotExist, item.FilePath, 5000);
+                    InAppToast.MainWindow?.Warning(
+                        Lang.ImageViewWindow_FileDoesNotExist,
+                        item.FilePath,
+                        5000
+                    );
                 }
             }
         }
@@ -525,7 +587,6 @@ public sealed partial class ScreenshotPage : PageBase
             _logger.LogError(ex, "Failed to open file in explorer");
         }
     }
-
 
     private async void MenuFlyoutItem_OpenWithDefault_Click(object sender, RoutedEventArgs e)
     {
@@ -540,7 +601,11 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow_FileDoesNotExist, item.FilePath, 5000);
+                    InAppToast.MainWindow?.Warning(
+                        Lang.ImageViewWindow_FileDoesNotExist,
+                        item.FilePath,
+                        5000
+                    );
                 }
             }
         }
@@ -549,7 +614,6 @@ public sealed partial class ScreenshotPage : PageBase
             _logger.LogError(ex, "Failed to open file with default application");
         }
     }
-
 
     private async void MenuFlyoutItem_OpenWith_Click(object sender, RoutedEventArgs e)
     {
@@ -565,7 +629,11 @@ public sealed partial class ScreenshotPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning(Lang.ImageViewWindow_FileDoesNotExist, item.FilePath, 5000);
+                    InAppToast.MainWindow?.Warning(
+                        Lang.ImageViewWindow_FileDoesNotExist,
+                        item.FilePath,
+                        5000
+                    );
                 }
             }
         }
@@ -575,12 +643,14 @@ public sealed partial class ScreenshotPage : PageBase
         }
     }
 
-
     private async void MenuFlyoutItem_Delete_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            if (GridView_Images.SelectionMode is ListViewSelectionMode.Multiple && GridView_Images.SelectedItems.Count > 0)
+            if (
+                GridView_Images.SelectionMode is ListViewSelectionMode.Multiple
+                && GridView_Images.SelectedItems.Count > 0
+            )
             {
                 var list = GridView_Images.SelectedItems.Cast<ScreenshotItem>().ToList();
                 foreach (ScreenshotItem item in list)
@@ -591,7 +661,10 @@ public sealed partial class ScreenshotPage : PageBase
                         await file.DeleteAsync();
                     }
                     _screenshotItems?.Remove(item);
-                    if (ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay) is ScreenshotItemGroup group)
+                    if (
+                        ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay)
+                        is ScreenshotItemGroup group
+                    )
                     {
                         if (group.Remove(item))
                         {
@@ -612,7 +685,10 @@ public sealed partial class ScreenshotPage : PageBase
                     await file.DeleteAsync();
                 }
                 _screenshotItems?.Remove(item);
-                if (ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay) is ScreenshotItemGroup group)
+                if (
+                    ScreenshotGroups?.FirstOrDefault(x => x.Header == item.TimeMonthDay)
+                    is ScreenshotItemGroup group
+                )
                 {
                     if (group.Remove(item))
                     {
@@ -627,7 +703,11 @@ public sealed partial class ScreenshotPage : PageBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            InAppToast.MainWindow?.Warning(Lang.ImageViewWindow_UnableToDeleteTheFile, Lang.ImageViewWindow_InsufficientPermissionsOrTheFileIsInUse, 5000);
+            InAppToast.MainWindow?.Warning(
+                Lang.ImageViewWindow_UnableToDeleteTheFile,
+                Lang.ImageViewWindow_InsufficientPermissionsOrTheFileIsInUse,
+                5000
+            );
             _logger.LogError(ex, "Failed to delete image file");
         }
         catch (Exception ex)
@@ -635,6 +715,4 @@ public sealed partial class ScreenshotPage : PageBase
             _logger.LogError(ex, "Failed to delete image file");
         }
     }
-
-
 }

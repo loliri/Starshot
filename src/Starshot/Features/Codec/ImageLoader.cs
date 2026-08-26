@@ -1,3 +1,8 @@
+using System;
+using System.IO;
+using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Graphics.Canvas;
 using Starward.Codec.AVIF;
 using Starward.Codec.ICC;
@@ -6,11 +11,6 @@ using Starward.Codec.JpegXL.CMS;
 using Starward.Codec.JpegXL.Decode;
 using Starward.Codec.PNG;
 using Starward.Codec.UltraHdr;
-using System;
-using System.IO;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
 
@@ -18,10 +18,10 @@ namespace Starshot.Features.Codec;
 
 internal static class ImageLoader
 {
-
-
-
-    public static async Task<ImageInfo> LoadImageAsync(string filePath, CancellationToken cancellation = default)
+    public static async Task<ImageInfo> LoadImageAsync(
+        string filePath,
+        CancellationToken cancellation = default
+    )
     {
         ImageInfo info;
         string extension = Path.GetExtension(filePath).ToLowerInvariant();
@@ -47,9 +47,14 @@ internal static class ImageLoader
             info = new()
             {
                 ColorPrimaries = ColorPrimaries.BT709,
-                CanvasBitmap = await CanvasBitmap.LoadAsync(CanvasDevice.GetSharedDevice(), fs.AsRandomAccessStream()).AsTask(cancellation),
+                CanvasBitmap = await CanvasBitmap
+                    .LoadAsync(CanvasDevice.GetSharedDevice(), fs.AsRandomAccessStream())
+                    .AsTask(cancellation),
             };
-            info.HDR = info.CanvasBitmap.Format is DirectXPixelFormat.R16G16B16A16Float or DirectXPixelFormat.R32G32B32A32Float;
+            info.HDR =
+                info.CanvasBitmap.Format
+                    is DirectXPixelFormat.R16G16B16A16Float
+                        or DirectXPixelFormat.R32G32B32A32Float;
             return info;
         }
         if (info.ColorPrimaries is null || !info.ColorPrimaries.IsValid)
@@ -59,21 +64,44 @@ internal static class ImageLoader
         return info;
     }
 
-
-
-    private static async Task<ImageInfo> LoadAvifAsync(string path, CancellationToken cancellationToken = default)
+    private static async Task<ImageInfo> LoadAvifAsync(
+        string path,
+        CancellationToken cancellationToken = default
+    )
     {
-        using var decoder = avifDecoderLite.Create(await File.ReadAllBytesAsync(path, cancellationToken));
+        using var decoder = avifDecoderLite.Create(
+            await File.ReadAllBytesAsync(path, cancellationToken)
+        );
         int width = (int)decoder.Width;
         int height = (int)decoder.Height;
         uint depth = decoder.Depth > 8u ? 16u : 8u;
-        bool hdr10 = decoder.ColorPrimaries is avifColorPrimaries.BT2020 && decoder.TransferCharacteristics is avifTransferCharacteristics.PQ && depth == 16;
-        var pixelBytes = await decoder.GetAvifRGBPixelBytesAsync(depth, avifRGBFormat.RGBA, cancellationToken);
+        bool hdr10 =
+            decoder.ColorPrimaries is avifColorPrimaries.BT2020
+            && decoder.TransferCharacteristics is avifTransferCharacteristics.PQ
+            && depth == 16;
+        var pixelBytes = await decoder.GetAvifRGBPixelBytesAsync(
+            depth,
+            avifRGBFormat.RGBA,
+            cancellationToken
+        );
 
         if (hdr10)
         {
-            using var bitmap = CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), pixelBytes, width, height, DirectXPixelFormat.R16G16B16A16UIntNormalized);
-            var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.R16G16B16A16Float, CanvasAlphaMode.Premultiplied);
+            using var bitmap = CanvasBitmap.CreateFromBytes(
+                CanvasDevice.GetSharedDevice(),
+                pixelBytes,
+                width,
+                height,
+                DirectXPixelFormat.R16G16B16A16UIntNormalized
+            );
+            var renderTarget = new CanvasRenderTarget(
+                CanvasDevice.GetSharedDevice(),
+                width,
+                height,
+                96,
+                DirectXPixelFormat.R16G16B16A16Float,
+                CanvasAlphaMode.Premultiplied
+            );
             using var ds = renderTarget.CreateDrawingSession();
             var effect = new HDR10ToScRGBEffect
             {
@@ -110,7 +138,15 @@ internal static class ImageLoader
             }
             catch { }
 
-            var bitmap = CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), pixelBytes, width, height, depth == 8 ? DirectXPixelFormat.R8G8B8A8UIntNormalized : DirectXPixelFormat.R16G16B16A16UIntNormalized);
+            var bitmap = CanvasBitmap.CreateFromBytes(
+                CanvasDevice.GetSharedDevice(),
+                pixelBytes,
+                width,
+                height,
+                depth == 8
+                    ? DirectXPixelFormat.R8G8B8A8UIntNormalized
+                    : DirectXPixelFormat.R16G16B16A16UIntNormalized
+            );
             return new ImageInfo
             {
                 CanvasBitmap = bitmap,
@@ -121,8 +157,10 @@ internal static class ImageLoader
         }
     }
 
-
-    private static async Task<ImageInfo> LoadJxlAsync(string path, CancellationToken cancellation = default)
+    private static async Task<ImageInfo> LoadJxlAsync(
+        string path,
+        CancellationToken cancellation = default
+    )
     {
         using var decoder = JxlDecoderLite.Create(await File.ReadAllBytesAsync(path, cancellation));
         int width = (int)decoder.Width;
@@ -154,10 +192,22 @@ internal static class ImageLoader
                         JxlPrimaries.BT2100 => ColorPrimaries.BT2020,
                         JxlPrimaries.Custom => new ColorPrimaries
                         {
-                            Red = new Vector2((float)color.PrimariesRedXY.X, (float)color.PrimariesRedXY.Y),
-                            Green = new Vector2((float)color.PrimariesGreenXY.X, (float)color.PrimariesGreenXY.Y),
-                            Blue = new Vector2((float)color.PrimariesBlueXY.X, (float)color.PrimariesBlueXY.Y),
-                            White = new Vector2((float)color.WhitePointXY.X, (float)color.WhitePointXY.Y),
+                            Red = new Vector2(
+                                (float)color.PrimariesRedXY.X,
+                                (float)color.PrimariesRedXY.Y
+                            ),
+                            Green = new Vector2(
+                                (float)color.PrimariesGreenXY.X,
+                                (float)color.PrimariesGreenXY.Y
+                            ),
+                            Blue = new Vector2(
+                                (float)color.PrimariesBlueXY.X,
+                                (float)color.PrimariesBlueXY.Y
+                            ),
+                            White = new Vector2(
+                                (float)color.WhitePointXY.X,
+                                (float)color.WhitePointXY.Y
+                            ),
                         },
                         _ => ColorPrimaries.BT709,
                     };
@@ -168,16 +218,41 @@ internal static class ImageLoader
 
         if (pixelFormat.DataType is JxlDataType.UInt8)
         {
-            var pixelBytes = await decoder.GetJxlPixelBytesAsync(JxlPixelFormat.R8G8B8A8UInt, cancellation);
-            info.CanvasBitmap = CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), pixelBytes, width, height, DirectXPixelFormat.R8G8B8A8UIntNormalized);
+            var pixelBytes = await decoder.GetJxlPixelBytesAsync(
+                JxlPixelFormat.R8G8B8A8UInt,
+                cancellation
+            );
+            info.CanvasBitmap = CanvasBitmap.CreateFromBytes(
+                CanvasDevice.GetSharedDevice(),
+                pixelBytes,
+                width,
+                height,
+                DirectXPixelFormat.R8G8B8A8UIntNormalized
+            );
         }
         else if (pixelFormat.DataType is JxlDataType.UInt16)
         {
-            var pixelBytes = await decoder.GetJxlPixelBytesAsync(JxlPixelFormat.R16G16B16A16UInt, cancellation);
+            var pixelBytes = await decoder.GetJxlPixelBytesAsync(
+                JxlPixelFormat.R16G16B16A16UInt,
+                cancellation
+            );
             if (hdr10)
             {
-                using var bitmap = CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), pixelBytes, width, height, DirectXPixelFormat.R16G16B16A16UIntNormalized);
-                var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.R16G16B16A16Float, CanvasAlphaMode.Premultiplied);
+                using var bitmap = CanvasBitmap.CreateFromBytes(
+                    CanvasDevice.GetSharedDevice(),
+                    pixelBytes,
+                    width,
+                    height,
+                    DirectXPixelFormat.R16G16B16A16UIntNormalized
+                );
+                var renderTarget = new CanvasRenderTarget(
+                    CanvasDevice.GetSharedDevice(),
+                    width,
+                    height,
+                    96,
+                    DirectXPixelFormat.R16G16B16A16Float,
+                    CanvasAlphaMode.Premultiplied
+                );
                 using var ds = renderTarget.CreateDrawingSession();
                 var effect = new HDR10ToScRGBEffect
                 {
@@ -189,16 +264,38 @@ internal static class ImageLoader
             }
             else
             {
-                info.CanvasBitmap = CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), pixelBytes, width, height, DirectXPixelFormat.R16G16B16A16UIntNormalized);
+                info.CanvasBitmap = CanvasBitmap.CreateFromBytes(
+                    CanvasDevice.GetSharedDevice(),
+                    pixelBytes,
+                    width,
+                    height,
+                    DirectXPixelFormat.R16G16B16A16UIntNormalized
+                );
             }
         }
         else if (pixelFormat.DataType is JxlDataType.Float or JxlDataType.Float16)
         {
-            var pixelBytes = await decoder.GetJxlPixelBytesAsync(JxlPixelFormat.R16G16B16A16Float, cancellation);
+            var pixelBytes = await decoder.GetJxlPixelBytesAsync(
+                JxlPixelFormat.R16G16B16A16Float,
+                cancellation
+            );
             if (hdr10)
             {
-                using var bitmap = CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), pixelBytes, width, height, DirectXPixelFormat.R16G16B16A16Float);
-                var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96, DirectXPixelFormat.R16G16B16A16Float, CanvasAlphaMode.Premultiplied);
+                using var bitmap = CanvasBitmap.CreateFromBytes(
+                    CanvasDevice.GetSharedDevice(),
+                    pixelBytes,
+                    width,
+                    height,
+                    DirectXPixelFormat.R16G16B16A16Float
+                );
+                var renderTarget = new CanvasRenderTarget(
+                    CanvasDevice.GetSharedDevice(),
+                    width,
+                    height,
+                    96,
+                    DirectXPixelFormat.R16G16B16A16Float,
+                    CanvasAlphaMode.Premultiplied
+                );
                 using var ds = renderTarget.CreateDrawingSession();
                 var effect = new HDR10ToScRGBEffect
                 {
@@ -210,7 +307,13 @@ internal static class ImageLoader
             }
             else
             {
-                info.CanvasBitmap = CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), pixelBytes, width, height, DirectXPixelFormat.R16G16B16A16Float);
+                info.CanvasBitmap = CanvasBitmap.CreateFromBytes(
+                    CanvasDevice.GetSharedDevice(),
+                    pixelBytes,
+                    width,
+                    height,
+                    DirectXPixelFormat.R16G16B16A16Float
+                );
             }
         }
         else
@@ -220,8 +323,10 @@ internal static class ImageLoader
         return info;
     }
 
-
-    private static async Task<ImageInfo> LoadPngAsync(string path, CancellationToken cancellationToken = default)
+    private static async Task<ImageInfo> LoadPngAsync(
+        string path,
+        CancellationToken cancellationToken = default
+    )
     {
         var info = new ImageInfo();
         using var fs = File.OpenRead(path);
@@ -265,7 +370,7 @@ internal static class ImageLoader
                         Red = new Vector2(chrm.RedX, chrm.RedY),
                         Green = new Vector2(chrm.GreenX, chrm.GreenY),
                         Blue = new Vector2(chrm.BlueX, chrm.BlueY),
-                        White = new Vector2(chrm.WhitePointX, chrm.WhitePointY)
+                        White = new Vector2(chrm.WhitePointX, chrm.WhitePointY),
                     };
                     break;
                 }
@@ -277,8 +382,17 @@ internal static class ImageLoader
         fs.Position = 0;
         if (info.ColorPrimaries.Id == 9)
         {
-            using var bitmap = await CanvasBitmap.LoadAsync(CanvasDevice.GetSharedDevice(), fs.AsRandomAccessStream()).AsTask(cancellationToken);
-            var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height, 96, DirectXPixelFormat.R16G16B16A16Float, CanvasAlphaMode.Premultiplied);
+            using var bitmap = await CanvasBitmap
+                .LoadAsync(CanvasDevice.GetSharedDevice(), fs.AsRandomAccessStream())
+                .AsTask(cancellationToken);
+            var renderTarget = new CanvasRenderTarget(
+                CanvasDevice.GetSharedDevice(),
+                bitmap.SizeInPixels.Width,
+                bitmap.SizeInPixels.Height,
+                96,
+                DirectXPixelFormat.R16G16B16A16Float,
+                CanvasAlphaMode.Premultiplied
+            );
             using var ds = renderTarget.CreateDrawingSession();
             var effect = new HDR10ToScRGBEffect
             {
@@ -292,13 +406,17 @@ internal static class ImageLoader
         }
         else
         {
-            info.CanvasBitmap = await CanvasBitmap.LoadAsync(CanvasDevice.GetSharedDevice(), fs.AsRandomAccessStream()).AsTask(cancellationToken);
+            info.CanvasBitmap = await CanvasBitmap
+                .LoadAsync(CanvasDevice.GetSharedDevice(), fs.AsRandomAccessStream())
+                .AsTask(cancellationToken);
         }
         return info;
     }
 
-
-    private static async Task<ImageInfo> LoadJpegAsync(string path, CancellationToken cancellationToken = default)
+    private static async Task<ImageInfo> LoadJpegAsync(
+        string path,
+        CancellationToken cancellationToken = default
+    )
     {
         var info = new ImageInfo();
         byte[] bytes = await File.ReadAllBytesAsync(path, cancellationToken);
@@ -316,31 +434,43 @@ internal static class ImageLoader
             }
         }
         catch { }
-        info.CanvasBitmap = await CanvasBitmap.LoadAsync(CanvasDevice.GetSharedDevice(), new MemoryStream(bytes).AsRandomAccessStream()).AsTask(cancellationToken);
+        info.CanvasBitmap = await CanvasBitmap
+            .LoadAsync(
+                CanvasDevice.GetSharedDevice(),
+                new MemoryStream(bytes).AsRandomAccessStream()
+            )
+            .AsTask(cancellationToken);
         return info;
     }
 
-
-    private static async Task<byte[]> GetAvifRGBPixelBytesAsync(this avifDecoderLite decoder, uint depth, avifRGBFormat format, CancellationToken cancellationToken = default)
+    private static async Task<byte[]> GetAvifRGBPixelBytesAsync(
+        this avifDecoderLite decoder,
+        uint depth,
+        avifRGBFormat format,
+        CancellationToken cancellationToken = default
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return await Task.Run(() =>
-        {
-            using var image = decoder.GetNextImage();
-            using var rgb = image.ToRGBImage(depth, format);
-            return rgb.GetPixelBytes().ToArray();
-        }, cancellationToken);
+        return await Task.Run(
+            () =>
+            {
+                using var image = decoder.GetNextImage();
+                using var rgb = image.ToRGBImage(depth, format);
+                return rgb.GetPixelBytes().ToArray();
+            },
+            cancellationToken
+        );
     }
 
-
-
-    private static async Task<byte[]> GetJxlPixelBytesAsync(this JxlDecoderLite decoder, JxlPixelFormat pixelFormat, CancellationToken cancellationToken = default)
+    private static async Task<byte[]> GetJxlPixelBytesAsync(
+        this JxlDecoderLite decoder,
+        JxlPixelFormat pixelFormat,
+        CancellationToken cancellationToken = default
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
         return await Task.Run(() => decoder.GetPixelBytes(pixelFormat), cancellationToken);
     }
-
-
 
     public static async Task<(uint Width, uint Height)> GetImagePixelSizeAsync(string filePath)
     {
@@ -362,6 +492,4 @@ internal static class ImageLoader
             return (decoder.PixelWidth, decoder.PixelHeight);
         }
     }
-
-
 }

@@ -1,27 +1,25 @@
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.Windows.AppLifecycle;
-using Starshot.Features.ViewHost;
 using System;
 using System.Collections;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.Windows.AppLifecycle;
+using Starshot.Features.ViewHost;
 using Windows.UI;
 
 namespace Starshot;
 
 public partial class App : Application
 {
-
     private readonly DispatcherQueue _uiDispatcherQueue;
 
     private readonly Timer _gcTimer = new(TimeSpan.FromSeconds(60));
 
     public static new App Current => (App)Application.Current;
-
 
     public App()
     {
@@ -34,12 +32,13 @@ public partial class App : Application
         _gcTimer.Start();
     }
 
-
-    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    private void App_UnhandledException(
+        object sender,
+        Microsoft.UI.Xaml.UnhandledExceptionEventArgs e
+    )
     {
         Program.WriteCrashLog("App Crash", e.Exception);
     }
-
 
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs _)
     {
@@ -59,8 +58,9 @@ public partial class App : Application
         AppConfig.CheckAutoStartValidity();
         AppConfig.CheckTaskValidity();
 
-        bool startHidden = Environment.GetCommandLineArgs().Contains("--hide", StringComparer.OrdinalIgnoreCase)
-                           && AppConfig.EnableSystemTrayIcon;
+        bool startHidden =
+            Environment.GetCommandLineArgs().Contains("--hide", StringComparer.OrdinalIgnoreCase)
+            && AppConfig.EnableSystemTrayIcon;
 
         if (!startHidden)
         {
@@ -69,8 +69,6 @@ public partial class App : Application
         }
         EnsureSystemTray();
     }
-
-
 
     private AppInstance instance;
 
@@ -83,8 +81,6 @@ public partial class App : Application
 
     private SystemTrayWindow? m_SystemTrayWindow;
 
-
-
     public void EnsureSystemTray()
     {
         if (AppConfig.EnableSystemTrayIcon && m_SystemTrayWindow is null)
@@ -93,8 +89,6 @@ public partial class App : Application
         }
     }
 
-
-
     public void EnsureMainWindow()
     {
         m_MainWindow ??= new MainWindow();
@@ -102,14 +96,10 @@ public partial class App : Application
         m_MainWindow.Show();
     }
 
-
-
     private void AppInstance_Activated(object? sender, AppActivationArguments e)
     {
         _uiDispatcherQueue.TryEnqueue(EnsureMainWindow);
     }
-
-
 
     public new void Exit()
     {
@@ -121,7 +111,4 @@ public partial class App : Application
         m_MainWindow?.Close();
         Application.Current.Exit();
     }
-
-
-
 }

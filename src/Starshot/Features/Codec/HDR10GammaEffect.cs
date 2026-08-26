@@ -9,11 +9,9 @@ namespace Starshot.Features.Codec;
 
 internal partial class ScRGBToHDR10Effect : CanvasEffect
 {
-
     public IGraphicsEffectSource Source { get; set; }
 
     public CanvasBufferPrecision? BufferPrecision { get; set; }
-
 
     protected override void BuildEffectGraph(CanvasEffectGraph effectGraph)
     {
@@ -32,21 +30,30 @@ internal partial class ScRGBToHDR10Effect : CanvasEffect
         effectGraph.RegisterOutputNode(pqEffect);
     }
 
-
-    protected override void ConfigureEffectGraph(CanvasEffectGraph effectGraph)
-    {
-
-    }
-
-
+    protected override void ConfigureEffectGraph(CanvasEffectGraph effectGraph) { }
 
     private static Matrix5x4 BT709ToBT2020ColorMatrix = new(
-        0.6284037f, 0.0644736f, 0.0164828f, 0f,
-        0.3298326f, 0.9171785f, 0.0880559f, 0f,
-        0.0433918f, 0.0110605f, 0.8955600f, 0f,
-        0f, 0f, 0f, 1f,
-        0f, 0f, 0f, 0f);
-
+        0.6284037f,
+        0.0644736f,
+        0.0164828f,
+        0f,
+        0.3298326f,
+        0.9171785f,
+        0.0880559f,
+        0f,
+        0.0433918f,
+        0.0110605f,
+        0.8955600f,
+        0f,
+        0f,
+        0f,
+        0f,
+        1f,
+        0f,
+        0f,
+        0f,
+        0f
+    );
 
     [D2DInputCount(1)]
     [D2DInputSimple(0)]
@@ -54,7 +61,6 @@ internal partial class ScRGBToHDR10Effect : CanvasEffect
     [D2DGeneratedPixelShaderDescriptor]
     internal readonly partial struct PQOETFShader(float maxLevel = 10000) : ID2D1PixelShader
     {
-
         const float c1 = 107f / 128f;
         const float c2 = 2413f / 128f;
         const float c3 = 2392f / 128f;
@@ -71,20 +77,14 @@ internal partial class ScRGBToHDR10Effect : CanvasEffect
             rgb = Hlsl.Pow(v1 / v2, m);
             return new float4(Hlsl.Saturate(rgb), color.A);
         }
-
     }
-
 }
-
-
 
 internal partial class HDR10ToScRGBEffect : CanvasEffect
 {
-
     public IGraphicsEffectSource Source { get; set; }
 
     public CanvasBufferPrecision? BufferPrecision { get; set; }
-
 
     protected override void BuildEffectGraph(CanvasEffectGraph effectGraph)
     {
@@ -103,21 +103,30 @@ internal partial class HDR10ToScRGBEffect : CanvasEffect
         effectGraph.RegisterOutputNode(colorEffect);
     }
 
-
-    protected override void ConfigureEffectGraph(CanvasEffectGraph effectGraph)
-    {
-
-    }
-
-
+    protected override void ConfigureEffectGraph(CanvasEffectGraph effectGraph) { }
 
     private static Matrix5x4 BT2020ToBT709ColorMatrix = new(
-         1.6535364f, -0.1160068f, -0.0190270f, 0f,
-        -0.5876440f, 1.1328219f, -0.1005690f, 0f,
-        -0.0728597f, -0.0083700f, 1.1187837f, 0f,
-        0f, 0f, 0f, 1f,
-        0f, 0f, 0f, 0f);
-
+        1.6535364f,
+        -0.1160068f,
+        -0.0190270f,
+        0f,
+        -0.5876440f,
+        1.1328219f,
+        -0.1005690f,
+        0f,
+        -0.0728597f,
+        -0.0083700f,
+        1.1187837f,
+        0f,
+        0f,
+        0f,
+        0f,
+        1f,
+        0f,
+        0f,
+        0f,
+        0f
+    );
 
     [D2DInputCount(1)]
     [D2DInputSimple(0)]
@@ -125,7 +134,6 @@ internal partial class HDR10ToScRGBEffect : CanvasEffect
     [D2DGeneratedPixelShaderDescriptor]
     internal readonly partial struct PQEOTFShader(float maxLevel = 10000) : ID2D1PixelShader
     {
-
         const float c1 = 107f / 128f;
         const float c2 = 2413f / 128f;
         const float c3 = 2392f / 128f;
@@ -142,7 +150,5 @@ internal partial class HDR10ToScRGBEffect : CanvasEffect
             rgb = maxLevel * Hlsl.Pow(Hlsl.Abs(v1 / v2), 1 / n);
             return new float4(rgb, color.A);
         }
-
     }
-
 }

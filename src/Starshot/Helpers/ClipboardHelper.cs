@@ -11,77 +11,71 @@ namespace Starshot.Helpers;
 
 internal static class ClipboardHelper
 {
-
     public static void SetText(string? value)
     {
         if (!string.IsNullOrWhiteSpace(value))
         {
-            var data = new DataPackage
-            {
-                RequestedOperation = DataPackageOperation.Copy
-            };
+            var data = new DataPackage { RequestedOperation = DataPackageOperation.Copy };
             data.SetText(value);
             Clipboard.SetContent(data);
             Clipboard.Flush();
         }
     }
 
-
     public static void SetBitmap(IStorageFile file)
     {
         var value = RandomAccessStreamReference.CreateFromFile(file);
-        var data = new DataPackage
-        {
-            RequestedOperation = DataPackageOperation.Copy
-        };
+        var data = new DataPackage { RequestedOperation = DataPackageOperation.Copy };
         data.SetBitmap(value);
         Clipboard.SetContent(data);
     }
 
-
     public static void SetStorageItems(DataPackageOperation operation, params IStorageItem[] items)
     {
-        var data = new DataPackage
-        {
-            RequestedOperation = operation,
-        };
+        var data = new DataPackage { RequestedOperation = operation };
         data.SetStorageItems(items);
         Clipboard.SetContent(data);
     }
-
-
 
     // ===== Win32 剪贴板（CF_DIB）。绕过 WinRT DataPackage，任意线程可调，最可靠。 =====
 
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool OpenClipboard(IntPtr hWndNewOwner);
+
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool EmptyClipboard();
+
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
+
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool CloseClipboard();
+
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr GlobalLock(IntPtr hMem);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GlobalUnlock(IntPtr hMem);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr GlobalFree(IntPtr hMem);
+
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr GetClipboardData(uint uFormat);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern UIntPtr GlobalSize(IntPtr hMem);
 
     private const uint GMEM_MOVEABLE = 0x0002;
     private const uint CF_DIB = 8;
     private const uint CF_HDROP = 15;
-
 
     /// <summary>
     /// 把 BGRA top-down 像素以 CF_DIB 放进剪贴板（BITMAPINFOHEADER + 倒序行成 bottom-up）。
@@ -95,22 +89,27 @@ internal static class ClipboardHelper
         int total = headerSize + pixelBytes;
 
         IntPtr hMem = GlobalAlloc(GMEM_MOVEABLE, (UIntPtr)total);
-        if (hMem == IntPtr.Zero) return false;
+        if (hMem == IntPtr.Zero)
+            return false;
         IntPtr ptr = GlobalLock(hMem);
-        if (ptr == IntPtr.Zero) { GlobalFree(hMem); return false; }
+        if (ptr == IntPtr.Zero)
+        {
+            GlobalFree(hMem);
+            return false;
+        }
 
         // BITMAPINFOHEADER
-        Marshal.WriteInt32(ptr, 0, headerSize);       // biSize
-        Marshal.WriteInt32(ptr, 4, width);            // biWidth
-        Marshal.WriteInt32(ptr, 8, height);           // biHeight（正=bottom-up）
-        Marshal.WriteInt16(ptr, 12, (short)1);        // biPlanes
-        Marshal.WriteInt16(ptr, 14, (short)32);       // biBitCount
-        Marshal.WriteInt32(ptr, 16, 0);               // biCompression = BI_RGB
-        Marshal.WriteInt32(ptr, 20, pixelBytes);      // biSizeImage
-        Marshal.WriteInt32(ptr, 24, 0);               // biXPelsPerMeter
-        Marshal.WriteInt32(ptr, 28, 0);               // biYPelsPerMeter
-        Marshal.WriteInt32(ptr, 32, 0);               // biClrUsed
-        Marshal.WriteInt32(ptr, 36, 0);               // biClrImportant
+        Marshal.WriteInt32(ptr, 0, headerSize); // biSize
+        Marshal.WriteInt32(ptr, 4, width); // biWidth
+        Marshal.WriteInt32(ptr, 8, height); // biHeight（正=bottom-up）
+        Marshal.WriteInt16(ptr, 12, (short)1); // biPlanes
+        Marshal.WriteInt16(ptr, 14, (short)32); // biBitCount
+        Marshal.WriteInt32(ptr, 16, 0); // biCompression = BI_RGB
+        Marshal.WriteInt32(ptr, 20, pixelBytes); // biSizeImage
+        Marshal.WriteInt32(ptr, 24, 0); // biXPelsPerMeter
+        Marshal.WriteInt32(ptr, 28, 0); // biYPelsPerMeter
+        Marshal.WriteInt32(ptr, 32, 0); // biClrUsed
+        Marshal.WriteInt32(ptr, 36, 0); // biClrImportant
 
         // top-down 像素 → bottom-up：从最后一行往前拷
         IntPtr rowPtr = ptr + headerSize;
@@ -129,7 +128,11 @@ internal static class ClipboardHelper
                 EmptyClipboard();
                 IntPtr res = SetClipboardData(CF_DIB, hMem);
                 CloseClipboard();
-                if (res != IntPtr.Zero) { success = true; break; } // 系统接管 hMem
+                if (res != IntPtr.Zero)
+                {
+                    success = true;
+                    break;
+                } // 系统接管 hMem
             }
             Thread.Sleep(20);
         }
@@ -139,7 +142,6 @@ internal static class ClipboardHelper
         }
         return success;
     }
-
 
     /// <summary>
     /// 读当前剪贴板里的图像，返回可重复打开的流引用；非图像/空/失败一律返回 null，绝不抛
@@ -178,7 +180,6 @@ internal static class ClipboardHelper
         return null;
     }
 
-
     private static byte[]? TryGetCfDibBytes()
     {
         for (int i = 0; i < 3; i++)
@@ -188,9 +189,11 @@ internal static class ClipboardHelper
                 try
                 {
                     IntPtr h = GetClipboardData(CF_DIB);
-                    if (h == IntPtr.Zero) return null;
+                    if (h == IntPtr.Zero)
+                        return null;
                     IntPtr ptr = GlobalLock(h);
-                    if (ptr == IntPtr.Zero) return null;
+                    if (ptr == IntPtr.Zero)
+                        return null;
                     try
                     {
                         int size = checked((int)GlobalSize(h));
@@ -213,22 +216,24 @@ internal static class ClipboardHelper
         return null;
     }
 
-
     /// <summary>CF_DIB（32bpp BI_RGB，本 app 的写法）→ PNG 内存流；其他位深/压缩一律放弃返回 null</summary>
     private static async Task<InMemoryRandomAccessStream?> DibToPngStreamAsync(byte[] dib)
     {
-        if (dib.Length < 40) return null;
+        if (dib.Length < 40)
+            return null;
         int headerSize = BitConverter.ToInt32(dib, 0);
         int width = BitConverter.ToInt32(dib, 4);
         int heightRaw = BitConverter.ToInt32(dib, 8);
         short bitCount = BitConverter.ToInt16(dib, 14);
         int compression = BitConverter.ToInt32(dib, 16);
-        if (width <= 0 || heightRaw == 0 || bitCount != 32 || compression != 0 || headerSize < 40) return null;
+        if (width <= 0 || heightRaw == 0 || bitCount != 32 || compression != 0 || headerSize < 40)
+            return null;
         bool bottomUp = heightRaw > 0;
         int height = Math.Abs(heightRaw);
         int rowBytes = width * 4;
         int pixelLen = rowBytes * height;
-        if (dib.Length < headerSize + pixelLen) return null;
+        if (dib.Length < headerSize + pixelLen)
+            return null;
 
         // bottom-up 行序翻成 top-down
         byte[] bgra = new byte[pixelLen];
@@ -236,7 +241,13 @@ internal static class ClipboardHelper
         {
             for (int y = 0; y < height; y++)
             {
-                System.Buffer.BlockCopy(dib, headerSize + (height - 1 - y) * rowBytes, bgra, y * rowBytes, rowBytes);
+                System.Buffer.BlockCopy(
+                    dib,
+                    headerSize + (height - 1 - y) * rowBytes,
+                    bgra,
+                    y * rowBytes,
+                    rowBytes
+                );
             }
         }
         else
@@ -246,11 +257,18 @@ internal static class ClipboardHelper
 
         var stream = new InMemoryRandomAccessStream();
         var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
-        encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, (uint)width, (uint)height, 96, 96, bgra);
+        encoder.SetPixelData(
+            BitmapPixelFormat.Bgra8,
+            BitmapAlphaMode.Premultiplied,
+            (uint)width,
+            (uint)height,
+            96,
+            96,
+            bgra
+        );
         await encoder.FlushAsync();
         return stream;
     }
-
 
     /// <summary>
     /// 把文件复制到剪贴板（Win32 CF_HDROP，文件列表）。任意线程可调，被占用时重试。
@@ -258,7 +276,8 @@ internal static class ClipboardHelper
     /// </summary>
     public static void SetFiles(params string[] paths)
     {
-        if (paths == null || paths.Length == 0) return;
+        if (paths == null || paths.Length == 0)
+            return;
 
         // DROPFILES(20B) + 各路径(逐个 \0 结束) + 末尾额外 \0，Unicode
         var sb = new System.Text.StringBuilder();
@@ -273,16 +292,21 @@ internal static class ClipboardHelper
         int total = headerSize + blob.Length * 2;
 
         IntPtr hMem = GlobalAlloc(GMEM_MOVEABLE, (UIntPtr)total);
-        if (hMem == IntPtr.Zero) return;
+        if (hMem == IntPtr.Zero)
+            return;
         IntPtr ptr = GlobalLock(hMem);
-        if (ptr == IntPtr.Zero) { GlobalFree(hMem); return; }
+        if (ptr == IntPtr.Zero)
+        {
+            GlobalFree(hMem);
+            return;
+        }
 
         // DROPFILES
         Marshal.WriteInt32(ptr, 0, headerSize); // pFiles = 偏移到文件列表
-        Marshal.WriteInt32(ptr, 4, 0);          // pt.x
-        Marshal.WriteInt32(ptr, 8, 0);          // pt.y
-        Marshal.WriteInt32(ptr, 12, 0);         // fNC = FALSE
-        Marshal.WriteInt32(ptr, 16, 1);         // fWide = TRUE（Unicode）
+        Marshal.WriteInt32(ptr, 4, 0); // pt.x
+        Marshal.WriteInt32(ptr, 8, 0); // pt.y
+        Marshal.WriteInt32(ptr, 12, 0); // fNC = FALSE
+        Marshal.WriteInt32(ptr, 16, 1); // fWide = TRUE（Unicode）
         char[] chars = blob.ToCharArray();
         Marshal.Copy(chars, 0, ptr + headerSize, chars.Length);
         GlobalUnlock(hMem);
@@ -295,7 +319,11 @@ internal static class ClipboardHelper
                 EmptyClipboard();
                 IntPtr res = SetClipboardData(CF_HDROP, hMem);
                 CloseClipboard();
-                if (res != IntPtr.Zero) { success = true; break; }
+                if (res != IntPtr.Zero)
+                {
+                    success = true;
+                    break;
+                }
             }
             Thread.Sleep(20);
         }
@@ -304,6 +332,4 @@ internal static class ClipboardHelper
             GlobalFree(hMem);
         }
     }
-
-
 }

@@ -1,45 +1,37 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Windows.System;
 using Windows.UI.Core;
-
 
 namespace Starshot.Features.Setting;
 
 [INotifyPropertyChanged]
 public sealed partial class HotkeyInput : UserControl
 {
-
-
     public HotkeyInput()
     {
         InitializeComponent();
         this.Unloaded += HotkeyInput_Unloaded;
     }
 
-
-
     public nint WindowHandle { get; set; }
-
 
     public int HotkeyId { get; set; }
 
-
     public VirtualKeyModifiers Modifiers { get; private set; }
-
 
     public VirtualKey Key { get; private set; }
 
-
     public HoykeyInputState State
     {
-        get; set
+        get;
+        set
         {
             field = value;
             if (value is HoykeyInputState.None)
@@ -98,14 +90,11 @@ public sealed partial class HotkeyInput : UserControl
         }
     }
 
-
-
     public event EventHandler<HotkeyInputEventArg> HotkeyEditing;
 
     public event EventHandler<HotkeyEditFinishedEventArg> HotkeyEditFinished;
 
     public event EventHandler<HotkeyInputEventArg> HotkeyDeleted;
-
 
     public bool SetHotkey(VirtualKeyModifiers modifiers, VirtualKey key)
     {
@@ -123,18 +112,22 @@ public sealed partial class HotkeyInput : UserControl
         }
     }
 
-
     public bool SetHotkey(uint fsModifiers, uint key)
     {
         return SetHotkey((VirtualKeyModifiers)SwitchModifiesBit01(fsModifiers), (VirtualKey)key);
     }
 
+    public string? EditingText
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
 
-    public string? EditingText { get; private set => SetProperty(ref field, value); }
-
-
-    public string? HotkeyText { get; private set => SetProperty(ref field, value); }
-
+    public string? HotkeyText
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
 
     private void Button_EditHotkey_Click(object sender, RoutedEventArgs e)
     {
@@ -146,7 +139,6 @@ public sealed partial class HotkeyInput : UserControl
         UpdateText();
     }
 
-
     private void Grid_EditHotkey_LostFocus(object sender, RoutedEventArgs e)
     {
         _pressedKeys.Clear();
@@ -155,7 +147,6 @@ public sealed partial class HotkeyInput : UserControl
             OnHotkeyEditFinished();
         }
     }
-
 
     private void Grid_EditHotkey_KeyDown(object sender, KeyRoutedEventArgs e)
     {
@@ -171,7 +162,14 @@ public sealed partial class HotkeyInput : UserControl
                 _pressedKeys.Add(e.Key);
             }
             _editingModifiers = GetKeyModifiers();
-            if (e.Key is VirtualKey.Control or VirtualKey.Shift or VirtualKey.Menu or VirtualKey.LeftWindows or VirtualKey.RightWindows)
+            if (
+                e.Key
+                is VirtualKey.Control
+                    or VirtualKey.Shift
+                    or VirtualKey.Menu
+                    or VirtualKey.LeftWindows
+                    or VirtualKey.RightWindows
+            )
             {
                 _editingKey = VirtualKey.None;
             }
@@ -187,7 +185,6 @@ public sealed partial class HotkeyInput : UserControl
         }
         catch { }
     }
-
 
     private void Grid_EditHotkey_KeyUp(object sender, KeyRoutedEventArgs e)
     {
@@ -206,14 +203,22 @@ public sealed partial class HotkeyInput : UserControl
                 return;
             }
 
-            if (e.Key is VirtualKey.Control or VirtualKey.Shift or VirtualKey.Menu or VirtualKey.LeftWindows or VirtualKey.RightWindows)
+            if (
+                e.Key
+                is VirtualKey.Control
+                    or VirtualKey.Shift
+                    or VirtualKey.Menu
+                    or VirtualKey.LeftWindows
+                    or VirtualKey.RightWindows
+            )
             {
                 _editingModifiers &= e.Key switch
                 {
                     VirtualKey.Control => ~VirtualKeyModifiers.Control,
                     VirtualKey.Shift => ~VirtualKeyModifiers.Shift,
                     VirtualKey.Menu => ~VirtualKeyModifiers.Menu,
-                    VirtualKey.LeftWindows or VirtualKey.RightWindows => ~VirtualKeyModifiers.Windows,
+                    VirtualKey.LeftWindows or VirtualKey.RightWindows =>
+                        ~VirtualKeyModifiers.Windows,
                     _ => ~VirtualKeyModifiers.None,
                 };
             }
@@ -226,7 +231,6 @@ public sealed partial class HotkeyInput : UserControl
         catch { }
     }
 
-
     private void Button_DeleteHotkey_Click(object sender, RoutedEventArgs e)
     {
         Modifiers = VirtualKeyModifiers.None;
@@ -235,16 +239,18 @@ public sealed partial class HotkeyInput : UserControl
         _editingKey = VirtualKey.None;
         UpdateText();
         State = HoykeyInputState.None;
-        HotkeyDeleted?.Invoke(this, new HotkeyInputEventArg
-        {
-            WindowHandle = WindowHandle,
-            HotkeyId = HotkeyId,
-            Modifiers = 0,
-            Key = 0,
-            fsModifiers = 0,
-        });
+        HotkeyDeleted?.Invoke(
+            this,
+            new HotkeyInputEventArg
+            {
+                WindowHandle = WindowHandle,
+                HotkeyId = HotkeyId,
+                Modifiers = 0,
+                Key = 0,
+                fsModifiers = 0,
+            }
+        );
     }
-
 
     private void HotkeyInput_Unloaded(object sender, RoutedEventArgs e)
     {
@@ -256,21 +262,18 @@ public sealed partial class HotkeyInput : UserControl
         Button_DeleteHotkey.Click -= Button_DeleteHotkey_Click;
     }
 
-
-
     private List<VirtualKey> _pressedKeys = new();
 
     private VirtualKeyModifiers _editingModifiers;
 
     private VirtualKey _editingKey;
 
-
     private void UpdateText()
     {
         HotkeyText = GetHotkeyText(Modifiers, Key);
-        EditingText = GetHotkeyText(_editingModifiers, _editingKey) ?? Lang.HotkeyInput_PressTheShortcutKeys;
+        EditingText =
+            GetHotkeyText(_editingModifiers, _editingKey) ?? Lang.HotkeyInput_PressTheShortcutKeys;
     }
-
 
     private static string? GetHotkeyText(VirtualKeyModifiers modifiers, VirtualKey key)
     {
@@ -309,12 +312,13 @@ public sealed partial class HotkeyInput : UserControl
         }
     }
 
-
     public static string? GetHotkeyText(uint fsModifiers, uint key)
     {
-        return GetHotkeyText((VirtualKeyModifiers)SwitchModifiesBit01(fsModifiers), (VirtualKey)key);
+        return GetHotkeyText(
+            (VirtualKeyModifiers)SwitchModifiesBit01(fsModifiers),
+            (VirtualKey)key
+        );
     }
-
 
     private static bool IsHotkeyAvaliable(VirtualKeyModifiers modifiers, VirtualKey key)
     {
@@ -322,60 +326,83 @@ public sealed partial class HotkeyInput : UserControl
         {
             return true;
         }
-        else if ((modifiers.HasFlag(VirtualKeyModifiers.Control)
-                  || modifiers.HasFlag(VirtualKeyModifiers.Menu)
-                  || modifiers.HasFlag(VirtualKeyModifiers.Shift)
-                  || modifiers.HasFlag(VirtualKeyModifiers.Windows))
-                  && AvaliableKeyDict.ContainsKey(key))
+        else if (
+            (
+                modifiers.HasFlag(VirtualKeyModifiers.Control)
+                || modifiers.HasFlag(VirtualKeyModifiers.Menu)
+                || modifiers.HasFlag(VirtualKeyModifiers.Shift)
+                || modifiers.HasFlag(VirtualKeyModifiers.Windows)
+            ) && AvaliableKeyDict.ContainsKey(key)
+        )
         {
             return true;
         }
         return false;
     }
 
-
     public static bool IsHotkeyAvaliable(uint fsModifiers, uint key)
     {
-        return IsHotkeyAvaliable((VirtualKeyModifiers)SwitchModifiesBit01(fsModifiers), (VirtualKey)key);
+        return IsHotkeyAvaliable(
+            (VirtualKeyModifiers)SwitchModifiesBit01(fsModifiers),
+            (VirtualKey)key
+        );
     }
-
 
     private static VirtualKeyModifiers GetKeyModifiers()
     {
         VirtualKeyModifiers modifiers = 0;
-        if (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down))
+        if (
+            InputKeyboardSource
+                .GetKeyStateForCurrentThread(VirtualKey.Control)
+                .HasFlag(CoreVirtualKeyStates.Down)
+        )
         {
             modifiers |= VirtualKeyModifiers.Control;
         }
-        if (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down))
+        if (
+            InputKeyboardSource
+                .GetKeyStateForCurrentThread(VirtualKey.Shift)
+                .HasFlag(CoreVirtualKeyStates.Down)
+        )
         {
             modifiers |= VirtualKeyModifiers.Shift;
         }
-        if (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Menu).HasFlag(CoreVirtualKeyStates.Down))
+        if (
+            InputKeyboardSource
+                .GetKeyStateForCurrentThread(VirtualKey.Menu)
+                .HasFlag(CoreVirtualKeyStates.Down)
+        )
         {
             modifiers |= VirtualKeyModifiers.Menu;
         }
-        if (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.LeftWindows).HasFlag(CoreVirtualKeyStates.Down)
-            || InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.RightWindows).HasFlag(CoreVirtualKeyStates.Down))
+        if (
+            InputKeyboardSource
+                .GetKeyStateForCurrentThread(VirtualKey.LeftWindows)
+                .HasFlag(CoreVirtualKeyStates.Down)
+            || InputKeyboardSource
+                .GetKeyStateForCurrentThread(VirtualKey.RightWindows)
+                .HasFlag(CoreVirtualKeyStates.Down)
+        )
         {
             modifiers |= VirtualKeyModifiers.Windows;
         }
         return modifiers;
     }
 
-
     private void OnHotkeyEditing()
     {
-        HotkeyEditing?.Invoke(this, new HotkeyInputEventArg
-        {
-            WindowHandle = WindowHandle,
-            HotkeyId = HotkeyId,
-            Modifiers = Modifiers,
-            Key = Key,
-            fsModifiers = SwitchModifiesBit01((uint)Modifiers),
-        });
+        HotkeyEditing?.Invoke(
+            this,
+            new HotkeyInputEventArg
+            {
+                WindowHandle = WindowHandle,
+                HotkeyId = HotkeyId,
+                Modifiers = Modifiers,
+                Key = Key,
+                fsModifiers = SwitchModifiesBit01((uint)Modifiers),
+            }
+        );
     }
-
 
     private void OnHotkeyEditFinished()
     {
@@ -413,9 +440,7 @@ public sealed partial class HotkeyInput : UserControl
             State = HoykeyInputState.None;
             HotkeyEditFinished?.Invoke(this, e);
         }
-
     }
-
 
     private static uint SwitchModifiesBit01(uint modifiers)
     {
@@ -424,7 +449,6 @@ public sealed partial class HotkeyInput : UserControl
         uint mod = (uint)(modifiers & ~0b11);
         return mod | (bit0 << 1) | (bit1 >> 1);
     }
-
 
     public static readonly Dictionary<VirtualKey, string> AvaliableKeyDict = new()
     {
@@ -522,10 +546,7 @@ public sealed partial class HotkeyInput : UserControl
         [(VirtualKey)190] = ".",
         [(VirtualKey)191] = "/",
     };
-
 }
-
-
 
 public enum HoykeyInputState
 {
@@ -534,7 +555,6 @@ public enum HoykeyInputState
     Success = 2,
     Warning = 3,
 }
-
 
 public class HotkeyInputEventArg : EventArgs
 {
@@ -548,8 +568,6 @@ public class HotkeyInputEventArg : EventArgs
 
     public required uint fsModifiers { get; init; }
 }
-
-
 
 public class HotkeyEditFinishedEventArg : HotkeyInputEventArg
 {

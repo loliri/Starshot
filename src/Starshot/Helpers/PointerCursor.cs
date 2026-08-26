@@ -1,13 +1,18 @@
-﻿using Microsoft.UI.Input;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
-using System.Runtime.CompilerServices;
 
 namespace Starshot.Helpers;
 
 public class PointerCursor : DependencyObject
 {
     public static readonly DependencyProperty CursorShapeProperty =
-        DependencyProperty.RegisterAttached("CursorShape", typeof(InputSystemCursorShape), typeof(PointerCursor), new PropertyMetadata(default));
+        DependencyProperty.RegisterAttached(
+            "CursorShape",
+            typeof(InputSystemCursorShape),
+            typeof(PointerCursor),
+            new PropertyMetadata(default)
+        );
 
     public static void SetCursorShape(UIElement element, InputSystemCursorShape value)
     {

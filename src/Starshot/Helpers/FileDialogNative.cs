@@ -9,32 +9,29 @@ static class FileDialogNative
     [ComImport]
     [Guid(IIDGuid.IFileOpenDialog)]
     [CoClass(typeof(FileOpenDialogRCW))]
-    internal interface NativeFileOpenDialog : IFileOpenDialog
-    { }
+    internal interface NativeFileOpenDialog : IFileOpenDialog { }
 
     [ComImport]
     [Guid(IIDGuid.IFileSaveDialog)]
     [CoClass(typeof(FileSaveDialogRCW))]
-    internal interface NativeFileSaveDialog : IFileSaveDialog
-    { }
+    internal interface NativeFileSaveDialog : IFileSaveDialog { }
 
     [ComImport]
     [ClassInterface(ClassInterfaceType.None)]
     [TypeLibType(TypeLibTypeFlags.FCanCreate)]
     [Guid(CLSIDGuid.FileOpenDialog)]
-    internal class FileOpenDialogRCW
-    { }
+    internal class FileOpenDialogRCW { }
 
     [ComImport]
     [ClassInterface(ClassInterfaceType.None)]
     [TypeLibType(TypeLibTypeFlags.FCanCreate)]
     [Guid(CLSIDGuid.FileSaveDialog)]
-    internal class FileSaveDialogRCW
-    { }
+    internal class FileSaveDialogRCW { }
 
     internal class IIDGuid
     {
         private IIDGuid() { } // Avoid FxCop violation AvoidUninstantiatedInternalClasses
+
         // IID GUID strings for relevant COM interfaces
         internal const string IModalWindow = "b4db1657-70d7-485e-8e3e-6fcb5a5c1802";
         internal const string IFileDialog = "42f85136-db7e-439c-85f1-e4075d135fc8";
@@ -48,6 +45,7 @@ static class FileDialogNative
     internal class CLSIDGuid
     {
         private CLSIDGuid() { } // Avoid FxCop violation AvoidUninstantiatedInternalClasses
+
         internal const string FileOpenDialog = "DC1C5A9C-E88A-4dde-A5A1-60F82A20AEF7";
         internal const string FileSaveDialog = "C0B4E2F3-BA21-4773-8DBA-335EC946EB8B";
     }
@@ -57,7 +55,6 @@ static class FileDialogNative
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IModalWindow
     {
-
         [PreserveSig]
         int Show([In] nint parent);
     }
@@ -76,13 +73,26 @@ static class FileDialogNative
     {
         // Not supported: IBindCtx
 
-        void BindToHandler([In, MarshalAs(UnmanagedType.Interface)] nint pbc, [In] ref Guid rbhid, [In] ref Guid riid, out nint ppvOut);
+        void BindToHandler(
+            [In, MarshalAs(UnmanagedType.Interface)] nint pbc,
+            [In] ref Guid rbhid,
+            [In] ref Guid riid,
+            out nint ppvOut
+        );
 
         void GetPropertyStore([In] int Flags, [In] ref Guid riid, out nint ppv);
 
-        void GetPropertyDescriptionList([In] ref PROPERTYKEY keyType, [In] ref Guid riid, out nint ppv);
+        void GetPropertyDescriptionList(
+            [In] ref PROPERTYKEY keyType,
+            [In] ref Guid riid,
+            out nint ppv
+        );
 
-        void GetAttributes([In] SIATTRIBFLAGS dwAttribFlags, [In] uint sfgaoMask, out uint psfgaoAttribs);
+        void GetAttributes(
+            [In] SIATTRIBFLAGS dwAttribFlags,
+            [In] uint sfgaoMask,
+            out uint psfgaoAttribs
+        );
 
         void GetCount(out uint pdwNumItems);
 
@@ -106,13 +116,19 @@ static class FileDialogNative
         [PreserveSig]
         int Show([In] nint parent);
 
-        void SetFileTypes([In] uint cFileTypes, [In][MarshalAs(UnmanagedType.LPArray)] COMDLG_FILTERSPEC[] rgFilterSpec);
+        void SetFileTypes(
+            [In] uint cFileTypes,
+            [In] [MarshalAs(UnmanagedType.LPArray)] COMDLG_FILTERSPEC[] rgFilterSpec
+        );
 
         void SetFileTypeIndex([In] uint iFileType);
 
         void GetFileTypeIndex(out uint piFileType);
 
-        void Advise([In, MarshalAs(UnmanagedType.Interface)] IFileDialogEvents pfde, out uint pdwCookie);
+        void Advise(
+            [In, MarshalAs(UnmanagedType.Interface)] IFileDialogEvents pfde,
+            out uint pdwCookie
+        );
 
         void Unadvise([In] uint dwCookie);
 
@@ -167,7 +183,10 @@ static class FileDialogNative
 
         void GetFileTypeIndex(out uint piFileType);
 
-        void Advise([In, MarshalAs(UnmanagedType.Interface)] IFileDialogEvents pfde, out uint pdwCookie);
+        void Advise(
+            [In, MarshalAs(UnmanagedType.Interface)] IFileDialogEvents pfde,
+            out uint pdwCookie
+        );
 
         void Unadvise([In] uint dwCookie);
 
@@ -195,7 +214,10 @@ static class FileDialogNative
 
         void GetResult([MarshalAs(UnmanagedType.Interface)] out IShellItem ppsi);
 
-        void AddPlace([In, MarshalAs(UnmanagedType.Interface)] IShellItem psi, FileDialogCustomPlace fdcp);
+        void AddPlace(
+            [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi,
+            FileDialogCustomPlace fdcp
+        );
 
         void SetDefaultExtension([In, MarshalAs(UnmanagedType.LPWStr)] string pszDefaultExtension);
 
@@ -212,9 +234,11 @@ static class FileDialogNative
         void GetSelectedItems([MarshalAs(UnmanagedType.Interface)] out IShellItemArray ppsai);
     }
 
-    [ComImport(),
-    Guid(IIDGuid.IFileSaveDialog),
-    InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [
+        ComImport(),
+        Guid(IIDGuid.IFileSaveDialog),
+        InterfaceType(ComInterfaceType.InterfaceIsIUnknown)
+    ]
     internal interface IFileSaveDialog : IFileDialog
     {
         [PreserveSig]
@@ -226,7 +250,10 @@ static class FileDialogNative
 
         void GetFileTypeIndex(out uint piFileType);
 
-        void Advise([In, MarshalAs(UnmanagedType.Interface)] IFileDialogEvents pfde, out uint pdwCookie);
+        void Advise(
+            [In, MarshalAs(UnmanagedType.Interface)] IFileDialogEvents pfde,
+            out uint pdwCookie
+        );
 
         void Unadvise([In] uint dwCookie);
 
@@ -254,7 +281,10 @@ static class FileDialogNative
 
         void GetResult([MarshalAs(UnmanagedType.Interface)] out IShellItem ppsi);
 
-        void AddPlace([In, MarshalAs(UnmanagedType.Interface)] IShellItem psi, FileDialogCustomPlace fdcp);
+        void AddPlace(
+            [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi,
+            FileDialogCustomPlace fdcp
+        );
 
         void SetDefaultExtension([In, MarshalAs(UnmanagedType.LPWStr)] string pszDefaultExtension);
 
@@ -270,66 +300,97 @@ static class FileDialogNative
 
         void SetProperties([In, MarshalAs(UnmanagedType.Interface)] nint pStore);
 
-        void SetCollectedProperties([In, MarshalAs(UnmanagedType.Interface)] nint pList, [In] int fAppendDefault);
+        void SetCollectedProperties(
+            [In, MarshalAs(UnmanagedType.Interface)] nint pList,
+            [In] int fAppendDefault
+        );
 
         void GetProperties([MarshalAs(UnmanagedType.Interface)] out nint ppStore);
 
-        void ApplyProperties([In, MarshalAs(UnmanagedType.Interface)] IShellItem psi, [In, MarshalAs(UnmanagedType.Interface)] nint pStore, [In, ComAliasName("ShellObjects.wireHWND")] ref nint hwnd, [In, MarshalAs(UnmanagedType.Interface)] nint pSink);
+        void ApplyProperties(
+            [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi,
+            [In, MarshalAs(UnmanagedType.Interface)] nint pStore,
+            [In, ComAliasName("ShellObjects.wireHWND")] ref nint hwnd,
+            [In, MarshalAs(UnmanagedType.Interface)] nint pSink
+        );
     }
 
-    [ComImport,
-    Guid(IIDGuid.IFileDialogEvents),
-    InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [
+        ComImport,
+        Guid(IIDGuid.IFileDialogEvents),
+        InterfaceType(ComInterfaceType.InterfaceIsIUnknown)
+    ]
     internal interface IFileDialogEvents
     {
-        // NOTE: some of these callbacks are cancelable - returning S_FALSE means that 
-        // the dialog should not proceed (e.g. with closing, changing folder); to 
+        // NOTE: some of these callbacks are cancelable - returning S_FALSE means that
+        // the dialog should not proceed (e.g. with closing, changing folder); to
         // support this, we need to use the PreserveSig attribute to enable us to return
         // the proper HRESULT
         [PreserveSig]
         int OnFileOk([In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd);
 
         [PreserveSig]
-        int OnFolderChanging([In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd, [In, MarshalAs(UnmanagedType.Interface)] IShellItem psiFolder);
+        int OnFolderChanging(
+            [In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd,
+            [In, MarshalAs(UnmanagedType.Interface)] IShellItem psiFolder
+        );
 
         void OnFolderChange([In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd);
 
         void OnSelectionChange([In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd);
 
-        void OnShareViolation([In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd, [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi, out FDE_SHAREVIOLATION_RESPONSE pResponse);
+        void OnShareViolation(
+            [In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd,
+            [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi,
+            out FDE_SHAREVIOLATION_RESPONSE pResponse
+        );
 
         void OnTypeChange([In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd);
 
-        void OnOverwrite([In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd, [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi, out FDE_OVERWRITE_RESPONSE pResponse);
+        void OnOverwrite(
+            [In, MarshalAs(UnmanagedType.Interface)] IFileDialog pfd,
+            [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi,
+            out FDE_OVERWRITE_RESPONSE pResponse
+        );
     }
 
-    [ComImport,
-    Guid(IIDGuid.IShellItem),
-    InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport, Guid(IIDGuid.IShellItem), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IShellItem
     {
-        void BindToHandler([In, MarshalAs(UnmanagedType.Interface)] nint pbc, [In] ref Guid bhid, [In] ref Guid riid, out nint ppv);
+        void BindToHandler(
+            [In, MarshalAs(UnmanagedType.Interface)] nint pbc,
+            [In] ref Guid bhid,
+            [In] ref Guid riid,
+            out nint ppv
+        );
 
         void GetParent([MarshalAs(UnmanagedType.Interface)] out IShellItem ppsi);
 
-        void GetDisplayName([In] SIGDN sigdnName, [MarshalAs(UnmanagedType.LPWStr)] out string ppszName);
+        void GetDisplayName(
+            [In] SIGDN sigdnName,
+            [MarshalAs(UnmanagedType.LPWStr)] out string ppszName
+        );
 
         void GetAttributes([In] uint sfgaoMask, out uint psfgaoAttribs);
 
-        void Compare([In, MarshalAs(UnmanagedType.Interface)] IShellItem psi, [In] uint hint, out int piOrder);
+        void Compare(
+            [In, MarshalAs(UnmanagedType.Interface)] IShellItem psi,
+            [In] uint hint,
+            out int piOrder
+        );
     }
 
     internal enum SIGDN : uint
     {
-        SIGDN_NORMALDISPLAY = 0x00000000,           // SHGDN_NORMAL
-        SIGDN_PARENTRELATIVEPARSING = 0x80018001,   // SHGDN_INFOLDER | SHGDN_FORPARSING
-        SIGDN_DESKTOPABSOLUTEPARSING = 0x80028000,  // SHGDN_FORPARSING
-        SIGDN_PARENTRELATIVEEDITING = 0x80031001,   // SHGDN_INFOLDER | SHGDN_FOREDITING
-        SIGDN_DESKTOPABSOLUTEEDITING = 0x8004c000,  // SHGDN_FORPARSING | SHGDN_FORADDRESSBAR
-        SIGDN_FILESYSPATH = 0x80058000,             // SHGDN_FORPARSING
-        SIGDN_URL = 0x80068000,                     // SHGDN_FORPARSING
-        SIGDN_PARENTRELATIVEFORADDRESSBAR = 0x8007c001,     // SHGDN_INFOLDER | SHGDN_FORPARSING | SHGDN_FORADDRESSBAR
-        SIGDN_PARENTRELATIVE = 0x80080001           // SHGDN_INFOLDER
+        SIGDN_NORMALDISPLAY = 0x00000000, // SHGDN_NORMAL
+        SIGDN_PARENTRELATIVEPARSING = 0x80018001, // SHGDN_INFOLDER | SHGDN_FORPARSING
+        SIGDN_DESKTOPABSOLUTEPARSING = 0x80028000, // SHGDN_FORPARSING
+        SIGDN_PARENTRELATIVEEDITING = 0x80031001, // SHGDN_INFOLDER | SHGDN_FOREDITING
+        SIGDN_DESKTOPABSOLUTEEDITING = 0x8004c000, // SHGDN_FORPARSING | SHGDN_FORADDRESSBAR
+        SIGDN_FILESYSPATH = 0x80058000, // SHGDN_FORPARSING
+        SIGDN_URL = 0x80068000, // SHGDN_FORPARSING
+        SIGDN_PARENTRELATIVEFORADDRESSBAR = 0x8007c001, // SHGDN_INFOLDER | SHGDN_FORPARSING | SHGDN_FORADDRESSBAR
+        SIGDN_PARENTRELATIVE = 0x80080001, // SHGDN_INFOLDER
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto, Pack = 4)]
@@ -337,6 +398,7 @@ static class FileDialogNative
     {
         [MarshalAs(UnmanagedType.LPWStr)]
         internal string pszName;
+
         [MarshalAs(UnmanagedType.LPWStr)]
         internal string pszSpec;
     }
@@ -363,25 +425,22 @@ static class FileDialogNative
         FOS_NODEREFERENCELINKS = 0x00100000,
         FOS_DONTADDTORECENT = 0x02000000,
         FOS_FORCESHOWHIDDEN = 0x10000000,
-        FOS_DEFAULTNOMINIMODE = 0x20000000
+        FOS_DEFAULTNOMINIMODE = 0x20000000,
     }
 
     internal enum FDE_SHAREVIOLATION_RESPONSE
     {
         FDESVR_DEFAULT = 0x00000000,
         FDESVR_ACCEPT = 0x00000001,
-        FDESVR_REFUSE = 0x00000002
+        FDESVR_REFUSE = 0x00000002,
     }
 
     internal enum FDE_OVERWRITE_RESPONSE
     {
         FDEOR_DEFAULT = 0x00000000,
         FDEOR_ACCEPT = 0x00000001,
-        FDEOR_REFUSE = 0x00000002
+        FDEOR_REFUSE = 0x00000002,
     }
 
-
-
     internal class FileDialogCustomPlace { }
-
 }

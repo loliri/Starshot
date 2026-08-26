@@ -1,3 +1,7 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -9,10 +13,6 @@ using Starshot.Features.Database;
 using Starshot.Features.Screenshot;
 using Starshot.Frameworks;
 using Starshot.Helpers;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
 
@@ -20,21 +20,32 @@ namespace Starshot.Features.Setting;
 
 public sealed partial class StorageSetting : PageBase
 {
-
     private readonly ILogger<StorageSetting> _logger = AppConfig.GetLogger<StorageSetting>();
 
     private TextBox? _lastFocusedTemplateBox;
 
     private static readonly string[] _tokens =
     {
-        "process", "processPath", "title", "timestamp", "time", "date",
-        "year", "month", "day", "hour", "minute", "second", "width", "height",
+        "process",
+        "processPath",
+        "title",
+        "timestamp",
+        "time",
+        "date",
+        "year",
+        "month",
+        "day",
+        "hour",
+        "minute",
+        "second",
+        "width",
+        "height",
     };
-
 
     public string FileNamePattern
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -44,13 +55,16 @@ public sealed partial class StorageSetting : PageBase
         }
     } = AppConfig.ScreenshotFileNamePattern;
 
-
-    public string FileNamePreview { get; set => SetProperty(ref field, value); } = BuildPreview(AppConfig.ScreenshotFileNamePattern);
-
+    public string FileNamePreview
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = BuildPreview(AppConfig.ScreenshotFileNamePattern);
 
     public string RegionFileNamePattern
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -60,13 +74,16 @@ public sealed partial class StorageSetting : PageBase
         }
     } = AppConfig.RegionScreenshotFileNamePattern;
 
-
-    public string RegionFileNamePreview { get; set => SetProperty(ref field, value); } = BuildPreview(AppConfig.RegionScreenshotFileNamePattern);
-
+    public string RegionFileNamePreview
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = BuildPreview(AppConfig.RegionScreenshotFileNamePattern);
 
     public int FileNameTitleMaxLength
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -77,12 +94,18 @@ public sealed partial class StorageSetting : PageBase
         }
     } = AppConfig.ScreenshotFileNameTitleMaxLength;
 
-
     private static string BuildPreview(string pattern)
     {
-        return ScreenCaptureService.BuildFileName("explorer", "explorer.exe", "StarRail", DateTimeOffset.Now, 3840, 2160, pattern) + ".png";
+        return ScreenCaptureService.BuildFileName(
+                "explorer",
+                "explorer.exe",
+                "StarRail",
+                DateTimeOffset.Now,
+                3840,
+                2160,
+                pattern
+            ) + ".png";
     }
-
 
     public StorageSetting()
     {
@@ -106,9 +129,11 @@ public sealed partial class StorageSetting : PageBase
         _ = RefreshStatsAsync();
     }
 
-
-    public string DatabaseFolder { get; set => SetProperty(ref field, value); } = "";
-
+    public string DatabaseFolder
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
 
     [RelayCommand]
     private async Task ChangeDatabaseFolder()
@@ -119,16 +144,31 @@ public sealed partial class StorageSetting : PageBase
         try
         {
             var folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
-            if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return;
+            if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+                return;
             folder = Path.GetFullPath(folder);
-            if (string.Equals(folder, Path.GetFullPath(AppConfig.UserDataFolder), StringComparison.OrdinalIgnoreCase)) return;
+            if (
+                string.Equals(
+                    folder,
+                    Path.GetFullPath(AppConfig.UserDataFolder),
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+                return;
             // 复用备份逻辑把当前库整套快照到新位置（原库不动，保兼容）
-            await Task.Run(() => DatabaseService.BackupDatabase(Path.Combine(folder, "StarshotDatabase.db")));
+            await Task.Run(() =>
+                DatabaseService.BackupDatabase(Path.Combine(folder, "StarshotDatabase.db"))
+            );
             // 写锚定 JSON，下次启动按它定位数据库
-            string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot");
+            string localAppData = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Starshot"
+            );
             Directory.CreateDirectory(localAppData);
-            await File.WriteAllTextAsync(Path.Combine(localAppData, "database.json"),
-                System.Text.Json.JsonSerializer.Serialize(new { DatabaseFolder = folder }));
+            await File.WriteAllTextAsync(
+                Path.Combine(localAppData, "database.json"),
+                System.Text.Json.JsonSerializer.Serialize(new { DatabaseFolder = folder })
+            );
             DatabaseFolder = folder;
             var dialog = new DatabaseLocationDialog { XamlRoot = this.XamlRoot };
             await dialog.ShowAsync();
@@ -139,7 +179,6 @@ public sealed partial class StorageSetting : PageBase
         }
 #endif
     }
-
 
     private void BuildPlaceholderLinks()
     {
@@ -159,16 +198,17 @@ public sealed partial class StorageSetting : PageBase
             }
             string token = "{" + _tokens[i] + "}";
             var link = new Hyperlink { UnderlineStyle = UnderlineStyle.None };
-            link.Inlines.Add(new Run
-            {
-                Text = _tokens[i],
-                FontFamily = new FontFamily("Consolas, Cascadia Code, Microsoft YaHei UI"),
-            });
+            link.Inlines.Add(
+                new Run
+                {
+                    Text = _tokens[i],
+                    FontFamily = new FontFamily("Consolas, Cascadia Code, Microsoft YaHei UI"),
+                }
+            );
             link.Click += (_, _) => InsertToken(token);
             PlaceholderTextBlock.Inlines.Add(link);
         }
     }
-
 
     private static string GetHelpUrl()
     {
@@ -185,12 +225,10 @@ public sealed partial class StorageSetting : PageBase
         };
     }
 
-
     private void TemplateTextBox_GotFocus(object sender, RoutedEventArgs e)
     {
         _lastFocusedTemplateBox = (TextBox)sender;
     }
-
 
     private void InsertToken(string token)
     {
@@ -201,16 +239,16 @@ public sealed partial class StorageSetting : PageBase
         box.Focus(FocusState.Programmatic);
     }
 
-
-    private void TextBlock_IsTextTrimmedChanged(TextBlock sender, IsTextTrimmedChangedEventArgs args)
+    private void TextBlock_IsTextTrimmedChanged(
+        TextBlock sender,
+        IsTextTrimmedChangedEventArgs args
+    )
     {
         if (sender.FontSize > 12)
         {
             sender.FontSize -= 1;
         }
     }
-
-
 
     #region Data Folder
 
@@ -228,16 +266,17 @@ public sealed partial class StorageSetting : PageBase
         catch { }
     }
 
-
     #endregion
-
 
 
     #region Screenshot Folder
 
 
-    public string ScreenshotFolder { get; set => SetProperty(ref field, value); }
-
+    public string ScreenshotFolder
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     private void InitializeScreenshotFolder()
     {
@@ -256,7 +295,6 @@ public sealed partial class StorageSetting : PageBase
             _logger.LogError(ex, "Failed to initialize screenshot folder");
         }
     }
-
 
     [RelayCommand]
     private async Task ChangeScreenshotFolder()
@@ -277,7 +315,6 @@ public sealed partial class StorageSetting : PageBase
         }
     }
 
-
     [RelayCommand]
     private async Task OpenScreenshotFolder()
     {
@@ -291,16 +328,17 @@ public sealed partial class StorageSetting : PageBase
         catch { }
     }
 
-
     #endregion
-
 
 
     #region Log Folder
 
 
-    public string LogFolder { get; set => SetProperty(ref field, value); } = AppConfig.LogFolder;
-
+    public string LogFolder
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = AppConfig.LogFolder;
 
     public int LogLevel
     {
@@ -314,7 +352,6 @@ public sealed partial class StorageSetting : PageBase
             }
         }
     } = AppConfig.LogLevelConfig;
-
 
     [RelayCommand]
     private async Task ChangeLogFolder()
@@ -335,7 +372,6 @@ public sealed partial class StorageSetting : PageBase
         }
     }
 
-
     [RelayCommand]
     private async Task OpenLogFolder()
     {
@@ -349,25 +385,32 @@ public sealed partial class StorageSetting : PageBase
         catch { }
     }
 
-
     #endregion
-
 
 
     #region Database Backup
 
 
-    public string LastBackupTime { get; set => SetProperty(ref field, value); } = "";
+    public string LastBackupTime
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
 
-
-    public Visibility LastBackupVisible { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
-
+    public Visibility LastBackupVisible
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = Visibility.Collapsed;
 
     private string? _lastBackupPath;
 
     // 安装版线备份进日志文件夹体系（LocalAppData）；便携版照旧在数据目录（便携布局的根）
-    private static string DatabaseBackupFolder => Path.Combine(AppConfig.Installer ? AppConfig.LogFolder : AppConfig.UserDataFolder, "backup");
-
+    private static string DatabaseBackupFolder =>
+        Path.Combine(
+            AppConfig.Installer ? AppConfig.LogFolder : AppConfig.UserDataFolder,
+            "backup"
+        );
 
     private void RefreshLastBackup()
     {
@@ -379,7 +422,8 @@ public sealed partial class StorageSetting : PageBase
                 LastBackupVisible = Visibility.Collapsed;
                 return;
             }
-            var last = Directory.GetFiles(dir, "StarshotDatabase_*.db")
+            var last = Directory
+                .GetFiles(dir, "StarshotDatabase_*.db")
                 .OrderByDescending(File.GetLastWriteTime)
                 .FirstOrDefault();
             if (last is null)
@@ -388,12 +432,12 @@ public sealed partial class StorageSetting : PageBase
                 return;
             }
             _lastBackupPath = last;
-            LastBackupTime = $"{Lang.Starshot_LastBackup}  {File.GetLastWriteTime(last):yyyy-MM-dd HH:mm:ss}";
+            LastBackupTime =
+                $"{Lang.Starshot_LastBackup}  {File.GetLastWriteTime(last):yyyy-MM-dd HH:mm:ss}";
             LastBackupVisible = Visibility.Visible;
         }
         catch { }
     }
-
 
     [RelayCommand]
     private async Task BackupDatabase()
@@ -401,7 +445,10 @@ public sealed partial class StorageSetting : PageBase
         try
         {
             Directory.CreateDirectory(DatabaseBackupFolder);
-            string file = Path.Combine(DatabaseBackupFolder, $"StarshotDatabase_{DateTime.Now:yyyyMMdd_HHmmss}.db");
+            string file = Path.Combine(
+                DatabaseBackupFolder,
+                $"StarshotDatabase_{DateTime.Now:yyyyMMdd_HHmmss}.db"
+            );
             await Task.Run(() => DatabaseService.BackupDatabase(file));
             RefreshLastBackup();
             _ = RefreshStatsAsync();
@@ -414,7 +461,6 @@ public sealed partial class StorageSetting : PageBase
         }
     }
 
-
     [RelayCommand]
     private async Task OpenLastBackup()
     {
@@ -423,7 +469,9 @@ public sealed partial class StorageSetting : PageBase
             if (!string.IsNullOrEmpty(_lastBackupPath) && File.Exists(_lastBackupPath))
             {
                 var item = await StorageFile.GetFileFromPathAsync(_lastBackupPath);
-                var folder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(_lastBackupPath)!);
+                var folder = await StorageFolder.GetFolderFromPathAsync(
+                    Path.GetDirectoryName(_lastBackupPath)!
+                );
                 var options = new FolderLauncherOptions();
                 options.ItemsToSelect.Add(item);
                 await Launcher.LaunchFolderAsync(folder, options);
@@ -435,35 +483,47 @@ public sealed partial class StorageSetting : PageBase
         }
     }
 
-
     #endregion
-
 
 
     #region Storage Stats
 
 
-    public string ScreenshotFolderSize { get; set => SetProperty(ref field, value); } = "—";
+    public string ScreenshotFolderSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "—";
 
+    public string ImageCacheSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "—";
 
-    public string ImageCacheSize { get; set => SetProperty(ref field, value); } = "—";
+    public string WallpaperSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "—";
 
+    public string LogSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "—";
 
-    public string WallpaperSize { get; set => SetProperty(ref field, value); } = "—";
-
-
-    public string LogSize { get; set => SetProperty(ref field, value); } = "—";
-
-
-    public string BackupSize { get; set => SetProperty(ref field, value); } = "—";
-
+    public string BackupSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "—";
 
     [RelayCommand]
     private async Task RefreshStats()
     {
         await RefreshStatsAsync();
     }
-
 
     [RelayCommand]
     private void ClearCache()
@@ -478,9 +538,19 @@ public sealed partial class StorageSetting : PageBase
                 string? current = AppConfig.WallpaperFile;
                 foreach (var f in Directory.EnumerateFiles(bgDir))
                 {
-                    if (!string.Equals(Path.GetFileName(f), current, StringComparison.OrdinalIgnoreCase))
+                    if (
+                        !string.Equals(
+                            Path.GetFileName(f),
+                            current,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    )
                     {
-                        try { File.Delete(f); } catch { }
+                        try
+                        {
+                            File.Delete(f);
+                        }
+                        catch { }
                     }
                 }
             }
@@ -493,7 +563,6 @@ public sealed partial class StorageSetting : PageBase
             InAppToast.MainWindow?.Error(ex, Lang.ScreenshotSetting_ClearFailed);
         }
     }
-
 
     private async Task RefreshStatsAsync()
     {
@@ -527,8 +596,5 @@ public sealed partial class StorageSetting : PageBase
         }
     }
 
-
     #endregion
-
-
 }

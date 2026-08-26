@@ -1,6 +1,6 @@
-using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.IO;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Vanara.PInvoke;
 
 namespace Starshot.Helpers;
@@ -11,7 +11,6 @@ namespace Starshot.Helpers;
 /// </summary>
 internal static class AppIconHelper
 {
-
     /// <summary>
     /// 抽取应用自身图标：LoadIcon 取系统图标尺寸帧（默认 32×32）。
     /// 与托盘（H.NotifyIcon）、任务管理器（AppWindow.SetIcon）同源。
@@ -29,7 +28,6 @@ internal static class AppIconHelper
             return null;
         }
     }
-
 
     /// <summary>System.Drawing.Icon → BitmapImage（PNG 内存流中转），失败返回 null。</summary>
     public static BitmapImage? ToBitmapImage(System.Drawing.Icon icon)

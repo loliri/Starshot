@@ -1,6 +1,3 @@
 namespace Starshot.Features.Setting;
 
-public class AccentColorChangedMessage
-{
-
-}
+public class AccentColorChangedMessage { }

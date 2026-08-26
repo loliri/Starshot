@@ -1,193 +1,220 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<sf:PageBase x:Class="Starshot.Features.Setting.GeneralSetting"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:lang="using:Starshot.Language"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:sf="using:Starshot.Frameworks"
-             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
-             x:DefaultBindMode="OneWay"
-             mc:Ignorable="d">
+<sf:PageBase
+  x:Class="Starshot.Features.Setting.GeneralSetting"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:lang="using:Starshot.Language"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:sf="using:Starshot.Frameworks"
+  xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
+  x:DefaultBindMode="OneWay"
+  mc:Ignorable="d"
+>
+  <ScrollViewer Padding="0">
+    <StackPanel Width="820" Padding="36,24,36,36" Spacing="20">
+      <TextBlock FontSize="28" FontWeight="Bold" Text="{x:Bind lang:Lang.Starshot_Nav_Settings}" />
 
-    <ScrollViewer Padding="0">
-        <StackPanel Width="820"
-                    Padding="36,24,36,36"
-                    Spacing="20">
+      <!--  语言  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.SettingPage_Language}" />
+        <ComboBox MinWidth="240" SelectedIndex="{x:Bind LanguageIndex, Mode=TwoWay}">
+          <ComboBoxItem Content="{x:Bind lang:Lang.SettingPage_FollowSystem}" />
+          <ComboBoxItem Content="English" />
+          <ComboBoxItem Content="简体中文" />
+          <ComboBoxItem Content="日本語" />
+        </ComboBox>
+      </StackPanel>
 
-            <TextBlock FontSize="28"
-                       FontWeight="Bold"
-                       Text="{x:Bind lang:Lang.Starshot_Nav_Settings}" />
+      <!--  更新源（安装版线只藏源选择：源在 kachina config 写死；直连开关保留供 release notes 拉取）  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Update}" />
+        <cwc:Segmented
+          x:Name="Segmented_UpdateSource"
+          SelectedIndex="{x:Bind UpdateSource, Mode=TwoWay}"
+        >
+          <cwc:SegmentedItem Content="Cloudflare" />
+          <cwc:SegmentedItem Content="GitHub" />
+        </cwc:Segmented>
+        <ToggleSwitch
+          IsOn="{x:Bind GithubApiNoProxy, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}"
+          OnContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}"
+        />
+      </StackPanel>
 
-
-            <!--  语言  -->
-            <StackPanel Spacing="8">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.SettingPage_Language}" />
-                <ComboBox MinWidth="240"
-                          SelectedIndex="{x:Bind LanguageIndex, Mode=TwoWay}">
-                    <ComboBoxItem Content="{x:Bind lang:Lang.SettingPage_FollowSystem}" />
-                    <ComboBoxItem Content="English" />
-                    <ComboBoxItem Content="简体中文" />
-                    <ComboBoxItem Content="日本語" />
-                </ComboBox>
-            </StackPanel>
-
-
-            <!--  更新源（安装版线只藏源选择：源在 kachina config 写死；直连开关保留供 release notes 拉取）  -->
-            <StackPanel Spacing="8">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Update}" />
-                <cwc:Segmented x:Name="Segmented_UpdateSource" SelectedIndex="{x:Bind UpdateSource, Mode=TwoWay}">
-                    <cwc:SegmentedItem Content="Cloudflare" />
-                    <cwc:SegmentedItem Content="GitHub" />
-                </cwc:Segmented>
-                <ToggleSwitch IsOn="{x:Bind GithubApiNoProxy, Mode=TwoWay}"
-                              OffContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}"
-                              OnContent="{x:Bind lang:Lang.Starshot_GithubApiNoProxy}" />
-            </StackPanel>
-
-
-            <!--  调试  -->
-            <StackPanel Spacing="8" Visibility="{x:Bind DevModeVisibility}">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_DebugSection}" />
-                <Expander Header="{x:Bind lang:Lang.Starshot_DebugExtractTitle}"
-                          IsExpanded="True"
-                          HorizontalAlignment="Stretch"
-                          HorizontalContentAlignment="Stretch">
-                    <StackPanel Spacing="8">
-                        <TextBox x:Name="DebugUrlBox"
-                             Header="Zip URL"
-                             PlaceholderText="https://..." />
-                    <Grid ColumnSpacing="0" Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0"
-                                Height="40"
-                                Padding="16,0,16,0"
-                                BorderThickness="0"
-                                Command="{x:Bind BrowseDestCommand}"
-                                CornerRadius="8,20,20,8"
-                                Style="{ThemeResource AccentButtonStyle}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon FontSize="14" Glyph="&#xE8DE;" />
-                                <TextBlock Text="{x:Bind lang:Lang.Starshot_DebugSelect}" />
-                            </StackPanel>
-                        </Button>
-                        <Button Grid.Column="1"
-                                Height="40"
-                                Margin="16,0,0,0"
-                                Padding="20,0,20,1"
-                                HorizontalContentAlignment="Left"
-                                BorderThickness="0"
-                                Command="{x:Bind OpenDestCommand}"
-                                CornerRadius="20">
-                            <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock VerticalAlignment="Center"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           Text="{x:Bind DebugDestDisplay, Mode=OneWay}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <FontIcon Grid.Column="1"
-                                          Margin="0,2,2,0"
-                                          FontSize="14"
-                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                          Glyph="&#xE8A7;" />
-                            </Grid>
-                        </Button>
-                    </Grid>
-                    <StackPanel Orientation="Horizontal" Spacing="24" VerticalAlignment="Center">
-                        <Button HorizontalAlignment="Left"
-                                Height="40"
-                                Padding="16,0,16,0"
-                                BorderThickness="0"
-                                Command="{x:Bind DebugExtractCommand}"
-                                CornerRadius="8,20,20,8"
-                                Style="{ThemeResource AccentButtonStyle}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon FontSize="14" Glyph="&#xE72C;" />
-                                <TextBlock Text="{x:Bind lang:Lang.Starshot_DebugExtract}" />
-                            </StackPanel>
-                        </Button>
-                        <CheckBox VerticalAlignment="Center"
-                                  Content="{x:Bind lang:Lang.Starshot_DisableCertificateValidation}"
-                                  IsChecked="{x:Bind DisableCert, Mode=TwoWay}" />
-                    </StackPanel>
-                    <ProgressBar x:Name="DebugProgressBar"
-                                 MinWidth="200"
-                                 Visibility="Collapsed" />
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0"
-                                  x:Name="DebugCompletedIcon"
-                                  VerticalAlignment="Center"
-                                  FontSize="16"
-                                  Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                  Glyph="&#xE73E;"
-                                  Visibility="Collapsed" />
-                        <TextBlock Grid.Column="1"
-                                   x:Name="DebugStatus"
-                                   VerticalAlignment="Center"
-                                   FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   TextWrapping="Wrap" />
-                    </Grid>
-                    </StackPanel>
-                </Expander>
-            </StackPanel>
-
-
-            <!--  开机自启  -->
-            <StackPanel Spacing="8">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_AutoStart}" />
-                <StackPanel Orientation="Horizontal">
-                    <ToggleSwitch IsOn="{x:Bind EnableAutoStart, Mode=TwoWay}"
-                                  IsEnabled="{x:Bind AutoStartEnabled}"
-                                  OffContent="{x:Bind lang:Lang.Starshot_AutoStart}"
-                                  OnContent="{x:Bind lang:Lang.Starshot_AutoStart}" />
-                    <TextBlock FontSize="14"
-                               VerticalAlignment="Center"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Visibility="{x:Bind PriorityStartHintVisibility}"
-                               Text="{x:Bind lang:Lang.Starshot_TurnOffPriorityFirst}" />
+      <!--  调试  -->
+      <StackPanel Spacing="8" Visibility="{x:Bind DevModeVisibility}">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_DebugSection}" />
+        <Expander
+          Header="{x:Bind lang:Lang.Starshot_DebugExtractTitle}"
+          IsExpanded="True"
+          HorizontalAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
+        >
+          <StackPanel Spacing="8">
+            <TextBox x:Name="DebugUrlBox" Header="Zip URL" PlaceholderText="https://..." />
+            <Grid ColumnSpacing="0" Margin="0,12,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+              </Grid.ColumnDefinitions>
+              <Button
+                Grid.Column="0"
+                Height="40"
+                Padding="16,0,16,0"
+                BorderThickness="0"
+                Command="{x:Bind BrowseDestCommand}"
+                CornerRadius="8,20,20,8"
+                Style="{ThemeResource AccentButtonStyle}"
+              >
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <FontIcon FontSize="14" Glyph="&#xE8DE;" />
+                  <TextBlock Text="{x:Bind lang:Lang.Starshot_DebugSelect}" />
                 </StackPanel>
-                <ToggleSwitch IsOn="{x:Bind AutoStartMinimized, Mode=TwoWay}"
-                              OffContent="{x:Bind lang:Lang.Starshot_AutoStartMinimized}"
-                              OnContent="{x:Bind lang:Lang.Starshot_AutoStartMinimized}"
-                              Visibility="{x:Bind AutoStartMinimizedVisibility}" />
-                <ToggleSwitch IsOn="{x:Bind PriorityStart, Mode=TwoWay}"
-                              Visibility="{x:Bind PriorityStartVisibility}">
-                    <ToggleSwitch.OnContent>
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <Image Source="{x:Bind ShieldSource}" Width="20" Height="20" VerticalAlignment="Center" />
-                            <TextBlock Text="{x:Bind lang:Lang.Starshot_PriorityStart}" />
-                        </StackPanel>
-                    </ToggleSwitch.OnContent>
-                    <ToggleSwitch.OffContent>
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <Image Source="{x:Bind ShieldSource}" Width="20" Height="20" VerticalAlignment="Center" />
-                            <TextBlock Text="{x:Bind lang:Lang.Starshot_PriorityStart}" />
-                        </StackPanel>
-                    </ToggleSwitch.OffContent>
-                </ToggleSwitch>
+              </Button>
+              <Button
+                Grid.Column="1"
+                Height="40"
+                Margin="16,0,0,0"
+                Padding="20,0,20,1"
+                HorizontalContentAlignment="Left"
+                BorderThickness="0"
+                Command="{x:Bind OpenDestCommand}"
+                CornerRadius="20"
+              >
+                <Grid ColumnSpacing="12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind DebugDestDisplay, Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis"
+                  />
+                  <FontIcon
+                    Grid.Column="1"
+                    Margin="0,2,2,0"
+                    FontSize="14"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Glyph="&#xE8A7;"
+                  />
+                </Grid>
+              </Button>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="24" VerticalAlignment="Center">
+              <Button
+                HorizontalAlignment="Left"
+                Height="40"
+                Padding="16,0,16,0"
+                BorderThickness="0"
+                Command="{x:Bind DebugExtractCommand}"
+                CornerRadius="8,20,20,8"
+                Style="{ThemeResource AccentButtonStyle}"
+              >
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                  <TextBlock Text="{x:Bind lang:Lang.Starshot_DebugExtract}" />
+                </StackPanel>
+              </Button>
+              <CheckBox
+                VerticalAlignment="Center"
+                Content="{x:Bind lang:Lang.Starshot_DisableCertificateValidation}"
+                IsChecked="{x:Bind DisableCert, Mode=TwoWay}"
+              />
             </StackPanel>
+            <ProgressBar x:Name="DebugProgressBar" MinWidth="200" Visibility="Collapsed" />
+            <Grid ColumnSpacing="12">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+              </Grid.ColumnDefinitions>
+              <FontIcon
+                Grid.Column="0"
+                x:Name="DebugCompletedIcon"
+                VerticalAlignment="Center"
+                FontSize="16"
+                Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                Glyph="&#xE73E;"
+                Visibility="Collapsed"
+              />
+              <TextBlock
+                Grid.Column="1"
+                x:Name="DebugStatus"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextWrapping="Wrap"
+              />
+            </Grid>
+          </StackPanel>
+        </Expander>
+      </StackPanel>
 
-
-            <!--  性能  -->
-            <StackPanel Spacing="8">
-                <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Performance}" />
-                <ToggleSwitch IsOn="{x:Bind HighPriorityProcess, Mode=TwoWay}"
-                              OffContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}"
-                              OnContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}" />
-            </StackPanel>
-
+      <!--  开机自启  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_AutoStart}" />
+        <StackPanel Orientation="Horizontal">
+          <ToggleSwitch
+            IsOn="{x:Bind EnableAutoStart, Mode=TwoWay}"
+            IsEnabled="{x:Bind AutoStartEnabled}"
+            OffContent="{x:Bind lang:Lang.Starshot_AutoStart}"
+            OnContent="{x:Bind lang:Lang.Starshot_AutoStart}"
+          />
+          <TextBlock
+            FontSize="14"
+            VerticalAlignment="Center"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Visibility="{x:Bind PriorityStartHintVisibility}"
+            Text="{x:Bind lang:Lang.Starshot_TurnOffPriorityFirst}"
+          />
         </StackPanel>
-    </ScrollViewer>
+        <ToggleSwitch
+          IsOn="{x:Bind AutoStartMinimized, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_AutoStartMinimized}"
+          OnContent="{x:Bind lang:Lang.Starshot_AutoStartMinimized}"
+          Visibility="{x:Bind AutoStartMinimizedVisibility}"
+        />
+        <ToggleSwitch
+          IsOn="{x:Bind PriorityStart, Mode=TwoWay}"
+          Visibility="{x:Bind PriorityStartVisibility}"
+        >
+          <ToggleSwitch.OnContent>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <Image
+                Source="{x:Bind ShieldSource}"
+                Width="20"
+                Height="20"
+                VerticalAlignment="Center"
+              />
+              <TextBlock Text="{x:Bind lang:Lang.Starshot_PriorityStart}" />
+            </StackPanel>
+          </ToggleSwitch.OnContent>
+          <ToggleSwitch.OffContent>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <Image
+                Source="{x:Bind ShieldSource}"
+                Width="20"
+                Height="20"
+                VerticalAlignment="Center"
+              />
+              <TextBlock Text="{x:Bind lang:Lang.Starshot_PriorityStart}" />
+            </StackPanel>
+          </ToggleSwitch.OffContent>
+        </ToggleSwitch>
+      </StackPanel>
 
+      <!--  性能  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Performance}" />
+        <ToggleSwitch
+          IsOn="{x:Bind HighPriorityProcess, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}"
+          OnContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}"
+        />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
 </sf:PageBase>

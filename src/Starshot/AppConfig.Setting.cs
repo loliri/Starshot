@@ -1,5 +1,3 @@
-using Dapper;
-using Starshot.Features.Database;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +5,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Dapper;
 using Microsoft.Win32.TaskScheduler;
+using Starshot.Features.Database;
 
 namespace Starshot;
 
@@ -19,8 +19,6 @@ public enum CaptureMonitorSource
 
 public static partial class AppConfig
 {
-
-
     #region Static Setting
 
 
@@ -29,7 +27,6 @@ public static partial class AppConfig
         get => GetValue<string>();
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 主题：0=跟随系统, 1=浅色, 2=深色
@@ -40,7 +37,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 启用亚克力效果（导航栏/内容覆盖层/弹窗的磨砂玻璃）。关则用纯色背景。
     /// </summary>
@@ -49,7 +45,6 @@ public static partial class AppConfig
         get => GetValue(true);
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 壁纸模式：0=无，1=指定图片(复制到 bg/)，2=指定视频(读源)，3=文件夹随机(读源)
@@ -60,7 +55,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 壁纸文件名（模式 1，拷贝在 CacheFolder/bg/ 下），空=null=无
     /// </summary>
@@ -69,7 +63,6 @@ public static partial class AppConfig
         get => GetValue<string>();
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 壁纸源文件夹（模式 3，读源不复制），空=null=无
@@ -80,7 +73,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 壁纸源视频文件（模式 2，读源不复制），空=null=无
     /// </summary>
@@ -89,7 +81,6 @@ public static partial class AppConfig
         get => GetValue<string>();
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 文件夹随机模式仅抽视频（模式 3 子选项），默认 false=图/视频混合
@@ -100,21 +91,20 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 启用自定义壁纸（开则关 Mica，铺壁纸 + 亚克力隔层）。模式 0=无 → false；1/2/3 看对应路径。
     /// </summary>
     public static bool EnableWallpaper
     {
-        get => WallpaperMode switch
-        {
-            1 => !string.IsNullOrWhiteSpace(WallpaperFile),
-            2 => !string.IsNullOrWhiteSpace(WallpaperVideoFile),
-            3 => !string.IsNullOrWhiteSpace(WallpaperFolder),
-            _ => false,
-        };
+        get =>
+            WallpaperMode switch
+            {
+                1 => !string.IsNullOrWhiteSpace(WallpaperFile),
+                2 => !string.IsNullOrWhiteSpace(WallpaperVideoFile),
+                3 => !string.IsNullOrWhiteSpace(WallpaperFolder),
+                _ => false,
+            };
     }
-
 
     /// <summary>
     /// 从壁纸自动取色应用为强调色
@@ -125,7 +115,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 语言代码（如 en-US, zh-CN），空=跟随系统
     /// </summary>
@@ -135,12 +124,10 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 系统托盘总是启用（关闭主窗口最小化到托盘）
     /// </summary>
     public static bool EnableSystemTrayIcon => true;
-
 
     /// <summary>
     /// 开机自启：实时读注册表 HKCU\...\Run\Starshot 是否存在（用户可能在外部禁用，不能缓存到 DB）
@@ -151,7 +138,9 @@ public static partial class AppConfig
         {
             try
             {
-                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Run"
+                );
                 return key?.GetValue("Starshot") is not null;
             }
             catch
@@ -160,7 +149,6 @@ public static partial class AppConfig
             }
         }
     }
-
 
     /// <summary>
     /// 启动检测：自启项指向的 exe 不存在则清除（不判断是否本程序，单纯文件不存在就清）；为 true 时 MainWindow 打开后 toast 提示
@@ -175,15 +163,19 @@ public static partial class AppConfig
         try
         {
             using var ts = new TaskService();
-            if (ts.GetTask("Starshot") is not null) return;
+            if (ts.GetTask("Starshot") is not null)
+                return;
         }
         catch { }
 
         try
         {
-            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Run"
+            );
             string? cmd = key?.GetValue("Starshot") as string;
-            if (string.IsNullOrWhiteSpace(cmd)) return;
+            if (string.IsNullOrWhiteSpace(cmd))
+                return;
             string exePath = cmd.Trim();
             if (exePath.StartsWith('"'))
             {
@@ -193,11 +185,15 @@ public static partial class AppConfig
             else
             {
                 int space = exePath.IndexOf(' ');
-                if (space > 0) exePath = exePath[..space];
+                if (space > 0)
+                    exePath = exePath[..space];
             }
             if (!File.Exists(exePath))
             {
-                using var wkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: true);
+                using var wkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Run",
+                    writable: true
+                );
                 wkey?.DeleteValue("Starshot", throwOnMissingValue: false);
                 AutoStartInvalid = true;
             }
@@ -205,14 +201,14 @@ public static partial class AppConfig
         catch { }
     }
 
-
     public static void CheckTaskValidity()
     {
         try
         {
             using var ts = new TaskService();
             var task = ts.GetTask("Starshot");
-            if (task is null) return;
+            if (task is null)
+                return;
             var action = task.Definition.Actions.OfType<ExecAction>().FirstOrDefault();
             if (action is null || !File.Exists(action.Path))
             {
@@ -222,9 +218,8 @@ public static partial class AppConfig
         catch { }
     }
 
-
     /// <summary>
-    /// 开机自启时最小化到托盘（需托盘已开）
+    /// 开机自启时最小化到托盘
     /// </summary>
     public static bool AutoStartMinimized
     {
@@ -232,101 +227,122 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 启动时自动检查更新（节流 24h）
     /// </summary>
-    public static bool EnableAutoUpdateCheck { get => GetValue(true); set => SetValue(value); }
-
+    public static bool EnableAutoUpdateCheck
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
 
     /// <summary>
-    /// 安装版线（kachina）：true 时更新拉起 Starshot.Update.exe、隐藏更新源等便携版专属 UI。
+    /// 安装版线：true 时更新拉起 Starshot.Update.exe、隐藏更新源等便携版专属 UI。
     /// 首次启动由欢迎页流程按包内更新器存在与否写入，之后一直不变（更新线与数据位置独立锚定）。
     /// </summary>
-    public static bool Installer { get => GetValue(false); set => SetValue(value); }
-
+    public static bool Installer
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// 检查更新时是否包含预发布版本。开 = 用 /releases 端点（含 pre-release）；关 = 用 /releases/latest（只看正式版）。
     /// </summary>
-    public static bool EnablePreReleaseUpdateCheck { get => GetValue(false); set => SetValue(value); }
-
+    public static bool EnablePreReleaseUpdateCheck
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// GitHub API（api.github.com）不走系统代理（直连）。仅影响 release 查询 API，不影响 zip 下载（CDN）。默认开。
     /// </summary>
-    public static bool EnableGithubApiNoProxy { get => GetValue(true); set => SetValue(value); }
-
+    public static bool EnableGithubApiNoProxy
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// 跳过的更新版本（用户点「跳过此版本」）
     /// </summary>
-    public static string? IgnoreVersion { get => GetValue<string?>(); set => SetValue(value); }
-
+    public static string? IgnoreVersion
+    {
+        get => GetValue<string?>();
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// 上次检查更新的 Unix 时间戳（秒），用于节流
     /// </summary>
-    public static long LastCheckUpdateTime { get => GetValue(0L); set => SetValue(value); }
-
-
-    /// <summary>
-    /// 差分更新最大链式层数（默认 5，范围 1-20）
-    /// </summary>
-    public static int DeltaUpdateMaxLayers { get => GetValue(5); set => SetValue(value); }
-
+    public static long LastCheckUpdateTime
+    {
+        get => GetValue(0L);
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// 更新源：0=Cloudflare CDN（默认，功能更多、国内访问更快），1=GitHub Release。选定后整条更新流程走该源，不跨源回退。
     /// </summary>
-    public static int UpdateSource { get => GetValue(0); set => SetValue(value); }
-
+    public static int UpdateSource
+    {
+        get => GetValue(0);
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// 官网地址（下载页等由此拼接）
     /// </summary>
     public const string WebSiteUrl = "https://starshot.cialo.site";
 
-
     /// <summary>
     /// CDN 更新源基址（UpdateSource=Cloudflare 时用）
     /// </summary>
     public const string CdnBase = "https://starshot-release.cialo.site";
-
 
     /// <summary>
     /// GitHub 仓库基址（网页版；releases / blob 等链接由此拼接）
     /// </summary>
     public const string RepoBaseUrl = "https://github.com/loliri/Starshot";
 
-
     /// <summary>
     /// GitHub API 基址（查 release 信息用）
     /// </summary>
     public const string RepoApiBaseUrl = "https://api.github.com/repos/loliri/Starshot";
 
-
     /// <summary>
     /// 每次启动把进程提升为高优先级（应用自设，与启动方式无关）。关=跟随系统默认（Normal）。
     /// </summary>
-    public static bool HighPriorityProcess { get => GetValue(false); set => SetValue(value); }
-
+    public static bool HighPriorityProcess
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// 开发者模式：显示设置页调试组（流式解压测试）。默认关。
     /// </summary>
-    public static bool DevMode { get => GetValue(false); set => SetValue(value); }
-
+    public static bool DevMode
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
 
     /// <summary>
     /// 日志/缓存文件夹，默认 %LOCALAPPDATA%\Starshot
     /// </summary>
     public static string LogFolder
     {
-        get => GetValue(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot"))!;
+        get =>
+            GetValue(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Starshot"
+                )
+            )!;
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 日志级别：0=关 / 1=Error / 2=Warn / 3=Info(默认) / 4=Debug。重启生效。
@@ -335,24 +351,28 @@ public static partial class AppConfig
     {
         get => GetValue(
 #if DEBUG
-            4
+                4
 #else
-            3
+                3
 #endif
-        );
+            );
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 截图文件夹，默认 我的图片/Starshot
     /// </summary>
     public static string? ScreenshotFolder
     {
-        get => GetValue(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Starshot"));
+        get =>
+            GetValue(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+                    "Starshot"
+                )
+            );
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 用户配置的截图库文件夹列表（分号分隔），供库浏览
@@ -362,7 +382,6 @@ public static partial class AppConfig
         get => GetValue<string>();
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 截图快捷键
@@ -374,7 +393,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 区域截图快捷键
     /// </summary>
@@ -384,7 +402,6 @@ public static partial class AppConfig
         get => GetValue("1+81");
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 仅复制快捷键（区域选区 → 只进剪贴板不存文件）
@@ -396,13 +413,11 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     public static bool AutoConvertScreenshotToSDR
     {
         get => GetValue(true);
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// HDR 格式但内容为 SDR（maxCLL 不达 HDR 阈值）时，转为 SDR 并删除 HDR 文件。
@@ -414,13 +429,11 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     public static bool AutoCopyScreenshotToClipboard
     {
         get => GetValue(true);
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 截图链路色彩管理（HDR 模式始终启用）
@@ -431,7 +444,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// SDR 截图格式：0: PNG, 1: AVIF, 2: JPEG XL
     /// </summary>
@@ -440,7 +452,6 @@ public static partial class AppConfig
         get => GetValue(0);
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// HDR 截图格式：0: AVIF, 1: JPEG XL
@@ -451,7 +462,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 0: Middle, 1: High, 2: Lossless
     /// </summary>
@@ -460,7 +470,6 @@ public static partial class AppConfig
         get => GetValue(2);
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 截图文件名模板。占位符：{process} {processPath} {title} {timestamp} {time} {date} {width} {height} {year} {month} {day} {hour} {minute} {second}
@@ -471,7 +480,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 区域截图文件名模板（独立于全屏截图）
     /// </summary>
@@ -480,7 +488,6 @@ public static partial class AppConfig
         get => GetValue("{title}_region_{width}x{height}_{timestamp}");
         set => SetValue(value);
     }
-
 
     /// <summary>
     /// 文件名模板中 {title} 的最大字符数（截断），0 表示不截断
@@ -491,7 +498,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     /// <summary>
     /// 截图目标显示器来源：0=前台窗口所在显示器，1=鼠标所在显示器
     /// </summary>
@@ -501,16 +507,13 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-
     #endregion
-
 
 
     #region Setting Method
 
 
     private static Dictionary<string, string?> _settingCache;
-
 
     private static void InitializeSettingProvider()
     {
@@ -519,12 +522,13 @@ public static partial class AppConfig
             if (_settingCache is null)
             {
                 using var dapper = DatabaseService.CreateConnection();
-                _settingCache = dapper.Query<(string Key, string? Value)>("SELECT Key, Value FROM Setting;").ToDictionary(x => x.Key, x => x.Value);
+                _settingCache = dapper
+                    .Query<(string Key, string? Value)>("SELECT Key, Value FROM Setting;")
+                    .ToDictionary(x => x.Key, x => x.Value);
             }
         }
         catch { }
     }
-
 
     public static T? GetValue<T>(T? defaultValue = default, [CallerMemberName] string? key = null)
     {
@@ -548,7 +552,10 @@ public static partial class AppConfig
                 return ConvertFromString(value, defaultValue);
             }
             using var dapper = DatabaseService.CreateConnection();
-            value = dapper.QueryFirstOrDefault<string>("SELECT Value FROM Setting WHERE Key=@key LIMIT 1;", new { key });
+            value = dapper.QueryFirstOrDefault<string>(
+                "SELECT Value FROM Setting WHERE Key=@key LIMIT 1;",
+                new { key }
+            );
             _settingCache[key] = value;
             return ConvertFromString(value, defaultValue);
         }
@@ -557,7 +564,6 @@ public static partial class AppConfig
             return defaultValue;
         }
     }
-
 
     private static T? ConvertFromString<T>(string? value, T? defaultValue = default)
     {
@@ -572,7 +578,6 @@ public static partial class AppConfig
         }
         return (T?)converter.ConvertFromString(value);
     }
-
 
     public static void SetValue<T>(T? value, [CallerMemberName] string? key = null)
     {
@@ -598,11 +603,13 @@ public static partial class AppConfig
             }
             _settingCache[key] = val;
             using var dapper = DatabaseService.CreateConnection();
-            dapper.Execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (@key, @val);", new { key, val });
+            dapper.Execute(
+                "INSERT OR REPLACE INTO Setting (Key, Value) VALUES (@key, @val);",
+                new { key, val }
+            );
         }
         catch { }
     }
-
 
     public static void DeleteAllSettings()
     {
@@ -614,14 +621,10 @@ public static partial class AppConfig
         catch { }
     }
 
-
     public static void ClearCache()
     {
         _settingCache.Clear();
     }
 
-
     #endregion
-
-
 }

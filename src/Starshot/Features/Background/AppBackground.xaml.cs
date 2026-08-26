@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.Helpers;
@@ -9,12 +15,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Starshot.Helpers;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using Windows.Media.Core;
 using Windows.Media.Playback;
@@ -29,17 +29,23 @@ namespace Starshot.Features.Background;
 [INotifyPropertyChanged]
 public sealed partial class AppBackground : UserControl
 {
-
     private readonly ILogger<AppBackground> _logger = AppConfig.GetLogger<AppBackground>();
 
+    public ImageSource? BackgroundImageSource
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public ImageSource? BackgroundImageSource { get; set => SetProperty(ref field, value); }
-
-    public bool IsUpdateBackgroundRunning { get; set => SetProperty(ref field, value); }
-
+    public bool IsUpdateBackgroundRunning
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     private string? _lastFile;
     private CancellationTokenSource? _cts;
+
     // 在途的壁纸重载任务：RefreshAccentAsync 先等它收尾再读 _lastFile（末尾才更新），否则取到旧壁纸路径
     private Task _updateBackgroundTask = Task.CompletedTask;
 
@@ -48,30 +54,38 @@ public sealed partial class AppBackground : UserControl
     /// </summary>
     public static string? CurrentWallpaperFileName { get; private set; }
 
-
     /// <summary>广播当前壁纸文件名变更（设置页 NowPlaying 跟随）。file 传 null = 清空。</summary>
     private static void ReportNowPlaying(string? file)
     {
         CurrentWallpaperFileName = file is null ? null : Path.GetFileName(file);
-        WeakReferenceMessenger.Default.Send(new WallpaperNowPlayingChangedMessage { FileName = CurrentWallpaperFileName });
+        WeakReferenceMessenger.Default.Send(
+            new WallpaperNowPlayingChangedMessage { FileName = CurrentWallpaperFileName }
+        );
     }
-
 
     // ===== 视频 =====
     private MediaPlayer? _mediaPlayer;
-    private int _mediaPlayerRetryCount;  // 管线卡死重建次数，首帧到则清零
+    private int _mediaPlayerRetryCount; // 管线卡死重建次数，首帧到则清零
     private CanvasRenderTarget? _videoSurface;
     private CanvasImageSource? _videoImageSource;
     private readonly SemaphoreSlim _videoSemaphore = new(1, 1);
-    private bool _videoAccentExtracted;  // 视频首帧取色标志（取一次，避免每帧取导致强调色乱跳）
-
+    private bool _videoAccentExtracted; // 视频首帧取色标志（取一次，避免每帧取导致强调色乱跳）
 
     public AppBackground()
     {
         InitializeComponent();
-        WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, (_, _) => _updateBackgroundTask = UpdateBackgroundAsync());
-        WeakReferenceMessenger.Default.Register<AccentRefreshRequestedMessage>(this, (_, _) => _ = RefreshAccentAsync());
-        WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnWindowStateChanged);
+        WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(
+            this,
+            (_, _) => _updateBackgroundTask = UpdateBackgroundAsync()
+        );
+        WeakReferenceMessenger.Default.Register<AccentRefreshRequestedMessage>(
+            this,
+            (_, _) => _ = RefreshAccentAsync()
+        );
+        WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(
+            this,
+            OnWindowStateChanged
+        );
         Loaded += (_, _) => _updateBackgroundTask = UpdateBackgroundAsync();
         Unloaded += (_, _) =>
         {
@@ -79,7 +93,6 @@ public sealed partial class AppBackground : UserControl
             WeakReferenceMessenger.Default.UnregisterAll(this);
         };
     }
-
 
     /// <summary>
     /// 窗口隐藏 → 暂停视频壁纸；激活 → 续播。避免不可见时占 GPU。
@@ -104,7 +117,6 @@ public sealed partial class AppBackground : UserControl
         }
         catch { }
     }
-
 
     public async Task UpdateBackgroundAsync()
     {
@@ -139,7 +151,11 @@ public sealed partial class AppBackground : UserControl
             }
             if (fellBackToImage)
             {
-                InAppToast.MainWindow?.Warning(null, Lang.Starshot_WallpaperVideoFallbackToImage, 5000);
+                InAppToast.MainWindow?.Warning(
+                    null,
+                    Lang.Starshot_WallpaperVideoFallbackToImage,
+                    5000
+                );
             }
             if (file == _lastFile)
             {
@@ -148,7 +164,13 @@ public sealed partial class AppBackground : UserControl
 
             DisposeVideoResource();
 
-            _logger.LogDebug("UpdateBackground file={File} isVideo={IsVideo} fellBack={FellBack} lastFile={LastFile}", file, IsSupportedVideo(file), fellBackToImage, _lastFile);
+            _logger.LogDebug(
+                "UpdateBackground file={File} isVideo={IsVideo} fellBack={FellBack} lastFile={LastFile}",
+                file,
+                IsSupportedVideo(file),
+                fellBackToImage,
+                _lastFile
+            );
             if (IsSupportedVideo(file))
             {
                 // 先加载随机图占位：视频成功（VideoFrameAvailable 首帧）会覆盖；卡死则保持图，全程不黑屏。
@@ -187,18 +209,33 @@ public sealed partial class AppBackground : UserControl
         }
     }
 
-
-    private static readonly HashSet<string> WallpaperMediaExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> WallpaperMediaExtensions = new(
+        StringComparer.OrdinalIgnoreCase
+    )
     {
-        ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".gif",
-        ".mp4", ".mkv", ".mov", ".avi", ".webm",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".bmp",
+        ".webp",
+        ".gif",
+        ".mp4",
+        ".mkv",
+        ".mov",
+        ".avi",
+        ".webm",
     };
 
-    private static readonly HashSet<string> WallpaperVideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> WallpaperVideoExtensions = new(
+        StringComparer.OrdinalIgnoreCase
+    )
     {
-        ".mp4", ".mkv", ".mov", ".avi", ".webm",
+        ".mp4",
+        ".mkv",
+        ".mov",
+        ".avi",
+        ".webm",
     };
-
 
     /// <summary>
     /// 按模式解析当前要加载的壁纸文件路径，并指示是否发生了"仅视频无视频→回退图片"。
@@ -209,13 +246,22 @@ public sealed partial class AppBackground : UserControl
     {
         return AppConfig.WallpaperMode switch
         {
-            1 => (AppConfig.WallpaperFile is { Length: > 0 } f ? Path.Combine(AppConfig.CacheFolder, "bg", f) : null, false),
-            2 => (string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? null : AppConfig.WallpaperVideoFile, false),
+            1 => (
+                AppConfig.WallpaperFile is { Length: > 0 } f
+                    ? Path.Combine(AppConfig.CacheFolder, "bg", f)
+                    : null,
+                false
+            ),
+            2 => (
+                string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile)
+                    ? null
+                    : AppConfig.WallpaperVideoFile,
+                false
+            ),
             3 => PickRandomFromFolder(AppConfig.WallpaperFolder),
             _ => (null, false),
         };
     }
-
 
     private static (string? path, bool fellBackToImage) PickRandomFromFolder(string? folder)
     {
@@ -225,16 +271,19 @@ public sealed partial class AppBackground : UserControl
         }
         try
         {
-            var all = Directory.EnumerateFiles(folder)
+            var all = Directory
+                .EnumerateFiles(folder)
                 .Where(f => WallpaperMediaExtensions.Contains(Path.GetExtension(f)))
                 .ToList();
-            if (all.Count == 0) return (null, false);
+            if (all.Count == 0)
+                return (null, false);
 
             List<string> candidates;
             bool fellBack = false;
             if (AppConfig.WallpaperFolderVideoOnly)
             {
-                var videos = all.Where(f => WallpaperVideoExtensions.Contains(Path.GetExtension(f))).ToList();
+                var videos = all.Where(f => WallpaperVideoExtensions.Contains(Path.GetExtension(f)))
+                    .ToList();
                 if (videos.Count > 0)
                 {
                     candidates = videos;
@@ -242,8 +291,12 @@ public sealed partial class AppBackground : UserControl
                 else
                 {
                     // 仅视频但无视频 → 回退到图片（由调用方弹 warning）
-                    candidates = all.Where(f => !WallpaperVideoExtensions.Contains(Path.GetExtension(f))).ToList();
-                    if (candidates.Count == 0) return (null, false);
+                    candidates = all.Where(f =>
+                            !WallpaperVideoExtensions.Contains(Path.GetExtension(f))
+                        )
+                        .ToList();
+                    if (candidates.Count == 0)
+                        return (null, false);
                     fellBack = true;
                 }
             }
@@ -259,30 +312,35 @@ public sealed partial class AppBackground : UserControl
         }
     }
 
-
     /// <summary>
     /// 视频卡死兜底：从文件夹随机抽一张图片（非视频），避免视频管线失败后黑屏。
     /// </summary>
     private static string? PickRandomImageFromFolder(string? folder)
     {
-        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return null;
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+            return null;
         try
         {
-            var images = Directory.EnumerateFiles(folder)
-                .Where(f => WallpaperMediaExtensions.Contains(Path.GetExtension(f)) && !WallpaperVideoExtensions.Contains(Path.GetExtension(f)))
+            var images = Directory
+                .EnumerateFiles(folder)
+                .Where(f =>
+                    WallpaperMediaExtensions.Contains(Path.GetExtension(f))
+                    && !WallpaperVideoExtensions.Contains(Path.GetExtension(f))
+                )
                 .ToList();
             return images.Count == 0 ? null : images[Random.Shared.Next(images.Count)];
         }
-        catch { return null; }
+        catch
+        {
+            return null;
+        }
     }
-
 
     private static bool IsSupportedVideo(string file)
     {
         string? ext = Path.GetExtension(file)?.ToLowerInvariant();
         return ext is ".mp4" or ".mkv" or ".mov" or ".avi" or ".webm";
     }
-
 
     /// <summary>
     /// 检查当前模式的壁纸源是否存在（配置了但文件/文件夹丢失）。
@@ -292,15 +350,14 @@ public sealed partial class AppBackground : UserControl
         return AppConfig.WallpaperMode switch
         {
             1 => !string.IsNullOrWhiteSpace(AppConfig.WallpaperFile)
-                 && !File.Exists(Path.Combine(AppConfig.CacheFolder, "bg", AppConfig.WallpaperFile)),
+                && !File.Exists(Path.Combine(AppConfig.CacheFolder, "bg", AppConfig.WallpaperFile)),
             2 => !string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile)
-                 && !File.Exists(AppConfig.WallpaperVideoFile),
+                && !File.Exists(AppConfig.WallpaperVideoFile),
             3 => !string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder)
-                 && !Directory.Exists(AppConfig.WallpaperFolder),
+                && !Directory.Exists(AppConfig.WallpaperFolder),
             _ => false,
         };
     }
-
 
     /// <summary>
     /// 清空当前模式的壁纸配置项（文件/文件夹路径置 null）。
@@ -309,12 +366,17 @@ public sealed partial class AppBackground : UserControl
     {
         switch (AppConfig.WallpaperMode)
         {
-            case 1: AppConfig.WallpaperFile = null; break;
-            case 2: AppConfig.WallpaperVideoFile = null; break;
-            case 3: AppConfig.WallpaperFolder = null; break;
+            case 1:
+                AppConfig.WallpaperFile = null;
+                break;
+            case 2:
+                AppConfig.WallpaperVideoFile = null;
+                break;
+            case 3:
+                AppConfig.WallpaperFolder = null;
+                break;
         }
     }
-
 
     private async Task ChangeBackgroundImageAsync(string file, CancellationToken ct)
     {
@@ -326,7 +388,14 @@ public sealed partial class AppBackground : UserControl
         int h = (int)bitmap.SizeInPixels.Height;
 
         // 统一转 B8G8R8A8：取色按 BGRA 字节序，显示也复用
-        using var bgra = new CanvasRenderTarget(device, w, h, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+        using var bgra = new CanvasRenderTarget(
+            device,
+            w,
+            h,
+            96,
+            DirectXPixelFormat.B8G8R8A8UIntNormalized,
+            CanvasAlphaMode.Premultiplied
+        );
         using (var ds = bgra.CreateDrawingSession())
         {
             ds.DrawImage(bitmap);
@@ -344,11 +413,15 @@ public sealed partial class AppBackground : UserControl
         await ExtractAccentAsync(bgra, w, h, ct);
     }
 
-
     /// <summary>
     /// 从 BGRA 位图提取主色应用为强调色（开关关则跳过）。
     /// </summary>
-    private async Task ExtractAccentAsync(CanvasRenderTarget bgra, int w, int h, CancellationToken ct = default)
+    private async Task ExtractAccentAsync(
+        CanvasRenderTarget bgra,
+        int w,
+        int h,
+        CancellationToken ct = default
+    )
     {
         if (!AppConfig.EnableAccentFromWallpaper)
         {
@@ -367,13 +440,15 @@ public sealed partial class AppBackground : UserControl
                 // ChangeAppAccentColor 已发 AccentColorChangedMessage → MainWindow 会重解析主题
             }
         }
-        catch (OperationCanceledException) { throw; }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Accent from wallpaper");
         }
     }
-
 
     /// <summary>
     /// 重新从当前壁纸取色（只解码取色，不动显示/视频）。从壁纸取色开关打开时调用。
@@ -403,7 +478,14 @@ public sealed partial class AppBackground : UserControl
             using var bitmap = await CanvasBitmap.LoadAsync(device, fs.AsRandomAccessStream(), 96);
             int w = (int)bitmap.SizeInPixels.Width;
             int h = (int)bitmap.SizeInPixels.Height;
-            using var bgra = new CanvasRenderTarget(device, w, h, 96, DirectXPixelFormat.B8G8R8A8UIntNormalized, CanvasAlphaMode.Premultiplied);
+            using var bgra = new CanvasRenderTarget(
+                device,
+                w,
+                h,
+                96,
+                DirectXPixelFormat.B8G8R8A8UIntNormalized,
+                CanvasAlphaMode.Premultiplied
+            );
             using (var ds = bgra.CreateDrawingSession())
             {
                 ds.DrawImage(bitmap);
@@ -415,7 +497,6 @@ public sealed partial class AppBackground : UserControl
             _logger.LogError(ex, "RefreshAccentAsync");
         }
     }
-
 
     private void StartMediaPlayer(string file)
     {
@@ -429,13 +510,13 @@ public sealed partial class AppBackground : UserControl
         _mediaPlayer.CommandManager.IsEnabled = false;
         _mediaPlayer.SystemMediaTransportControls.IsEnabled = false;
         _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
-        _mediaPlayer.MediaFailed += (_, a) => _logger.LogError(a.ExtendedErrorCode, "MediaPlayer failed");
+        _mediaPlayer.MediaFailed += (_, a) =>
+            _logger.LogError(a.ExtendedErrorCode, "MediaPlayer failed");
         _mediaPlayer.MediaOpened += MediaPlayer_MediaOpened;
-        _videoAccentExtracted = false;  // 新视频重置取色标志
+        _videoAccentExtracted = false; // 新视频重置取色标志
         // 不在此 Play：等 MediaOpened（Source 解析完成、NaturalVideoWidth/Height 可用）再进 frame server + Play，
         // 规避启动期 MF 管线（demux/decode/首帧）未就绪时 VideoFrameAvailable 间歇不触发的竞争
     }
-
 
     private void MediaPlayer_MediaOpened(MediaPlayer sender, object args)
     {
@@ -448,11 +529,15 @@ public sealed partial class AppBackground : UserControl
             await Task.Delay(2000);
             DispatcherQueue?.TryEnqueue(() =>
             {
-                if (_mediaPlayer != sender || _videoImageSource is not null) return;  // 已切到别的视频 / 首帧已到
+                if (_mediaPlayer != sender || _videoImageSource is not null)
+                    return; // 已切到别的视频 / 首帧已到
                 if (_mediaPlayerRetryCount < 2)
                 {
                     _mediaPlayerRetryCount++;
-                    _logger.LogWarning("No first frame 2s after MediaOpened, rebuild MediaPlayer (retry {Retry})", _mediaPlayerRetryCount);
+                    _logger.LogWarning(
+                        "No first frame 2s after MediaOpened, rebuild MediaPlayer (retry {Retry})",
+                        _mediaPlayerRetryCount
+                    );
                     var f = _lastFile;
                     if (f is not null)
                     {
@@ -463,13 +548,14 @@ public sealed partial class AppBackground : UserControl
                 else
                 {
                     // 占位图已在显示（进入视频分支时加载），保持不动不黑屏；不清 _lastFile 避免同进程反复重试同一卡死视频
-                    _logger.LogWarning("Video still stuck after 2 rebuilds, keeping placeholder image");
+                    _logger.LogWarning(
+                        "Video still stuck after 2 rebuilds, keeping placeholder image"
+                    );
                     DisposeVideoResource();
                 }
             });
         });
     }
-
 
     private void MediaPlayer_VideoFrameAvailable(MediaPlayer sender, object args)
     {
@@ -487,8 +573,18 @@ public sealed partial class AppBackground : UserControl
                     _videoSurface?.Dispose();
                     int w = (int)sender.PlaybackSession.NaturalVideoWidth;
                     int h = (int)sender.PlaybackSession.NaturalVideoHeight;
-                    _videoSurface = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), w, h, 96);
-                    _videoImageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), w, h, 96);
+                    _videoSurface = new CanvasRenderTarget(
+                        CanvasDevice.GetSharedDevice(),
+                        w,
+                        h,
+                        96
+                    );
+                    _videoImageSource = new CanvasImageSource(
+                        CanvasDevice.GetSharedDevice(),
+                        w,
+                        h,
+                        96
+                    );
                     BackgroundImageSource = _videoImageSource;
                     _mediaPlayerRetryCount = 0;
                     ReportNowPlaying(_lastFile);
@@ -503,8 +599,11 @@ public sealed partial class AppBackground : UserControl
                     _videoAccentExtracted = true;
                     try
                     {
-                        var color = AccentColorHelper.GetAccentColor(_videoSurface.GetPixelBytes(),
-                            (int)_videoSurface.SizeInPixels.Width, (int)_videoSurface.SizeInPixels.Height);
+                        var color = AccentColorHelper.GetAccentColor(
+                            _videoSurface.GetPixelBytes(),
+                            (int)_videoSurface.SizeInPixels.Width,
+                            (int)_videoSurface.SizeInPixels.Height
+                        );
                         if (color is not null)
                         {
                             AccentColorHelper.ChangeAppAccentColor(color);
@@ -525,7 +624,6 @@ public sealed partial class AppBackground : UserControl
         });
     }
 
-
     private void DisposeVideoResource()
     {
         _mediaPlayer?.Dispose();
@@ -534,5 +632,4 @@ public sealed partial class AppBackground : UserControl
         _videoSurface = null;
         _videoImageSource = null;
     }
-
 }

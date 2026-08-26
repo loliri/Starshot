@@ -1,12 +1,11 @@
+using System;
 using Microsoft.Graphics.Canvas;
 using Starward.Codec.ICC;
-using System;
 
 namespace Starshot.Features.Screenshot;
 
 internal class ScreenCaptureItem : IDisposable
 {
-
     public CanvasBitmap CanvasBitmap { get; set; }
 
     public bool HDR { get; set; }
@@ -19,17 +18,13 @@ internal class ScreenCaptureItem : IDisposable
 
     public ColorPrimaries ColorPrimaries { get; set; }
 
-
-
     private bool disposedValue;
 
     protected virtual void Dispose(bool disposing)
     {
         if (!disposedValue)
         {
-            if (disposing)
-            {
-            }
+            if (disposing) { }
             ColorPrimaries = null!;
             CanvasBitmap.Dispose();
             disposedValue = true;

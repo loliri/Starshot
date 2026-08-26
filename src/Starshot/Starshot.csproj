@@ -1,104 +1,111 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
-		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-		<RootNamespace>Starshot</RootNamespace>
-		<Nullable>enable</Nullable>
-		<NoWarn>CA1416;CS0108;CS8600;CS8603;CS8618;CS9264;IL2026;IL2087;MVVMTK0049;MVVMTK0050;WMC1506</NoWarn>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<ApplicationIcon>../logo.ico</ApplicationIcon>
-		<Platforms>x64;arm64</Platforms>
-		<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-		<UseWinUI>true</UseWinUI>
-		<EnableMsixTooling>true</EnableMsixTooling>
-		<WindowsPackageType>None</WindowsPackageType>
-		<!-- 自包含仅 Release（CI 发布产物）：Debug 框架依赖构建更快更省盘 -->
-		<!-- <WindowsAppSDKSelfContained Condition="'$(Configuration)' != 'Debug'">true</WindowsAppSDKSelfContained>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Starshot</RootNamespace>
+    <Nullable>enable</Nullable>
+    <NoWarn>CA1416;CS0108;CS8600;CS8603;CS8618;CS9264;IL2026;IL2087;MVVMTK0049;MVVMTK0050;WMC1506</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>../logo.ico</ApplicationIcon>
+    <Platforms>x64;arm64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- 自包含仅 Release（CI 发布产物）：Debug 框架依赖构建更快更省盘 -->
+    <!-- <WindowsAppSDKSelfContained Condition="'$(Configuration)' != 'Debug'">true</WindowsAppSDKSelfContained>
 		<SelfContained Condition="'$(Configuration)' != 'Debug'">true</SelfContained> -->
-		<!-- 调试机 runtime 坏了，暂时先全部自包含，好了调回来 -->
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<SelfContained>true</SelfContained>
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-		<Version>0.0.0-local</Version>
-		<JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
-		<CsWinRTAotOptimizerEnabled Condition="'$(Configuration)' == 'Debug'">false</CsWinRTAotOptimizerEnabled>
-		<CsWinRTAotOptimizerEnabled Condition="'$(Configuration)' != 'Debug'">true</CsWinRTAotOptimizerEnabled>
-		<!-- CETCompat 继承，无验证记录，原因不明，保持不变 -->
-		<CETCompat>false</CETCompat>
-		<!-- 平铺输出：SDK 是在求值后的 OutputPath 后追加 TFM/RID 子目录（自定义路径也拼），删这两行原生资产会被分流进 win-x64/ -->
-		<OutputPath>..\..\build\app\</OutputPath>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-	</PropertyGroup>
+    <!-- 调试机 runtime 坏了，暂时先全部自包含，好了调回来 -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Version>0.0.0-local</Version>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <CsWinRTAotOptimizerEnabled Condition="'$(Configuration)' == 'Debug'"
+      >false</CsWinRTAotOptimizerEnabled>
+    <CsWinRTAotOptimizerEnabled Condition="'$(Configuration)' != 'Debug'"
+      >true</CsWinRTAotOptimizerEnabled>
+    <!-- CETCompat 继承，无验证记录，原因不明，保持不变 -->
+    <CETCompat>false</CETCompat>
+    <!-- 平铺输出：SDK 是在求值后的 OutputPath 后追加 TFM/RID 子目录（自定义路径也拼），删这两行原生资产会被分流进 win-x64/ -->
+    <OutputPath>..\..\build\app\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+  </PropertyGroup>
 
-	<!-- Release 发布配置（CLI dotnet publish -c Release 直接生效） -->
-	<PropertyGroup Condition="'$(Configuration)' != 'Debug'">
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>partial</TrimMode>
-		<PublishReadyToRun>true</PublishReadyToRun>
-		<PublishDir>..\..\build\release\app\</PublishDir>
-	</PropertyGroup>
+  <!-- Release 发布配置（CLI dotnet publish -c Release 直接生效） -->
+  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishDir>..\..\build\release\app\</PublishDir>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<!--  DO NOT Update Segmented https://github.com/CommunityToolkit/Windows/pull/699  -->
-		<PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.250402" />
-		<PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.2.251219" />
-		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.251219" />
-		<PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock" Version="0.1.251030-build.2370" />
-		<PackageReference Include="ComputeSharp.D2D1.WinUI" Version="3.2.0" />
-		<PackageReference Include="Dapper" Version="2.1.79" />
-		<PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.3.2" ExcludeAssets="all" />
-		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260529003" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.8249" />
-		<PackageReference Include="SemanticVersioning" Version="3.0.0" />
-		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
-		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-		<PackageReference Include="Scighost.WinUI" Version="0.1.0" />
-		<PackageReference Include="SharpCompress" Version="0.50.4" />
-		<PackageReference Include="Starward.Codec" Version="0.5.2" />
-		<PackageReference Include="Starward.Win2D" Version="1.3.2-release.1" />
-		<PackageReference Include="System.IO.Hashing" Version="10.0.9" />
-		<PackageReference Include="TaskScheduler" Version="2.12.2" />
-		<PackageReference Include="Vanara.PInvoke.DwmApi" Version="5.0.5" />
-		<PackageReference Include="Vanara.PInvoke.Ole" Version="5.0.5" />
-		<PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.5" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <!--  DO NOT Update Segmented https://github.com/CommunityToolkit/Windows/pull/699  -->
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.250402" />
+    <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.2.251219" />
+    <PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.251219" />
+    <PackageReference
+      Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock"
+      Version="0.1.251030-build.2370"
+    />
+    <PackageReference Include="ComputeSharp.D2D1.WinUI" Version="3.2.0" />
+    <PackageReference Include="Dapper" Version="2.1.79" />
+    <PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.3.2" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260529003" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.8249" />
+    <PackageReference Include="SemanticVersioning" Version="3.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="Scighost.WinUI" Version="0.1.0" />
+    <PackageReference Include="SharpCompress" Version="0.50.4" />
+    <PackageReference Include="Starward.Codec" Version="0.5.2" />
+    <PackageReference Include="Starward.Win2D" Version="1.3.2-release.1" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.9" />
+    <PackageReference Include="TaskScheduler" Version="2.12.2" />
+    <PackageReference Include="Vanara.PInvoke.DwmApi" Version="5.0.5" />
+    <PackageReference Include="Vanara.PInvoke.Ole" Version="5.0.5" />
+    <PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.5" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<Content Include="Assets\Font\PhotosIcons.ttf">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="..\logo.png" Link="Assets\logo.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Update="Assets\**">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Font\PhotosIcons.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\logo.png" Link="Assets\logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Starshot.Language\Starshot.Language.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Starshot.Language\Starshot.Language.csproj" />
+  </ItemGroup>
 
-	<!-- 若先编译了启动器会自动拷到 `build/release/` -->
-	<Target Name="CopyLauncher" AfterTargets="Publish">
-		<PropertyGroup>
-			<_ReleaseRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\build\release'))</_ReleaseRoot>
-		</PropertyGroup>
-		<Copy SourceFiles="$(MSBuildThisFileDirectory)..\..\build\Starshot.exe" DestinationFolder="$(_ReleaseRoot)" Condition="Exists('$(MSBuildThisFileDirectory)..\..\build\Starshot.exe')" />
-	</Target>
-
+  <!-- 若先编译了启动器会自动拷到 `build/release/` -->
+  <Target Name="CopyLauncher" AfterTargets="Publish">
+    <PropertyGroup>
+      <_ReleaseRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\build\release'))</_ReleaseRoot>
+    </PropertyGroup>
+    <Copy
+      SourceFiles="$(MSBuildThisFileDirectory)..\..\build\Starshot.exe"
+      DestinationFolder="$(_ReleaseRoot)"
+      Condition="Exists('$(MSBuildThisFileDirectory)..\..\build\Starshot.exe')"
+    />
+  </Target>
 </Project>

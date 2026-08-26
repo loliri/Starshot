@@ -1,21 +1,18 @@
-﻿using Microsoft.Win32;
-using Starward.Codec.VP9Decoder;
-using System;
+﻿using System;
 using System.Buffers;
 using System.IO;
+using Microsoft.Win32;
+using Starward.Codec.VP9Decoder;
 
 namespace Starshot.Features.Codec;
 
 public partial class VP9Helper
 {
-
-
     public static bool VP9MFTRegistered { get; private set; }
 
     public static bool VorbisMFTRegistered { get; private set; }
 
     private static bool _videoBackground;
-
 
     public static void RegisterVP9Decoder(bool videoBackground = false)
     {
@@ -37,7 +34,6 @@ public partial class VP9Helper
         catch { }
     }
 
-
     public static void UnregisterVP9Decoder(bool videoBackground = false)
     {
         try
@@ -55,7 +51,6 @@ public partial class VP9Helper
         catch { }
     }
 
-
     public static void RegisterVorbisDecoder()
     {
         try
@@ -72,7 +67,6 @@ public partial class VP9Helper
         catch { }
     }
 
-
     public static void UnregisterVorbisDecoder()
     {
         try
@@ -86,7 +80,6 @@ public partial class VP9Helper
         catch { }
     }
 
-
     /// <summary>
     /// 是否安装 VP9 Video Extensions
     /// </summary>
@@ -95,7 +88,9 @@ public partial class VP9Helper
     {
         try
         {
-            var packages = Registry.CurrentUser.OpenSubKey(@"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages");
+            var packages = Registry.CurrentUser.OpenSubKey(
+                @"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages"
+            );
             if (packages is not null)
             {
                 string[] names = packages.GetSubKeyNames();
@@ -114,8 +109,6 @@ public partial class VP9Helper
             return false;
         }
     }
-
-
 
     /// <summary>
     /// 判断给定的文件是否是 VP9 编码的高 Profile 或 RGB 像素格式视频文件
@@ -189,7 +182,6 @@ public partial class VP9Helper
         }
     }
 
-
     /// <summary>
     /// 判断给定的文件是否是 VP8 编码的 WebM 视频文件
     /// </summary>
@@ -225,7 +217,6 @@ public partial class VP9Helper
         }
     }
 
-
     private static bool IsWebMFile(ReadOnlySpan<byte> buffer)
     {
         // EBML magic: 0x1A 0x45 0xDF 0xA3
@@ -243,7 +234,6 @@ public partial class VP9Helper
         }
         return buffer.Slice(index + docTypePrefix.Length, 4).SequenceEqual("webm"u8);
     }
-
 
     /// <summary>
     /// 从 VP9 帧头解析是否为高 Profile 或 RGB 像素格式
@@ -278,9 +268,11 @@ public partial class VP9Helper
             return new VP9ProfileFlags(true, profile != 0, false);
         }
 
-        if (!reader.TryReadBit(out bool keyFrame)
+        if (
+            !reader.TryReadBit(out bool keyFrame)
             || !reader.TryReadBit(out bool showFrame)
-            || !reader.TryReadBit(out bool errorResilientMode))
+            || !reader.TryReadBit(out bool errorResilientMode)
+        )
         {
             return default;
         }
@@ -333,8 +325,7 @@ public partial class VP9Helper
             {
                 return default;
             }
-            if (!reader.TryReadBit(out _)
-                || !reader.TryReadBit(out _))
+            if (!reader.TryReadBit(out _) || !reader.TryReadBit(out _))
             {
                 return default;
             }
@@ -343,7 +334,6 @@ public partial class VP9Helper
 
         return new VP9ProfileFlags(true, profile != 0, isRgb);
     }
-
 
     /// <summary>
     /// 跳过一个 EBML VINT，返回其占用的字节数
@@ -367,9 +357,7 @@ public partial class VP9Helper
         return false;
     }
 
-
     private readonly record struct VP9ProfileFlags(bool IsValid, bool IsHighProfile, bool IsRgb);
-
 
     private ref struct BitReader
     {
@@ -418,6 +406,4 @@ public partial class VP9Helper
             return true;
         }
     }
-
-
 }

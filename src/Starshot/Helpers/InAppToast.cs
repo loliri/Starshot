@@ -1,28 +1,29 @@
-﻿using Microsoft.UI.Dispatching;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Xaml.Interactivity;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Starshot.Helpers;
 
 public class InAppToast : Behavior<StackPanel>
 {
-
     private readonly DispatcherQueueTimer _dismissTimer;
-
 
     public string Tag
     {
         get { return (string)GetValue(TagProperty); }
         set { SetValue(TagProperty, value); }
     }
-    public static readonly DependencyProperty TagProperty =
-        DependencyProperty.Register("Tag", typeof(string), typeof(InAppToast), new PropertyMetadata(default));
-
+    public static readonly DependencyProperty TagProperty = DependencyProperty.Register(
+        "Tag",
+        typeof(string),
+        typeof(InAppToast),
+        new PropertyMetadata(default)
+    );
 
     public static InAppToast? MainWindow { get; private set; }
 
@@ -31,9 +32,6 @@ public class InAppToast : Behavior<StackPanel>
 
     private static readonly List<Action> _pendingToasts = new();
 
-
-
-
     public InAppToast()
     {
         _dismissTimer = DispatcherQueue.CreateTimer();
@@ -41,7 +39,6 @@ public class InAppToast : Behavior<StackPanel>
         _dismissTimer.IsRepeating = true;
         _dismissTimer.Tick += _dismissTimer_Tick;
     }
-
 
     protected override void OnAttached()
     {
@@ -52,7 +49,6 @@ public class InAppToast : Behavior<StackPanel>
         }
     }
 
-
     protected override void OnDetaching()
     {
         base.OnDetaching();
@@ -61,7 +57,6 @@ public class InAppToast : Behavior<StackPanel>
             MainWindow = null;
         }
     }
-
 
     /// <summary>
     /// splash 完成后调：停止 defer，依次显示启动期间累积的 toast。
@@ -75,8 +70,6 @@ public class InAppToast : Behavior<StackPanel>
         }
         _pendingToasts.Clear();
     }
-
-
 
     private void _dismissTimer_Tick(DispatcherQueueTimer sender, object args)
     {
@@ -100,8 +93,6 @@ public class InAppToast : Behavior<StackPanel>
         }
         catch { }
     }
-
-
 
     public void Show(InfoBar infoBar, int duration = 0, int index = -1)
     {
@@ -128,73 +119,85 @@ public class InAppToast : Behavior<StackPanel>
         });
     }
 
-
-    private void AddInfoBar(InfoBarSeverity severity, string? title, string? message, int duration = 0, string? accentMessage = null)
+    private void AddInfoBar(
+        InfoBarSeverity severity,
+        string? title,
+        string? message,
+        int duration = 0,
+        string? accentMessage = null
+    )
     {
-        void core() => DispatcherQueue.TryEnqueue(() =>
-        {
-            var infoBar = new InfoBar
+        void core() =>
+            DispatcherQueue.TryEnqueue(() =>
             {
-                Title = title,
-                Severity = severity,
-                IsOpen = true,
-            };
-            if (accentMessage is not null)
-            {
-                // message + 空格 + accentMessage（强调色），用 Content 富文本替代 Message
-                var tb = new TextBlock();
-                if (!string.IsNullOrEmpty(message))
+                var infoBar = new InfoBar
                 {
-                    tb.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = message + "    " });
+                    Title = title,
+                    Severity = severity,
+                    IsOpen = true,
+                };
+                if (accentMessage is not null)
+                {
+                    // message + 空格 + accentMessage（强调色），用 Content 富文本替代 Message
+                    var tb = new TextBlock();
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        tb.Inlines.Add(
+                            new Microsoft.UI.Xaml.Documents.Run { Text = message + "    " }
+                        );
+                    }
+                    tb.Inlines.Add(
+                        new Microsoft.UI.Xaml.Documents.Run
+                        {
+                            Text = accentMessage,
+                            Foreground =
+                                Application.Current.Resources["SystemFillColorSuccessBrush"]
+                                as Brush,
+                        }
+                    );
+                    infoBar.Content = tb;
                 }
-                tb.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = accentMessage, Foreground = Application.Current.Resources["SystemFillColorSuccessBrush"] as Brush });
-                infoBar.Content = tb;
-            }
-            else
-            {
-                infoBar.Message = message;
-            }
-            if (severity == InfoBarSeverity.Informational)
-            {
-                infoBar.Background = Application.Current.Resources["CustomAcrylicBrush"] as Brush;
-            }
-            Show(infoBar, duration);
-        });
-        if (_deferring) _pendingToasts.Add(core);
-        else core();
+                else
+                {
+                    infoBar.Message = message;
+                }
+                if (severity == InfoBarSeverity.Informational)
+                {
+                    infoBar.Background =
+                        Application.Current.Resources["CustomAcrylicBrush"] as Brush;
+                }
+                Show(infoBar, duration);
+            });
+        if (_deferring)
+            _pendingToasts.Add(core);
+        else
+            core();
     }
 
-
-
-
-    public void Information(string? title, string? message = null, int duration = 3000, string? accentMessage = null)
+    public void Information(
+        string? title,
+        string? message = null,
+        int duration = 3000,
+        string? accentMessage = null
+    )
     {
         AddInfoBar(InfoBarSeverity.Informational, title, message, duration, accentMessage);
     }
-
-
 
     public void Success(string? title, string? message = null, int duration = 3000)
     {
         AddInfoBar(InfoBarSeverity.Success, title, message, duration);
     }
 
-
-
-
     public void Warning(string? title, string? message = null, int duration = 5000)
     {
         AddInfoBar(InfoBarSeverity.Warning, title, message, duration);
     }
 
-
-
     public void Error(string? title, string? message = null, int duration = 7000)
     {
         AddInfoBar(InfoBarSeverity.Error, title, message, duration);
     }
-
-
 
     public void Error(Exception ex, string? message = null, int duration = 7000)
     {
@@ -204,24 +207,52 @@ public class InAppToast : Behavior<StackPanel>
         }
         else
         {
-            AddInfoBar(InfoBarSeverity.Error, $"{ex.GetType().Name} - {message}", ex.Message, duration);
+            AddInfoBar(
+                InfoBarSeverity.Error,
+                $"{ex.GetType().Name} - {message}",
+                ex.Message,
+                duration
+            );
         }
     }
 
-
-    public void ShowWithButton(InfoBarSeverity severity, string? title, string? message, string buttonContent, Action buttonAction, Action? closedAction = null, int duration = 0)
+    public void ShowWithButton(
+        InfoBarSeverity severity,
+        string? title,
+        string? message,
+        string buttonContent,
+        Action buttonAction,
+        Action? closedAction = null,
+        int duration = 0
+    )
     {
-        void core() => DispatcherQueue.TryEnqueue(() =>
-        {
-            var infoBar = Create(severity, title, message, buttonContent, buttonAction, closedAction);
-            Show(infoBar, duration);
-        });
-        if (_deferring) _pendingToasts.Add(core);
-        else core();
+        void core() =>
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                var infoBar = Create(
+                    severity,
+                    title,
+                    message,
+                    buttonContent,
+                    buttonAction,
+                    closedAction
+                );
+                Show(infoBar, duration);
+            });
+        if (_deferring)
+            _pendingToasts.Add(core);
+        else
+            core();
     }
 
-
-    private InfoBar Create(InfoBarSeverity severity, string? title, string? message = null, string? buttonContent = null, Action? buttonAction = null, Action? closedAction = null)
+    private InfoBar Create(
+        InfoBarSeverity severity,
+        string? title,
+        string? message = null,
+        string? buttonContent = null,
+        Action? buttonAction = null,
+        Action? closedAction = null
+    )
     {
         Button? button = null;
         if (!string.IsNullOrWhiteSpace(buttonContent) && buttonAction != null)
@@ -261,7 +292,4 @@ public class InAppToast : Behavior<StackPanel>
         }
         return infoBar;
     }
-
-
-
 }

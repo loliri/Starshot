@@ -1,3 +1,7 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.Helpers;
@@ -6,10 +10,6 @@ using Microsoft.UI.Xaml.Controls;
 using Starshot.Features.Background;
 using Starshot.Frameworks;
 using Starshot.Helpers;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
 using Windows.System;
 using Windows.UI;
 
@@ -17,22 +17,23 @@ namespace Starshot.Features.Setting;
 
 public sealed partial class AppearanceSetting : PageBase
 {
-
-
     public AppearanceSetting()
     {
         InitializeComponent();
         // NowPlaying 初始值（设置页打开时拿当前壁纸），后续靠消息实时更新
         NowPlayingText = AppBackground.CurrentWallpaperFileName;
-        WeakReferenceMessenger.Default.Register<WallpaperNowPlayingChangedMessage>(this, static (r, m) =>
-        {
-            if (r is not AppearanceSetting s) return;
-            s.NowPlayingText = m.FileName;
-            s.OnPropertyChanged(nameof(NowPlayingDisplay));
-            s.OnPropertyChanged(nameof(NowPlayingVisibility));
-        });
+        WeakReferenceMessenger.Default.Register<WallpaperNowPlayingChangedMessage>(
+            this,
+            static (r, m) =>
+            {
+                if (r is not AppearanceSetting s)
+                    return;
+                s.NowPlayingText = m.FileName;
+                s.OnPropertyChanged(nameof(NowPlayingDisplay));
+                s.OnPropertyChanged(nameof(NowPlayingVisibility));
+            }
+        );
     }
-
 
     public int Theme
     {
@@ -47,10 +48,10 @@ public sealed partial class AppearanceSetting : PageBase
         }
     } = AppConfig.Theme;
 
-
     public bool EnableAcrylic
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -60,9 +61,11 @@ public sealed partial class AppearanceSetting : PageBase
         }
     } = AppConfig.EnableAcrylic;
 
-
-    public Windows.UI.Color AccentColorValue { get; set => SetProperty(ref field, value); } = ParseAccentHex(AppConfig.AccentColor);
-
+    public Windows.UI.Color AccentColorValue
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = ParseAccentHex(AppConfig.AccentColor);
 
     private static Windows.UI.Color ParseAccentHex(string? hex)
     {
@@ -77,20 +80,19 @@ public sealed partial class AppearanceSetting : PageBase
         return Windows.UI.Color.FromArgb(255, 0x2D, 0xBE, 0x9C);
     }
 
-
     [RelayCommand]
     private void ApplyAccent()
     {
         AppConfig.AccentColor = AccentColorValue.ToHex();
         AccentColorHelper.ChangeAppAccentColor(AccentColorValue);
-        EnableAccentFromWallpaper = false;  // 手动选色后关掉自动取色，避免下次换壁纸覆盖
+        EnableAccentFromWallpaper = false; // 手动选色后关掉自动取色，避免下次换壁纸覆盖
         AccentColorFlyout?.Hide();
     }
 
-
     public bool EnableAccentFromWallpaper
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -104,13 +106,13 @@ public sealed partial class AppearanceSetting : PageBase
         }
     } = AppConfig.EnableAccentFromWallpaper;
 
-
-    public Visibility WallpaperRowVisibility => AppConfig.WallpaperMode == 0 ? Visibility.Collapsed : Visibility.Visible;
-
+    public Visibility WallpaperRowVisibility =>
+        AppConfig.WallpaperMode == 0 ? Visibility.Collapsed : Visibility.Visible;
 
     public int WallpaperMode
     {
-        get; set
+        get;
+        set
         {
             if (SetProperty(ref field, value))
             {
@@ -119,18 +121,26 @@ public sealed partial class AppearanceSetting : PageBase
                 switch (value)
                 {
                     case 1:
-                        if (!string.IsNullOrEmpty(AppConfig.WallpaperFile)
-                            && !File.Exists(Path.Combine(AppConfig.CacheFolder, "bg", AppConfig.WallpaperFile)))
+                        if (
+                            !string.IsNullOrEmpty(AppConfig.WallpaperFile)
+                            && !File.Exists(
+                                Path.Combine(AppConfig.CacheFolder, "bg", AppConfig.WallpaperFile)
+                            )
+                        )
                             AppConfig.WallpaperFile = null;
                         break;
                     case 2:
-                        if (!string.IsNullOrEmpty(AppConfig.WallpaperVideoFile)
-                            && !File.Exists(AppConfig.WallpaperVideoFile))
+                        if (
+                            !string.IsNullOrEmpty(AppConfig.WallpaperVideoFile)
+                            && !File.Exists(AppConfig.WallpaperVideoFile)
+                        )
                             AppConfig.WallpaperVideoFile = null;
                         break;
                     case 3:
-                        if (!string.IsNullOrEmpty(AppConfig.WallpaperFolder)
-                            && !Directory.Exists(AppConfig.WallpaperFolder))
+                        if (
+                            !string.IsNullOrEmpty(AppConfig.WallpaperFolder)
+                            && !Directory.Exists(AppConfig.WallpaperFolder)
+                        )
                             AppConfig.WallpaperFolder = null;
                         break;
                 }
@@ -148,25 +158,30 @@ public sealed partial class AppearanceSetting : PageBase
         }
     } = AppConfig.WallpaperMode;
 
+    public string WallpaperChooseLabel =>
+        AppConfig.WallpaperMode switch
+        {
+            2 => Lang.Starshot_WallpaperChooseVideo,
+            3 => Lang.Starshot_WallpaperChooseFolder,
+            _ => Lang.Starshot_WallpaperChooseImage,
+        };
 
-    public string WallpaperChooseLabel => AppConfig.WallpaperMode switch
-    {
-        2 => Lang.Starshot_WallpaperChooseVideo,
-        3 => Lang.Starshot_WallpaperChooseFolder,
-        _ => Lang.Starshot_WallpaperChooseImage,
-    };
+    public string WallpaperValue =>
+        AppConfig.WallpaperMode switch
+        {
+            2 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile)
+                ? Lang.Starshot_PathNone
+                : AppConfig.WallpaperVideoFile!,
+            3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder)
+                ? Lang.Starshot_PathNone
+                : AppConfig.WallpaperFolder!,
+            _ => string.IsNullOrWhiteSpace(AppConfig.WallpaperFile)
+                ? Lang.Starshot_PathNone
+                : AppConfig.WallpaperFile!,
+        };
 
-
-    public string WallpaperValue => AppConfig.WallpaperMode switch
-    {
-        2 => string.IsNullOrWhiteSpace(AppConfig.WallpaperVideoFile) ? Lang.Starshot_PathNone : AppConfig.WallpaperVideoFile!,
-        3 => string.IsNullOrWhiteSpace(AppConfig.WallpaperFolder) ? Lang.Starshot_PathNone : AppConfig.WallpaperFolder!,
-        _ => string.IsNullOrWhiteSpace(AppConfig.WallpaperFile) ? Lang.Starshot_PathNone : AppConfig.WallpaperFile!,
-    };
-
-
-    public Visibility WallpaperFolderVideoOnlyVisibility => AppConfig.WallpaperMode == 3 ? Visibility.Visible : Visibility.Collapsed;
-
+    public Visibility WallpaperFolderVideoOnlyVisibility =>
+        AppConfig.WallpaperMode == 3 ? Visibility.Visible : Visibility.Collapsed;
 
     public bool WallpaperFolderVideoOnly
     {
@@ -182,18 +197,24 @@ public sealed partial class AppearanceSetting : PageBase
         }
     }
 
-
     private static readonly (string, string)[] ImageFilters =
     {
-        ("Images", ".jpg"), ("Images", ".jpeg"), ("Images", ".png"),
-        ("Images", ".bmp"), ("Images", ".webp"), ("Images", ".gif"),
+        ("Images", ".jpg"),
+        ("Images", ".jpeg"),
+        ("Images", ".png"),
+        ("Images", ".bmp"),
+        ("Images", ".webp"),
+        ("Images", ".gif"),
     };
 
     private static readonly (string, string)[] VideoFilters =
     {
-        ("Videos", ".mp4"), ("Videos", ".mkv"), ("Videos", ".mov"), ("Videos", ".avi"), ("Videos", ".webm"),
+        ("Videos", ".mp4"),
+        ("Videos", ".mkv"),
+        ("Videos", ".mov"),
+        ("Videos", ".avi"),
+        ("Videos", ".webm"),
     };
-
 
     [RelayCommand]
     private async Task ChooseWallpaper()
@@ -202,24 +223,33 @@ public sealed partial class AppearanceSetting : PageBase
         {
             switch (AppConfig.WallpaperMode)
             {
-                case 2:  // 指定视频 → 读源
+                case 2: // 指定视频 → 读源
                 {
-                    string? path = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot, VideoFilters);
-                    if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+                    string? path = await FileDialogHelper.PickSingleFileAsync(
+                        this.XamlRoot,
+                        VideoFilters
+                    );
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                        return;
                     AppConfig.WallpaperVideoFile = path;
                     break;
                 }
-                case 3:  // 文件夹随机（图/视频混合）→ 读源
+                case 3: // 文件夹随机（图/视频混合）→ 读源
                 {
                     string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
-                    if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return;
+                    if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+                        return;
                     AppConfig.WallpaperFolder = folder;
                     break;
                 }
-                default:  // 1 指定图片 → 复制到 bg/
+                default: // 1 指定图片 → 复制到 bg/
                 {
-                    string? path = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot, ImageFilters);
-                    if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+                    string? path = await FileDialogHelper.PickSingleFileAsync(
+                        this.XamlRoot,
+                        ImageFilters
+                    );
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                        return;
                     string fileName = Path.GetFileName(path);
                     string bgDir = Path.Combine(AppConfig.CacheFolder, "bg");
                     Directory.CreateDirectory(bgDir);
@@ -231,11 +261,8 @@ public sealed partial class AppearanceSetting : PageBase
             RefreshWallpaperBindings();
             WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
         }
-        catch
-        {
-        }
+        catch { }
     }
-
 
     [RelayCommand]
     private async Task OpenWallpaperFolder()
@@ -248,47 +275,53 @@ public sealed partial class AppearanceSetting : PageBase
                 case 3:
                 {
                     string? folder = AppConfig.WallpaperFolder;
-                    if (!string.IsNullOrEmpty(folder)) await Launcher.LaunchFolderPathAsync(folder);
+                    if (!string.IsNullOrEmpty(folder))
+                        await Launcher.LaunchFolderPathAsync(folder);
                     break;
                 }
                 case 2:
                 {
                     string? file = AppConfig.WallpaperVideoFile;
-                    if (!string.IsNullOrEmpty(file) && File.Exists(file)) SelectInExplorer(file);
+                    if (!string.IsNullOrEmpty(file) && File.Exists(file))
+                        SelectInExplorer(file);
                     break;
                 }
-                default:  // 1
+                default: // 1
                 {
                     string? f = AppConfig.WallpaperFile;
                     if (!string.IsNullOrEmpty(f))
                     {
                         string path = Path.Combine(AppConfig.CacheFolder, "bg", f);
-                        if (File.Exists(path)) SelectInExplorer(path);
+                        if (File.Exists(path))
+                            SelectInExplorer(path);
                     }
                     break;
                 }
             }
         }
-        catch
-        {
-        }
+        catch { }
     }
-
 
     /// <summary>explorer 打开并选中指定文件。</summary>
     private static void SelectInExplorer(string filePath)
     {
-        Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{filePath}\"") { UseShellExecute = true });
+        Process.Start(
+            new ProcessStartInfo("explorer.exe", $"/select,\"{filePath}\"")
+            {
+                UseShellExecute = true,
+            }
+        );
     }
-
 
     private void RefreshWallpaperBindings()
     {
         OnPropertyChanged(nameof(WallpaperValue));
     }
 
-
-    private void TextBlock_IsTextTrimmedChanged(TextBlock sender, IsTextTrimmedChangedEventArgs args)
+    private void TextBlock_IsTextTrimmedChanged(
+        TextBlock sender,
+        IsTextTrimmedChangedEventArgs args
+    )
     {
         if (sender.FontSize > 12)
         {
@@ -296,11 +329,19 @@ public sealed partial class AppearanceSetting : PageBase
         }
     }
 
+    public string? NowPlayingText
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public string? NowPlayingText { get; set => SetProperty(ref field, value); }
+    public string NowPlayingDisplay =>
+        string.IsNullOrEmpty(NowPlayingText)
+            ? ""
+            : $"{Lang.Starshot_WallpaperNowPlaying}: {NowPlayingText}";
 
-    public string NowPlayingDisplay => string.IsNullOrEmpty(NowPlayingText) ? "" : $"{Lang.Starshot_WallpaperNowPlaying}: {NowPlayingText}";
-
-    public Visibility NowPlayingVisibility => AppConfig.WallpaperMode == 3 && !string.IsNullOrEmpty(NowPlayingText) ? Visibility.Visible : Visibility.Collapsed;
-
+    public Visibility NowPlayingVisibility =>
+        AppConfig.WallpaperMode == 3 && !string.IsNullOrEmpty(NowPlayingText)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 }

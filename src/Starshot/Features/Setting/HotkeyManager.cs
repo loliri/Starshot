@@ -1,34 +1,46 @@
-using Starshot.Helpers;
 using System;
 using System.Diagnostics;
+using Starshot.Helpers;
 using Vanara.PInvoke;
 
 namespace Starshot.Features.Setting;
 
 internal static class HotkeyManager
 {
+    public static HotkeyInfo ScreenshotCapture { get; private set; } =
+        new HotkeyInfo(
+            nameof(AppConfig.ScreenshotCaptureHotkey),
+            44445,
+            User32.HotKeyModifiers.MOD_ALT,
+            User32.VK.VK_W
+        );
 
+    public static HotkeyInfo RegionCapture { get; private set; } =
+        new HotkeyInfo(
+            nameof(AppConfig.RegionCaptureHotkey),
+            44446,
+            User32.HotKeyModifiers.MOD_ALT,
+            User32.VK.VK_Q
+        );
 
-    public static HotkeyInfo ScreenshotCapture { get; private set; } = new HotkeyInfo(nameof(AppConfig.ScreenshotCaptureHotkey), 44445, User32.HotKeyModifiers.MOD_ALT, User32.VK.VK_W);
-
-
-    public static HotkeyInfo RegionCapture { get; private set; } = new HotkeyInfo(nameof(AppConfig.RegionCaptureHotkey), 44446, User32.HotKeyModifiers.MOD_ALT, User32.VK.VK_Q);
-
-
-    public static HotkeyInfo RegionCopyOnly { get; private set; } = new HotkeyInfo(nameof(AppConfig.RegionCopyHotkey), 44447, User32.HotKeyModifiers.MOD_ALT, User32.VK.VK_A);
-
-
-
+    public static HotkeyInfo RegionCopyOnly { get; private set; } =
+        new HotkeyInfo(
+            nameof(AppConfig.RegionCopyHotkey),
+            44447,
+            User32.HotKeyModifiers.MOD_ALT,
+            User32.VK.VK_A
+        );
 
     private static nint _registeredHwnd;
-
 
     public static void InitializeHotkey(nint hwnd)
     {
         _registeredHwnd = hwnd;
         try
         {
-            foreach (var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly })
+            foreach (
+                var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly }
+            )
             {
                 User32.HotKeyModifiers modifiers = User32.HotKeyModifiers.MOD_NONE;
                 User32.VK key = 0;
@@ -56,11 +68,25 @@ internal static class HotkeyManager
                     hotkey = HotkeyInput.GetHotkeyText((uint)modifiers, (uint)key);
                     if (error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
                     {
-                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 0);
+                        InAppToast.MainWindow.Warning(
+                            null,
+                            string.Format(
+                                Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage,
+                                hotkey
+                            ),
+                            0
+                        );
                     }
                     else
                     {
-                        InAppToast.MainWindow.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 0);
+                        InAppToast.MainWindow.Warning(
+                            null,
+                            string.Format(
+                                Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage,
+                                hotkey
+                            ),
+                            0
+                        );
                     }
                 }
             }
@@ -71,8 +97,6 @@ internal static class HotkeyManager
         }
     }
 
-
-
     /// <summary>
     /// 补弹注册失败提示：--hide 启动时 MainWindow 未建、toast 无宿主；MainWindow 打开后调此补弹未显示的错误。
     /// </summary>
@@ -80,18 +104,37 @@ internal static class HotkeyManager
     {
         foreach (var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly })
         {
-            if (item.ErrorShown || item.Error.Succeeded) continue;
+            if (item.ErrorShown || item.Error.Succeeded)
+                continue;
             item.ErrorShown = true;
             string hotkey = HotkeyInput.GetHotkeyText((uint)item.Modifiers, (uint)item.Key);
             if (item.Error == Win32Error.ERROR_HOTKEY_ALREADY_REGISTERED)
-                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage, hotkey), 0);
+                InAppToast.MainWindow?.Warning(
+                    null,
+                    string.Format(
+                        Lang.HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage,
+                        hotkey
+                    ),
+                    0
+                );
             else
-                InAppToast.MainWindow?.Warning(null, string.Format(Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage, hotkey), 0);
+                InAppToast.MainWindow?.Warning(
+                    null,
+                    string.Format(
+                        Lang.HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage,
+                        hotkey
+                    ),
+                    0
+                );
         }
     }
 
-
-    public static Win32Error RegisterHotkey(nint hwnd, int id, User32.HotKeyModifiers modifiers, User32.VK key)
+    public static Win32Error RegisterHotkey(
+        nint hwnd,
+        int id,
+        User32.HotKeyModifiers modifiers,
+        User32.VK key
+    )
     {
         if (GetHotkeyInfo(id) is HotkeyInfo info)
         {
@@ -104,7 +147,12 @@ internal static class HotkeyManager
             {
                 return Win32Error.ERROR_SUCCESS;
             }
-            User32.RegisterHotKey(_registeredHwnd, id, modifiers | User32.HotKeyModifiers.MOD_NOREPEAT, (uint)key);
+            User32.RegisterHotKey(
+                _registeredHwnd,
+                id,
+                modifiers | User32.HotKeyModifiers.MOD_NOREPEAT,
+                (uint)key
+            );
             Win32Error error = Kernel32.GetLastError();
             if (error.Succeeded && (info.Modifiers != modifiers || info.Key != key))
             {
@@ -122,7 +170,6 @@ internal static class HotkeyManager
         }
     }
 
-
     public static Win32Error UnregisterHotkey(nint hwnd, int id)
     {
         User32.UnregisterHotKey(_registeredHwnd, id);
@@ -134,7 +181,6 @@ internal static class HotkeyManager
         }
         return error;
     }
-
 
     public static Win32Error DeleteHotkey(nint hwnd, int id)
     {
@@ -151,16 +197,16 @@ internal static class HotkeyManager
         return error;
     }
 
-
     public static void InitializeHotkeyInput(HotkeyInput hotkeyInput)
     {
         if (GetHotkeyInfo(hotkeyInput.HotkeyId) is HotkeyInfo info)
         {
             hotkeyInput.SetHotkey((uint)info.Modifiers, (uint)info.Key);
-            hotkeyInput.State = info.Error.Succeeded ? HoykeyInputState.None : HoykeyInputState.Warning;
+            hotkeyInput.State = info.Error.Succeeded
+                ? HoykeyInputState.None
+                : HoykeyInputState.Warning;
         }
     }
-
 
     private static (User32.HotKeyModifiers Modifiers, User32.VK Key)? GetModifiersKey(string? value)
     {
@@ -175,16 +221,16 @@ internal static class HotkeyManager
         string[] splits = value.Split('+');
         if (splits.Length == 2)
         {
-            if (uint.TryParse(splits[0].Trim(), out uint modifiers) && uint.TryParse(splits[1].Trim(), out uint key))
+            if (
+                uint.TryParse(splits[0].Trim(), out uint modifiers)
+                && uint.TryParse(splits[1].Trim(), out uint key)
+            )
             {
                 return ((User32.HotKeyModifiers)modifiers, (User32.VK)key);
             }
         }
         return null;
     }
-
-
-
 
     public static HotkeyInfo? GetHotkeyInfo(int id)
     {
@@ -197,12 +243,8 @@ internal static class HotkeyManager
         };
     }
 
-
-
-
     public class HotkeyInfo
     {
-
         public string ConfigSetting { get; init; }
 
         public int Id { get; init; }
@@ -221,20 +263,17 @@ internal static class HotkeyManager
 
         public User32.VK DefaultKey { get; init; }
 
-
-        public HotkeyInfo(string configSetting, int id, User32.HotKeyModifiers defaultModifiers, User32.VK defaultKey)
+        public HotkeyInfo(
+            string configSetting,
+            int id,
+            User32.HotKeyModifiers defaultModifiers,
+            User32.VK defaultKey
+        )
         {
             ConfigSetting = configSetting;
             Id = id;
             DefaultModifiers = defaultModifiers;
             DefaultKey = defaultKey;
         }
-
-
     }
-
-
-
-
-
 }

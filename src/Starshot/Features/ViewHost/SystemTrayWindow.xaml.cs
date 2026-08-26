@@ -11,21 +11,17 @@ using Starshot.Helpers;
 using Vanara.PInvoke;
 using Windows.Foundation;
 
-
 namespace Starshot.Features.ViewHost;
 
 [INotifyPropertyChanged]
 public sealed partial class SystemTrayWindow : WindowEx
 {
-
     // 与 HotkeyManager 的 id 对齐：--hide 启动时 MainWindow 不创建，热键由本窗口接管
     private const int HOTKEY_CAPTURE = 44445;
 
     private const int HOTKEY_REGION = 44446;
 
     private const int HOTKEY_REGION_COPY = 44447;
-
-
 
     public SystemTrayWindow()
     {
@@ -35,12 +31,23 @@ public sealed partial class SystemTrayWindow : WindowEx
         // 托盘窗口生命周期 = App 生命周期；--hide 启动时它是唯一窗口，必须由它注册热键。
         // 延迟到 DispatcherQueue 下一轮：非隐藏启动时等 MainWindow Loaded 设好 InAppToast.MainWindow，
         // 这样注册失败（被占用）时 toast 才能弹出来；MainWindow 已先注册时 IsRegistered 守卫会跳过。
-        DispatcherQueue.GetForCurrentThread().TryEnqueue(() => HotkeyManager.InitializeHotkey(WindowHandle));
-        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
+        DispatcherQueue
+            .GetForCurrentThread()
+            .TryEnqueue(() => HotkeyManager.InitializeHotkey(WindowHandle));
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(
+            this,
+            (_, _) => this.Bindings.Update()
+        );
     }
 
-
-    protected override nint WindowSubclassProc(HWND hWnd, uint uMsg, nint wParam, nint lParam, nuint uIdSubclass, nint dwRefData)
+    protected override nint WindowSubclassProc(
+        HWND hWnd,
+        uint uMsg,
+        nint wParam,
+        nint lParam,
+        nuint uIdSubclass,
+        nint dwRefData
+    )
     {
         if (uMsg == (uint)User32.WindowMessage.WM_HOTKEY)
         {
@@ -60,16 +67,16 @@ public sealed partial class SystemTrayWindow : WindowEx
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
     }
 
-
-
-
     private unsafe void InitializeWindow()
     {
-        new SystemBackdropHelper(this, SystemBackdropProperty.AcrylicDefault with
-        {
-            TintColorLight = 0xFFE7E7E7,
-            TintColorDark = 0xFF404040
-        }).TrySetAcrylic(true);
+        new SystemBackdropHelper(
+            this,
+            SystemBackdropProperty.AcrylicDefault with
+            {
+                TintColorLight = 0xFFE7E7E7,
+                TintColorDark = 0xFF404040,
+            }
+        ).TrySetAcrylic(true);
 
         AppWindow.IsShownInSwitchers = false;
         AppWindow.Closing += (s, e) => e.Cancel = true;
@@ -87,20 +94,32 @@ public sealed partial class SystemTrayWindow : WindowEx
         flag &= ~(nint)User32.WindowStyles.WS_BORDER;
         User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE, flag);
         var p = DwmApi.DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
-        DwmApi.DwmSetWindowAttribute(WindowHandle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE, (nint)(&p), sizeof(DwmApi.DWM_WINDOW_CORNER_PREFERENCE));
+        DwmApi.DwmSetWindowAttribute(
+            WindowHandle,
+            DwmApi.DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE,
+            (nint)(&p),
+            sizeof(DwmApi.DWM_WINDOW_CORNER_PREFERENCE)
+        );
 
         // 托盘窗口必须 Show 一次以初始化托盘图标和 XAML 树（否则图标不出现、菜单打不开）。
         // WS_EX_LAYERED + alpha=0 让窗口透明不可见地完成初始化，base.Show 绕过 override 的光标定位。
         var exStyle = User32.GetWindowLongPtr(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE);
-        User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE, exStyle | (nint)User32.WindowStylesEx.WS_EX_LAYERED);
-        User32.SetLayeredWindowAttributes(WindowHandle, 0, 0, User32.LayeredWindowAttributes.LWA_ALPHA);
+        User32.SetWindowLong(
+            WindowHandle,
+            User32.WindowLongFlags.GWL_EXSTYLE,
+            exStyle | (nint)User32.WindowStylesEx.WS_EX_LAYERED
+        );
+        User32.SetLayeredWindowAttributes(
+            WindowHandle,
+            0,
+            0,
+            User32.LayeredWindowAttributes.LWA_ALPHA
+        );
         base.Show();
         Hide();
         // 摘掉 LAYERED，恢复正常渲染（否则以后每次 Show 都是透明的）
         User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE, exStyle);
     }
-
-
 
     private void SetTrayIcon()
     {
@@ -111,9 +130,6 @@ public sealed partial class SystemTrayWindow : WindowEx
         catch { }
     }
 
-
-
-
     private void SystemTrayWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
         if (args.WindowActivationState is WindowActivationState.Deactivated)
@@ -122,25 +138,38 @@ public sealed partial class SystemTrayWindow : WindowEx
         }
     }
 
-
-
     [RelayCommand]
     public override void Show()
     {
-        RootGrid.RequestedTheme = ShouldSystemUseDarkMode() ? ElementTheme.Dark : ElementTheme.Light;
+        RootGrid.RequestedTheme = ShouldSystemUseDarkMode()
+            ? ElementTheme.Dark
+            : ElementTheme.Light;
         RootGrid.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         SIZE windowSize = new()
         {
             Width = (int)(RootGrid.DesiredSize.Width * UIScale),
-            Height = (int)(RootGrid.DesiredSize.Height * UIScale)
+            Height = (int)(RootGrid.DesiredSize.Height * UIScale),
         };
         User32.GetCursorPos(out POINT point);
-        User32.CalculatePopupWindowPosition(point, windowSize, User32.TrackPopupMenuFlags.TPM_RIGHTALIGN | User32.TrackPopupMenuFlags.TPM_BOTTOMALIGN | User32.TrackPopupMenuFlags.TPM_WORKAREA, null, out RECT windowPos);
-        User32.MoveWindow(WindowHandle, windowPos.X, windowPos.Y, windowPos.Width, windowPos.Height, true);
+        User32.CalculatePopupWindowPosition(
+            point,
+            windowSize,
+            User32.TrackPopupMenuFlags.TPM_RIGHTALIGN
+                | User32.TrackPopupMenuFlags.TPM_BOTTOMALIGN
+                | User32.TrackPopupMenuFlags.TPM_WORKAREA,
+            null,
+            out RECT windowPos
+        );
+        User32.MoveWindow(
+            WindowHandle,
+            windowPos.X,
+            windowPos.Y,
+            windowPos.Width,
+            windowPos.Height,
+            true
+        );
         base.Show();
     }
-
-
 
     [RelayCommand]
     public override void Hide()
@@ -148,21 +177,17 @@ public sealed partial class SystemTrayWindow : WindowEx
         base.Hide();
     }
 
-
-
     [RelayCommand]
     public void ShowMainWindow()
     {
         App.Current.EnsureMainWindow();
     }
 
-
     [RelayCommand]
     private void Exit()
     {
         App.Current.Exit();
     }
-
 
     [RelayCommand]
     private void Capture()
@@ -171,14 +196,12 @@ public sealed partial class SystemTrayWindow : WindowEx
         ScreenCaptureService.Capture();
     }
 
-
     [RelayCommand]
     private void CaptureRegion()
     {
         Hide();
         ScreenCaptureService.CaptureRegion();
     }
-
 
     [RelayCommand]
     private void CaptureRegionCopy()
@@ -187,11 +210,8 @@ public sealed partial class SystemTrayWindow : WindowEx
         ScreenCaptureService.CaptureRegionCopyOnly();
     }
 
-
     private void WindowEx_Closed(object sender, WindowEventArgs args)
     {
         trayIcon?.Dispose();
     }
-
-
 }

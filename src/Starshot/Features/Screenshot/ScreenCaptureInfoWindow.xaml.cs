@@ -1,3 +1,9 @@
+using System;
+using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
@@ -12,12 +18,6 @@ using Microsoft.UI.Xaml.Hosting;
 using Starshot.Features.Setting;
 using Starshot.Frameworks;
 using Starshot.Helpers;
-using System;
-using System.Diagnostics;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Windows.Foundation;
 using Windows.Graphics;
@@ -25,19 +25,17 @@ using Windows.Graphics.DirectX;
 using Windows.Storage;
 using Windows.System;
 
-
 namespace Starshot.Features.Screenshot;
 
 [INotifyPropertyChanged]
 public sealed partial class ScreenCaptureInfoWindow : WindowEx
 {
-
     private const int WindowWidth = 320;
 
     private const int WindowHeight = 100;
 
-    private readonly ILogger<ScreenCaptureInfoWindow> _logger = AppConfig.GetLogger<ScreenCaptureInfoWindow>();
-
+    private readonly ILogger<ScreenCaptureInfoWindow> _logger =
+        AppConfig.GetLogger<ScreenCaptureInfoWindow>();
 
     public ScreenCaptureInfoWindow()
     {
@@ -46,11 +44,12 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         InitializeWindow();
         // 不能删除，防止在 SW_SHOWNOACTIVATE 显示后没有文字
         this.Bindings.Update();
-        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(
+            this,
+            (_, _) => this.Bindings.Update()
+        );
         this.Closed += ScreenCaptureInfoWindow_Closed;
     }
-
-
 
     private void InitializeWindow()
     {
@@ -62,16 +61,17 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             presenter.IsResizable = false;
             presenter.SetBorderAndTitleBar(false, false);
             presenter.IsAlwaysOnTop = true;
-            User32.WindowStyles style = (User32.WindowStyles)User32.GetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE);
+            User32.WindowStyles style = (User32.WindowStyles)
+                User32.GetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE);
             style &= ~User32.WindowStyles.WS_DLGFRAME;
             User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE, (nint)style);
-            User32.WindowStylesEx styleEx = (User32.WindowStylesEx)User32.GetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE);
+            User32.WindowStylesEx styleEx = (User32.WindowStylesEx)
+                User32.GetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE);
             styleEx |= User32.WindowStylesEx.WS_EX_TOPMOST;
             User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_EXSTYLE, (nint)styleEx);
         }
         SetWindowDisplayAffinity(WindowHandle, 0x11); // WDA_EXCLUDEFROMCAPTURE：截图时此窗口不可见
     }
-
 
     private void ScreenCaptureInfoWindow_Closed(object sender, WindowEventArgs args)
     {
@@ -81,18 +81,23 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         Button_OpenLog.Click -= Button_OpenLog_Click;
     }
 
+    public bool IsSuccess
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
-    public bool IsSuccess { get; set => SetProperty(ref field, value); }
-
-    public bool IsError { get; set => SetProperty(ref field, value); }
-
-
+    public bool IsError
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     private int _captureImageCount;
 
     private int _finishedImageCount;
 
-    private bool _isCopy;  // 仅复制模式：显示"已复制"而非"已保存"+打开按钮
+    private bool _isCopy; // 仅复制模式：显示"已复制"而非"已保存"+打开按钮
 
     private string? _lastFile;
 
@@ -106,8 +111,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
     private bool _hasCursorMonitorRect;
     private RECT _cursorMonitorRect;
     private uint _cursorMonitorDpi;
-
-
 
     /// <summary>
     /// 开始截图后调用此方法显示信息
@@ -126,14 +129,17 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         DisplayWindow(hwnd, true);
     }
 
-
     /// <summary>
     /// 开始截图后调用此方法显示信息
     /// </summary>
     /// <param name="hwnd"></param>
     /// <param name="bitmap"></param>
     /// <param name="maxCLL"></param>
-    public void CaptureStart(Microsoft.UI.DisplayId displayId, CanvasBitmap bitmap, float maxCLL = -1)
+    public void CaptureStart(
+        Microsoft.UI.DisplayId displayId,
+        CanvasBitmap bitmap,
+        float maxCLL = -1
+    )
     {
         IsSuccess = true;
         IsError = false;
@@ -141,11 +147,9 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         _captureImageCount++;
         CropImage(bitmap, GetDpiForMonitor(displayId), maxCLL);
         _cancellationTokenSource?.Cancel();
-        _hasCursorMonitorRect = false;  // 新会话：让 DisplayWindow 重新采样光标所在屏
+        _hasCursorMonitorRect = false; // 新会话：让 DisplayWindow 重新采样光标所在屏
         DisplayWindow(true);
     }
-
-
 
     /// <summary>
     /// 截图成功后调用此方法来显示截图信息窗口
@@ -178,8 +182,12 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
     }
 
-
-    public void CaptureSuccess(Microsoft.UI.DisplayId displayId, CanvasBitmap bitmap, string file, float maxCLL = -1)
+    public void CaptureSuccess(
+        Microsoft.UI.DisplayId displayId,
+        CanvasBitmap bitmap,
+        string file,
+        float maxCLL = -1
+    )
     {
         try
         {
@@ -203,13 +211,17 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
     }
 
-
     /// <summary>
     /// 仅复制成功：显示缩略图 + "已复制"，无文件、无打开按钮
     /// </summary>
-    public void CaptureCopySuccess(Microsoft.UI.DisplayId displayId, CanvasBitmap? bitmap, float maxCLL = -1)
+    public void CaptureCopySuccess(
+        Microsoft.UI.DisplayId displayId,
+        CanvasBitmap? bitmap,
+        float maxCLL = -1
+    )
     {
-        if (bitmap is null) return;
+        if (bitmap is null)
+            return;
         try
         {
             IsSuccess = true;
@@ -221,7 +233,7 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = new CancellationTokenSource();
             _openImageCancellationToken = _cancellationTokenSource.Token;
-            _hasCursorMonitorRect = false;  // copy-only 不走 CaptureStart，这里补重置：浮窗重新采样光标所在屏
+            _hasCursorMonitorRect = false; // copy-only 不走 CaptureStart，这里补重置：浮窗重新采样光标所在屏
             DisplayWindow(false, _cancellationTokenSource.Token);
         }
         catch (Exception ex)
@@ -230,29 +242,31 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
     }
 
-
     [LibraryImport("Shcore.dll")]
-    private static partial int GetDpiForMonitor(nint hmonitor, int dpiType, out uint dpiX, out uint dpiY);
-
+    private static partial int GetDpiForMonitor(
+        nint hmonitor,
+        int dpiType,
+        out uint dpiX,
+        out uint dpiY
+    );
 
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SetWindowDisplayAffinity(IntPtr hwnd, uint dwAffinity);
-
 
     private static uint GetDpiForMonitor(Microsoft.UI.DisplayId displayId)
     {
         return GetDpiForMonitor((nint)displayId.Value);
     }
 
-
     private static uint GetDpiForMonitor(nint hmonitor)
     {
         // 失败时 out 参数是未写入的栈内存，检查 HRESULT；兜底改问系统 DPI（随用户缩放设置，
         // 如 150% 机器返回 144），不写死 96 以免高缩放用户浮窗尺寸失真
-        return GetDpiForMonitor(hmonitor, 0, out uint dpiX, out _) == 0 ? dpiX : User32.GetDpiForSystem();
+        return GetDpiForMonitor(hmonitor, 0, out uint dpiX, out _) == 0
+            ? dpiX
+            : User32.GetDpiForSystem();
     }
-
 
     /// <summary>
     /// 根据 _isCopy / complete 设置状态文字、图标、按钮（仅复制模式显示"已复制"，无打开按钮）
@@ -271,7 +285,9 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             return;
         }
         StackPanel_CopyStatus.Visibility = Visibility.Collapsed;
-        TextBlock_State.Text = complete ? Lang.ScreenCaptureInfoWindow_ScreenshotSaved : Lang.ScreenCaptureInfoWindow_ProcessingImage;
+        TextBlock_State.Text = complete
+            ? Lang.ScreenCaptureInfoWindow_ScreenshotSaved
+            : Lang.ScreenCaptureInfoWindow_ProcessingImage;
         ProgressRing_Process.Visibility = complete ? Visibility.Collapsed : Visibility.Visible;
         FontIcon_Complete.Visibility = complete ? Visibility.Visible : Visibility.Collapsed;
         if (_captureImageCount > 1)
@@ -279,9 +295,9 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             TextBlock_Repeat.Visibility = Visibility.Visible;
             TextBlock_Repeat.Text = $"{_finishedImageCount}/{_captureImageCount}";
         }
-        Button_OpenImage.Visibility = IsSuccess && _finishedImageCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+        Button_OpenImage.Visibility =
+            IsSuccess && _finishedImageCount > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
-
 
     /// <summary>
     /// 剪裁并缩放至正方形大小
@@ -339,7 +355,12 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
 
         if (_imageSource?.Size.Width != targetSize)
         {
-            _imageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), targetSize, targetSize, 96);
+            _imageSource = new CanvasImageSource(
+                CanvasDevice.GetSharedDevice(),
+                targetSize,
+                targetSize,
+                96
+            );
         }
         using (CanvasDrawingSession ds = _imageSource.CreateDrawingSession(Colors.Transparent))
         {
@@ -347,7 +368,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
         ThumbnailImage.Source = _imageSource;
     }
-
 
     /// <summary>
     /// 显示错误信息
@@ -376,12 +396,13 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
     }
 
-
-
     private Visual _contentVisual;
 
-
-    private async void DisplayWindow(nint hwnd, bool doNotClose = false, CancellationToken cancellationToken = default)
+    private async void DisplayWindow(
+        nint hwnd,
+        bool doNotClose = false,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -404,23 +425,32 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             int targetX = clientTopLeft.x + clientWidth - width;
             int targetY = clientTopLeft.y + (int)(clientHeight * 0.25) - height / 2;
 
-            HMONITOR monitor = User32.MonitorFromWindow(hwnd, User32.MonitorFlags.MONITOR_DEFAULTTONEAREST);
-            User32.MONITORINFOEX monitorInfo = new() { cbSize = (uint)Marshal.SizeOf<User32.MONITORINFOEX>() };
+            HMONITOR monitor = User32.MonitorFromWindow(
+                hwnd,
+                User32.MonitorFlags.MONITOR_DEFAULTTONEAREST
+            );
+            User32.MONITORINFOEX monitorInfo = new()
+            {
+                cbSize = (uint)Marshal.SizeOf<User32.MONITORINFOEX>(),
+            };
             User32.GetMonitorInfo(monitor, ref monitorInfo);
             var err = Kernel32.GetLastError();
             var rcMonitor = monitorInfo.rcMonitor;
 
-            bool exceedsClient = targetX < clientTopLeft.x
-                                 || targetX + width > clientTopLeft.x + clientWidth
-                                 || targetY < clientTopLeft.y
-                                 || targetY + height > clientTopLeft.y + clientHeight;
+            bool exceedsClient =
+                targetX < clientTopLeft.x
+                || targetX + width > clientTopLeft.x + clientWidth
+                || targetY < clientTopLeft.y
+                || targetY + height > clientTopLeft.y + clientHeight;
 
-            bool exceedsScreen = targetX < rcMonitor.left
-                                 || targetX + width > rcMonitor.right
-                                 || targetY < rcMonitor.top
-                                 || targetY + height > rcMonitor.bottom;
+            bool exceedsScreen =
+                targetX < rcMonitor.left
+                || targetX + width > rcMonitor.right
+                || targetY < rcMonitor.top
+                || targetY + height > rcMonitor.bottom;
 
-            bool fallbackToScreen = exceedsClient || exceedsScreen || User32.GetForegroundWindow() != hwnd;
+            bool fallbackToScreen =
+                exceedsClient || exceedsScreen || User32.GetForegroundWindow() != hwnd;
 
             if (fallbackToScreen)
             {
@@ -448,8 +478,10 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
     }
 
-
-    private async void DisplayWindow(bool doNotClose = false, CancellationToken cancellationToken = default)
+    private async void DisplayWindow(
+        bool doNotClose = false,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -458,8 +490,14 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             if (!_hasCursorMonitorRect)
             {
                 User32.GetCursorPos(out var pt);
-                HMONITOR monitor = User32.MonitorFromPoint(pt, User32.MonitorFlags.MONITOR_DEFAULTTONEAREST);
-                User32.MONITORINFOEX monitorInfo = new() { cbSize = (uint)Marshal.SizeOf<User32.MONITORINFOEX>() };
+                HMONITOR monitor = User32.MonitorFromPoint(
+                    pt,
+                    User32.MonitorFlags.MONITOR_DEFAULTTONEAREST
+                );
+                User32.MONITORINFOEX monitorInfo = new()
+                {
+                    cbSize = (uint)Marshal.SizeOf<User32.MONITORINFOEX>(),
+                };
                 User32.GetMonitorInfo(monitor, ref monitorInfo);
                 _cursorMonitorRect = monitorInfo.rcMonitor;
                 _cursorMonitorDpi = GetDpiForMonitor(monitor.DangerousGetHandle());
@@ -493,7 +531,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
     }
 
-
     private void ShowWindow(RectInt32 rect)
     {
         // 跨 DPI 屏移动会触发 WM_DPICHANGED，系统默认按 DPI 比例调整窗口 rect（位置偏）。
@@ -503,7 +540,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         AppWindow.Show(false);
         StartShowAnimation();
     }
-
 
     private async Task HideWindowAsync(CancellationToken cancellationToken)
     {
@@ -520,8 +556,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         TextBlock_Repeat.Text = "";
         TextBlock_Repeat.Visibility = Visibility.Collapsed;
     }
-
-
 
     private Vector3KeyFrameAnimation _showAnimation;
 
@@ -547,7 +581,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         _lastShowAnimationTs = ts;
     }
 
-
     private void StartHideAnimation()
     {
         _contentVisual ??= ElementCompositionPreview.GetElementVisual(RootGrid);
@@ -559,7 +592,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
         _contentVisual.StartAnimation(nameof(_contentVisual.Offset), _hideAnimation);
     }
-
 
     private async void Button_OpenImage_Click(object sender, RoutedEventArgs e)
     {
@@ -579,7 +611,6 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         catch { }
     }
 
-
     private async void Button_OpenLog_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -598,6 +629,4 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         }
         catch { }
     }
-
-
 }

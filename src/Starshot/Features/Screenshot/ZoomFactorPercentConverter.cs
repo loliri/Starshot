@@ -1,6 +1,5 @@
-using Microsoft.UI.Xaml.Data;
 using System;
-
+using Microsoft.UI.Xaml.Data;
 
 namespace Starshot.Features.Screenshot;
 

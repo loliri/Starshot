@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Navigation;
@@ -6,23 +8,19 @@ using Starshot.Features.Update;
 using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
-using System;
-using System.Threading.Tasks;
 using Windows.System;
 
 namespace Starshot.Features.About;
 
 public sealed partial class AboutPage : PageBase
 {
-
     public string Version { get; set; } =
 #if DEBUG
         "Debug";
 #else
-        // 安装版线（kachina）带 Installer 后缀，两条线在关于页可辨
+        // 安装版线带 Installer 后缀，两条线在关于页可辨
         $"Release {AppConfig.AppVersion}{(AppConfig.Installer ? " Installer" : "")}";
 #endif
-
 
     /// <summary>
     /// 检查更新时是否包含预发布版本（代理 AppConfig.EnablePreReleaseUpdateCheck）。
@@ -33,7 +31,6 @@ public sealed partial class AboutPage : PageBase
         set => AppConfig.EnablePreReleaseUpdateCheck = value;
     }
 
-
     public AboutPage()
     {
         InitializeComponent();
@@ -42,12 +39,6 @@ public sealed partial class AboutPage : PageBase
         CheckUpdateButton.Visibility = Visibility.Collapsed;
         PreReleaseSwitch.Visibility = Visibility.Collapsed;
 #endif
-        // 安装版线（kachina）当前只走 stable 渠道，预览开关会误导（检查到预览版但更新器按 hash 只认 stable）；
-        // devmode 开发者保留（调双渠道用）
-        if (AppConfig.Installer && !AppConfig.DevMode)
-        {
-            PreReleaseSwitch.Visibility = Visibility.Collapsed;
-        }
 
         // 仓库地址单一来源：NavigateUri 与显示文本都从 AppConfig 常量来，XAML 不再硬编码
         WebSiteLink.NavigateUri = new Uri(AppConfig.WebSiteUrl);
@@ -56,10 +47,8 @@ public sealed partial class AboutPage : PageBase
         RepoUrlText.Text = AppConfig.RepoBaseUrl;
     }
 
-
     private int _logoTaps;
     private DateTime _lastLogoTap = DateTime.MinValue;
-
 
     /// <summary>
     /// logo 点 5 次开启开发者模式（2.5 秒内连点算连续）。只开不关：已开启时只提示，关闭走设置页开关。
@@ -72,18 +61,17 @@ public sealed partial class AboutPage : PageBase
         }
         _lastLogoTap = DateTime.Now;
         _logoTaps++;
-        if (_logoTaps < 5) return;
+        if (_logoTaps < 5)
+            return;
         _logoTaps = 0;
         AppConfig.DevMode = true;
         InAppToast.MainWindow?.Information(Lang.Starshot_DevModeOn, null, 3000);
     }
 
-
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
     }
-
 
     [RelayCommand]
     private async Task CheckUpdate()
@@ -107,5 +95,4 @@ public sealed partial class AboutPage : PageBase
             InAppToast.MainWindow?.Error(ex, Lang.Starshot_UpdateFailed);
         }
     }
-
 }

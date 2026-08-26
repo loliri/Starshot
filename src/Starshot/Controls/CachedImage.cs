@@ -1,27 +1,28 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Scighost.WinUI.ImageEx;
 using Starshot.Features.Codec;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Starshot.Controls;
 
 public sealed partial class CachedImage : ImageEx
 {
-
-
     public bool IsThumbnail
     {
         get { return (bool)GetValue(IsThumbnailProperty); }
         set { SetValue(IsThumbnailProperty, value); }
     }
 
-    public static readonly DependencyProperty IsThumbnailProperty =
-        DependencyProperty.Register("IsThumbnail", typeof(bool), typeof(CachedImage), new PropertyMetadata(false));
-
+    public static readonly DependencyProperty IsThumbnailProperty = DependencyProperty.Register(
+        "IsThumbnail",
+        typeof(bool),
+        typeof(CachedImage),
+        new PropertyMetadata(false)
+    );
 
     public bool PngThumbnail
     {
@@ -29,12 +30,17 @@ public sealed partial class CachedImage : ImageEx
         set { SetValue(PngThumbnailProperty, value); }
     }
 
-    public static readonly DependencyProperty PngThumbnailProperty =
-        DependencyProperty.Register(nameof(PngThumbnail), typeof(bool), typeof(CachedImage), new PropertyMetadata(false));
+    public static readonly DependencyProperty PngThumbnailProperty = DependencyProperty.Register(
+        nameof(PngThumbnail),
+        typeof(bool),
+        typeof(CachedImage),
+        new PropertyMetadata(false)
+    );
 
-
-
-    protected override async Task<ImageSource?> ProvideCachedResourceAsync(Uri imageUri, CancellationToken token)
+    protected override async Task<ImageSource?> ProvideCachedResourceAsync(
+        Uri imageUri,
+        CancellationToken token
+    )
     {
         if (imageUri.Scheme is "ms-appx")
         {
@@ -44,7 +50,11 @@ public sealed partial class CachedImage : ImageEx
         {
             if (IsThumbnail)
             {
-                return await ImageThumbnail.GetImageThumbnailAsync(imageUri.LocalPath, PngThumbnail, token);
+                return await ImageThumbnail.GetImageThumbnailAsync(
+                    imageUri.LocalPath,
+                    PngThumbnail,
+                    token
+                );
             }
             else
             {
@@ -53,6 +63,4 @@ public sealed partial class CachedImage : ImageEx
         }
         return new BitmapImage(imageUri);
     }
-
-
 }

@@ -1,83 +1,95 @@
-<sf:WindowEx x:Class="Starshot.Features.ViewHost.SystemTrayWindow"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:hn="using:H.NotifyIcon"
-             xmlns:lang="using:Starshot.Language"
-             xmlns:local="using:Starshot.Features.ViewHost"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:sf="using:Starshot.Frameworks"
-             Title="StarwardTrayMenu"
-             x:DefaultBindMode="OneWay"
-             Closed="WindowEx_Closed"
-             mc:Ignorable="d">
+<sf:WindowEx
+  x:Class="Starshot.Features.ViewHost.SystemTrayWindow"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:hn="using:H.NotifyIcon"
+  xmlns:lang="using:Starshot.Language"
+  xmlns:local="using:Starshot.Features.ViewHost"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:sf="using:Starshot.Frameworks"
+  Title="StarwardTrayMenu"
+  x:DefaultBindMode="OneWay"
+  Closed="WindowEx_Closed"
+  mc:Ignorable="d"
+>
+  <Grid Name="RootGrid">
+    <hn:TaskbarIcon
+      x:Name="trayIcon"
+      LeftClickCommand="{x:Bind ShowMainWindowCommand}"
+      NoLeftClickDelay="True"
+      RightClickCommand="{x:Bind ShowCommand}"
+      ToolTipText="Starshot"
+    />
 
-    <Grid Name="RootGrid">
-        <hn:TaskbarIcon x:Name="trayIcon"
-                        LeftClickCommand="{x:Bind ShowMainWindowCommand}"
-                        NoLeftClickDelay="True"
-                        RightClickCommand="{x:Bind ShowCommand}"
-                        ToolTipText="Starshot" />
-
-        <StackPanel Padding="8">
-
-            <Button Height="36"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Left"
-                    Command="{x:Bind CaptureCommand}"
-                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <FontIcon FontSize="16" Glyph="&#xE722;" />
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_HotkeyScreenshot}" />
-                </StackPanel>
-            </Button>
-            <Button Height="36"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Left"
-                    Command="{x:Bind CaptureRegionCommand}"
-                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <FontIcon FontSize="16" Glyph="&#xE8A9;" />
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_HotkeyRegion}" />
-                </StackPanel>
-            </Button>
-            <Button Height="36"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Left"
-                    Command="{x:Bind CaptureRegionCopyCommand}"
-                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <FontIcon FontSize="16" Glyph="&#xE8C8;" />
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_HotkeyRegionCopy}" />
-                </StackPanel>
-            </Button>
-            <MenuFlyoutSeparator />
-            <Button Height="36"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Left"
-                    Command="{x:Bind ShowMainWindowCommand}"
-                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <FontIcon HorizontalAlignment="Center"
-                              FontSize="16"
-                              Glyph="&#xE80F;" />
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.MainPage_Launcher}" />
-                </StackPanel>
-            </Button>
-            <Button Height="36"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Left"
-                    Command="{x:Bind ExitCommand}"
-                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <FontIcon HorizontalAlignment="Center"
-                              FontSize="16"
-                              Glyph="&#xE7E8;" />
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Common_Exit}" />
-                </StackPanel>
-            </Button>
-
+    <StackPanel Padding="8">
+      <Button
+        Height="36"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Left"
+        Command="{x:Bind CaptureCommand}"
+        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+      >
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <FontIcon FontSize="16" Glyph="&#xE722;" />
+          <TextBlock
+            VerticalAlignment="Center"
+            Text="{x:Bind lang:Lang.Starshot_HotkeyScreenshot}"
+          />
         </StackPanel>
-    </Grid>
-
+      </Button>
+      <Button
+        Height="36"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Left"
+        Command="{x:Bind CaptureRegionCommand}"
+        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+      >
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <FontIcon FontSize="16" Glyph="&#xE8A9;" />
+          <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Starshot_HotkeyRegion}" />
+        </StackPanel>
+      </Button>
+      <Button
+        Height="36"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Left"
+        Command="{x:Bind CaptureRegionCopyCommand}"
+        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+      >
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <FontIcon FontSize="16" Glyph="&#xE8C8;" />
+          <TextBlock
+            VerticalAlignment="Center"
+            Text="{x:Bind lang:Lang.Starshot_HotkeyRegionCopy}"
+          />
+        </StackPanel>
+      </Button>
+      <MenuFlyoutSeparator />
+      <Button
+        Height="36"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Left"
+        Command="{x:Bind ShowMainWindowCommand}"
+        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+      >
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <FontIcon HorizontalAlignment="Center" FontSize="16" Glyph="&#xE80F;" />
+          <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.MainPage_Launcher}" />
+        </StackPanel>
+      </Button>
+      <Button
+        Height="36"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Left"
+        Command="{x:Bind ExitCommand}"
+        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+      >
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <FontIcon HorizontalAlignment="Center" FontSize="16" Glyph="&#xE7E8;" />
+          <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Common_Exit}" />
+        </StackPanel>
+      </Button>
+    </StackPanel>
+  </Grid>
 </sf:WindowEx>

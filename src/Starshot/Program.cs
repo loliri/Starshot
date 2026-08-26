@@ -15,14 +15,17 @@ namespace Starshot;
 /// </summary>
 public static class Program
 {
-
     // 未打包应用没注册 AppUserModelID，任务管理器用隐式 AUMID 解析应用图标常失败 → 空白图标。
     // 显式设置后按此 ID 分组解析（配合 MainWindow 的 AppWindow.SetIcon）
     [DllImport("shell32.dll")]
-    private static extern void SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string appID);
+    private static extern void SetCurrentProcessExplicitAppUserModelID(
+        [MarshalAs(UnmanagedType.LPWStr)] string appID
+    );
 
-
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.UI.Xaml.Markup.Compiler", " 3.0.0.2411")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute(
+        "Microsoft.UI.Xaml.Markup.Compiler",
+        " 3.0.0.2411"
+    )]
     [global::System.STAThreadAttribute]
     static int Main(string[] args)
     {
@@ -42,12 +45,19 @@ public static class Program
                     td.Actions.Add(new ExecAction(launcherPath, taskArgs));
                     td.Settings.DisallowStartIfOnBatteries = false;
                     td.Settings.StopIfGoingOnBatteries = false;
-                    try { ts.RootFolder.DeleteTask("Starshot", false); } catch { }
-                    ts.RootFolder.RegisterTaskDefinition("Starshot", td,
+                    try
+                    {
+                        ts.RootFolder.DeleteTask("Starshot", false);
+                    }
+                    catch { }
+                    ts.RootFolder.RegisterTaskDefinition(
+                        "Starshot",
+                        td,
                         TaskCreation.CreateOrUpdate,
                         $"{Environment.UserDomainName}\\{Environment.UserName}",
                         null,
-                        TaskLogonType.InteractiveToken);
+                        TaskLogonType.InteractiveToken
+                    );
                     LogManageTask($"Task created: {launcherPath} {taskArgs}");
                 }
                 else
@@ -67,33 +77,43 @@ public static class Program
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
         global::WinRT.ComWrappersSupport.InitializeComWrappers();
-        global::Microsoft.UI.Xaml.Application.Start((p) =>
-        {
-            var context = new global::Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(global::Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread());
-            global::System.Threading.SynchronizationContext.SetSynchronizationContext(context);
-            new App();
-        });
+        global::Microsoft.UI.Xaml.Application.Start(
+            (p) =>
+            {
+                var context =
+                    new global::Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(
+                        global::Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()
+                    );
+                global::System.Threading.SynchronizationContext.SetSynchronizationContext(context);
+                new App();
+            }
+        );
         return 0;
     }
-
 
     private static void LogManageTask(string message)
     {
         try
         {
-            string logFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starshot", "log", "TaskScheduler.log");
+            string logFile = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Starshot",
+                "log",
+                "TaskScheduler.log"
+            );
             Directory.CreateDirectory(Path.GetDirectoryName(logFile)!);
             File.AppendAllText(logFile, $"[{DateTime.Now:HH:mm:ss.fff}] [manage-task] {message}\n");
         }
         catch { }
     }
 
-
-    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private static void CurrentDomain_UnhandledException(
+        object sender,
+        UnhandledExceptionEventArgs e
+    )
     {
         WriteCrashLog("Program Crash", e.ExceptionObject as Exception);
     }
-
 
     /// <summary>
     /// 崩溃直写文件，不依赖任何初始化：Serilog 要到首个页面构造才配置（Log.Logger 唯一赋值点在 BuildServiceProvider），
@@ -107,7 +127,10 @@ public static class Program
                 ? Path.Combine(AppContext.BaseDirectory, "log", AppConfig.BuildLogFileName())
                 : AppConfig.LogFile;
             Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-            File.AppendAllText(file, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [{kind}]\r\n{ex}\r\n\r\n");
+            File.AppendAllText(
+                file,
+                $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [{kind}]\r\n{ex}\r\n\r\n"
+            );
         }
         catch { }
     }
