@@ -192,52 +192,15 @@ jobs:
           $releases = if ($LASTEXITCODE -eq 0 -and $raw) { $raw | ConvertFrom-Json } else { $null }
           if (-not $releases) { Write-Host "No releases, skipping delta"; exit 0 }
 
-          # 上一个 stable（prerelease=false 最近的）
-          $prevStable = $releases | Where-Object { -not $_.prerelease } | Select-Object -First 1
-          if (-not $prevStable) { Write-Host "No stable base release, skipping delta"; exit 0 }
-
-          # 本级 preview：上一个 stable 之后（更新于它）的所有 prerelease
-          # releases 按发布时间倒序，prevStable 的 index 之前（index 更小=更新）的就是它之后的 prerelease
-          $stableIdx = [array]::IndexOf($releases, $prevStable)
-          $recentPreviews = @()
-          if ($stableIdx -gt 0) {
-            $recentPreviews = $releases[0..($stableIdx - 1)] | Where-Object { $_.prerelease }
-          }
-
-          # 选 diff target（线性发布；不解析版本号——仅线起点 .0 一处例外）
-          # stable：本级 preview + 前 5 个 stable + 线起点 .0 保底（如 2.1.100 → 2.1.0；跨线首发 2.2.0 → 上一条线 2.1.0），
-          # 卡老 patch 的用户也能走差分；已在前 5 内则不重复
-          # preview：本级 preview + 上一个 stable（1 个）
+          # 选 diff target（主要用户在安装版，便携版差分收窄到最小覆盖）：
+          # stable：前 2 个 stable；preview：上一个 release（无论 stable/preview，就这一个）
           $targetTags = [System.Collections.Generic.List[string]]::new()
-          foreach ($r in $recentPreviews) {
-            if ($r.tag_name -ne $newTag -and -not $targetTags.Contains($r.tag_name)) { $targetTags.Add($r.tag_name) }
-          }
           if ($isPre) {
-            if (-not $targetTags.Contains($prevStable.tag_name)) { $targetTags.Add($prevStable.tag_name) }
+            $prev = $releases | Where-Object { $_.tag_name -ne $newTag } | Select-Object -First 1
+            if ($prev) { $targetTags.Add($prev.tag_name) }
           } else {
-            $releases | Where-Object { -not $_.prerelease } | Select-Object -First 5 | ForEach-Object {
-              if ($_.tag_name -ne $newTag -and -not $targetTags.Contains($_.tag_name)) { $targetTags.Add($_.tag_name) }
-            }
-            # 线起点保底：当前 a.b.c → a.b.0；当前本身就是 .0（新 minor 首发，如 2.2.0）→ 回退上一条线 (a.(b-1).0)，
-            # 跨线更新时老线头部用户也能走差分。已在集合 / release 不存在（线从非 0 起步）/ minor=0 无上线都不加
-            $parts = $newTag.Split('.')
-            if ($parts.Count -ge 2) {
-              $lineStart = "$($parts[0]).$($parts[1]).0"
-              if ($lineStart -eq $newTag -and [int]$parts[1] -gt 0) {
-                $lineStart = "$($parts[0]).$([int]$parts[1] - 1).0"
-              }
-              if ($lineStart -ne $newTag -and -not $targetTags.Contains($lineStart)) {
-                # 直接按 tag 查 release（不受 /releases 分页影响：.0 基线可能早已滚出第 1 页）；
-                # 该端点不返回 draft，仅需再排除 prerelease（.0 只以预览存在过的线不算）
-                $lsJson = gh api "repos/${{ github.repository }}/releases/tags/$lineStart" 2>$null
-                if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrEmpty($lsJson)) {
-                  $lsRelease = $lsJson | ConvertFrom-Json
-                  if (-not $lsRelease.prerelease) {
-                    $targetTags.Add($lineStart)
-                    Write-Host "Line-start delta added: $lineStart -> $newTag"
-                  }
-                }
-              }
+            $releases | Where-Object { -not $_.prerelease -and $_.tag_name -ne $newTag } | Select-Object -First 2 | ForEach-Object {
+              $targetTags.Add($_.tag_name)
             }
           }
 
