@@ -175,10 +175,12 @@ public sealed partial class UpdateWindow : WindowEx
     {
         if (_release is null)
             return;
-        // 缺更新器：只弹重下载提示，不走后续任何流程
+        // 缺更新器：exe 与自更新中断残留 .instbak 都不在才判没救，弹重下载提示；
+        // 只剩 .instbak 时放行，StartUpdateAsync 会试着拉它
         if (
             AppConfig.Installer
             && !File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"))
+            && !File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.instbak"))
         )
         {
             var dialog = new UpdaterMissingDialog { XamlRoot = RootGrid.XamlRoot };
@@ -222,6 +224,15 @@ public sealed partial class UpdateWindow : WindowEx
                 _cts.Token,
                 forceFull: forceFull
             );
+        }
+        catch (InvalidOperationException)
+        {
+            // 更新器彻底不可用（exe 缺失且 .instbak 损坏拉不起来）：这条更新链已死，唯一出路是重新下载。
+            // 主按钮不恢复——坏状态不会自己好，恢复只会让用户重点再炸循环；「稍后提醒」恢复供关窗退出
+            IsProgressVisible = Visibility.Collapsed;
+            Button_Remind.IsEnabled = true;
+            var dialog = new UpdaterMissingDialog { XamlRoot = RootGrid.XamlRoot };
+            await dialog.ShowAsync();
         }
         catch (Exception ex)
         {

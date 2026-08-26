@@ -177,18 +177,33 @@ public static class UpdateService
         // 安装版线：更新交给包内更新器（GUI 自带进度/差分/hash 校验/断点自愈），app 退出让它接管
         if (AppConfig.Installer)
         {
+            // 更新器自更新中断的残留：旧更新器被改名 .instbak、新文件未落地——拉改名的那份照样能用
             string updaterExe = Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe");
-            if (File.Exists(updaterExe))
+            string updaterBak = Path.Combine(AppContext.BaseDirectory, "Starshot.Update.instbak");
+            string target = File.Exists(updaterExe)
+                ? updaterExe
+                : File.Exists(updaterBak) ? updaterBak : "";
+            if (target.Length > 0)
             {
-                // -I 非交互自动更新，占用文件自动结束应用进程；渠道透传 --source 锁定 config 里 source[].id
+                // -I 非交互自动更新，占用文件自动结束应用进程；渠道透传 --source 锁定 config 里 source[].id。
+                // UseShellExecute=false 走 CreateProcess：只认 PE 内容不认扩展名，.instbak 改名残留也能直接拉起
+                //（ShellExecute 按扩展名找关联，.instbak 无关联永远打不开）
                 string source = AppConfig.EnablePreReleaseUpdateCheck ? "preview" : "stable";
-                Process.Start(
-                    new ProcessStartInfo(updaterExe)
-                    {
-                        UseShellExecute = true,
-                        Arguments = $"-I --source {source}",
-                    }
-                );
+                try
+                {
+                    Process.Start(
+                        new ProcessStartInfo(target)
+                        {
+                            UseShellExecute = false,
+                            Arguments = $"-I --source {source}",
+                        }
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // .instbak 也拉不起来（损坏）——更新链无救，抛给 UI 层弹重下提示
+                    throw new InvalidOperationException("Starshot.Update.exe missing (installer mode)", ex);
+                }
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(2000);
