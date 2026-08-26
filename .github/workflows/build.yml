@@ -28,11 +28,6 @@ on:
         type: boolean
         required: false
         default: false
-      upload_kachina:
-        description: '预发布也上传 kachina 安装版产物到 CDN（stable 恒传，此开关只对 preview 生效）'
-        type: boolean
-        required: false
-        default: false
     outputs:
       v:
         description: '显示版本（原大小写）'
@@ -364,11 +359,22 @@ jobs:
         run: |
           $arch = "${{ matrix.platform }}"
           $vl = "${{ needs.resolve-version.outputs.vl }}"
+          $isPre = "${{ inputs.prerelease }}" -eq "true"
           $cdn = "https://starshot-release.cialo.site"
-          # 源=CDN 根固定 URL（与版本无关，全在线，无备用源）；差分基线=上一版原始目录 zip（固定名，stable 每版覆盖）
+          # 渠道分流（双渠道更新源，安装器不校验渠道、靠内容轮换收敛）：
+          # 内容源 stable=kachina/Starshot-full-*、preview=kachina/Starshot-preview-*；
+          # stable 发布时两个源都复写为 stable 内容（上传步骤处理），preview 用户顺源升到 stable 收敛
+          # 差分基线在 kachina/asset/ 按渠道分名；拉不到基线=该版纯全量（代价可忽略）
+          $sourceName = if ($isPre) { "Starshot-preview-win-$arch.exe" } else { "Starshot-full-win-$arch.exe" }
+          $baselineName = if ($isPre) { "baseline-preview-win-$arch.zip" } else { "baseline-win-$arch.zip" }
+          # 源=CDN 根固定 URL（与版本无关，全在线，无备用源）；source 为双发布源数组（stable+preview，
+          # 安装器把两个源都当更新源走，渠道收敛靠内容轮换——stable 发布时 preview 源也复写为 stable）
           # 注意：builder 的 extract 吐的是 zstd 存储形态不是原始字节，不能当基线（本地实测），必须存原始目录
           $config = @{
-            source = "$cdn/kachina/Starshot-full-win-$arch.exe"
+            source = @(
+              @{ id = "stable"; name = "正式版"; uri = "$cdn/kachina/Starshot-full-win-$arch.exe" },
+              @{ id = "preview"; name = "预览版"; uri = "$cdn/kachina/Starshot-preview-win-$arch.exe" }
+            )
             appName = "Starshot"
             publisher = "loliri"
             regName = "Starshot"
@@ -390,11 +396,11 @@ jobs:
           ./kachina-builder.exe pack -c kachina.config.json -o Starshot.Update.exe -t installer.webp --icon installer.ico
           if (!(Test-Path Starshot.Update.exe)) { Write-Error "updater build failed"; exit 1 }
 
-          # 差分基线：拉上一版原始目录 zip 解压（404=首个安装版，跳过差分纯全量）。
+          # 差分基线：拉上一版同渠道原始目录 zip 解压（404=该渠道首个版本，跳过差分纯全量）。
           # zip 打包时不含包裹目录，解压后 baseline/ 即原始平铺目录
           $diffArgs = @()
           try {
-            Invoke-WebRequest "$cdn/kachina/baseline-win-$arch.zip" -OutFile baseline.zip
+            Invoke-WebRequest "$cdn/kachina/asset/$baselineName" -OutFile baseline.zip
             Expand-Archive baseline.zip -DestinationPath baseline -Force
             if (Test-Path baseline) { $diffArgs = @("-d", (Resolve-Path baseline).Path) }
           } catch {
@@ -402,18 +408,18 @@ jobs:
           }
 
           ./kachina-builder.exe gen -j 8 -i kachina-flat -m kachina-metadata.json -o kachina-hashed -r loliri/Starshot -t $vl -u Starshot.Update.exe @diffArgs
-          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -t installer.webp --icon installer.ico -o "Starshot-full-win-$arch.exe"
-          if (!(Test-Path "Starshot-full-win-$arch.exe")) { Write-Error "full package build failed"; exit 1 }
+          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -t installer.webp --icon installer.ico -o "$sourceName"
+          if (!(Test-Path "$sourceName")) { Write-Error "full package build failed"; exit 1 }
 
           # 分发用纯在线安装器 Starshot-installer：与更新器同体（零 app 内嵌，安装时 HTTP 206 对 CDN
-          # kachina/ 下的全量包远程寻址，全部内容在线获取），进 GitHub Release + CDN 根目录；
-          # 全量包 Starshot-full 只传 CDN kachina/ 子路径（内容源），不进 GitHub Release
+          # kachina/ 下的全量包远程寻址，全部内容在线获取），进 CDN 根目录；仅 stable 发布时复写
+          #（壳与版本无关，preview 发布没必要动它）；内容源 Starshot-full/preview 只传 CDN，不进 GitHub Release
           Copy-Item Starshot.Update.exe "Starshot-installer-win-$arch.exe"
 
-          # 本版原始目录 zip = 下一版的差分基线
+          # 本版原始目录 zip = 下一版同渠道差分基线（传 kachina/asset/）
           Add-Type -AssemblyName System.IO.Compression.FileSystem
-          if (Test-Path "baseline-win-$arch.zip") { Remove-Item "baseline-win-$arch.zip" }
-          [System.IO.Compression.ZipFile]::CreateFromDirectory("kachina-flat", "baseline-win-$arch.zip", [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
+          if (Test-Path "$baselineName") { Remove-Item "$baselineName" }
+          [System.IO.Compression.ZipFile]::CreateFromDirectory("kachina-flat", "$baselineName", [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
           Remove-Item baseline.zip -Force -ErrorAction SilentlyContinue
           Remove-Item baseline -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item kachina-hashed -Recurse -Force -ErrorAction SilentlyContinue
@@ -426,7 +432,9 @@ jobs:
             Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip
             Starshot-installer-win-${{ matrix.platform }}.exe
             Starshot-full-win-${{ matrix.platform }}.exe
+            Starshot-preview-win-${{ matrix.platform }}.exe
             baseline-win-${{ matrix.platform }}.zip
+            baseline-preview-win-${{ matrix.platform }}.zip
             diff-*-win-${{ matrix.platform }}.patch
             launcher-*-win-${{ matrix.platform }}.exe
 
@@ -564,39 +572,59 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload kachina to CDN
-        if: ${{ inputs.prerelease != true || inputs.upload_kachina }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
         run: |
-          # 根目录摆纯在线安装器（与 GitHub Release 同物同名）；全量包是更新/在线安装的内容源，
-          # 收进 kachina/ 子路径（config.source 指向它）。固定 URL 被 CDN 缓存，一律 no-cache。
-          # 仅 stable 覆盖（预览只出包不传 CDN）。
-          # 未来的双渠道方案（用户已验证可行）：stable/preview 两个文件夹各一套 + SourceItem 双发布源
+          # 双渠道更新源（安装器不校验渠道，靠内容轮换收敛）。固定 URL 被 CDN 缓存，一律 no-cache。
+          # stable（8 个全复写）：根目录通用 installer×2 + kachina/ 下 full×2（=stable）+ preview×2（=stable，
+          #   preview 用户顺源升级收敛回 stable 线）+ kachina/asset/ 基线×2
+          # preview（4 个）：preview×2（=新 preview）+ asset/preview 基线×2；stable 文件全不碰
           if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$R2_BUCKET" ] || [ -z "$R2_ENDPOINT" ]; then
             echo "::error::R2 secrets not configured"
             exit 1
           fi
           for arch in x64 arm64; do
-            if [ -f "upload/Starshot-installer-win-$arch.exe" ]; then
-              aws s3 cp "upload/Starshot-installer-win-$arch.exe" "s3://$R2_BUCKET/Starshot-installer-win-$arch.exe" \
-                --endpoint-url "$R2_ENDPOINT" \
-                --content-type "application/octet-stream" \
-                --cache-control "no-cache, must-revalidate"
-            fi
-            if [ -f "upload/Starshot-full-win-$arch.exe" ]; then
-              aws s3 cp "upload/Starshot-full-win-$arch.exe" "s3://$R2_BUCKET/kachina/Starshot-full-win-$arch.exe" \
-                --endpoint-url "$R2_ENDPOINT" \
-                --content-type "application/octet-stream" \
-                --cache-control "no-cache, must-revalidate"
-            fi
-            if [ -f "upload/baseline-win-$arch.zip" ]; then
-              aws s3 cp "upload/baseline-win-$arch.zip" "s3://$R2_BUCKET/kachina/baseline-win-$arch.zip" \
-                --endpoint-url "$R2_ENDPOINT" \
-                --content-type "application/zip" \
-                --cache-control "no-cache, must-revalidate"
+            if [ "$PRE" = "true" ]; then
+              if [ -f "upload/Starshot-preview-win-$arch.exe" ]; then
+                aws s3 cp "upload/Starshot-preview-win-$arch.exe" "s3://$R2_BUCKET/kachina/Starshot-preview-win-$arch.exe" \
+                  --endpoint-url "$R2_ENDPOINT" \
+                  --content-type "application/octet-stream" \
+                  --cache-control "no-cache, must-revalidate"
+              fi
+              if [ -f "upload/baseline-preview-win-$arch.zip" ]; then
+                aws s3 cp "upload/baseline-preview-win-$arch.zip" "s3://$R2_BUCKET/kachina/asset/baseline-preview-win-$arch.zip" \
+                  --endpoint-url "$R2_ENDPOINT" \
+                  --content-type "application/zip" \
+                  --cache-control "no-cache, must-revalidate"
+              fi
+            else
+              if [ -f "upload/Starshot-installer-win-$arch.exe" ]; then
+                aws s3 cp "upload/Starshot-installer-win-$arch.exe" "s3://$R2_BUCKET/Starshot-installer-win-$arch.exe" \
+                  --endpoint-url "$R2_ENDPOINT" \
+                  --content-type "application/octet-stream" \
+                  --cache-control "no-cache, must-revalidate"
+              fi
+              if [ -f "upload/Starshot-full-win-$arch.exe" ]; then
+                aws s3 cp "upload/Starshot-full-win-$arch.exe" "s3://$R2_BUCKET/kachina/Starshot-full-win-$arch.exe" \
+                  --endpoint-url "$R2_ENDPOINT" \
+                  --content-type "application/octet-stream" \
+                  --cache-control "no-cache, must-revalidate"
+                # preview 源同步复写为 stable 内容（线收敛）：同一份产物复制成 preview 名上传
+                cp "upload/Starshot-full-win-$arch.exe" "upload/Starshot-preview-win-$arch.exe"
+                aws s3 cp "upload/Starshot-preview-win-$arch.exe" "s3://$R2_BUCKET/kachina/Starshot-preview-win-$arch.exe" \
+                  --endpoint-url "$R2_ENDPOINT" \
+                  --content-type "application/octet-stream" \
+                  --cache-control "no-cache, must-revalidate"
+              fi
+              if [ -f "upload/baseline-win-$arch.zip" ]; then
+                aws s3 cp "upload/baseline-win-$arch.zip" "s3://$R2_BUCKET/kachina/asset/baseline-win-$arch.zip" \
+                  --endpoint-url "$R2_ENDPOINT" \
+                  --content-type "application/zip" \
+                  --cache-control "no-cache, must-revalidate"
+              fi
             fi
           done
 

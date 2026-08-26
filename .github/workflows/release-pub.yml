@@ -21,11 +21,6 @@ on:
         type: boolean
         required: false
         default: false
-      upload_kachina:
-        description: 'Pre-release also uploads kachina installer artifacts to CDN (stable always uploads)'
-        type: boolean
-        required: false
-        default: false
 
 permissions:
   contents: write
@@ -45,7 +40,6 @@ jobs:
       version: ${{ inputs.version }}
       dry_run_cleanup: ${{ inputs.dry_run_cleanup }}
       launcher_updated: ${{ inputs.launcher_updated }}
-      upload_kachina: ${{ inputs.upload_kachina }}
     secrets: inherit
 
   release:
