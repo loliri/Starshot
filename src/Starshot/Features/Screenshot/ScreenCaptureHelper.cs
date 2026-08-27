@@ -83,14 +83,15 @@ internal partial class ScreenCaptureHelper
     )
     {
         device ??= CanvasDevice.GetSharedDevice();
-        using Direct3D11CaptureFramePool framePool = IsWin10
-            ? Direct3D11CaptureFramePool.Create(
-                device,
-                DirectXPixelFormat.R8G8B8A8UIntNormalized,
-                1,
-                item.Size
-            )
-            : Direct3D11CaptureFramePool.CreateFreeThreaded(device, pixelFormat, 1, item.Size);
+        // 必须 CreateFreeThreaded：区域截图在 Task.Run 线程池线程发起捕获（并行抓多显示器），
+        // 无 DispatcherQueue——Create 版的 FrameArrived 依赖创建线程的 Dispatcher 投递，线程池上永远不来（Win10 实测 10s 超时）。
+        // Win10 格式仍写死 B8G8R8A8（WGC 在 Win10 无 HDR float 捕获），Win11 起用调用方请求的格式
+        using Direct3D11CaptureFramePool framePool = Direct3D11CaptureFramePool.CreateFreeThreaded(
+            device,
+            IsWin10 ? DirectXPixelFormat.R8G8B8A8UIntNormalized : pixelFormat,
+            1,
+            item.Size
+        );
         using GraphicsCaptureSession session = framePool.CreateCaptureSession(item);
         if (IsIncludeSecondaryWindowsPresent)
         {
