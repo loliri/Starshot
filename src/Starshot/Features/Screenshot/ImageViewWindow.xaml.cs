@@ -1570,7 +1570,8 @@ public sealed partial class ImageViewWindow : Window
                         colorPrimaries,
                         100,
                         null,
-                        writeColorProfile
+                        writeColorProfile,
+                        MaxCLL
                     ),
                     ".jxl" => ImageSaver.SaveAsJxlAsync(
                         bitmap,

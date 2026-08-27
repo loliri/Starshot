@@ -317,7 +317,8 @@ internal static class ImageSaver
         ColorPrimaries colorPrimaries,
         int quality,
         byte[]? xmpData = null,
-        bool writeColorProfile = true
+        bool writeColorProfile = true,
+        float? maxCLL = null
     )
     {
         uint width = bitmap.SizeInPixels.Width;
@@ -376,7 +377,8 @@ internal static class ImageSaver
                     ColorPrimaries.BT2020,
                     quality,
                     xmpData,
-                    writeColorProfile
+                    writeColorProfile,
+                    maxCLL
                 )
                 .ConfigureAwait(false);
         }
@@ -395,7 +397,8 @@ internal static class ImageSaver
         ColorPrimaries colorPrimaries,
         int quality,
         byte[]? xmpData = null,
-        bool writeColorProfile = true
+        bool writeColorProfile = true,
+        float? maxCLL = null
     )
     {
         quality = Math.Clamp(quality, 0, 100);
@@ -449,6 +452,12 @@ internal static class ImageSaver
                         image.ColorPrimaries = avifColorPrimaries.BT2020;
                         image.TransferCharacteristics = avifTransferCharacteristics.SMPTE2084;
                         image.MatrixCoefficients = avifMatrixCoefficients.BT2020_NCL;
+                        // clli（maxCLL）：无此元数据时 Chrome 做保守 tone-map 压高光（屏幕越暗越明显，issue #4）；
+                        // maxPALL 管线未算，按规范 0=unknown，Chrome 决策只看 maxCLL
+                        if (maxCLL is > 0)
+                        {
+                            image.SetMaxCLL((ushort)Math.Clamp(maxCLL.Value, 0, 65535), 0);
+                        }
                     }
                     else
                     {

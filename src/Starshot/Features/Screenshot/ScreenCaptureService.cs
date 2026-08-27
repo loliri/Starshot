@@ -632,7 +632,8 @@ internal class ScreenCaptureService
                     colorPrimaries,
                     quality,
                     xmpData,
-                    writeColorProfile
+                    writeColorProfile,
+                    maxCLL
                 );
             }
             else if (extension is "jxl")
