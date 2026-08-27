@@ -320,7 +320,7 @@ C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Sta
 | 数据存储       | SQLite + Dapper                                                    |
 | 日志           | Serilog                                                            |
 | 托盘           | H.NotifyIcon.WinUI                                                 |
-| 缩略图         | Scighost.WinUI ImageEx + 自定义 CachedImage                        |
+| 缩略图         | 自定义 CachedImage（ImageEx 异步加载 + 缩略图缓存）                 |
 | 区域截图覆盖层 | Win2D CanvasControl（冻结帧渲染 + 选区绘制）                       |
 | 剪贴板         | Win32 原生 API（OpenClipboard / SetClipboardData）                 |
 | 启动器         | C++ 原生（v145 工具集，静态 CRT）                                  |
@@ -436,6 +436,13 @@ PNGv3（W3C PNG 第三版，2025 年定稿）的 HDR 依靠 cICP 元数据标注
 <summary><b>截图后剪贴板粘贴不出来</b></summary>
 
 Starshot 使用 Win32 原生剪贴板 API 写入，理论上比 WinRT 更可靠。如果仍粘贴失败，可能是目标应用不支持对应的剪贴板格式（CF_HDROP 文件 / CF_DIB 位图）。尝试粘贴到资源管理器（文件）或画图（位图）验证。
+
+</details>
+
+<details>
+<summary><b>Windows 10 截图是 SDR 的，HDR 功能在哪？</b></summary>
+
+Windows 10 的 Windows.Graphics.Capture 不支持 HDR 像素格式捕获，系统合成器只能提供 8bit SDR 帧。因此在 Windows 10 上无论全屏还是区域截图都只能得到 SDR 图像；HDR 截图需要 Windows 11。
 
 </details>
 

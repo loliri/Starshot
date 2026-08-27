@@ -318,7 +318,7 @@ Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `ap
 | Data Storage   | SQLite + Dapper                                                      |
 | Logging        | Serilog                                                              |
 | System Tray    | H.NotifyIcon.WinUI                                                   |
-| Thumbnails     | Scighost.WinUI ImageEx + custom CachedImage                          |
+| Thumbnails     | Custom CachedImage (ImageEx async loading + thumbnail cache)        |
 | Region Overlay | Win2D CanvasControl (frozen-frame rendering + selection drawing)     |
 | Clipboard      | Win32 native API (OpenClipboard / SetClipboardData)                  |
 | Launcher       | Native C++ (v145 toolset, static CRT)                                |
@@ -434,6 +434,13 @@ If you're using an HDR display, make sure the Windows HDR toggle is enabled (Set
 <summary><b>Can't paste from clipboard after taking a screenshot</b></summary>
 
 Starshot uses the Win32 native clipboard API for writing, which is theoretically more reliable than WinRT. If pasting still fails, the target application may not support the corresponding clipboard format (CF_HDROP for files / CF_DIB for bitmaps). Try pasting into Explorer (files) or Paint (bitmaps) to verify.
+
+</details>
+
+<details>
+<summary><b>Screenshots on Windows 10 come out as SDR — where's HDR?</b></summary>
+
+Windows Graphics Capture on Windows 10 does not support HDR pixel format capture; the system compositor can only provide 8-bit SDR frames. On Windows 10, both full-screen and region captures are SDR only. HDR capture requires Windows 11.
 
 </details>
 
