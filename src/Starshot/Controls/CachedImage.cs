@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
-using Scighost.WinUI.ImageEx;
 using Starshot.Features.Codec;
 
 namespace Starshot.Controls;
