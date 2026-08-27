@@ -794,7 +794,7 @@
     <value>サポートされています。すべてのスクリーンショット機能が利用可能です。</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported1" xml:space="preserve">
-    <value>現在の環境ではサポートされていません。</value>
+    <value>現在の環境ではサポートされていません（判定を誤っている可能性もあります）</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported2" xml:space="preserve">
     <value>スクリーンショット機能は動作せず、クラッシュする可能性があります。</value>

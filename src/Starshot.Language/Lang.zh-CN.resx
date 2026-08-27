@@ -776,7 +776,7 @@
     <value>数据库存放位置</value>
   </data>
   <data name="Starshot_WelcomeEditionPrefix" xml:space="preserve">
-    <value>当前使用的是</value>
+    <value>当前使用的是 </value>
   </data>
   <data name="Starshot_EditionInstaller" xml:space="preserve">
     <value>安装版</value>
@@ -794,7 +794,7 @@
     <value>支持。可以使用所有截图功能。</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported1" xml:space="preserve">
-    <value>当前环境不支持。</value>
+    <value>当前环境不支持（也可能是判断错雾？</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported2" xml:space="preserve">
     <value>这意味着你无法使用本软件的所有截图功能，程序崩溃为可预见现象。</value>

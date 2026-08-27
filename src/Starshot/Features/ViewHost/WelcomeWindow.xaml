@@ -113,7 +113,6 @@
       >
         <Run Text="{x:Bind lang:Lang.Starshot_WelcomeEditionPrefix}" />
         <Run
-          FontWeight="SemiBold"
           Foreground="{ThemeResource SystemFillColorSuccessBrush}"
           Text="{x:Bind EditionName}"
         />
