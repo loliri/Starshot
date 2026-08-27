@@ -240,6 +240,17 @@ public sealed partial class MainWindow : WindowEx
                 );
             }
         }
+        else if (uMsg == (uint)User32.WindowMessage.WM_GETMINMAXINFO)
+        {
+            // 最小尺寸与 Starward 主窗口一致（1200×676 逻辑像素，按 DPI 缩放到物理像素）
+            unsafe
+            {
+                var mmi = (User32.MINMAXINFO*)lParam;
+                mmi->minTrackSize = new SIZE((int)(1200 * UIScale), (int)(676 * UIScale));
+            }
+            // 已处理：不再传 DefWindowProc，默认处理会用系统值覆盖掉刚填的最小尺寸
+            return 0;
+        }
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
     }
 
