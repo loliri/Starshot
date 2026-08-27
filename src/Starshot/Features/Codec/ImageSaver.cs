@@ -97,7 +97,8 @@ internal static class ImageSaver
         Stream stream,
         ColorPrimaries colorPrimaries,
         byte[]? xmpData = null,
-        bool writeColorProfile = true
+        bool writeColorProfile = true,
+        float? maxCLL = null
     )
     {
         uint width = bitmap.SizeInPixels.Width;
@@ -154,7 +155,8 @@ internal static class ImageSaver
                     pixelBytes,
                     ColorPrimaries.BT2020,
                     xmpData,
-                    writeColorProfile
+                    writeColorProfile,
+                    maxCLL
                 )
                 .ConfigureAwait(false);
         }
@@ -172,7 +174,8 @@ internal static class ImageSaver
         byte[] pixelBytes,
         ColorPrimaries colorPrimaries,
         byte[]? xmpData = null,
-        bool writeColorProfile = true
+        bool writeColorProfile = true,
+        float? maxCLL = null
     )
     {
         BitmapPixelFormat format = pixelFormat switch
@@ -190,6 +193,7 @@ internal static class ImageSaver
         PngChunk? srgbChunk = null;
         PngChunk? chrmChunk = null;
         PngChunk? itxtChunk = null;
+        byte[]? clliBytes = null;
 
         if (writeColorProfile)
         {
@@ -206,6 +210,23 @@ internal static class ImageSaver
                 cicp.MatrixCoefficients = 0;
                 cicp.FullRangeFlag = 1;
                 cicpChunk.UpdateCrc32();
+                // cLLi（PNGv3 内容亮度元数据，与 AVIF 的 clli 同动机）：无此元数据时浏览器做保守
+                // tone-map 压高光；maxFALL 未算，0=unknown。PngChunkType 不接受强转，整块手拼
+                if (id == 9 && maxCLL is > 0)
+                {
+                    Span<byte> chunk = new byte[20];
+                    System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(chunk, 8);
+                    "cLLi"u8.CopyTo(chunk[4..]);
+                    System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(
+                        chunk[8..],
+                        (uint)Math.Clamp(maxCLL.Value, 0, uint.MaxValue)
+                    );
+                    System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(
+                        chunk[16..],
+                        ComputeCrc32(chunk[4..16])
+                    );
+                    clliBytes = chunk.ToArray();
+                }
             }
             else
             {
@@ -290,6 +311,10 @@ internal static class ImageSaver
                 {
                     stream.Write(chrmChunk.ChunkData.Span);
                 }
+                if (clliBytes is not null)
+                {
+                    stream.Write(clliBytes);
+                }
                 if (itxtChunk is not null)
                 {
                     stream.Write(itxtChunk.ChunkData.Span);
@@ -309,6 +334,23 @@ internal static class ImageSaver
         }
 
         stream.Write(PngReader.IENDSignature);
+    }
+
+    /// <summary>
+    /// PNG chunk CRC32（反射多项式 0xEDB88320，覆盖 type + data）。
+    /// </summary>
+    private static uint ComputeCrc32(ReadOnlySpan<byte> data)
+    {
+        uint crc = 0xFFFFFFFF;
+        foreach (byte b in data)
+        {
+            crc ^= b;
+            for (int i = 0; i < 8; i++)
+            {
+                crc = (crc >> 1) ^ (0xEDB88320u & (0u - (crc & 1)));
+            }
+        }
+        return crc ^ 0xFFFFFFFF;
     }
 
     public static async Task SaveAsAvifAsync(
