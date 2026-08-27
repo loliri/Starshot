@@ -839,13 +839,18 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         );
         if (_format == ".avif")
         {
+            // HDR 源现算 maxCLL 写 clli（与截图管线同动机：无元数据时浏览器保守 tone-map 压高光）
+            float? maxCLL = imageInfo.HDR
+                ? ScreenCaptureService.GetMaxCLL(imageInfo.CanvasBitmap)
+                : null;
             using var ms = new MemoryStream();
             await SaveAsAvifAsync(
                 imageInfo.CanvasBitmap,
                 ms,
                 item.SourceFileTime,
                 _quality,
-                cancellationToken
+                cancellationToken,
+                maxCLL
             );
             using var fs = File.Create(outputPath);
             ms.Position = 0;
@@ -874,7 +879,8 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         Stream stream,
         DateTimeOffset frameTime,
         int quality,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        float? maxCLL = null
     )
     {
         uint width = bitmap.SizeInPixels.Width;
@@ -964,6 +970,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
                         image.ColorPrimaries = avifColorPrimaries.BT2020;
                         image.TransferCharacteristics = avifTransferCharacteristics.SMPTE2084;
                         image.MatrixCoefficients = avifMatrixCoefficients.BT2020_NCL;
+                        if (maxCLL is > 0)
+                        {
+                            image.SetMaxCLL((ushort)Math.Clamp(maxCLL.Value, 0, 65535), 0);
+                        }
                         image.SetXMPMetadata(ScreenCaptureService.BuildXMPMetadata(frameTime));
                         image.FromRGBImage(rgb);
                         encoder.AddImage(image, 1, avifAddImageFlag.Single);
