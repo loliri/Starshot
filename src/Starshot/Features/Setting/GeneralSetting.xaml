@@ -215,6 +215,21 @@
           OnContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}"
         />
       </StackPanel>
+
+      <!--  截图通知  -->
+      <StackPanel Spacing="8">
+        <ToggleSwitch
+          IsOn="{x:Bind MuteNotificationInFullscreen, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
+          OnContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
+        />
+        <TextBlock
+          FontSize="12"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreenDesc}"
+          TextWrapping="Wrap"
+        />
+      </StackPanel>
     </StackPanel>
   </ScrollViewer>
 </sf:PageBase>

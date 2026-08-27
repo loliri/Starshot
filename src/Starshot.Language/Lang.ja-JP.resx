@@ -355,6 +355,12 @@
   <data name="ScreenshotSetting_AutoCopyScreenshotFile" xml:space="preserve">
     <value>スクショファイルの自動コピー</value>
   </data>
+  <data name="Starshot_MuteNotificationInFullscreen" xml:space="preserve">
+    <value>排他的フルスクリーン時に通知を無効化</value>
+  </data>
+  <data name="Starshot_MuteNotificationInFullscreenDesc" xml:space="preserve">
+    <value>キャプチャ時に排他的フルスクリーンを検出し、その間はポップアップを表示しません（ゲームが最小化されるのを防止）。ボーダーレスフルスクリーンとウィンドウモードでは通常どおり表示します。オフの場合は検出せず常に表示します。</value>
+  </data>
   <data name="ImageViewWindow_CopyToClipboard" xml:space="preserve">
     <value>クリップボードにコピー</value>
   </data>

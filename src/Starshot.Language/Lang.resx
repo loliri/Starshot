@@ -355,6 +355,12 @@
   <data name="ScreenshotSetting_AutoCopyScreenshotFile" xml:space="preserve">
     <value>Auto Copy Screenshot File</value>
   </data>
+  <data name="Starshot_MuteNotificationInFullscreen" xml:space="preserve">
+    <value>Silence Notification in Exclusive Fullscreen</value>
+  </data>
+  <data name="Starshot_MuteNotificationInFullscreenDesc" xml:space="preserve">
+    <value>Detect exclusive fullscreen on capture and suppress the popup while in it (the popup minimizes exclusive-fullscreen games); borderless fullscreen and windowed mode still show the popup. Off always shows it with no detection.</value>
+  </data>
   <data name="ImageViewWindow_CopyToClipboard" xml:space="preserve">
     <value>Copy to clipboard</value>
   </data>

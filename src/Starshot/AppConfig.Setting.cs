@@ -436,6 +436,17 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 全屏时静默截图通知：开=截图弹浮窗前检测独占全屏（SHQueryUserNotificationState），
+    /// 全屏中不弹（浮窗会把游戏最小化到桌面），平时照常弹。
+    /// 关（默认）=始终弹浮窗且不做检测，行为与引入本开关前完全一致。
+    /// </summary>
+    public static bool MuteNotificationInFullscreen
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 截图链路色彩管理（HDR 模式始终启用）
     /// </summary>
     public static bool EnableScreenshotColorManagement

@@ -932,6 +932,24 @@
                 return ResourceManager.GetString("ScreenshotSetting_AutoCopyScreenshotFile", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Silence Notification in Fullscreen 的本地化字符串。
+        /// </summary>
+        public static string Starshot_MuteNotificationInFullscreen {
+            get {
+                return ResourceManager.GetString("Starshot_MuteNotificationInFullscreen", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Detect exclusive fullscreen on capture 的本地化字符串。
+        /// </summary>
+        public static string Starshot_MuteNotificationInFullscreenDesc {
+            get {
+                return ResourceManager.GetString("Starshot_MuteNotificationInFullscreenDesc", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Clear Failed 的本地化字符串。

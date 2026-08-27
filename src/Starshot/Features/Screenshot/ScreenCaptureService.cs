@@ -35,6 +35,19 @@ internal class ScreenCaptureService
     private ScreenCaptureInfoWindow? _infoWindow;
     private RegionCaptureWindow? _regionWindow;
 
+    /// <summary>
+    /// 浮窗是否显示：开关关（默认）恒显示（零检测，与引入开关前行为一致）；
+    /// 开=弹窗前查会话状态，D3D 独占全屏运行中不显示（浮窗会把游戏最小化到桌面），其余照常。
+    /// 查询失败按可显示处理——检测不可用不误伤正常弹窗。
+    /// </summary>
+    private static bool ShouldShowInfoWindow()
+    {
+        if (!AppConfig.MuteNotificationInFullscreen)
+            return true;
+        return Shell32.SHQueryUserNotificationState(out var state).Failed
+            || state != Shell32.QUERY_USER_NOTIFICATION_STATE.QUNS_RUNNING_D3D_FULL_SCREEN;
+    }
+
     private static SemaphoreSlim _encodeSlim = new(1);
 
     private static int _isCapturing;
@@ -122,8 +135,11 @@ internal class ScreenCaptureService
                 sdrWhiteLevel = (float)colorInfo.SdrWhiteLevelInNits;
             }
 
-            _infoWindow ??= new ScreenCaptureInfoWindow();
-            _infoWindow.CaptureStart(displayId, canvasBitmap, maxCLL);
+            if (ShouldShowInfoWindow())
+            {
+                _infoWindow ??= new ScreenCaptureInfoWindow();
+                _infoWindow.CaptureStart(displayId, canvasBitmap, maxCLL);
+            }
             captureStarted = true;
 
             string windowTitle = "";
@@ -162,8 +178,11 @@ internal class ScreenCaptureService
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while capturing the screen.");
-            _infoWindow ??= new ScreenCaptureInfoWindow();
-            _infoWindow.CaptureError(hwnd, captureStarted);
+            if (ShouldShowInfoWindow())
+            {
+                _infoWindow ??= new ScreenCaptureInfoWindow();
+                _infoWindow.CaptureError(hwnd, captureStarted);
+            }
         }
         finally
         {
@@ -355,8 +374,11 @@ internal class ScreenCaptureService
                     User32.MonitorFlags.MONITOR_DEFAULTTONEAREST
                 );
                 var dispId = new Microsoft.UI.DisplayId((ulong)mon.DangerousGetHandle());
-                _infoWindow ??= new ScreenCaptureInfoWindow();
-                _infoWindow.CaptureCopySuccess(dispId, sdrCrop);
+                if (ShouldShowInfoWindow())
+                {
+                    _infoWindow ??= new ScreenCaptureInfoWindow();
+                    _infoWindow.CaptureCopySuccess(dispId, sdrCrop);
+                }
                 _logger.LogInformation("Region copy-only done");
                 return;
             }
@@ -411,8 +433,11 @@ internal class ScreenCaptureService
                 regionDisplayId
             );
 
-            _infoWindow ??= new ScreenCaptureInfoWindow();
-            _infoWindow.CaptureStart(regionDisplayId, cropped, maxCLL);
+            if (ShouldShowInfoWindow())
+            {
+                _infoWindow ??= new ScreenCaptureInfoWindow();
+                _infoWindow.CaptureStart(regionDisplayId, cropped, maxCLL);
+            }
             captureStarted = true;
 
             // 守卫只挡"抓帧+选区"；编码慢且已由 _encodeSlim 单独串行，这里放守卫让下一次按下能立刻进
@@ -442,8 +467,11 @@ internal class ScreenCaptureService
         {
             _logger.LogError(ex, "Region capture failed");
             // 对齐全屏路径：不补 CaptureError 的话计数永差一，信息窗这个会话不再自动隐藏（卡「处理中」）
-            _infoWindow ??= new ScreenCaptureInfoWindow();
-            _infoWindow.CaptureError(fgHwnd, captureStarted);
+            if (ShouldShowInfoWindow())
+            {
+                _infoWindow ??= new ScreenCaptureInfoWindow();
+                _infoWindow.CaptureError(fgHwnd, captureStarted);
+            }
         }
         finally
         {
@@ -655,7 +683,8 @@ internal class ScreenCaptureService
             ClipboardHelper.SetFiles(clipFile);
         }
 
-        _infoWindow?.CaptureSuccess(displayId, bitmap, finalFile, maxCLL);
+        if (ShouldShowInfoWindow())
+            _infoWindow?.CaptureSuccess(displayId, bitmap, finalFile, maxCLL);
     }
 
     /// <summary>

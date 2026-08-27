@@ -253,6 +253,15 @@ public sealed partial class GeneralSetting : PageBase
     }
 
     /// <summary>
+    /// 全屏时静默截图通知：开=检测独占全屏，全屏中不弹浮窗；关（默认）=照弹且不检测。
+    /// </summary>
+    public bool MuteNotificationInFullscreen
+    {
+        get => AppConfig.MuteNotificationInFullscreen;
+        set => AppConfig.MuteNotificationInFullscreen = value;
+    }
+
+    /// <summary>
     /// GitHub API 不走系统代理（仅 GitHub 源生效；CDN 源走系统代理不受影响）。改后重启生效。
     /// </summary>
     public bool GithubApiNoProxy
