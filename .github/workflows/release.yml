@@ -1,5 +1,13 @@
 name: Release
 
+# 单入口发布 workflow：解析版本 + 双架构构建 + 差分 + kachina 安装包 + 上传 CDN + 创建 Release（draft 可选）。
+#
+# resolve-version 是独立、非 matrix 的 job：后续所有 job 用 needs 消费同一个版本号结果，
+# 避免各自读一次 GitHub API 可能读到不同状态。
+#
+# build 只负责编译 + 便携 zip；delta / kachina 各自独立 matrix job，从 build artifact 解压工作目录，
+# 互不依赖可并行。
+
 on:
   workflow_dispatch:
     inputs:
@@ -14,10 +22,10 @@ on:
         required: false
         default: false
       version:
-        description: "Version (e.g. 0.1.0-preview.1; leave empty for auto)"
+        description: "Version (e.g. 0.1.0-preview.1; leave empty to auto-increment from latest release)"
         required: false
       launcher_updated:
-        description: "Launcher changed"
+        description: "Launcher changed this release"
         type: boolean
         required: false
         default: false
@@ -32,6 +40,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+
   resolve-version:
     runs-on: windows-2025-vs2026
     outputs:
@@ -129,32 +138,74 @@ jobs:
             try { [void][System.Globalization.CultureInfo]::GetCultureInfo($_.Name); return $true } catch { return $false }
           } | Remove-Item -Recurse -Force
 
-      - name: Preserve flat layout for kachina
+      - name: Setup hpatchz
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # kachina 安装版线要平铺目录（原始文件名）；下面的 Version layout 会把 app/ 改名成 app-{vl}/，先拷一份
-          Copy-Item build/release/app kachina-flat -Recurse -Force
-          # 安装版标志：烙进主程序 exe 的 DOS stub（偏移 0x40，覆盖无用的 "This program cannot be run in DOS mode" 死区文本）。
-          # 运行时读 exe 判定分发线（AppConfig.Installer）——便携 zip 从 build/release 打包，不带标志，两线天然隔离
-          $exe = "kachina-flat/Starshot.exe"
-          $bytes = [System.IO.File]::ReadAllBytes($exe)
-          $eLfanew = [BitConverter]::ToInt32($bytes, 0x3C)
-          $magic = [System.Text.Encoding]::ASCII.GetBytes("STARSHOT-INSTALLER")
-          if ($eLfanew -lt 0x40 + $magic.Length) { Write-Error "DOS stub too small (e_lfanew=$eLfanew), cannot stamp installer flag"; exit 1 }
-          [Array]::Copy($magic, 0, $bytes, 0x40, $magic.Length)
-          [System.IO.File]::WriteAllBytes($exe, $bytes)
-          Write-Host "Installer flag stamped into $exe"
+          # hpatchz 打进便携 zip 给客户端 apply 差分用，跟 matrix 架构对齐
+          $appDir = "build/release/app"
+          if ("${{ matrix.platform }}" -eq "x64") {
+            $zipName = "_bin_windows64.zip"
+          } else {
+            $zipName = "_bin_windows_arm64.zip"
+          }
+          $url = gh api repos/sisong/HDiffPatch/releases/latest --jq ".assets[] | select(.name | test(\\"${zipName}$\\")) | .browser_download_url"
+          if ([string]::IsNullOrEmpty($url)) { Write-Error "HDiffPatch $zipName not found"; exit 1 }
+          Invoke-WebRequest $url -OutFile hpatchz-src.zip
+          Expand-Archive hpatchz-src.zip -DestinationPath hpatchz-tool -Force
+          $hpExe = (Get-ChildItem hpatchz-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
+          Move-Item $hpExe "$appDir/hpatchz.exe" -Force
+          & "$appDir/hpatchz.exe" -v
+          if (-not (Test-Path "$appDir/hpatchz.exe")) { Write-Error "hpatchz.exe not found"; exit 1 }
+          Remove-Item hpatchz-src.zip, hpatchz-tool -Recurse -Force -ErrorAction SilentlyContinue
 
       - name: Version layout
         run: |
           Move-Item build/release/app "build/release/app-${{ needs.resolve-version.outputs.vl }}" -Force
           "version=${{ needs.resolve-version.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
 
-      - name: Setup HDiffPatch tools
+      - name: Copy launcher (if updated)
+        if: ${{ inputs.launcher_updated }}
+        run: Copy-Item build/release/Starshot.exe "launcher-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.exe"
+
+      - name: Zip release
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = "Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip"
+          if (Test-Path $zip) { Remove-Item $zip }
+          [System.IO.Compression.ZipFile]::CreateFromDirectory("build/release", $zip, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
+          path: |
+            Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip
+            launcher-*-win-${{ matrix.platform }}.exe
+
+  delta:
+    needs: [resolve-version, build]
+    strategy:
+      matrix:
+        platform: [x64, arm64]
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: build-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
+          path: .
+
+      - name: Unpack app dir
+        run: |
+          Expand-Archive "Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip" -DestinationPath unpacked -Force
+
+      - name: Setup hdiffz
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $appDir = "build/release/app-${{ needs.resolve-version.outputs.vl }}"
           # hdiffz 永远取 windows64（跑在 x64 runner 上，跟 matrix 无关）
           $win64 = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows64\\.zip$")) | .browser_download_url'
           if ([string]::IsNullOrEmpty($win64)) { Write-Error "HDiffPatch windows64 zip not found"; exit 1 }
@@ -163,22 +214,6 @@ jobs:
           $hdiffExe = (Get-ChildItem hdiff-tool -Filter hdiffz.exe -Recurse | Select-Object -First 1).FullName
           Move-Item $hdiffExe hdiffz.exe -Force
           ./hdiffz.exe -v
-          # hpatchz 跟 matrix 对齐（打进 release 给客户端 apply 用）
-          if ("${{ matrix.platform }}" -eq "x64") {
-            # 同一份 windows64 解压里取 hpatchz，不再重复下载
-            $hpExe = (Get-ChildItem hdiff-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
-            Move-Item $hpExe "$appDir/hpatchz.exe" -Force
-            & "$appDir/hpatchz.exe" -v
-          } else {
-            $arm = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows_arm64\\.zip$")) | .browser_download_url'
-            if ([string]::IsNullOrEmpty($arm)) { Write-Error "HDiffPatch windows_arm64 zip not found"; exit 1 }
-            Invoke-WebRequest $arm -OutFile hdiff-arm64.zip
-            Expand-Archive hdiff-arm64.zip -DestinationPath hdiff-tool -Force
-            $hpExe = (Get-ChildItem hdiff-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
-            Move-Item $hpExe "$appDir/hpatchz.exe" -Force
-            if (-not (Test-Path "$appDir/hpatchz.exe")) { Write-Error "hpatchz.exe not found"; exit 1 }
-            Remove-Item hdiff-arm64.zip, hdiff-tool -Recurse -Force
-          }
           Remove-Item hdiff-win64.zip, hdiff-tool -Recurse -Force -ErrorAction SilentlyContinue
 
       - name: Generate delta
@@ -211,10 +246,7 @@ jobs:
           if ($targetTags.Count -eq 0) { Write-Host "No delta target, skipping"; exit 0 }
           Write-Host "Delta targets ($($targetTags.Count)): $($targetTags -join ', ')"
 
-          Add-Type -AssemblyName System.IO.Compression
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-
-          $newApp = "build/release/app-$newTag"
+          $newApp = "unpacked/app-$newTag"
           if (!(Test-Path $newApp)) { Write-Host "New app folder missing, skipping delta"; exit 0 }
           $newRoot = (Resolve-Path $newApp).Path
 
@@ -264,18 +296,41 @@ jobs:
             Write-Host "delta: $deltaPatch ($([math]::Round((Get-Item $deltaPatch).Length / 1MB, 2)) MB)"
           }
 
-      - name: Copy launcher (if updated)
-        if: ${{ inputs.launcher_updated }}
-        run: Copy-Item build/release/Starshot.exe "launcher-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.exe"
+      - name: Upload delta artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: delta-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
+          path: diff-*-win-${{ matrix.platform }}.patch
+          if-no-files-found: ignore
 
-      - name: Zip release
+  kachina:
+    needs: [resolve-version, build]
+    strategy:
+      matrix:
+        platform: [x64, arm64]
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: build-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
+          path: .
+
+      - name: Prepare flat layout
         run: |
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $zip = "Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip"
-          if (Test-Path $zip) { Remove-Item $zip }
-          [System.IO.Compression.ZipFile]::CreateFromDirectory("build/release", $zip, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
-
-      # ===== kachina 安装版线（只加不改：以上便携版线步骤与以下互不影响） =====
+          # kachina 要平铺目录（原始文件名）：从便携 zip 解压出 app 目录改名
+          Expand-Archive "Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip" -DestinationPath unpacked -Force
+          Move-Item "unpacked/app-${{ needs.resolve-version.outputs.vl }}" kachina-flat -Force
+          # 安装版标志：烙进主程序 exe 的 DOS stub（偏移 0x40，覆盖无用的 "This program cannot be run in DOS mode" 死区文本）。
+          # 运行时读 exe 判定分发线（AppConfig.Installer）——便携 zip 不带标志，两线天然隔离
+          $exe = "kachina-flat/Starshot.exe"
+          $bytes = [System.IO.File]::ReadAllBytes($exe)
+          $eLfanew = [BitConverter]::ToInt32($bytes, 0x3C)
+          $magic = [System.Text.Encoding]::ASCII.GetBytes("STARSHOT-INSTALLER")
+          if ($eLfanew -lt 0x40 + $magic.Length) { Write-Error "DOS stub too small (e_lfanew=$eLfanew), cannot stamp installer flag"; exit 1 }
+          [Array]::Copy($magic, 0, $bytes, 0x40, $magic.Length)
+          [System.IO.File]::WriteAllBytes($exe, $bytes)
+          Write-Host "Installer flag stamped into $exe"
 
       - name: Setup kachina-builder
         shell: pwsh
@@ -288,7 +343,7 @@ jobs:
           Invoke-WebRequest $url -OutFile kachina-builder.exe
           ./kachina-builder.exe --help | Select-Object -First 1
 
-      - name: Prepare kachina branding assets
+      - name: Prepare branding assets
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -319,7 +374,7 @@ jobs:
           python -c "from PIL import Image; Image.open('installer.png').save('installer.ico', sizes=[(256,256),(128,128),(64,64),(48,48),(32,32),(16,16)])"
           if (!(Test-Path installer.ico)) { Write-Error "ico convert failed"; exit 1 }
 
-      - name: Build kachina installer package
+      - name: Build installer package
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -394,19 +449,16 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
+          name: kachina-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
           path: |
-            Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip
             Starshot-installer-win-${{ matrix.platform }}.exe
             Starshot-full-win-${{ matrix.platform }}.exe
             Starshot-preview-win-${{ matrix.platform }}.exe
             baseline-win-${{ matrix.platform }}.zip
             baseline-preview-win-${{ matrix.platform }}.zip
-            diff-*-win-${{ matrix.platform }}.patch
-            launcher-*-win-${{ matrix.platform }}.exe
 
   upload-cdn:
-    needs: [resolve-version, build]
+    needs: [resolve-version, build, delta, kachina]
     runs-on: ubuntu-latest
     outputs:
       old_latest: ${{ steps.rootmanifest.outputs.old_latest }}
@@ -418,16 +470,15 @@ jobs:
       VL: ${{ needs.resolve-version.outputs.vl }}
       PRE: ${{ inputs.prerelease }}
     steps:
-      - name: Download x64 artifact
+      - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
-          name: Starshot-${{ needs.resolve-version.outputs.vl }}-win-x64
+          pattern: |
+            build-${{ needs.resolve-version.outputs.vl }}-win-*
+            delta-${{ needs.resolve-version.outputs.vl }}-win-*
+            kachina-${{ needs.resolve-version.outputs.vl }}-win-*
           path: upload/
-      - name: Download arm64 artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: Starshot-${{ needs.resolve-version.outputs.vl }}-win-arm64
-          path: upload/
+          merge-multiple: true
 
       - name: List files
         run: ls -la upload/
@@ -655,34 +706,36 @@ jobs:
           done
 
   release:
-    needs: build
+    needs: [resolve-version, build, kachina]
     runs-on: windows-2025-vs2026
     steps:
-      - name: Download x64
+      - name: Download build artifacts
         uses: actions/download-artifact@v8
         with:
-          name: Starshot-${{ needs.build.outputs.vl }}-win-x64
-          path: x64
-      - name: Download arm64
+          pattern: build-${{ needs.resolve-version.outputs.vl }}-win-*
+          path: out/
+          merge-multiple: true
+      - name: Download kachina artifacts
         uses: actions/download-artifact@v8
         with:
-          name: Starshot-${{ needs.build.outputs.vl }}-win-arm64
-          path: arm64
+          pattern: kachina-${{ needs.resolve-version.outputs.vl }}-win-*
+          path: out/
+          merge-multiple: true
 
       # draft 开：建草稿（保持人工检查后发布的流程，不自动生成 notes）
       # draft 关：直接发布，GitHub 自动生成 release notes
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ needs.build.outputs.vl }}
-          name: ${{ needs.build.outputs.v }}
+          tag_name: ${{ needs.resolve-version.outputs.vl }}
+          name: ${{ needs.resolve-version.outputs.v }}
           draft: ${{ inputs.draft }}
           generate_release_notes: ${{ !inputs.draft }}
           prerelease: ${{ inputs.prerelease }}
           files: |
-            x64/Starshot-${{ needs.build.outputs.vl }}-win-x64.zip
-            arm64/Starshot-${{ needs.build.outputs.vl }}-win-arm64.zip
-            x64/Starshot-installer-win-x64.exe
-            arm64/Starshot-installer-win-arm64.exe
+            out/Starshot-${{ needs.resolve-version.outputs.vl }}-win-x64.zip
+            out/Starshot-${{ needs.resolve-version.outputs.vl }}-win-arm64.zip
+            out/Starshot-installer-win-x64.exe
+            out/Starshot-installer-win-arm64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
