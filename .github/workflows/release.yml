@@ -1,33 +1,23 @@
 name: Release
 
-# 单入口发布 workflow：解析版本 + 双架构构建 + 生成差分 + 上传 CDN + 创建 Release（draft 可选）。
-#
-# 版本解析（resolve-version）是独立、非 matrix 的 job：build 是 matrix: [x64, arm64] 两个架构并行跑；
-# 版本号只应该算一次，放进单独 job 用 needs 让两边消费同一个结果，避免各自读一次 GitHub API 可能读到不同状态。
-
 on:
   workflow_dispatch:
     inputs:
       draft:
-        description: 'Create as draft (uncheck to publish directly)'
+        description: "Create as draft (uncheck to publish directly)"
         type: boolean
         required: false
         default: true
       prerelease:
-        description: 'Mark as pre-release'
+        description: "Mark as Pre-release"
         type: boolean
         required: false
         default: false
       version:
-        description: 'Version (e.g. 0.1.0-preview.1; leave empty to auto-increment from latest release)'
+        description: "Version (e.g. 0.1.0-preview.1; leave empty for auto)"
         required: false
-      dry_run_cleanup:
-        description: 'Preview CDN cleanup without deleting (dry run)'
-        type: boolean
-        required: false
-        default: false
       launcher_updated:
-        description: 'Launcher changed this release'
+        description: "Launcher changed"
         type: boolean
         required: false
         default: false
@@ -42,7 +32,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-
   resolve-version:
     runs-on: windows-2025-vs2026
     outputs:
@@ -112,7 +101,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
@@ -190,7 +179,7 @@ jobs:
             if (-not (Test-Path "$appDir/hpatchz.exe")) { Write-Error "hpatchz.exe not found"; exit 1 }
             Remove-Item hdiff-arm64.zip, hdiff-tool -Recurse -Force
           }
-          Remove-Item hdiff-win64.zip, hdiff-tool -Recurse -Force
+          Remove-Item hdiff-win64.zip, hdiff-tool -Recurse -Force -ErrorAction SilentlyContinue
 
       - name: Generate delta
         shell: pwsh
@@ -416,7 +405,6 @@ jobs:
             diff-*-win-${{ matrix.platform }}.patch
             launcher-*-win-${{ matrix.platform }}.exe
 
-
   upload-cdn:
     needs: [resolve-version, build]
     runs-on: ubuntu-latest
@@ -615,7 +603,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
-      DRY_RUN: ${{ inputs.dry_run_cleanup }}
       OLD_LATEST: ${{ needs.upload-cdn.outputs.old_latest }}
       OLD_LATEST_PREVIEW: ${{ needs.upload-cdn.outputs.old_latest_preview }}
       NEW_LATEST: ${{ needs.upload-cdn.outputs.new_latest }}
@@ -657,16 +644,10 @@ jobs:
             exit 0
           fi
 
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "=== dry run：只预览，不会真的删除 ==="
-          fi
-
           for tag in $EXISTING; do
             IS_KEEP=$(echo "$KEEP" | jq --arg t "$tag" 'any(. == $t)')
             if [ "$IS_KEEP" = "true" ]; then
               echo "保留: $tag"
-            elif [ "$DRY_RUN" = "true" ]; then
-              echo "[dry-run] 会删除: $tag"
             else
               echo "删除: $tag"
               aws s3 rm "s3://$R2_BUCKET/release/$tag/" --recursive --endpoint-url "$R2_ENDPOINT"
