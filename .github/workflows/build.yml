@@ -139,6 +139,16 @@ jobs:
         run: |
           # kachina 安装版线要平铺目录（原始文件名）；下面的 Version layout 会把 app/ 改名成 app-{vl}/，先拷一份
           Copy-Item build/release/app kachina-flat -Recurse -Force
+          # 安装版标志：烙进主程序 exe 的 DOS stub（偏移 0x40，覆盖无用的 "This program cannot be run in DOS mode" 死区文本）。
+          # 运行时读 exe 判定分发线（AppConfig.Installer）——便携 zip 从 build/release 打包，不带标志，两线天然隔离
+          $exe = "kachina-flat/Starshot.exe"
+          $bytes = [System.IO.File]::ReadAllBytes($exe)
+          $eLfanew = [BitConverter]::ToInt32($bytes, 0x3C)
+          $magic = [System.Text.Encoding]::ASCII.GetBytes("STARSHOT-INSTALLER")
+          if ($eLfanew -lt 0x40 + $magic.Length) { Write-Error "DOS stub too small (e_lfanew=$eLfanew), cannot stamp installer flag"; exit 1 }
+          [Array]::Copy($magic, 0, $bytes, 0x40, $magic.Length)
+          [System.IO.File]::WriteAllBytes($exe, $bytes)
+          Write-Host "Installer flag stamped into $exe"
 
       - name: Version layout
         run: |
