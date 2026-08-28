@@ -89,9 +89,8 @@ public sealed partial class WelcomeWindow : WindowEx
         set => SetProperty(ref field, value);
     } = "";
 
-    // 安装版线判定（包内带更新器）：desc 文案按当前线只写对应一半，不让用户自己对号
-    private bool IsInstallerLine =>
-        File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe"));
+    // 分发线判定：与 AppConfig.Installer 同源（exe 内烙印标志），不再单独探测包内文件
+    private bool IsInstallerLine => AppConfig.Installer;
 
     public string EditionName =>
         IsInstallerLine ? Lang.Starshot_EditionInstaller : Lang.Starshot_EditionPortable;
