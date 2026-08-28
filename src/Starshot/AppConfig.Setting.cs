@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Dapper;
 using Microsoft.Win32.TaskScheduler;
 using Starshot.Features.Database;
@@ -524,21 +525,39 @@ public static partial class AppConfig
     #region Setting Method
 
 
-    private static Dictionary<string, string?> _settingCache;
+    private static Dictionary<string, string?>? _settingCache;
+
+    private static string ConfigFilePath => Path.Combine(UserDataFolder, "config.sjson");
 
     private static void InitializeSettingProvider()
     {
+        if (_settingCache is not null)
+            return;
+        _settingCache = [];
         try
         {
-            if (_settingCache is null)
+            if (File.Exists(ConfigFilePath))
             {
-                using var dapper = DatabaseService.CreateConnection();
-                _settingCache = dapper
-                    .Query<(string Key, string? Value)>("SELECT Key, Value FROM Setting;")
-                    .ToDictionary(x => x.Key, x => x.Value);
+                _settingCache =
+                    JsonSerializer.Deserialize<Dictionary<string, string?>>(
+                        File.ReadAllText(ConfigFilePath)
+                    ) ?? [];
             }
         }
         catch { }
+    }
+
+    /// <summary>
+    /// 全量写回 config.sjson。temp + Move 原子替换，防写一半崩溃损坏整档。
+    /// </summary>
+    private static void SaveConfigFile()
+    {
+        string tmp = ConfigFilePath + ".tmp";
+        File.WriteAllText(
+            tmp,
+            JsonSerializer.Serialize(_settingCache, new JsonSerializerOptions { WriteIndented = true })
+        );
+        File.Move(tmp, ConfigFilePath, overwrite: true);
     }
 
     public static T? GetValue<T>(T? defaultValue = default, [CallerMemberName] string? key = null)
@@ -552,28 +571,18 @@ public static partial class AppConfig
             return defaultValue;
         }
         InitializeSettingProvider();
-        if (_settingCache is null)
+        if (_settingCache?.TryGetValue(key, out string? value) ?? false)
         {
-            return defaultValue;
-        }
-        try
-        {
-            if (_settingCache.TryGetValue(key, out string? value))
+            try
             {
                 return ConvertFromString(value, defaultValue);
             }
-            using var dapper = DatabaseService.CreateConnection();
-            value = dapper.QueryFirstOrDefault<string>(
-                "SELECT Value FROM Setting WHERE Key=@key LIMIT 1;",
-                new { key }
-            );
-            _settingCache[key] = value;
-            return ConvertFromString(value, defaultValue);
+            catch
+            {
+                return defaultValue;
+            }
         }
-        catch
-        {
-            return defaultValue;
-        }
+        return defaultValue;
     }
 
     private static T? ConvertFromString<T>(string? value, T? defaultValue = default)
@@ -601,23 +610,15 @@ public static partial class AppConfig
             return;
         }
         InitializeSettingProvider();
-        if (_settingCache is null)
-        {
-            return;
-        }
         try
         {
             string? val = value?.ToString();
-            if (_settingCache.TryGetValue(key, out string? cacheValue) && cacheValue == val)
+            if (_settingCache!.TryGetValue(key, out string? cacheValue) && cacheValue == val)
             {
                 return;
             }
             _settingCache[key] = val;
-            using var dapper = DatabaseService.CreateConnection();
-            dapper.Execute(
-                "INSERT OR REPLACE INTO Setting (Key, Value) VALUES (@key, @val);",
-                new { key, val }
-            );
+            SaveConfigFile();
         }
         catch { }
     }
@@ -626,15 +627,15 @@ public static partial class AppConfig
     {
         try
         {
-            using var dapper = DatabaseService.CreateConnection();
-            dapper.Execute("DELETE FROM Setting WHERE TRUE;");
+            _settingCache = [];
+            SaveConfigFile();
         }
         catch { }
     }
 
     public static void ClearCache()
     {
-        _settingCache.Clear();
+        _settingCache = null;
     }
 
     #endregion
