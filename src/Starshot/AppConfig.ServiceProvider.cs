@@ -32,8 +32,14 @@ public static partial class AppConfig
                 );
             }
             Log.Logger = cfg.CreateLogger();
+            // 版本行与关于页标签同款：Debug 只显示 Debug；Release 带版本 + 安装版 Installer 后缀
+#if DEBUG
+            string versionTag = "Debug";
+#else
+            string versionTag = $"Release {AppVersion}{(Installer ? " Installer" : "")}";
+#endif
             Log.Information(
-                $"Welcome to Starshot v{AppVersion}\r\nRuntime: {Environment.Version}\r\nCommand Line: {Environment.CommandLine}"
+                $"Welcome to Starshot {versionTag}\r\nRuntime: {Environment.Version}\r\nCommand Line: {Environment.CommandLine}"
             );
 
             var sc = new ServiceCollection();
