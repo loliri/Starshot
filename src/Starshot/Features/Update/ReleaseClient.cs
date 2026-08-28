@@ -40,24 +40,26 @@ public static class ReleaseClient
     private const string LatestReleaseUrl = AppConfig.RepoApiBaseUrl + "/releases/latest";
     private const string AllReleasesUrl = AppConfig.RepoApiBaseUrl + "/releases";
 
-    private static readonly HttpClient _http = CreateClient();
-    private static readonly HttpClient _cdnHttp = CreateCdnClient();
+    private static readonly HttpClient _http = CreateClient(
+        useProxy: !AppConfig.EnableGithubApiNoProxy,
+        githubApiHeader: true
+    );
 
-    private static HttpClient CreateClient()
+    private static readonly HttpClient _cdnHttp = CreateClient(useProxy: true, githubApiHeader: false);
+
+    /// <summary>
+    /// 单一 HttpClient 工厂，差异仅两点：代理策略与是否带 GitHub API 的 Accept 头。
+    /// GitHub API 按开关可直连（UseProxy=false）；CDN 恒走系统代理（用户的网络 / 优选 IP）。
+    /// </summary>
+    private static HttpClient CreateClient(bool useProxy, bool githubApiHeader)
     {
-        // GitHub API 不走系统代理（开关开 = UseProxy=false 直连 api.github.com）。仅 API，zip 下载走 CDN 不受影响。
-        var handler = new HttpClientHandler { UseProxy = !AppConfig.EnableGithubApiNoProxy };
+        var handler = new HttpClientHandler { UseProxy = useProxy };
         var c = new HttpClient(handler);
         c.DefaultRequestHeaders.UserAgent.ParseAdd($"Starshot/{AppConfig.AppVersion}");
-        c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
-        return c;
-    }
-
-    private static HttpClient CreateCdnClient()
-    {
-        // CDN 走系统代理（用户的网络 / 优选 IP），跟 GitHub API 的直连策略分开
-        var c = new HttpClient();
-        c.DefaultRequestHeaders.UserAgent.ParseAdd($"Starshot/{AppConfig.AppVersion}");
+        if (githubApiHeader)
+        {
+            c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+        }
         return c;
     }
 
