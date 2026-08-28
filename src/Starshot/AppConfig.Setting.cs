@@ -242,12 +242,11 @@ public static partial class AppConfig
     {
         try
         {
-            // DOS stub 是死区（加载器只读 MZ magic 和 0x3C 的 e_lfanew），CI 把
-            // "STARSHOT-INSTALLER" 写在固定偏移 0x40（stub 文本起始处），读取直接 Seek 比对
             using var fs = File.OpenRead(Environment.ProcessPath!);
             fs.Seek(0x40, SeekOrigin.Begin);
-            Span<byte> buf = stackalloc byte[17];
-            return fs.ReadAtLeast(buf, 17) == 17 && buf.SequenceEqual("STARSHOT-INSTALLER"u8);
+            ReadOnlySpan<byte> magic = "STARSHOT-INSTALLER"u8;
+            Span<byte> buf = stackalloc byte[magic.Length];
+            return fs.ReadAtLeast(buf, magic.Length) == magic.Length && buf.SequenceEqual(magic);
         }
         catch
         {
