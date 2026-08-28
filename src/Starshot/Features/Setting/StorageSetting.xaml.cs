@@ -440,7 +440,6 @@ public sealed partial class StorageSetting : PageBase
             bool ok = await Task.Run(() => AppConfig.ImportConfigFile(path));
             if (ok)
             {
-                RefreshLastBackup();
                 InAppToast.MainWindow?.Success(Lang.Starshot_ImportSuccess);
             }
             else
