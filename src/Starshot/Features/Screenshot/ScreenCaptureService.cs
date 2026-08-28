@@ -506,7 +506,7 @@ internal class ScreenCaptureService
         // 提前判定内容是否真 HDR + 各分支标志（maxCLL 入口已有，无需等编码后再判）
         bool contentIsHDR = hdr && maxCLL > sdrWhiteLevel + 5;
         bool deleteHDR = hdr && AppConfig.DeleteHDRIfSDRContent && !contentIsHDR;
-        bool autoConvertSDR = hdr && AppConfig.AutoConvertScreenshotToSDR && !deleteHDR;
+        bool autoConvertSDR = hdr && AppConfig.AutoSaveUltraHDRJpeg && !deleteHDR;
         bool outputIsHDR = hdr && !deleteHDR; // 主文件是否走 HDR 编码
 
         int quality = AppConfig.ScreenCaptureEncodeQuality switch

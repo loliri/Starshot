@@ -82,17 +82,17 @@
           </Button>
         </Grid>
         <ToggleSwitch
-          IsOn="{x:Bind WallpaperFolderVideoOnly, Mode=TwoWay}"
-          Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}"
-          OffContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}"
-          OnContent="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnly}"
+          IsOn="{x:Bind WallpaperFolderPreferVideo, Mode=TwoWay}"
+          Visibility="{x:Bind WallpaperFolderPreferVideoVisibility}"
+          OffContent="{x:Bind lang:Lang.Starshot_WallpaperFolderPreferVideo}"
+          OnContent="{x:Bind lang:Lang.Starshot_WallpaperFolderPreferVideo}"
         />
         <TextBlock
           FontSize="12"
           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-          Text="{x:Bind lang:Lang.Starshot_WallpaperFolderVideoOnlyDesc}"
+          Text="{x:Bind lang:Lang.Starshot_WallpaperFolderPreferVideoDesc}"
           TextWrapping="Wrap"
-          Visibility="{x:Bind WallpaperFolderVideoOnlyVisibility}"
+          Visibility="{x:Bind WallpaperFolderPreferVideoVisibility}"
         />
         <TextBlock
           FontSize="12"

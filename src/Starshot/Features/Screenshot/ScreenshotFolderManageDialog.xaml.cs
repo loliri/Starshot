@@ -29,7 +29,7 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         Unloaded += ScreenshotFolderManageDialog_Unloaded;
     }
 
-    public ObservableCollection<ScreenshotFolder> ScreenshotFolders { get; set; } = new();
+    public ObservableCollection<ScreenshotFolder> ExtraScreenshotFolders { get; set; } = new();
 
     public bool FolderChanged { get; set; }
 
@@ -47,7 +47,7 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
             {
                 foreach (var item in Folders)
                 {
-                    ScreenshotFolders.Add(item);
+                    ExtraScreenshotFolders.Add(item);
                 }
             }
         }
@@ -58,8 +58,8 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
     {
         try
         {
-            ScreenshotFolders.Clear();
-            ScreenshotFolders = null!;
+            ExtraScreenshotFolders.Clear();
+            ExtraScreenshotFolders = null!;
         }
         catch { }
     }
@@ -72,9 +72,9 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
             string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
             if (Directory.Exists(folder))
             {
-                if (ScreenshotFolders.FirstOrDefault(x => x.Folder == folder) is null)
+                if (ExtraScreenshotFolders.FirstOrDefault(x => x.Folder == folder) is null)
                 {
-                    ScreenshotFolders.Add(new ScreenshotFolder(folder));
+                    ExtraScreenshotFolders.Add(new ScreenshotFolder(folder));
                     CanSave = true;
                 }
             }
@@ -106,7 +106,7 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
         {
             if (sender is FrameworkElement { DataContext: ScreenshotFolder folder })
             {
-                ScreenshotFolders.Remove(folder);
+                ExtraScreenshotFolders.Remove(folder);
                 CanSave = true;
             }
         }
@@ -121,7 +121,7 @@ public sealed partial class ScreenshotFolderManageDialog : ContentDialog
             FolderChanged = true;
             Folders ??= new();
             Folders.Clear();
-            Folders.AddRange(ScreenshotFolders.Where(x => x.CanRemove));
+            Folders.AddRange(ExtraScreenshotFolders.Where(x => x.CanRemove));
             this.Hide();
         }
         catch

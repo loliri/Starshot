@@ -99,7 +99,7 @@
         />
       </StackPanel>
 
-      <!--  数据库存放位置  -->
+      <!--  数据存放位置（只读说明：便携版=程序所在目录，安装版=系统用户数据目录，均不可更改）  -->
       <TextBlock
         Margin="0,12,0,0"
         FontSize="16"
@@ -118,21 +118,6 @@
         />
         <Run Text="{x:Bind DbFolderDescTail}" />
       </TextBlock>
-      <StackPanel Orientation="Horizontal" Spacing="12">
-        <Button
-          BorderThickness="0"
-          Command="{x:Bind PickDatabaseFolderCommand}"
-          Content="{x:Bind lang:Lang.Starshot_WelcomePickFolder}"
-          Style="{ThemeResource AccentButtonStyle}"
-        />
-        <TextBlock
-          VerticalAlignment="Center"
-          FontSize="13"
-          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-          Text="{x:Bind DatabaseFolderDisplay}"
-          TextTrimming="CharacterEllipsis"
-        />
-      </StackPanel>
     </StackPanel>
 
     <!--  开始使用  -->

@@ -84,17 +84,17 @@ public sealed partial class ScreenshotSetting : PageBase
         }
     }
 
-    public bool AutoConvertScreenshotToSDR
+    public bool AutoSaveUltraHDRJpeg
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
-                AppConfig.AutoConvertScreenshotToSDR = value;
+                AppConfig.AutoSaveUltraHDRJpeg = value;
             }
         }
-    } = AppConfig.AutoConvertScreenshotToSDR;
+    } = AppConfig.AutoSaveUltraHDRJpeg;
 
     public bool DeleteHDRIfSDRContent
     {

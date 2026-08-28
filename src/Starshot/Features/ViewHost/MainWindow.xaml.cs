@@ -51,12 +51,7 @@ public sealed partial class MainWindow : WindowEx
         SetDragRectangles(new RectInt32(0, 0, 100000, (int)(48 * UIScale)));
         ApplyBackdrop();
         ApplyTheme();
-        // 托盘开启时由 SystemTrayWindow 注册热键（--hide 场景它唯一常驻）；托盘关闭时才由本窗口注册，
-        // 否则两个窗口都注册同一组热键，被占用时各弹一遍 toast（3×2=6 个）
-        if (!AppConfig.EnableSystemTrayIcon)
-        {
-            HotkeyManager.InitializeHotkey(WindowHandle);
-        }
+        // 热键由 SystemTrayWindow 注册（托盘恒开，它是常驻宿主；--hide 场景唯一常驻窗口）
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(
             this,
             (_, _) => OnAccentChanged()
@@ -126,11 +121,11 @@ public sealed partial class MainWindow : WindowEx
             if (!AppConfig.EnableAutoUpdateCheck)
                 return;
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            if (now - AppConfig.LastCheckUpdateTime < 86400)
+            if (now - AppConfig.LastUpdateCheckTime < 86400)
                 return;
             var (release, _) = await UpdateService.CheckUpdateAsync();
             // 成功查询后才更新时间戳：网络失败抛异常会跳过本行（catch 兜底），下次启动即重试
-            AppConfig.LastCheckUpdateTime = now;
+            AppConfig.LastUpdateCheckTime = now;
             if (release is null)
                 return;
             var window = new UpdateWindow();
@@ -198,11 +193,9 @@ public sealed partial class MainWindow : WindowEx
         {
             return;
         }
-        if (AppConfig.EnableSystemTrayIcon)
-        {
-            args.Cancel = true;
-            Hide();
-        }
+        // 托盘恒开：关窗即最小化到托盘
+        args.Cancel = true;
+        Hide();
     }
 
     protected override nint WindowSubclassProc(

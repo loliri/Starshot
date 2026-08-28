@@ -9,7 +9,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using Starshot.Features.Codec;
-using Starshot.Features.Database;
 using Starshot.Features.Screenshot;
 using Starshot.Frameworks;
 using Starshot.Helpers;
@@ -110,74 +109,12 @@ public sealed partial class StorageSetting : PageBase
     public StorageSetting()
     {
         InitializeComponent();
-        DatabaseFolder = AppConfig.UserDataFolder;
-#if DEBUG
-        // Debug 数据库锁死父目录，不读写 database.json，更改位置入口隐藏
-        Grid_ChangeDatabaseFolder.Visibility = Visibility.Collapsed;
-#endif
-        // 当前目录存在 database.json（便携化锚定，优先级高于 LocalAppData）时不允许再改：
-        // 按钮只写 LocalAppData 那份，写了也会被当前目录的压住，改了无效
-        if (File.Exists(Path.Combine(AppContext.BaseDirectory, "database.json")))
-        {
-            Button_ChangeDatabaseFolder.IsEnabled = false;
-        }
         InitializeScreenshotFolder();
         LogFolder = AppConfig.LogFolder;
         _lastFocusedTemplateBox = FileNameTextBox;
         BuildPlaceholderLinks();
         RefreshLastBackup();
         _ = RefreshStatsAsync();
-    }
-
-    public string DatabaseFolder
-    {
-        get;
-        set => SetProperty(ref field, value);
-    } = "";
-
-    [RelayCommand]
-    private async Task ChangeDatabaseFolder()
-    {
-#if DEBUG
-        return; // Debug 数据库锁死父目录，不产生任何锚定写入
-#else
-        try
-        {
-            var folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
-            if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
-                return;
-            folder = Path.GetFullPath(folder);
-            if (
-                string.Equals(
-                    folder,
-                    Path.GetFullPath(AppConfig.UserDataFolder),
-                    StringComparison.OrdinalIgnoreCase
-                )
-            )
-                return;
-            // 复用备份逻辑把当前库整套快照到新位置（原库不动，保兼容）
-            await Task.Run(() =>
-                DatabaseService.BackupDatabase(Path.Combine(folder, "StarshotDatabase.db"))
-            );
-            // 写锚定 JSON，下次启动按它定位数据库
-            string localAppData = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Starshot"
-            );
-            Directory.CreateDirectory(localAppData);
-            await File.WriteAllTextAsync(
-                Path.Combine(localAppData, "database.json"),
-                System.Text.Json.JsonSerializer.Serialize(new { DatabaseFolder = folder })
-            );
-            DatabaseFolder = folder;
-            var dialog = new DatabaseLocationDialog { XamlRoot = this.XamlRoot };
-            await dialog.ShowAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "ChangeDatabaseFolder");
-        }
-#endif
     }
 
     private void BuildPlaceholderLinks()
@@ -249,25 +186,6 @@ public sealed partial class StorageSetting : PageBase
             sender.FontSize -= 1;
         }
     }
-
-    #region Data Folder
-
-
-    [RelayCommand]
-    private async Task OpenDataFolder()
-    {
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(AppConfig.UserDataFolder))
-            {
-                await Launcher.LaunchFolderPathAsync(AppConfig.UserDataFolder);
-            }
-        }
-        catch { }
-    }
-
-    #endregion
-
 
     #region Screenshot Folder
 
@@ -347,11 +265,11 @@ public sealed partial class StorageSetting : PageBase
         {
             if (SetProperty(ref field, value))
             {
-                AppConfig.LogLevelConfig = value;
+                AppConfig.LogLevel = value;
                 InAppToast.MainWindow?.Information(null, Lang.Starshot_LogFolderRestartTip, 3000);
             }
         }
-    } = AppConfig.LogLevelConfig;
+    } = AppConfig.LogLevel;
 
     [RelayCommand]
     private async Task ChangeLogFolder()
@@ -428,10 +346,11 @@ public sealed partial class StorageSetting : PageBase
 
     private string? _lastBackupPath;
 
-    // 安装版线备份进日志文件夹体系（LocalAppData）；便携版照旧在数据目录（便携布局的根）
-    private static string DatabaseBackupFolder =>
+    // 备份固定写 LocalAppData（不随日志文件夹/数据位置变化）
+    private static string ConfigBackupFolder =>
         Path.Combine(
-            AppConfig.Installer ? AppConfig.LogFolder : AppConfig.UserDataFolder,
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Starshot",
             "backup"
         );
 
@@ -439,14 +358,14 @@ public sealed partial class StorageSetting : PageBase
     {
         try
         {
-            string dir = DatabaseBackupFolder;
+            string dir = ConfigBackupFolder;
             if (!Directory.Exists(dir))
             {
                 LastBackupVisible = Visibility.Collapsed;
                 return;
             }
             var last = Directory
-                .GetFiles(dir, "StarshotDatabase_*.db")
+                .GetFiles(dir, "config_*.sjson")
                 .OrderByDescending(File.GetLastWriteTime)
                 .FirstOrDefault();
             if (last is null)
@@ -463,24 +382,82 @@ public sealed partial class StorageSetting : PageBase
     }
 
     [RelayCommand]
-    private async Task BackupDatabase()
+    private async Task BackupConfig()
     {
         try
         {
-            Directory.CreateDirectory(DatabaseBackupFolder);
+            Directory.CreateDirectory(ConfigBackupFolder);
             string file = Path.Combine(
-                DatabaseBackupFolder,
-                $"StarshotDatabase_{DateTime.Now:yyyyMMdd_HHmmss}.db"
+                ConfigBackupFolder,
+                $"config_{DateTime.Now:yyyyMMdd_HHmmss}.sjson"
             );
-            await Task.Run(() => DatabaseService.BackupDatabase(file));
+            await Task.Run(() => File.Copy(AppConfig.ConfigFilePath, file, overwrite: true));
             RefreshLastBackup();
             _ = RefreshStatsAsync();
             InAppToast.MainWindow?.Success(Lang.Starshot_BackupSuccess);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Backup database");
+            _logger.LogError(ex, "Backup config");
             InAppToast.MainWindow?.Error(ex, Lang.Starshot_BackupFailed);
+        }
+    }
+
+    /// <summary>
+    /// 导出配置：config.sjson 副本存到用户选的位置（.json 扩展，便于识别与编辑）。
+    /// </summary>
+    [RelayCommand]
+    private async Task ExportConfig()
+    {
+        try
+        {
+            string? path = await FileDialogHelper.OpenSaveFileDialogAsync(
+                this.XamlRoot,
+                $"Starshot_config_{DateTime.Now:yyyyMMdd_HHmmss}.json",
+                ("JSON", ".json")
+            );
+            if (string.IsNullOrWhiteSpace(path))
+                return;
+            await Task.Run(() => File.Copy(AppConfig.ConfigFilePath, path, overwrite: true));
+            InAppToast.MainWindow?.Success(Lang.Starshot_ExportSuccess);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Export config");
+            InAppToast.MainWindow?.Error(ex, Lang.Starshot_ExportFailed);
+        }
+    }
+
+    /// <summary>
+    /// 导入配置：选 JSON 文件 → 校验为合法配置字典 → 覆盖 config.sjson + 清缓存重载。
+    /// 校验只保证结构与值类型，不校验个别键合法性（未知键忽略、值按默认转换容错）。
+    /// </summary>
+    [RelayCommand]
+    private async Task ImportConfig()
+    {
+        try
+        {
+            string? path = await FileDialogHelper.PickSingleFileAsync(
+                this.XamlRoot,
+                new[] { ("JSON", ".json"), ("Starshot Settings", ".sjson") }
+            );
+            if (string.IsNullOrWhiteSpace(path))
+                return;
+            bool ok = await Task.Run(() => AppConfig.ImportConfigFile(path));
+            if (ok)
+            {
+                RefreshLastBackup();
+                InAppToast.MainWindow?.Success(Lang.Starshot_ImportSuccess);
+            }
+            else
+            {
+                InAppToast.MainWindow?.Warning(null, Lang.Starshot_ImportInvalid, 5000);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Import config");
+            InAppToast.MainWindow?.Error(ex, Lang.Starshot_ImportFailed);
         }
     }
 
@@ -595,7 +572,7 @@ public sealed partial class StorageSetting : PageBase
             string cache = AppConfig.CacheFolder;
             string bgDir = Path.Combine(cache, "bg");
             string logDir = Path.Combine(AppConfig.LogFolder, "log");
-            string backupDir = DatabaseBackupFolder;
+            string backupDir = ConfigBackupFolder;
 
             var (ssSize, cacheSize, bgSize, logSize, backupSize) = await Task.Run(() =>
             {

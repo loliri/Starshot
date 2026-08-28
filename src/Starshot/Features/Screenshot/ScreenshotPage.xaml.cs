@@ -134,7 +134,7 @@ public sealed partial class ScreenshotPage : PageBase
             }
 
             // 用户自加的文件夹
-            string? externalFolder = AppConfig.ScreenshotFolders;
+            string? externalFolder = AppConfig.ExtraScreenshotFolders;
             if (!string.IsNullOrWhiteSpace(externalFolder))
             {
                 foreach (var item in externalFolder.Split(';'))
@@ -324,7 +324,7 @@ public sealed partial class ScreenshotPage : PageBase
                     ';',
                     dialog.Folders.Where(x => x.CanRemove).Select(x => x.Folder)
                 );
-                AppConfig.ScreenshotFolders = folder;
+                AppConfig.ExtraScreenshotFolders = folder;
                 Initialize();
                 UpdateSelectCountText();
             }

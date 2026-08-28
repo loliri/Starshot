@@ -58,9 +58,9 @@ public partial class App : Application
         AppConfig.CheckAutoStartValidity();
         AppConfig.CheckTaskValidity();
 
-        bool startHidden =
-            Environment.GetCommandLineArgs().Contains("--hide", StringComparer.OrdinalIgnoreCase)
-            && AppConfig.EnableSystemTrayIcon;
+        bool startHidden = Environment
+            .GetCommandLineArgs()
+            .Contains("--hide", StringComparer.OrdinalIgnoreCase);
 
         if (!startHidden)
         {
@@ -83,7 +83,7 @@ public partial class App : Application
 
     public void EnsureSystemTray()
     {
-        if (AppConfig.EnableSystemTrayIcon && m_SystemTrayWindow is null)
+        if (m_SystemTrayWindow is null)
         {
             m_SystemTrayWindow = new SystemTrayWindow();
         }

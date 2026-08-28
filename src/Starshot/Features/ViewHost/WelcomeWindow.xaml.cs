@@ -36,7 +36,6 @@ public sealed partial class WelcomeWindow : WindowEx
     public string? WallpaperFileName { get; private set; }
     public string? WallpaperVideoPath { get; private set; }
     public bool WallpaperIsVideo { get; private set; }
-    public string? DatabaseFolderPath { get; private set; }
 
     public WelcomeWindow()
     {
@@ -85,12 +84,6 @@ public sealed partial class WelcomeWindow : WindowEx
 
     // 选完显示选中路径
     public string WallpaperDisplay
-    {
-        get;
-        set => SetProperty(ref field, value);
-    } = "";
-
-    public string DatabaseFolderDisplay
     {
         get;
         set => SetProperty(ref field, value);
@@ -173,21 +166,6 @@ public sealed partial class WelcomeWindow : WindowEx
                 File.Copy(path, Path.Combine(bgDir, fileName), overwrite: true);
                 WallpaperFileName = fileName;
                 WallpaperDisplay = fileName;
-            }
-        }
-        catch { }
-    }
-
-    [RelayCommand]
-    private async Task PickDatabaseFolder()
-    {
-        try
-        {
-            var folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
-            if (!string.IsNullOrWhiteSpace(folder))
-            {
-                DatabaseFolderPath = folder;
-                DatabaseFolderDisplay = folder;
             }
         }
         catch { }

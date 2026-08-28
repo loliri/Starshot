@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Starshot.Features.Database;
 using Starshot.Features.Screenshot;
 
 namespace Starshot;
@@ -17,7 +15,7 @@ public static partial class AppConfig
     {
         if (_serviceProvider == null)
         {
-            var minLevel = AppConfig.LogLevelConfig switch
+            var minLevel = AppConfig.LogLevel switch
             {
                 1 => Serilog.Events.LogEventLevel.Error,
                 2 => Serilog.Events.LogEventLevel.Warning,
@@ -25,7 +23,7 @@ public static partial class AppConfig
                 _ => Serilog.Events.LogEventLevel.Information,
             };
             var cfg = new LoggerConfiguration().Enrich.FromLogContext().MinimumLevel.Is(minLevel);
-            if (AppConfig.LogLevelConfig != 0)
+            if (AppConfig.LogLevel != 0)
             {
                 cfg.WriteTo.File(
                     path: LogFile,
@@ -58,10 +56,5 @@ public static partial class AppConfig
     {
         BuildServiceProvider();
         return _serviceProvider.GetService<ILogger<T>>()!;
-    }
-
-    public static SqliteConnection CreateDatabaseConnection()
-    {
-        return DatabaseService.CreateConnection();
     }
 }

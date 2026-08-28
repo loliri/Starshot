@@ -220,7 +220,7 @@
   <data name="ScreenCaptureInfoWindow_ScreenshotSaved" xml:space="preserve">
     <value>截图已保存</value>
   </data>
-  <data name="ScreenshotPage_ManageScreenshotFolders" xml:space="preserve">
+  <data name="ScreenshotPage_ManageExtraScreenshotFolders" xml:space="preserve">
     <value>管理截图文件夹</value>
   </data>
   <data name="ScreenshotFolderManageDialog_AddFolder" xml:space="preserve">
@@ -499,10 +499,10 @@
   <data name="Starshot_WallpaperModeVideo" xml:space="preserve">
     <value>指定视频</value>
   </data>
-  <data name="Starshot_WallpaperFolderVideoOnly" xml:space="preserve">
+  <data name="Starshot_WallpaperFolderPreferVideo" xml:space="preserve">
     <value>视频优先</value>
   </data>
-  <data name="Starshot_WallpaperFolderVideoOnlyDesc" xml:space="preserve">
+  <data name="Starshot_WallpaperFolderPreferVideoDesc" xml:space="preserve">
     <value>优先选择视频；视频无法初始化时回退到随机图片</value>
   </data>
   <data name="Starshot_WallpaperNowPlaying" xml:space="preserve">
@@ -714,6 +714,33 @@
   </data>
   <data name="Starshot_BackupDatabase" xml:space="preserve">
     <value>备份数据库</value>
+  </data>
+  <data name="Starshot_BackupRestore" xml:space="preserve">
+    <value>备份与恢复</value>
+  </data>
+  <data name="Starshot_BackupConfig" xml:space="preserve">
+    <value>备份配置</value>
+  </data>
+  <data name="Starshot_ExportConfig" xml:space="preserve">
+    <value>导出配置</value>
+  </data>
+  <data name="Starshot_ImportConfig" xml:space="preserve">
+    <value>导入配置</value>
+  </data>
+  <data name="Starshot_ExportSuccess" xml:space="preserve">
+    <value>导出成功</value>
+  </data>
+  <data name="Starshot_ExportFailed" xml:space="preserve">
+    <value>导出失败</value>
+  </data>
+  <data name="Starshot_ImportSuccess" xml:space="preserve">
+    <value>导入成功，部分设置重启后完全生效</value>
+  </data>
+  <data name="Starshot_ImportInvalid" xml:space="preserve">
+    <value>文件无效，不是合法的配置文件</value>
+  </data>
+  <data name="Starshot_ImportFailed" xml:space="preserve">
+    <value>导入失败</value>
   </data>
   <data name="Starshot_LastBackup" xml:space="preserve">
     <value>上次备份</value>

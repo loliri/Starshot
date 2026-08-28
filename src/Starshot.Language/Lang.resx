@@ -220,7 +220,7 @@
   <data name="ScreenCaptureInfoWindow_ScreenshotSaved" xml:space="preserve">
     <value>Screenshot Saved</value>
   </data>
-  <data name="ScreenshotPage_ManageScreenshotFolders" xml:space="preserve">
+  <data name="ScreenshotPage_ManageExtraScreenshotFolders" xml:space="preserve">
     <value>Manage Screenshot Folders</value>
   </data>
   <data name="ScreenshotFolderManageDialog_AddFolder" xml:space="preserve">
@@ -499,10 +499,10 @@
   <data name="Starshot_WallpaperModeVideo" xml:space="preserve">
     <value>Specified Video</value>
   </data>
-  <data name="Starshot_WallpaperFolderVideoOnly" xml:space="preserve">
+  <data name="Starshot_WallpaperFolderPreferVideo" xml:space="preserve">
     <value>Prefer Video</value>
   </data>
-  <data name="Starshot_WallpaperFolderVideoOnlyDesc" xml:space="preserve">
+  <data name="Starshot_WallpaperFolderPreferVideoDesc" xml:space="preserve">
     <value>Picks videos first; falls back to a random image if the video can't initialize</value>
   </data>
   <data name="Starshot_WallpaperNowPlaying" xml:space="preserve">
@@ -714,6 +714,33 @@
   </data>
   <data name="Starshot_BackupDatabase" xml:space="preserve">
     <value>Back Up Database</value>
+  </data>
+  <data name="Starshot_BackupRestore" xml:space="preserve">
+    <value>Backup &amp; Restore</value>
+  </data>
+  <data name="Starshot_BackupConfig" xml:space="preserve">
+    <value>Back Up Settings</value>
+  </data>
+  <data name="Starshot_ExportConfig" xml:space="preserve">
+    <value>Export Settings</value>
+  </data>
+  <data name="Starshot_ImportConfig" xml:space="preserve">
+    <value>Import Settings</value>
+  </data>
+  <data name="Starshot_ExportSuccess" xml:space="preserve">
+    <value>Exported</value>
+  </data>
+  <data name="Starshot_ExportFailed" xml:space="preserve">
+    <value>Export failed</value>
+  </data>
+  <data name="Starshot_ImportSuccess" xml:space="preserve">
+    <value>Imported. Restart to apply everything.</value>
+  </data>
+  <data name="Starshot_ImportInvalid" xml:space="preserve">
+    <value>Invalid file: not a valid settings file</value>
+  </data>
+  <data name="Starshot_ImportFailed" xml:space="preserve">
+    <value>Import failed</value>
   </data>
   <data name="Starshot_LastBackup" xml:space="preserve">
     <value>Last Backup</value>

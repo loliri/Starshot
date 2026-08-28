@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using Starshot.Features.Database;
 using Starshot.Features.ViewHost;
 using Starshot.Helpers;
 
@@ -41,38 +40,11 @@ public static partial class AppConfig
         );
         UserDataFolder = Path.GetDirectoryName(baseDir) ?? baseDir;
 
-        // LocalAppData 根（日志/缓存默认家，database.json 锚定也放这）
+        // LocalAppData 根（日志/缓存默认家，安装版数据位置）
         string localAppData = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Starshot"
         );
-
-#if !DEBUG
-        // database.json 锚定数据库位置，覆盖优先级：当前目录 > LocalAppData > 父目录默认。
-        // 当前目录的 database.json 是便携化锚定（随程序走，比如 U 盘）——存在即用，且不看 LocalAppData；
-        // LocalAppData 那份是安装版线欢迎页/更改位置按钮写的。Debug 锁死父目录，不读不写
-        try
-        {
-            string? anchorPath = Path.Combine(AppContext.BaseDirectory, "database.json");
-            if (!File.Exists(anchorPath))
-            {
-                anchorPath = Path.Combine(localAppData, "database.json");
-            }
-            if (File.Exists(anchorPath))
-            {
-                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(anchorPath));
-                if (
-                    doc.RootElement.TryGetProperty("DatabaseFolder", out var folder)
-                    && folder.GetString() is { Length: > 0 } dbFolder
-                    && Directory.Exists(dbFolder)
-                )
-                {
-                    UserDataFolder = dbFolder;
-                }
-            }
-        }
-        catch { }
-#endif
 
         // 版本号：Debug 构建显示 "Debug"（日志 Starshot_Debug_*.log + 启动 vDebug）；Release 读 assembly 内嵌
 #if DEBUG
@@ -95,10 +67,9 @@ public static partial class AppConfig
         LogFile = Path.Combine(logFolder, "log", BuildLogFileName());
         Directory.CreateDirectory(CacheFolder);
 
-        // 首次启动（DB 不存在）弹欢迎页；用户关掉不完成则退出
-        string dbPath = Path.Combine(UserDataFolder, "StarshotDatabase.db");
+        // 首次启动（配置文件不存在）弹欢迎页；用户关掉不完成则退出
         WelcomeWindow? welcome = null;
-        if (!File.Exists(dbPath))
+        if (!File.Exists(ConfigFilePath))
         {
             welcome = new Features.ViewHost.WelcomeWindow();
             if (!await welcome.WaitAsync())
@@ -106,43 +77,16 @@ public static partial class AppConfig
                 Environment.Exit(0);
             }
 #if !DEBUG
-            // 欢迎页选了数据库文件夹 → 首启直接采用（定终身，绕开设置页改位置的迁移链路）
-            bool pickedDb =
-                welcome.DatabaseFolderPath is { Length: > 0 } pickedFolder
-                && Directory.Exists(pickedFolder);
-            if (pickedDb)
-            {
-                UserDataFolder = welcome.DatabaseFolderPath!;
-            }
-            // 安装版线首启判定——只在欢迎页做这一次：包内带更新器、用户没选位置 →
-            // 数据落 LocalAppData。锚定 database.json 统一写 LocalAppData（不写 app 目录）：
-            // 安装版必写；便携版只在选了位置时写（没选默认就是父目录，锚定冗余）。
-            // 此后启动靠 JSON 定位，不再探测。Debug 不参与（数据库锁死父目录）
-            bool isInstallerLine = File.Exists(
-                Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")
-            );
-            if (isInstallerLine && !pickedDb)
+            // 安装版线首启判定——只在欢迎页做这一次：包内带更新器 → 数据落 LocalAppData。
+            // 位置不可更改（欢迎页只展示、设置页无更改入口）。Debug 不参与（数据库锁死父目录）
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")))
             {
                 UserDataFolder = localAppData;
             }
-            if (isInstallerLine || pickedDb)
-            {
-                try
-                {
-                    Directory.CreateDirectory(localAppData);
-                    File.WriteAllText(
-                        Path.Combine(localAppData, "database.json"),
-                        System.Text.Json.JsonSerializer.Serialize(
-                            new { DatabaseFolder = UserDataFolder }
-                        )
-                    );
-                }
-                catch { }
-            }
 #endif
+            // 落盘首启判定文件：全默认不改设置的用户 config.sjson 也会生成，不再重复弹欢迎页
+            EnsureConfigFile();
         }
-
-        DatabaseService.SetDatabase(UserDataFolder);
 
         // 高优先级运行开关：开了每次启动自提升（对自身 SetPriorityClass 无需权限，任何启动方式都生效）；关=系统默认
         try
@@ -152,7 +96,7 @@ public static partial class AppConfig
         }
         catch { }
 
-        // 欢迎页选的配置在 SetDatabase 之后才写 DB（之前 DB 没创建，直接写会丢）
+        // 欢迎页选的配置在此写入（之前配置缓存未初始化，直接写会丢）
         if (welcome is not null)
         {
             if (welcome.WallpaperIsVideo && !string.IsNullOrWhiteSpace(welcome.WallpaperVideoPath))

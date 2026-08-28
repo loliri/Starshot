@@ -319,7 +319,7 @@
       />
       <Button
         Command="{x:Bind ManageScreenshotFolderCommand}"
-        Content="{x:Bind lang:Lang.ScreenshotPage_ManageScreenshotFolders}"
+        Content="{x:Bind lang:Lang.ScreenshotPage_ManageExtraScreenshotFolders}"
       />
     </StackPanel>
   </Grid>

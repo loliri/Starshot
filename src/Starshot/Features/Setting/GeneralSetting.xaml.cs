@@ -335,7 +335,7 @@ public sealed partial class GeneralSetting : PageBase
             {
                 string launcherPath = GetLauncherPath();
                 string args =
-                    (AppConfig.AutoStartMinimized && AppConfig.EnableSystemTrayIcon)
+                    AppConfig.AutoStartMinimized
                         ? " --hide"
                         : "";
                 key.SetValue(RunValueName, $"\"{launcherPath}\"{args}");
@@ -361,7 +361,7 @@ public sealed partial class GeneralSetting : PageBase
         {
             string launcherPath = GetLauncherPath();
             string taskArgs =
-                (AppConfig.AutoStartMinimized && AppConfig.EnableSystemTrayIcon) ? "--hide" : "";
+                AppConfig.AutoStartMinimized ? "--hide" : "";
             string mode = enable ? "create" : "delete";
             // 提权子进程：UAC 弹窗，admin 权限调 TaskScheduler API（同步）；await 不阻塞 UI
             var psi = new ProcessStartInfo(

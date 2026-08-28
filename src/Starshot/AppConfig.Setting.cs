@@ -6,9 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Dapper;
 using Microsoft.Win32.TaskScheduler;
-using Starshot.Features.Database;
 
 namespace Starshot;
 
@@ -84,9 +82,9 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 文件夹随机模式仅抽视频（模式 3 子选项），默认 false=图/视频混合
+    /// 文件夹随机模式优先抽视频（模式 3 子选项）：有视频只从视频抽，没有回退图片。默认 false=图/视频混合。
     /// </summary>
-    public static bool WallpaperFolderVideoOnly
+    public static bool WallpaperFolderPreferVideo
     {
         get => GetValue(false);
         set => SetValue(value);
@@ -126,12 +124,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 系统托盘总是启用（关闭主窗口最小化到托盘）
-    /// </summary>
-    public static bool EnableSystemTrayIcon => true;
-
-    /// <summary>
-    /// 开机自启：实时读注册表 HKCU\...\Run\Starshot 是否存在（用户可能在外部禁用，不能缓存到 DB）
+    /// 开机自启：实时读注册表 HKCU\...\Run\Starshot 是否存在（用户可能在外部禁用，不能缓存到配置）
     /// </summary>
     public static bool EnableAutoStart
     {
@@ -238,8 +231,8 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 安装版线：true 时更新拉起 Starshot.Update.exe、隐藏更新源等便携版专属 UI。
-    /// 首次启动由欢迎页流程按包内更新器存在与否写入，之后一直不变（更新线与数据位置独立锚定）。
+    /// 安装版线：true 时更新拉起 Starshot.Update.exe、隐藏更新源选择等便携版专属 UI。
+    /// 首次启动由欢迎页流程按包内更新器存在与否写入，之后一直不变。
     /// </summary>
     public static bool Installer
     {
@@ -248,7 +241,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 检查更新时是否包含预发布版本。开 = 用 /releases 端点（含 pre-release）；关 = 用 /releases/latest（只看正式版）。
+    /// 检查更新时包含预览版（默认只看正式版）。
     /// </summary>
     public static bool EnablePreReleaseUpdateCheck
     {
@@ -277,7 +270,7 @@ public static partial class AppConfig
     /// <summary>
     /// 上次检查更新的 Unix 时间戳（秒），用于节流
     /// </summary>
-    public static long LastCheckUpdateTime
+    public static long LastUpdateCheckTime
     {
         get => GetValue(0L);
         set => SetValue(value);
@@ -348,7 +341,7 @@ public static partial class AppConfig
     /// <summary>
     /// 日志级别：0=关 / 1=Error / 2=Warn / 3=Info(默认) / 4=Debug。重启生效。
     /// </summary>
-    public static int LogLevelConfig
+    public static int LogLevel
     {
         get => GetValue(
 #if DEBUG
@@ -363,7 +356,7 @@ public static partial class AppConfig
     /// <summary>
     /// 截图文件夹，默认 我的图片/Starshot
     /// </summary>
-    public static string? ScreenshotFolder
+    public static string ScreenshotFolder
     {
         get =>
             GetValue(
@@ -378,7 +371,7 @@ public static partial class AppConfig
     /// <summary>
     /// 用户配置的截图库文件夹列表（分号分隔），供库浏览
     /// </summary>
-    public static string? ScreenshotFolders
+    public static string? ExtraScreenshotFolders
     {
         get => GetValue<string>();
         set => SetValue(value);
@@ -414,7 +407,11 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-    public static bool AutoConvertScreenshotToSDR
+    /// <summary>
+    /// HDR 截图在主 HDR 文件之外额外保存一份 Ultra HDR JPEG（SDR 基图 + gain map，
+    /// 不支持 HDR 的软件也能正常显示）。主文件不受影响。
+    /// </summary>
+    public static bool AutoSaveUltraHDRJpeg
     {
         get => GetValue(true);
         set => SetValue(value);
@@ -422,7 +419,7 @@ public static partial class AppConfig
 
     /// <summary>
     /// HDR 格式但内容为 SDR（maxCLL 不达 HDR 阈值）时，转为 SDR 并删除 HDR 文件。
-    /// 启用后无视 AutoConvertScreenshotToSDR。
+    /// 启用后无视 AutoSaveUltraHDRJpeg。
     /// </summary>
     public static bool DeleteHDRIfSDRContent
     {
@@ -430,6 +427,10 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 截图自动写剪贴板总开关：全屏保存后放文件（CF_HDROP），区域选区自动复制放位图（CF_DIB）。
+    /// 用户主动复制（图库右键等 force 路径）不受影响。
+    /// </summary>
     public static bool AutoCopyScreenshotToClipboard
     {
         get => GetValue(true);
@@ -527,7 +528,10 @@ public static partial class AppConfig
 
     private static Dictionary<string, string?>? _settingCache;
 
-    private static string ConfigFilePath => Path.Combine(UserDataFolder, "config.sjson");
+    /// <summary>
+    /// 当前配置文件路径（导出/备份直接拷此文件）。
+    /// </summary>
+    public static string ConfigFilePath => Path.Combine(UserDataFolder, "config.sjson");
 
     private static void InitializeSettingProvider()
     {
@@ -558,6 +562,18 @@ public static partial class AppConfig
             JsonSerializer.Serialize(_settingCache, new JsonSerializerOptions { WriteIndented = true })
         );
         File.Move(tmp, ConfigFilePath, overwrite: true);
+    }
+
+    /// <summary>
+    /// 确保配置文件存在（首启流程的判定文件；全默认不改设置的用户也生成，避免重复弹欢迎页）。
+    /// </summary>
+    public static void EnsureConfigFile()
+    {
+        InitializeSettingProvider();
+        if (!File.Exists(ConfigFilePath))
+        {
+            SaveConfigFile();
+        }
     }
 
     public static T? GetValue<T>(T? defaultValue = default, [CallerMemberName] string? key = null)
@@ -631,6 +647,29 @@ public static partial class AppConfig
             SaveConfigFile();
         }
         catch { }
+    }
+
+    /// <summary>
+    /// 导入配置：读 JSON 文件 → 校验为合法配置字典（键非空、值为字符串）→ 整档替换并写盘。
+    /// 返回 false = 文件不存在/不是合法 JSON/结构不符（调用方提示无效，原配置不动）。
+    /// </summary>
+    public static bool ImportConfigFile(string path)
+    {
+        try
+        {
+            if (!File.Exists(path))
+                return false;
+            var dict = JsonSerializer.Deserialize<Dictionary<string, string?>>(File.ReadAllText(path));
+            if (dict is null || dict.Any(kv => string.IsNullOrWhiteSpace(kv.Key)))
+                return false;
+            _settingCache = dict;
+            SaveConfigFile();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public static void ClearCache()

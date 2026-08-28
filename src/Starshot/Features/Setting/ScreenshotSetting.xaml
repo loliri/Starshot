@@ -64,7 +64,7 @@
       <!--  HDR 处理  -->
       <StackPanel Spacing="12">
         <ToggleSwitch
-          IsOn="{x:Bind AutoConvertScreenshotToSDR, Mode=TwoWay}"
+          IsOn="{x:Bind AutoSaveUltraHDRJpeg, Mode=TwoWay}"
           OffContent="{x:Bind lang:Lang.ScreenshotSetting_AutoConvertToSDRImage}"
           OnContent="{x:Bind lang:Lang.ScreenshotSetting_AutoConvertToSDRImage}"
         />

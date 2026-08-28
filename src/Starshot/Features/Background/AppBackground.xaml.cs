@@ -280,7 +280,7 @@ public sealed partial class AppBackground : UserControl
 
             List<string> candidates;
             bool fellBack = false;
-            if (AppConfig.WallpaperFolderVideoOnly)
+            if (AppConfig.WallpaperFolderPreferVideo)
             {
                 var videos = all.Where(f => WallpaperVideoExtensions.Contains(Path.GetExtension(f)))
                     .ToList();

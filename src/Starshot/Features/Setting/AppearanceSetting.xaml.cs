@@ -147,7 +147,7 @@ public sealed partial class AppearanceSetting : PageBase
                 OnPropertyChanged(nameof(WallpaperChooseLabel));
                 OnPropertyChanged(nameof(WallpaperValue));
                 OnPropertyChanged(nameof(WallpaperRowVisibility));
-                OnPropertyChanged(nameof(WallpaperFolderVideoOnlyVisibility));
+                OnPropertyChanged(nameof(WallpaperFolderPreferVideoVisibility));
                 WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
                 // 开着自动取色：切换模式后强制重新从新壁纸取色（避免 _lastFile 短路 / 视频模式不取色）
                 if (AppConfig.EnableAccentFromWallpaper)
@@ -180,17 +180,17 @@ public sealed partial class AppearanceSetting : PageBase
                 : AppConfig.WallpaperFile!,
         };
 
-    public Visibility WallpaperFolderVideoOnlyVisibility =>
+    public Visibility WallpaperFolderPreferVideoVisibility =>
         AppConfig.WallpaperMode == 3 ? Visibility.Visible : Visibility.Collapsed;
 
-    public bool WallpaperFolderVideoOnly
+    public bool WallpaperFolderPreferVideo
     {
-        get => AppConfig.WallpaperFolderVideoOnly;
+        get => AppConfig.WallpaperFolderPreferVideo;
         set
         {
-            if (AppConfig.WallpaperFolderVideoOnly != value)
+            if (AppConfig.WallpaperFolderPreferVideo != value)
             {
-                AppConfig.WallpaperFolderVideoOnly = value;
+                AppConfig.WallpaperFolderPreferVideo = value;
                 OnPropertyChanged();
                 WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
             }

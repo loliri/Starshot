@@ -882,9 +882,9 @@
         /// <summary>
         ///   查找类似 Manage Screenshot Folders 的本地化字符串。
         /// </summary>
-        public static string ScreenshotPage_ManageScreenshotFolders {
+        public static string ScreenshotPage_ManageExtraScreenshotFolders {
             get {
-                return ResourceManager.GetString("ScreenshotPage_ManageScreenshotFolders", resourceCulture);
+                return ResourceManager.GetString("ScreenshotPage_ManageExtraScreenshotFolders", resourceCulture);
             }
         }
         
@@ -1163,6 +1163,87 @@
         public static string Starshot_BackupDatabase {
             get {
                 return ResourceManager.GetString("Starshot_BackupDatabase", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 备份与恢复 的本地化字符串。
+        /// </summary>
+        public static string Starshot_BackupRestore {
+            get {
+                return ResourceManager.GetString("Starshot_BackupRestore", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 备份配置 的本地化字符串。
+        /// </summary>
+        public static string Starshot_BackupConfig {
+            get {
+                return ResourceManager.GetString("Starshot_BackupConfig", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 导出配置 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ExportConfig {
+            get {
+                return ResourceManager.GetString("Starshot_ExportConfig", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 导入配置 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ImportConfig {
+            get {
+                return ResourceManager.GetString("Starshot_ImportConfig", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 导出成功 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ExportSuccess {
+            get {
+                return ResourceManager.GetString("Starshot_ExportSuccess", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 导出失败 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ExportFailed {
+            get {
+                return ResourceManager.GetString("Starshot_ExportFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 导入成功，部分设置重启后完全生效 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ImportSuccess {
+            get {
+                return ResourceManager.GetString("Starshot_ImportSuccess", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 文件无效，不是合法的配置文件 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ImportInvalid {
+            get {
+                return ResourceManager.GetString("Starshot_ImportInvalid", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 导入失败 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ImportFailed {
+            get {
+                return ResourceManager.GetString("Starshot_ImportFailed", resourceCulture);
             }
         }
         
@@ -2066,18 +2147,18 @@
         /// <summary>
         ///   查找类似 Prefer Video 的本地化字符串。
         /// </summary>
-        public static string Starshot_WallpaperFolderVideoOnly {
+        public static string Starshot_WallpaperFolderPreferVideo {
             get {
-                return ResourceManager.GetString("Starshot_WallpaperFolderVideoOnly", resourceCulture);
+                return ResourceManager.GetString("Starshot_WallpaperFolderPreferVideo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   查找类似 Picks videos first; falls back to a random image if the video can&apos;t initialize 的本地化字符串。
         /// </summary>
-        public static string Starshot_WallpaperFolderVideoOnlyDesc {
+        public static string Starshot_WallpaperFolderPreferVideoDesc {
             get {
-                return ResourceManager.GetString("Starshot_WallpaperFolderVideoOnlyDesc", resourceCulture);
+                return ResourceManager.GetString("Starshot_WallpaperFolderPreferVideoDesc", resourceCulture);
             }
         }
 
