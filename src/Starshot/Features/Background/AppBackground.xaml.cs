@@ -436,8 +436,8 @@ public sealed partial class AppBackground : UserControl
             if (color is not null)
             {
                 AccentColorHelper.ChangeAppAccentColor(color);
-                AppConfig.AccentColor = color?.ToHex();
-                // ChangeAppAccentColor 已发 AccentColorChangedMessage → MainWindow 会重解析主题
+                // 只应用不存储：AccentColor 存储项语义是「用户手动选择」，自动取色写它会把
+                // 壁纸残留色冒充手动选择（关掉自动取色后取色器里显示的不是用户选的色）
             }
         }
         catch (OperationCanceledException)
@@ -607,7 +607,7 @@ public sealed partial class AppBackground : UserControl
                         if (color is not null)
                         {
                             AccentColorHelper.ChangeAppAccentColor(color);
-                            AppConfig.AccentColor = color?.ToHex();
+                            // 同图片壁纸：只应用不存储，不污染手动色
                         }
                     }
                     catch (Exception ex)
