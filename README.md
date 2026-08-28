@@ -263,6 +263,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 ## Known Limitations
 
 - The region screenshot overlay displays HDR frames as SDR (WinUI CanvasControl uses an SDR swap chain); saved files are unaffected.
+- HDR JPEG XL output does not embed content light level metadata (the codec wrapper does not expose the API); some browsers may dim highlights as a result. AVIF and PNGv3 embed it and are not affected.
 - Custom wallpapers use `UniformToFill` to cover the window, but WinUI's crop is not centered — it is currently **top-left** aligned. For example, a narrow (portrait) wallpaper in a wide window will only show the upper portion (cropped from the top rather than centered).
 - When the region screenshot overlay first opens, the cursor remains the default system shape. **You need to move the mouse once** for the crosshair cursor to appear (WinUI `ProtectedCursor` does not take immediate effect on a stationary pointer already over the element — moving once triggers a pointer event, after which it works normally).
 - When hovering certain windows in region capture, the coordinate box may show negative values (e.g. `-11,-11`). This is the window extended frame bounds reported by Windows DWM (including off-screen shadow/border); Starshot reads it as-is — the off-screen part is invisible and does not affect the screenshot.
