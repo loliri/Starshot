@@ -230,14 +230,29 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    private static bool? _installer;
+
     /// <summary>
-    /// 安装版线：true 时更新拉起 Starshot.Update.exe、隐藏更新源选择等便携版专属 UI。
-    /// 首次启动由欢迎页流程按包内更新器存在与否写入，之后一直不变。
+    /// 分发线身份：打包阶段烙在主程序 exe DOS stub（偏移 0x40）里的标志，CI 只对 kachina 安装版产物写入。
+    /// 启动读一次缓存；便携版 exe 无标志恒 false。true 时更新拉起 Starshot.Update.exe、隐藏便携专属 UI。
     /// </summary>
-    public static bool Installer
+    public static bool Installer => _installer ??= ReadInstallerFlag();
+
+    private static bool ReadInstallerFlag()
     {
-        get => GetValue(false);
-        set => SetValue(value);
+        try
+        {
+            // DOS stub 是死区（加载器只读 MZ magic 和 0x3C 的 e_lfanew），CI 把
+            // "STARSHOT-INSTALLER" 写在固定偏移 0x40（stub 文本起始处），读取直接 Seek 比对
+            using var fs = File.OpenRead(Environment.ProcessPath!);
+            fs.Seek(0x40, SeekOrigin.Begin);
+            Span<byte> buf = stackalloc byte[17];
+            return fs.ReadAtLeast(buf, 17) == 17 && buf.SequenceEqual("STARSHOT-INSTALLER"u8);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>

@@ -67,6 +67,13 @@ public static partial class AppConfig
         LogFile = Path.Combine(logFolder, "log", BuildLogFileName());
         Directory.CreateDirectory(CacheFolder);
 
+        // 分发线位置判定（最先做，之后一切逻辑都在正确的数据位置语义下）：
+        // 安装版 = exe 内烙有安装标志（DOS stub，CI 打包时写入）→ 数据落 LocalAppData；便携 = 父目录
+        if (Installer)
+        {
+            UserDataFolder = localAppData;
+        }
+
         // 首次启动（配置文件不存在）弹欢迎页；用户关掉不完成则退出
         WelcomeWindow? welcome = null;
         if (!File.Exists(ConfigFilePath))
@@ -76,14 +83,6 @@ public static partial class AppConfig
             {
                 Environment.Exit(0);
             }
-#if !DEBUG
-            // 安装版线首启判定——只在欢迎页做这一次：包内带更新器 → 数据落 LocalAppData。
-            // 位置不可更改（欢迎页只展示、设置页无更改入口）。Debug 不参与（数据库锁死父目录）
-            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")))
-            {
-                UserDataFolder = localAppData;
-            }
-#endif
             // 落盘首启判定文件：全默认不改设置的用户 config.sjson 也会生成，不再重复弹欢迎页
             EnsureConfigFile();
         }
@@ -120,12 +119,6 @@ public static partial class AppConfig
                 AppConfig.WallpaperFile = "pic.jpg";
                 AppConfig.WallpaperMode = 1;
             }
-#if !DEBUG
-            // 更新线锚定：安装版线把 installer 标志写进 DB，此后运行期更新分派/设置显隐只看它
-            AppConfig.Installer = File.Exists(
-                Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe")
-            );
-#endif
         }
 
         // 应用强调色与语言
