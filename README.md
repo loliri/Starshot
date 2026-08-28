@@ -257,7 +257,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 - Registry key `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, pointing to the launcher (root `Starshot.exe`; the installer line points directly at the main program itself).
 - Optional "Priority start" toggle: switches to a scheduled task (logon trigger) whose launch timing takes priority over registry queuing; process priority is separately controlled by the "High priority run" toggle (app self-elevation).
 - Optional `--hide` flag to start minimized to tray (requires tray to be enabled).
-- The toggle reads the registry in real time (no cached database): Task Manager disabling only touches StartupApproved without removing the Run entry — the toggle still shows as on.
+- The toggle reads the registry in real time (no cached setting): Task Manager disabling only touches StartupApproved without removing the Run entry — the toggle still shows as on.
 - On startup, checks whether the exe pointed to by the auto-start entry exists; if not, automatically removes the startup entry and shows a toast.
 
 ## Known Limitations
@@ -276,26 +276,25 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 ```
 Root/ (portable)
   Starshot.exe            ← C++ launcher (reads version.ini to decide which app dir to launch)
-  StarshotDatabase.db     ← SQLite settings database
+  config.sjson            ← Configuration file (JSON, generated on first launch)
   version.ini             ← Version number (CI/CD release only; absent in local builds)
   app-{version}/          ← Main program directory (versioned for CI/CD release, app/ for local builds)
     Starshot.exe          ← Main program (WinUI 3 / .NET 10)
     *.dll                 ← Dependencies
     avifenc.exe etc.      ← Codec tools (from Starward.Codec NuGet)
-  backup/                 ← Database backups
 
-Install dir/ (installer, flat)
+Install dir/ (installer, flat; the main exe carries an installer flag stamped into it — the runtime uses it to tell the lines apart)
   Starshot.exe            ← Main program (no launcher, no version dirs)
   Starshot.Update.exe     ← kachina updater
   Starshot.Uninst.exe     ← Uninstaller
   *.dll etc.              ← All dependencies flat
 
-%LOCALAPPDATA%/Starshot/  (shared; some sub-locations are configurable)
+%LOCALAPPDATA%/Starshot/  (shared)
+  config.sjson            ← Configuration file (installer line only)
   log/                    ← Logs
   bg/                     ← Wallpapers
-  backup/                 ← Database backups (installer line; portable keeps them in the root)
   thumb/                  ← Thumbnail cache
-  database.json           ← Database location anchor (lookup priority: app dir > here > portable parent-dir default)
+  backup/                 ← Config backups
 ```
 
 ### Launcher
@@ -316,10 +315,10 @@ Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `ap
 | Runtime        | .NET 10                                                              |
 | Graphics       | Win2D 1.3 (D3D11 interop, HDR tone mapping, histogram effects)       |
 | Codecs         | Starward.Codec NuGet (libavif / libjxl / Ultra HDR P/Invoke wrapper) |
-| Data Storage   | SQLite + Dapper                                                      |
+| Data Storage   | config.sjson (System.Text.Json)                                      |
 | Logging        | Serilog                                                              |
 | System Tray    | H.NotifyIcon.WinUI                                                   |
-| Thumbnails     | Custom CachedImage (ImageEx async loading + thumbnail cache)        |
+| Thumbnails     | Custom CachedImage (ImageEx async loading + thumbnail cache)         |
 | Region Overlay | Win2D CanvasControl (frozen-frame rendering + selection drawing)     |
 | Clipboard      | Win32 native API (OpenClipboard / SetClipboardData)                  |
 | Launcher       | Native C++ (v145 toolset, static CRT)                                |
@@ -455,7 +454,6 @@ Windows Graphics Capture on Windows 10 does not support HDR pixel format capture
 
 - [CommunityToolkit](https://github.com/CommunityToolkit) — MVVM framework + WinUI controls (Segmented / Behaviors / Helpers)
 - [SharpCompress](https://github.com/adamhathcock/sharpcompress) — Streaming decompression
-- [Dapper](https://github.com/DapperLib/Dapper) — Lightweight SQLite ORM
 - [H.NotifyIcon.WinUI](https://github.com/HavenDV/H.NotifyIcon) — System tray
 - [Vanara.PInvoke](https://github.com/dahall/Vanara) — Win32 API wrappers (DwmApi / Ole / Shell32)
 - [ComputeSharp.D2D1](https://github.com/Sergio0694/ComputeSharp) — GPU compute effects

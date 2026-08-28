@@ -259,7 +259,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`，指向启动器（根目录 `Starshot.exe`；安装版直接指向主程序自身）
 - 可选「高优先级启动」开关：改用计划任务（登录触发），启动时机优先于注册表排队；进程优先级另由「高优先级运行」开关控制（应用自提升）
 - 可选 `--hide` 最小化到托盘启动（需托盘已开启）
-- 开关实时读注册表（不缓存数据库）：任务管理器禁用只动 StartupApproved、不删 Run 项，开关仍显示开
+- 开关实时读注册表（不缓存配置）：任务管理器禁用只动 StartupApproved、不删 Run 项，开关仍显示开
 - 启动时检测自启项指向的 exe 是否存在，不存在则自动清除启动项并 toast 提示
 
 ## 已知限制
@@ -278,13 +278,12 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 ```
 根目录/（便携版）
   Starshot.exe            ← C++ 启动器（读 version.ini 决定启哪个 app 目录）
-  StarshotDatabase.db     ← SQLite 设置数据库
+  config.sjson            ← 配置文件（JSON，首次启动生成）
   version.ini             ← 版本号（仅 CI/CD release 有，本地构建无）
   app-{version}/          ← 主程序目录（CI/CD release 版本化，本地构建为 app/）
     Starshot.exe          ← 主程序（WinUI 3 / .NET 10）
     *.dll                 ← 依赖库
     avifenc.exe 等        ← 编解码工具（来自 Starward.Codec NuGet）
-  backup/                 ← 数据库备份
 
 安装目录/（安装版，扁平）
   Starshot.exe            ← 主程序（无启动器，无版本目录）
@@ -293,11 +292,11 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
   *.dll 等                ← 全部依赖平铺
 
 %LOCALAPPDATA%/Starshot/ （共用，可自定义其中部分内容存储位置）
+  config.sjson            ← 配置文件（仅安装版有）
   log/                    ← 日志
   bg/                     ← 壁纸
-  backup/                 ← 数据库备份（安装版；便携版在根目录）
   thumb/                  ← 缩略图缓存
-  database.json           ← 数据库位置锚定（查找优先级：应用目录 > 此处 > 便携版父目录默认）
+  backup/                 ← 配置备份
 ```
 
 ### 启动器
@@ -318,10 +317,10 @@ C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Sta
 | 运行时         | .NET 10                                                            |
 | 图形           | Win2D 1.3（D3D11 互操作、HDR 色调映射、直方图效果）                |
 | 编解码         | Starward.Codec NuGet（libavif / libjxl / Ultra HDR P/Invoke 封装） |
-| 数据存储       | SQLite + Dapper                                                    |
+| 数据存储       | config.sjson（System.Text.Json）                                   |
 | 日志           | Serilog                                                            |
 | 托盘           | H.NotifyIcon.WinUI                                                 |
-| 缩略图         | 自定义 CachedImage（ImageEx 异步加载 + 缩略图缓存）                 |
+| 缩略图         | 自定义 CachedImage（ImageEx 异步加载 + 缩略图缓存）                |
 | 区域截图覆盖层 | Win2D CanvasControl（冻结帧渲染 + 选区绘制）                       |
 | 剪贴板         | Win32 原生 API（OpenClipboard / SetClipboardData）                 |
 | 启动器         | C++ 原生（v145 工具集，静态 CRT）                                  |
@@ -457,7 +456,6 @@ Windows 10 的 Windows.Graphics.Capture 不支持 HDR 像素格式捕获，系�
 
 - [CommunityToolkit](https://github.com/CommunityToolkit) — MVVM 框架 + WinUI 控件（Segmented / Behaviors / Helpers）
 - [SharpCompress](https://github.com/adamhathcock/sharpcompress) — 流式解压
-- [Dapper](https://github.com/DapperLib/Dapper) — SQLite 轻量 ORM
 - [H.NotifyIcon.WinUI](https://github.com/HavenDV/H.NotifyIcon) — 系统托盘
 - [Vanara.PInvoke](https://github.com/dahall/Vanara) — Win32 API 封装（DwmApi / Ole / Shell32）
 - [ComputeSharp.D2D1](https://github.com/Sergio0694/ComputeSharp) — GPU 计算效果
