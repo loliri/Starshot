@@ -87,6 +87,11 @@ public class ImageEx : ContentControl
             }
         }
         catch (OperationCanceledException) { }
+        catch
+        {
+            // 取图管线非取消异常（文件损坏 / 解码失败）：保持 Background 占位，不让 async void 异常崩进程
+            _image.Source = null;
+        }
     }
 
     private async Task SetSourceFromUriAsync(Uri uri, CancellationToken token)
