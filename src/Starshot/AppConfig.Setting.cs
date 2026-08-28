@@ -383,12 +383,26 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 用户配置的截图库文件夹列表（分号分隔），供库浏览
+    /// 用户配置的截图库文件夹列表（JSON 数组），供库浏览。
+    /// 兼容读旧版分号分隔串（Windows 路径不含分号，拆分安全）；读到的旧值在下次保存时自动转为数组
     /// </summary>
-    public static string? ExtraScreenshotFolders
+    public static List<string> ExtraScreenshotFolders
     {
-        get => GetValue<string>();
-        set => SetValue(value);
+        get
+        {
+            string? raw = GetValue<string>();
+            if (string.IsNullOrWhiteSpace(raw))
+                return [];
+            try
+            {
+                return JsonSerializer.Deserialize<List<string>>(raw) ?? [];
+            }
+            catch (JsonException) { }
+            return raw
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+        }
+        set => SetValue(JsonSerializer.Serialize(value));
     }
 
     /// <summary>

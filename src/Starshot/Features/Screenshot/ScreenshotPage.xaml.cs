@@ -134,20 +134,16 @@ public sealed partial class ScreenshotPage : PageBase
             }
 
             // 用户自加的文件夹
-            string? externalFolder = AppConfig.ExtraScreenshotFolders;
-            if (!string.IsNullOrWhiteSpace(externalFolder))
+            foreach (var item in AppConfig.ExtraScreenshotFolders)
             {
-                foreach (var item in externalFolder.Split(';'))
+                string folder = item.Trim();
+                if (Directory.Exists(folder))
                 {
-                    string folder = item.Trim();
-                    if (Directory.Exists(folder))
+                    folder = Path.GetFullPath(folder);
+                    if (_folders.FirstOrDefault(x => x.Folder == folder) is null)
                     {
-                        folder = Path.GetFullPath(folder);
-                        if (_folders.FirstOrDefault(x => x.Folder == folder) is null)
-                        {
-                            _watchers.Add(CreateFileSystemWatcher(folder));
-                            _folders.Add(new(folder));
-                        }
+                        _watchers.Add(CreateFileSystemWatcher(folder));
+                        _folders.Add(new(folder));
                     }
                 }
             }
@@ -320,11 +316,10 @@ public sealed partial class ScreenshotPage : PageBase
             await dialog.ShowAsync();
             if (dialog.FolderChanged)
             {
-                string folder = string.Join(
-                    ';',
-                    dialog.Folders.Where(x => x.CanRemove).Select(x => x.Folder)
-                );
-                AppConfig.ExtraScreenshotFolders = folder;
+                AppConfig.ExtraScreenshotFolders = dialog
+                    .Folders.Where(x => x.CanRemove)
+                    .Select(x => x.Folder)
+                    .ToList();
                 Initialize();
                 UpdateSelectCountText();
             }
