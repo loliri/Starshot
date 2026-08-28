@@ -33,7 +33,8 @@ public static partial class AppConfig
 
     public static async Task CheckEnviromentAsync()
     {
-        // 数据库固定放在根目录（app 的父目录）。AppContext.BaseDirectory 带尾部分隔符，先去掉再取父目录。
+        // 数据位置默认 app 的父目录（便携版；安装版随后由分发线判定改指 LocalAppData）。
+        // AppContext.BaseDirectory 带尾部分隔符，先去掉再取父目录。
         string baseDir = AppContext.BaseDirectory.TrimEnd(
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar
@@ -58,7 +59,7 @@ public static partial class AppConfig
 #endif
 
         // 先用默认 LogFolder 算 CacheFolder/LogFile：欢迎页选壁纸要拷 bg/，
-        // 而 DB 在欢迎页之后才创建，读不到用户配置的 LogFolder
+        // 而 config 在欢迎页之后才初始化，读不到用户配置的 LogFolder
         string logFolder = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Starshot"
@@ -125,7 +126,7 @@ public static partial class AppConfig
         AccentColorHelper.ChangeAppAccentColor(AccentColor);
         SetLanguage(Language);
 
-        // DB 后读用户配置的 LogFolder 覆盖（首次 DB 没值，保持默认）
+        // 配置初始化后读用户配置的 LogFolder 覆盖（首启没值，保持默认）
         logFolder = LogFolder;
         CacheFolder = logFolder;
         LogFile = Path.Combine(logFolder, "log", BuildLogFileName());

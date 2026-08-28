@@ -180,9 +180,10 @@ public static class UpdateService
             // 更新器自更新中断的残留：旧更新器被改名 .instbak、新文件未落地——拉改名的那份照样能用
             string updaterExe = Path.Combine(AppContext.BaseDirectory, "Starshot.Update.exe");
             string updaterBak = Path.Combine(AppContext.BaseDirectory, "Starshot.Update.instbak");
-            string target = File.Exists(updaterExe)
-                ? updaterExe
-                : File.Exists(updaterBak) ? updaterBak : "";
+            string target =
+                File.Exists(updaterExe) ? updaterExe
+                : File.Exists(updaterBak) ? updaterBak
+                : "";
             if (target.Length > 0)
             {
                 // -I 非交互自动更新，占用文件自动结束应用进程；渠道透传 --source 锁定 config 里 source[].id。
@@ -202,7 +203,10 @@ public static class UpdateService
                 catch (Exception ex)
                 {
                     // .instbak 也拉不起来（损坏）——更新链无救，抛给 UI 层弹重下提示
-                    throw new InvalidOperationException("Starshot.Update.exe missing (installer mode)", ex);
+                    throw new InvalidOperationException(
+                        "Starshot.Update.exe missing (installer mode)",
+                        ex
+                    );
                 }
                 _ = Task.Run(async () =>
                 {

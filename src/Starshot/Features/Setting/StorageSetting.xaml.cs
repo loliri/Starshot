@@ -297,13 +297,7 @@ public sealed partial class StorageSetting : PageBase
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Starshot"
         );
-        if (
-            string.Equals(
-                AppConfig.LogFolder,
-                defaultFolder,
-                StringComparison.OrdinalIgnoreCase
-            )
-        )
+        if (string.Equals(AppConfig.LogFolder, defaultFolder, StringComparison.OrdinalIgnoreCase))
         {
             InAppToast.MainWindow?.Information(null, Lang.Starshot_AlreadyDefault, 3000);
             return;

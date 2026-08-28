@@ -112,10 +112,7 @@
         TextWrapping="Wrap"
       >
         <Run Text="{x:Bind lang:Lang.Starshot_WelcomeEditionPrefix}" />
-        <Run
-          Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-          Text="{x:Bind EditionName}"
-        />
+        <Run Foreground="{ThemeResource SystemFillColorSuccessBrush}" Text="{x:Bind EditionName}" />
         <Run Text="{x:Bind DbFolderDescTail}" />
       </TextBlock>
     </StackPanel>

@@ -45,7 +45,10 @@ public static class ReleaseClient
         githubApiHeader: true
     );
 
-    private static readonly HttpClient _cdnHttp = CreateClient(useProxy: true, githubApiHeader: false);
+    private static readonly HttpClient _cdnHttp = CreateClient(
+        useProxy: true,
+        githubApiHeader: false
+    );
 
     /// <summary>
     /// 单一 HttpClient 工厂，差异仅两点：代理策略与是否带 GitHub API 的 Accept 头。

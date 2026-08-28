@@ -69,7 +69,6 @@
         />
       </StackPanel>
 
-
       <!--  截图文件夹  -->
       <StackPanel Spacing="8">
         <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_ScreenshotFolder}" />

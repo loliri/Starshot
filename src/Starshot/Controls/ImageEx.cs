@@ -101,7 +101,10 @@ public class ImageEx : ContentControl
     /// <summary>
     /// 异步取图钩子：默认直出 BitmapImage，派生类覆写接入缓存/缩略图管线。
     /// </summary>
-    protected virtual Task<ImageSource?> ProvideCachedResourceAsync(Uri imageUri, CancellationToken token)
+    protected virtual Task<ImageSource?> ProvideCachedResourceAsync(
+        Uri imageUri,
+        CancellationToken token
+    )
     {
         return Task.FromResult<ImageSource?>(new BitmapImage(imageUri));
     }

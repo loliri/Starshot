@@ -574,7 +574,10 @@ public static partial class AppConfig
         string tmp = ConfigFilePath + ".tmp";
         File.WriteAllText(
             tmp,
-            JsonSerializer.Serialize(_settingCache, new JsonSerializerOptions { WriteIndented = true })
+            JsonSerializer.Serialize(
+                _settingCache,
+                new JsonSerializerOptions { WriteIndented = true }
+            )
         );
         File.Move(tmp, ConfigFilePath, overwrite: true);
     }
@@ -674,7 +677,9 @@ public static partial class AppConfig
         {
             if (!File.Exists(path))
                 return false;
-            var dict = JsonSerializer.Deserialize<Dictionary<string, string?>>(File.ReadAllText(path));
+            var dict = JsonSerializer.Deserialize<Dictionary<string, string?>>(
+                File.ReadAllText(path)
+            );
             if (dict is null || dict.Any(kv => string.IsNullOrWhiteSpace(kv.Key)))
                 return false;
             _settingCache = dict;
