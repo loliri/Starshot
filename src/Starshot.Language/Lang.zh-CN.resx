@@ -838,6 +838,9 @@
   <data name="Starshot_Performance" xml:space="preserve">
     <value>性能</value>
   </data>
+  <data name="Starshot_Advanced" xml:space="preserve">
+    <value>高级</value>
+  </data>
   <data name="Starshot_HighPriorityProcess" xml:space="preserve">
     <value>高优先级运行</value>
   </data>

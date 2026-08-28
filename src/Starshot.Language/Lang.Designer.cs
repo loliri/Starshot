@@ -1383,6 +1383,15 @@
         }
 
         /// <summary>
+        ///   查找类似 Advanced 的本地化字符串。
+        /// </summary>
+        public static string Starshot_Advanced {
+            get {
+                return ResourceManager.GetString("Starshot_Advanced", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Run at high priority 的本地化字符串。
         /// </summary>
         public static string Starshot_HighPriorityProcess {

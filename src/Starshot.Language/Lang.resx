@@ -838,6 +838,9 @@
   <data name="Starshot_Performance" xml:space="preserve">
     <value>Performance</value>
   </data>
+  <data name="Starshot_Advanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
   <data name="Starshot_HighPriorityProcess" xml:space="preserve">
     <value>Run at high priority</value>
   </data>

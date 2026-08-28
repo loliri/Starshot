@@ -216,8 +216,9 @@
         />
       </StackPanel>
 
-      <!--  截图通知  -->
+      <!--  高级  -->
       <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Advanced}" />
         <ToggleSwitch
           IsOn="{x:Bind MuteNotificationInFullscreen, Mode=TwoWay}"
           OffContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
