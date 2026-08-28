@@ -34,59 +34,27 @@ public sealed partial class HotkeyInput : UserControl
         set
         {
             field = value;
-            if (value is HoykeyInputState.None)
-            {
-                TextBlock_EditingText.Visibility = Visibility.Collapsed;
-                TextBlock_HotkeyText_Warning.Visibility = Visibility.Collapsed;
-                Button_Success.Visibility = Visibility.Collapsed;
-                Icon_Warning.Visibility = Visibility.Collapsed;
-                Button_CancelEdit.Visibility = Visibility.Collapsed;
-                if (string.IsNullOrWhiteSpace(HotkeyText))
+            // 8 个 UI 元素 × 4 状态的可见性映射；None 态再按是否已设热键二分
+            //（未设置显示点击提示，已设置显示热键文本 + 删除按钮）
+            bool hasHotkey = !string.IsNullOrWhiteSpace(HotkeyText);
+            var V = Visibility.Visible;
+            var C = Visibility.Collapsed;
+            var (clickToSet, hotkeyText, editing, warningText, success, warning, delete, cancel) =
+                value switch
                 {
-                    TextBlock_ClickToSetHotkey.Visibility = Visibility.Visible;
-                    TextBlock_HotkeyText.Visibility = Visibility.Collapsed;
-                    Button_DeleteHotkey.Visibility = Visibility.Collapsed;
-                }
-                else
-                {
-                    TextBlock_ClickToSetHotkey.Visibility = Visibility.Collapsed;
-                    TextBlock_HotkeyText.Visibility = Visibility.Visible;
-                    Button_DeleteHotkey.Visibility = Visibility.Visible;
-                }
-            }
-            else if (value is HoykeyInputState.Edit)
-            {
-                TextBlock_ClickToSetHotkey.Visibility = Visibility.Collapsed;
-                TextBlock_HotkeyText.Visibility = Visibility.Collapsed;
-                TextBlock_EditingText.Visibility = Visibility.Visible;
-                TextBlock_HotkeyText_Warning.Visibility = Visibility.Collapsed;
-                Button_Success.Visibility = Visibility.Collapsed;
-                Icon_Warning.Visibility = Visibility.Collapsed;
-                Button_DeleteHotkey.Visibility = Visibility.Collapsed;
-                Button_CancelEdit.Visibility = Visibility.Visible;
-            }
-            else if (value is HoykeyInputState.Success)
-            {
-                TextBlock_ClickToSetHotkey.Visibility = Visibility.Collapsed;
-                TextBlock_HotkeyText.Visibility = Visibility.Visible;
-                TextBlock_EditingText.Visibility = Visibility.Collapsed;
-                TextBlock_HotkeyText_Warning.Visibility = Visibility.Collapsed;
-                Button_Success.Visibility = Visibility.Visible;
-                Icon_Warning.Visibility = Visibility.Collapsed;
-                Button_DeleteHotkey.Visibility = Visibility.Collapsed;
-                Button_CancelEdit.Visibility = Visibility.Collapsed;
-            }
-            else if (value is HoykeyInputState.Warning)
-            {
-                TextBlock_ClickToSetHotkey.Visibility = Visibility.Collapsed;
-                TextBlock_HotkeyText.Visibility = Visibility.Collapsed;
-                TextBlock_EditingText.Visibility = Visibility.Collapsed;
-                TextBlock_HotkeyText_Warning.Visibility = Visibility.Visible;
-                Button_Success.Visibility = Visibility.Collapsed;
-                Icon_Warning.Visibility = Visibility.Visible;
-                Button_DeleteHotkey.Visibility = Visibility.Visible;
-                Button_CancelEdit.Visibility = Visibility.Collapsed;
-            }
+                    HoykeyInputState.Edit => (C, C, V, C, C, C, C, V),
+                    HoykeyInputState.Success => (C, V, C, C, V, C, C, C),
+                    HoykeyInputState.Warning => (C, C, C, V, C, V, V, C),
+                    _ => hasHotkey ? (C, V, C, C, C, C, V, C) : (V, C, C, C, C, C, C, C),
+                };
+            TextBlock_ClickToSetHotkey.Visibility = clickToSet;
+            TextBlock_HotkeyText.Visibility = hotkeyText;
+            TextBlock_EditingText.Visibility = editing;
+            TextBlock_HotkeyText_Warning.Visibility = warningText;
+            Button_Success.Visibility = success;
+            Icon_Warning.Visibility = warning;
+            Button_DeleteHotkey.Visibility = delete;
+            Button_CancelEdit.Visibility = cancel;
         }
     }
 
