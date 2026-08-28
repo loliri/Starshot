@@ -1,43 +1,45 @@
-name: Build
+name: Release
 
-# 可复用构建 workflow：解析版本 + 双架构构建 + 生成差分 + 上传 CDN。
-# 由 release-draft.yml / release-pub.yml 调用，调用方各自做 release（草稿/正式）。
+# 单入口发布 workflow：解析版本 + 双架构构建 + 生成差分 + 上传 CDN + 创建 Release（draft 可选）。
 #
-# 版本解析（resolve-version）合并在本文件内部，且是独立、非 matrix 的 job：
-# build job 是 matrix: [x64, arm64]，两个架构并行跑；版本号只应该算一次，
-# 放进单独 job 里用 needs 让两边消费同一个结果，避免各自读一次 GitHub API 可能读到不同状态。
+# 版本解析（resolve-version）是独立、非 matrix 的 job：build 是 matrix: [x64, arm64] 两个架构并行跑；
+# 版本号只应该算一次，放进单独 job 用 needs 让两边消费同一个结果，避免各自读一次 GitHub API 可能读到不同状态。
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      prerelease:
-        description: '本次是否预发布（决定版本号怎么算、根 manifest 更新 latest 还是 latestPreview）'
+      draft:
+        description: 'Create as draft (uncheck to publish directly)'
         type: boolean
-        required: true
+        required: false
+        default: true
+      prerelease:
+        description: 'Mark as pre-release'
+        type: boolean
+        required: false
+        default: false
       version:
-        description: '手动指定的版本号，留空则从最新 release 自动递增'
-        type: string
+        description: 'Version (e.g. 0.1.0-preview.1; leave empty to auto-increment from latest release)'
         required: false
       dry_run_cleanup:
-        description: '清理旧版本时只打印会删什么，不真的删除'
+        description: 'Preview CDN cleanup without deleting (dry run)'
         type: boolean
         required: false
         default: false
       launcher_updated:
-        description: '这次 launcher 有实质更新，把新 launcher 整个传给增量更新用户（不 diff，直接整份传，客户端整体替换）'
+        description: 'Launcher changed this release'
         type: boolean
         required: false
         default: false
-    outputs:
-      v:
-        description: '显示版本（原大小写）'
-        value: ${{ jobs.resolve-version.outputs.v }}
-      vl:
-        description: '小写版本号（tag/目录名）'
-        value: ${{ jobs.resolve-version.outputs.vl }}
 
 permissions:
-  contents: read
+  contents: write
+
+# 同名 group 串行执行，避免两次手动 dispatch 同时读到同一个"上一个 release"
+# 算出相同版本号，撞车创建同名 tag。不 cancel-in-progress：新的排队等，不打断正在跑的构建
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
 
@@ -96,6 +98,9 @@ jobs:
 
   build:
     needs: resolve-version
+    outputs:
+      v: ${{ needs.resolve-version.outputs.v }}
+      vl: ${{ needs.resolve-version.outputs.vl }}
     strategy:
       matrix:
         platform: [x64, arm64]
@@ -178,12 +183,12 @@ jobs:
           } else {
             $arm = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows_arm64\\.zip$")) | .browser_download_url'
             if ([string]::IsNullOrEmpty($arm)) { Write-Error "HDiffPatch windows_arm64 zip not found"; exit 1 }
-            Invoke-WebRequest $arm -OutFile hpatch-arm64.zip
-            Expand-Archive hpatch-arm64.zip -DestinationPath hpatch-tool -Force
-            $hpExe = (Get-ChildItem hpatch-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
+            Invoke-WebRequest $arm -OutFile hdiff-arm64.zip
+            Expand-Archive hdiff-arm64.zip -DestinationPath hdiff-tool -Force
+            $hpExe = (Get-ChildItem hdiff-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
             Move-Item $hpExe "$appDir/hpatchz.exe" -Force
             if (-not (Test-Path "$appDir/hpatchz.exe")) { Write-Error "hpatchz.exe not found"; exit 1 }
-            Remove-Item hpatch-arm64.zip, hpatch-tool -Recurse -Force
+            Remove-Item hdiff-arm64.zip, hdiff-tool -Recurse -Force
           }
           Remove-Item hdiff-win64.zip, hdiff-tool -Recurse -Force
 
@@ -386,7 +391,7 @@ jobs:
 
           # 分发用纯在线安装器 Starshot-installer：与更新器同体（零 app 内嵌，安装时 HTTP 206 对 CDN
           # kachina/ 下的全量包远程寻址，全部内容在线获取），进 CDN 根目录；仅 stable 发布时复写
-          #（壳与版本无关，preview 发布没必要动它）；内容源 Starshot-full/preview 只传 CDN，不进 GitHub Release
+          #（壳与版本无关，preview 发布没有必要动它）；内容源 Starshot-full/preview 只传 CDN，不进 GitHub Release
           Copy-Item Starshot.Update.exe "Starshot-installer-win-$arch.exe"
 
           # 本版原始目录 zip = 下一版同渠道差分基线（传 kachina/asset/）
@@ -667,3 +672,36 @@ jobs:
               aws s3 rm "s3://$R2_BUCKET/release/$tag/" --recursive --endpoint-url "$R2_ENDPOINT"
             fi
           done
+
+  release:
+    needs: build
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Download x64
+        uses: actions/download-artifact@v8
+        with:
+          name: Starshot-${{ needs.build.outputs.vl }}-win-x64
+          path: x64
+      - name: Download arm64
+        uses: actions/download-artifact@v8
+        with:
+          name: Starshot-${{ needs.build.outputs.vl }}-win-arm64
+          path: arm64
+
+      # draft 开：建草稿（保持人工检查后发布的流程，不自动生成 notes）
+      # draft 关：直接发布，GitHub 自动生成 release notes
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.build.outputs.vl }}
+          name: ${{ needs.build.outputs.v }}
+          draft: ${{ inputs.draft }}
+          generate_release_notes: ${{ !inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            x64/Starshot-${{ needs.build.outputs.vl }}-win-x64.zip
+            arm64/Starshot-${{ needs.build.outputs.vl }}-win-arm64.zip
+            x64/Starshot-installer-win-x64.exe
+            arm64/Starshot-installer-win-arm64.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
