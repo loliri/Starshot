@@ -841,6 +841,12 @@
   <data name="Starshot_Advanced" xml:space="preserve">
     <value>高级</value>
   </data>
+  <data name="Starshot_ResetToDefault" xml:space="preserve">
+    <value>恢复默认</value>
+  </data>
+  <data name="Starshot_AlreadyDefault" xml:space="preserve">
+    <value>已是默认值</value>
+  </data>
   <data name="Starshot_HighPriorityProcess" xml:space="preserve">
     <value>高优先级运行</value>
   </data>

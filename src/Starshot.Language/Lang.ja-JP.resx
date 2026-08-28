@@ -841,6 +841,12 @@
   <data name="Starshot_Advanced" xml:space="preserve">
     <value>詳細設定</value>
   </data>
+  <data name="Starshot_ResetToDefault" xml:space="preserve">
+    <value>初期値に戻す</value>
+  </data>
+  <data name="Starshot_AlreadyDefault" xml:space="preserve">
+    <value>すでに既定値です</value>
+  </data>
   <data name="Starshot_HighPriorityProcess" xml:space="preserve">
     <value>高優先度で実行</value>
   </data>

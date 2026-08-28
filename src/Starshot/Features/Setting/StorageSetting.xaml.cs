@@ -373,6 +373,29 @@ public sealed partial class StorageSetting : PageBase
     }
 
     [RelayCommand]
+    private void ResetLogFolder()
+    {
+        string defaultFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Starshot"
+        );
+        if (
+            string.Equals(
+                AppConfig.LogFolder,
+                defaultFolder,
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            InAppToast.MainWindow?.Information(null, Lang.Starshot_AlreadyDefault, 3000);
+            return;
+        }
+        AppConfig.LogFolder = defaultFolder;
+        LogFolder = defaultFolder;
+        InAppToast.MainWindow?.Information(null, Lang.Starshot_LogFolderRestartTip, 3000);
+    }
+
+    [RelayCommand]
     private async Task OpenLogFolder()
     {
         try

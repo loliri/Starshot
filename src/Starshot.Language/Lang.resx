@@ -841,6 +841,12 @@
   <data name="Starshot_Advanced" xml:space="preserve">
     <value>Advanced</value>
   </data>
+  <data name="Starshot_ResetToDefault" xml:space="preserve">
+    <value>Restore Default</value>
+  </data>
+  <data name="Starshot_AlreadyDefault" xml:space="preserve">
+    <value>Already the default</value>
+  </data>
   <data name="Starshot_HighPriorityProcess" xml:space="preserve">
     <value>Run at high priority</value>
   </data>

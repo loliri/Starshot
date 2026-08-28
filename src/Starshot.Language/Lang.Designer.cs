@@ -1392,6 +1392,24 @@
         }
 
         /// <summary>
+        ///   查找类似 Restore Default 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ResetToDefault {
+            get {
+                return ResourceManager.GetString("Starshot_ResetToDefault", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Already the default 的本地化字符串。
+        /// </summary>
+        public static string Starshot_AlreadyDefault {
+            get {
+                return ResourceManager.GetString("Starshot_AlreadyDefault", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Run at high priority 的本地化字符串。
         /// </summary>
         public static string Starshot_HighPriorityProcess {
