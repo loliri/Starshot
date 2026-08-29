@@ -79,6 +79,7 @@ jobs:
               exit 1
             }
             $input = $normalized
+            Write-Host "manual: $input"
           }
           $v = $input
           $vl = $v.ToLowerInvariant()
@@ -283,6 +284,8 @@ jobs:
               Write-Host "delta: $deltaPatch ($([math]::Round((Get-Item $deltaPatch).Length / 1MB, 2)) MB)"
             }
           }
+          # gh release download 失败的 $LASTEXITCODE 会让步骤误判失败（skip 是正常路径），显式清零
+          exit 0
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -445,6 +448,7 @@ jobs:
             Starshot-preview-win-*.exe
             baseline-win-*.zip
             baseline-preview-win-*.zip
+            kachina-metadata-x64.json
 
   upload-cdn:
     needs: [resolve-version, build, portable, kachina]
