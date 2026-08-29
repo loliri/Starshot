@@ -275,7 +275,7 @@ public sealed partial class GeneralSetting : PageBase
     }
 
     /// <summary>
-    /// 开发者模式：显示调试组（流式解压测试）
+    /// 开发者模式
     /// </summary>
     public bool DevMode
     {

@@ -246,11 +246,46 @@ public sealed partial class StorageSetting : PageBase
         catch { }
     }
 
+    [RelayCommand]
+    private void ResetScreenshotFolder()
+    {
+        try
+        {
+            // 默认值与 AppConfig.ScreenshotFolder 的 getter 默认一致（我的图片\Starshot）
+            string defaultFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+                "Starshot"
+            );
+            if (
+                string.Equals(
+                    AppConfig.ScreenshotFolder,
+                    defaultFolder,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+            {
+                InAppToast.MainWindow?.Information(null, Lang.Starshot_AlreadyDefault, 3000);
+                return;
+            }
+            Directory.CreateDirectory(defaultFolder);
+            ScreenshotFolder = defaultFolder;
+            AppConfig.ScreenshotFolder = defaultFolder;
+            _ = RefreshStatsAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to reset screenshot folder");
+        }
+    }
+
     #endregion
 
 
     #region Log Folder
 
+
+    public Visibility DevModeVisibility =>
+        AppConfig.DevMode ? Visibility.Collapsed : Visibility.Visible;
 
     public string LogFolder
     {

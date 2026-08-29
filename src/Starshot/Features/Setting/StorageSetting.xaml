@@ -76,6 +76,7 @@
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <Button
             Grid.Column="0"
@@ -123,6 +124,20 @@
                 Glyph="&#xE8A7;"
               />
             </Grid>
+          </Button>
+          <Button
+            Grid.Column="2"
+            Width="40"
+            Height="40"
+            Margin="8,0,0,0"
+            Padding="0"
+            BorderThickness="0"
+            Command="{x:Bind ResetScreenshotFolderCommand}"
+            CornerRadius="20"
+            ToolTipService.ToolTip="{x:Bind lang:Lang.Starshot_ResetToDefault}"
+            Visibility="{x:Bind DevModeVisibility}"
+          >
+            <FontIcon FontSize="16" Glyph="&#xE7A7;" />
           </Button>
         </Grid>
       </StackPanel>
@@ -274,6 +289,7 @@
             Command="{x:Bind ResetLogFolderCommand}"
             CornerRadius="20"
             ToolTipService.ToolTip="{x:Bind lang:Lang.Starshot_ResetToDefault}"
+            Visibility="{x:Bind DevModeVisibility}"
           >
             <FontIcon FontSize="16" Glyph="&#xE7A7;" />
           </Button>
