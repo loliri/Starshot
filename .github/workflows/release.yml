@@ -1,33 +1,23 @@
 name: Release
 
-# 单入口发布 workflow：解析版本 + 双架构构建 + 生成差分 + 上传 CDN + 创建 Release（draft 可选）。
-#
-# 版本解析（resolve-version）是独立、非 matrix 的 job：build 是 matrix: [x64, arm64] 两个架构并行跑；
-# 版本号只应该算一次，放进单独 job 用 needs 让两边消费同一个结果，避免各自读一次 GitHub API 可能读到不同状态。
-
 on:
   workflow_dispatch:
     inputs:
       draft:
-        description: 'Create as draft (uncheck to publish directly)'
+        description: "Create as draft (uncheck to publish directly)"
         type: boolean
         required: false
         default: true
       prerelease:
-        description: 'Mark as pre-release'
+        description: "Mark as Pre-release"
         type: boolean
         required: false
         default: false
       version:
-        description: 'Version (e.g. 0.1.0-preview.1; leave empty to auto-increment from latest release)'
+        description: "Version (e.g. 0.1.0-preview.1; leave empty = auto+1)"
         required: false
-      dry_run_cleanup:
-        description: 'Preview CDN cleanup without deleting (dry run)'
-        type: boolean
-        required: false
-        default: false
       launcher_updated:
-        description: 'Launcher changed this release'
+        description: "Launcher changed"
         type: boolean
         required: false
         default: false
@@ -42,7 +32,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-
   resolve-version:
     runs-on: windows-2025-vs2026
     outputs:
@@ -90,6 +79,7 @@ jobs:
               exit 1
             }
             $input = $normalized
+            Write-Host "manual: $input"
           }
           $v = $input
           $vl = $v.ToLowerInvariant()
@@ -98,9 +88,6 @@ jobs:
 
   build:
     needs: resolve-version
-    outputs:
-      v: ${{ needs.resolve-version.outputs.v }}
-      vl: ${{ needs.resolve-version.outputs.vl }}
     strategy:
       matrix:
         platform: [x64, arm64]
@@ -112,7 +99,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
@@ -140,33 +127,40 @@ jobs:
             try { [void][System.Globalization.CultureInfo]::GetCultureInfo($_.Name); return $true } catch { return $false }
           } | Remove-Item -Recurse -Force
 
-      - name: Preserve flat layout for kachina
+      # 编译中间产物直接打包（launcher + app/，未装配：无 version.ini / hpatchz），
+      # 发布布局装配与差分在 delta job 做
+      - name: Zip build output
         run: |
-          # kachina 安装版线要平铺目录（原始文件名）；下面的 Version layout 会把 app/ 改名成 app-{vl}/，先拷一份
-          Copy-Item build/release/app kachina-flat -Recurse -Force
-          # 安装版标志：烙进主程序 exe 的 DOS stub（偏移 0x40，覆盖无用的 "This program cannot be run in DOS mode" 死区文本）。
-          # 运行时读 exe 判定分发线（AppConfig.Installer）——便携 zip 从 build/release 打包，不带标志，两线天然隔离
-          $exe = "kachina-flat/Starshot.exe"
-          $bytes = [System.IO.File]::ReadAllBytes($exe)
-          $eLfanew = [BitConverter]::ToInt32($bytes, 0x3C)
-          $magic = [System.Text.Encoding]::ASCII.GetBytes("STARSHOT-INSTALLER")
-          if ($eLfanew -lt 0x40 + $magic.Length) { Write-Error "DOS stub too small (e_lfanew=$eLfanew), cannot stamp installer flag"; exit 1 }
-          [Array]::Copy($magic, 0, $bytes, 0x40, $magic.Length)
-          [System.IO.File]::WriteAllBytes($exe, $bytes)
-          Write-Host "Installer flag stamped into $exe"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = "build-${{ matrix.platform }}.zip"
+          if (Test-Path $zip) { Remove-Item $zip }
+          [System.IO.Compression.ZipFile]::CreateFromDirectory("build/release", $zip, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
 
-      - name: Version layout
-        run: |
-          Move-Item build/release/app "build/release/app-${{ needs.resolve-version.outputs.vl }}" -Force
-          "version=${{ needs.resolve-version.outputs.v }}" | Set-Content -Path build/release/version.ini -Encoding UTF8
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
+          path: build-${{ matrix.platform }}.zip
+
+  # 便携版发布线：装配（hpatchz / version 布局 / launcher）+ 正式 zip + 差分，单 job 循环两架构
+  portable:
+    needs: [resolve-version, build]
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: build-${{ needs.resolve-version.outputs.vl }}-win-*
+          path: src/
+          merge-multiple: true
 
       - name: Setup HDiffPatch tools
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $appDir = "build/release/app-${{ needs.resolve-version.outputs.vl }}"
-          # hdiffz 永远取 windows64（跑在 x64 runner 上，跟 matrix 无关）
+          # hdiffz 生成差分 + hpatchz 打进 zip 给客户端 apply，都取 windows64（跑在 x64 runner 上）；
+          # arm64 的 hpatchz 另下 arm64 包
           $win64 = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows64\\.zip$")) | .browser_download_url'
           if ([string]::IsNullOrEmpty($win64)) { Write-Error "HDiffPatch windows64 zip not found"; exit 1 }
           Invoke-WebRequest $win64 -OutFile hdiff-win64.zip
@@ -174,147 +168,182 @@ jobs:
           $hdiffExe = (Get-ChildItem hdiff-tool -Filter hdiffz.exe -Recurse | Select-Object -First 1).FullName
           Move-Item $hdiffExe hdiffz.exe -Force
           ./hdiffz.exe -v
-          # hpatchz 跟 matrix 对齐（打进 release 给客户端 apply 用）
-          if ("${{ matrix.platform }}" -eq "x64") {
-            # 同一份 windows64 解压里取 hpatchz，不再重复下载
-            $hpExe = (Get-ChildItem hdiff-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
-            Move-Item $hpExe "$appDir/hpatchz.exe" -Force
-            & "$appDir/hpatchz.exe" -v
-          } else {
-            $arm = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows_arm64\\.zip$")) | .browser_download_url'
-            if ([string]::IsNullOrEmpty($arm)) { Write-Error "HDiffPatch windows_arm64 zip not found"; exit 1 }
-            Invoke-WebRequest $arm -OutFile hdiff-arm64.zip
-            Expand-Archive hdiff-arm64.zip -DestinationPath hdiff-tool -Force
-            $hpExe = (Get-ChildItem hdiff-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
-            Move-Item $hpExe "$appDir/hpatchz.exe" -Force
-            if (-not (Test-Path "$appDir/hpatchz.exe")) { Write-Error "hpatchz.exe not found"; exit 1 }
-            Remove-Item hdiff-arm64.zip, hdiff-tool -Recurse -Force
-          }
-          Remove-Item hdiff-win64.zip, hdiff-tool -Recurse -Force
+          $arm64Url = gh api repos/sisong/HDiffPatch/releases/latest --jq '.assets[] | select(.name | test("_bin_windows_arm64\\.zip$")) | .browser_download_url'
+          if ([string]::IsNullOrEmpty($arm64Url)) { Write-Error "HDiffPatch windows_arm64 zip not found"; exit 1 }
+          Invoke-WebRequest $arm64Url -OutFile hdiff-arm64.zip
+          Expand-Archive hdiff-arm64.zip -DestinationPath hpatchz-arm64-tool -Force
+          Remove-Item hdiff-win64.zip, hdiff-arm64.zip -Force -ErrorAction SilentlyContinue
 
-      - name: Generate delta
+      - name: Assemble portable release and generate delta
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $newTag = "${{ needs.resolve-version.outputs.vl }}"
-          $arch = "${{ matrix.platform }}"
+          $v = "${{ needs.resolve-version.outputs.v }}"
           $isPre = "${{ inputs.prerelease }}" -eq "true"
+          $launcherUpdated = "${{ inputs.launcher_updated }}" -eq "true"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
 
+          # ===== 装配：解压编译中间产物（launcher + app/），注入 hpatchz、version 布局，重打正式 zip =====
+          foreach ($arch in @("x64", "arm64")) {
+            Write-Host "=== assemble $arch ==="
+            $work = "assemble-$arch"
+            Expand-Archive "src/build-$arch.zip" -DestinationPath $work -Force
+
+            # hpatchz 打进 app 给客户端 apply 差分用，架构对齐
+            if ($arch -eq "x64") {
+              $hpExe = (Get-ChildItem hdiff-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
+            } else {
+              $hpExe = (Get-ChildItem hpatchz-arm64-tool -Filter hpatchz.exe -Recurse | Select-Object -First 1).FullName
+            }
+            if ([string]::IsNullOrEmpty($hpExe)) { Write-Error "hpatchz.exe ($arch) not found"; exit 1 }
+            Move-Item $hpExe "$work/app/hpatchz.exe" -Force
+
+            # version 布局：app/ 改名 app-{vl} + version.ini
+            Move-Item "$work/app" "$work/app-$newTag" -Force
+            "version=$v" | Set-Content -Path "$work/version.ini" -Encoding UTF8
+
+            if ($launcherUpdated) {
+              Copy-Item "$work/Starshot.exe" "launcher-$newTag-win-$arch.exe"
+            }
+
+            $zip = "Starshot-$newTag-win-$arch.zip"
+            if (Test-Path $zip) { Remove-Item $zip }
+            [System.IO.Compression.ZipFile]::CreateFromDirectory($work, $zip, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
+            Write-Host "assembled: $zip"
+          }
+
+          # ===== 差分（stable：前 2 个 stable；preview：上一个 release，就这一个）=====
           # 读 release 历史（tag + prerelease 字段，倒序；/releases 默认不含 draft）
           # 不从版本号判断正式/预览——只认 release.prerelease 字段
           $raw = gh api repos/${{ github.repository }}/releases 2>$null
           $releases = if ($LASTEXITCODE -eq 0 -and $raw) { $raw | ConvertFrom-Json } else { $null }
           if (-not $releases) { Write-Host "No releases, skipping delta"; exit 0 }
 
-          # 选 diff target（主要用户在安装版，便携版差分收窄到最小覆盖）：
-          # stable：前 2 个 stable；preview：上一个 release（无论 stable/preview，就这一个）
           $targetTags = [System.Collections.Generic.List[string]]::new()
+          # 过滤 draft：合并后全文件 contents:write，/releases 能看到 draft（旧 build.yml 的 read
+          # 权限天花板没了）——草稿随时会删/改，不能当 diff target，与 resolve-version 的 jq 过滤对齐
           if ($isPre) {
-            $prev = $releases | Where-Object { $_.tag_name -ne $newTag } | Select-Object -First 1
+            $prev = $releases | Where-Object { -not $_.draft -and $_.tag_name -ne $newTag } | Select-Object -First 1
             if ($prev) { $targetTags.Add($prev.tag_name) }
           } else {
-            $releases | Where-Object { -not $_.prerelease -and $_.tag_name -ne $newTag } | Select-Object -First 2 | ForEach-Object {
+            $releases | Where-Object { -not $_.draft -and -not $_.prerelease -and $_.tag_name -ne $newTag } | Select-Object -First 2 | ForEach-Object {
               $targetTags.Add($_.tag_name)
             }
           }
-
           if ($targetTags.Count -eq 0) { Write-Host "No delta target, skipping"; exit 0 }
           Write-Host "Delta targets ($($targetTags.Count)): $($targetTags -join ', ')"
 
-          Add-Type -AssemblyName System.IO.Compression
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          foreach ($arch in @("x64", "arm64")) {
+            $newRoot = (Resolve-Path "assemble-$arch/app-$newTag").Path
+            foreach ($oldTag in $targetTags) {
+              Write-Host "--- delta: $oldTag -> $newTag ($arch) ---"
+              $oldZip = "old-$oldTag-win-$arch.zip"
+              gh release download $oldTag --pattern "Starshot-${oldTag}-win-${arch}.zip" --output $oldZip --repo ${{ github.repository }} 2>$null
+              if ($LASTEXITCODE -ne 0 -or !(Test-Path $oldZip)) {
+                Write-Host "Skip ${oldTag}: prev release zip not found"
+                continue
+              }
 
-          $newApp = "build/release/app-$newTag"
-          if (!(Test-Path $newApp)) { Write-Host "New app folder missing, skipping delta"; exit 0 }
-          $newRoot = (Resolve-Path $newApp).Path
+              $oldDir = "old-$oldTag-win-$arch"
+              if (Test-Path $oldDir) { Remove-Item $oldDir -Recurse -Force }
+              # 历史资产可能损坏/非法 zip：Expand-Archive 对此抛的是 terminating error，不包 try/catch
+              # 会中断整个 step，把这次全新构建也拖下水。跟下面下载失败分支一样处理：跳过继续
+              try {
+                Expand-Archive $oldZip -DestinationPath $oldDir -Force
+              } catch {
+                Write-Host "Skip ${oldTag}: 解压失败 - $($_.Exception.Message)"
+                Remove-Item $oldZip -Force -ErrorAction SilentlyContinue
+                Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue
+                continue
+              }
+              Remove-Item $oldZip -Force
 
-          foreach ($oldTag in $targetTags) {
-            Write-Host "--- delta: $oldTag -> $newTag ($arch) ---"
-            $oldZip = "old-$oldTag.zip"
-            gh release download $oldTag --pattern "Starshot-${oldTag}-win-${arch}.zip" --output $oldZip --repo ${{ github.repository }} 2>$null
-            if ($LASTEXITCODE -ne 0 -or !(Test-Path $oldZip)) {
-              Write-Host "Skip ${oldTag}: prev release zip not found"
-              continue
-            }
+              $oldApp = Join-Path $oldDir "app-$oldTag"
+              if (!(Test-Path $oldApp)) {
+                Write-Host "Skip ${oldTag}: app folder not found in prev zip"
+                Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue
+                continue
+              }
+              $oldRoot = (Resolve-Path $oldApp).Path
 
-            $oldDir = "old-$oldTag"
-            if (Test-Path $oldDir) { Remove-Item $oldDir -Recurse -Force }
-            # 历史资产可能损坏/非法 zip：Expand-Archive 对此抛的是 terminating error，不包 try/catch
-            # 会中断整个 step，把这次全新构建也拖下水。跟下面下载失败分支一样处理：跳过继续
-            try {
-              Expand-Archive $oldZip -DestinationPath $oldDir -Force
-            } catch {
-              Write-Host "Skip ${oldTag}: 解压失败 - $($_.Exception.Message)"
-              Remove-Item $oldZip -Force -ErrorAction SilentlyContinue
+              # hdiffz 生成目录二进制 diff，直接输出 diff-*.patch（zstd 内置压缩，不再外包 zip 容器）
+              $deltaPatch = "diff-${newTag}-from-${oldTag}-win-${arch}.patch"
+              if (Test-Path $deltaPatch) { Remove-Item $deltaPatch }
+              & ./hdiffz.exe -m -c-zstd-19 -D "$oldRoot" "$newRoot" "$deltaPatch"
+              if ($LASTEXITCODE -ne 0 -or !(Test-Path $deltaPatch)) {
+                Write-Host "Skip ${oldTag}: hdiffz failed (exit $LASTEXITCODE)"
+                Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item $deltaPatch -Force -ErrorAction SilentlyContinue
+                continue
+              }
+
               Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue
-              continue
+              Write-Host "delta: $deltaPatch ($([math]::Round((Get-Item $deltaPatch).Length / 1MB, 2)) MB)"
             }
-            Remove-Item $oldZip -Force
-
-            $oldApp = Join-Path $oldDir "app-$oldTag"
-            if (!(Test-Path $oldApp)) {
-              Write-Host "Skip ${oldTag}: app folder not found in prev zip"
-              Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue
-              continue
-            }
-            $oldRoot = (Resolve-Path $oldApp).Path
-
-            # hdiffz 生成目录二进制 diff，直接输出 diff-*.patch（zstd 内置压缩，不再外包 zip 容器）
-            $deltaPatch = "diff-${newTag}-from-${oldTag}-win-${arch}.patch"
-            if (Test-Path $deltaPatch) { Remove-Item $deltaPatch }
-            & ./hdiffz.exe -m -c-zstd-19 -D "$oldRoot" "$newRoot" "$deltaPatch"
-            if ($LASTEXITCODE -ne 0 -or !(Test-Path $deltaPatch)) {
-              Write-Host "Skip ${oldTag}: hdiffz failed (exit $LASTEXITCODE)"
-              Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue
-              Remove-Item $deltaPatch -Force -ErrorAction SilentlyContinue
-              continue
-            }
-
-            Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue
-            Write-Host "delta: $deltaPatch ($([math]::Round((Get-Item $deltaPatch).Length / 1MB, 2)) MB)"
           }
+          # gh release download 失败的 $LASTEXITCODE 会让步骤误判失败（skip 是正常路径），显式清零
+          exit 0
 
-      - name: Copy launcher (if updated)
-        if: ${{ inputs.launcher_updated }}
-        run: Copy-Item build/release/Starshot.exe "launcher-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.exe"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: portable-${{ needs.resolve-version.outputs.vl }}
+          path: |
+            Starshot-*-win-*.zip
+            diff-*-win-*.patch
+            launcher-*-win-*.exe
 
-      - name: Zip release
-        run: |
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $zip = "Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip"
-          if (Test-Path $zip) { Remove-Item $zip }
-          [System.IO.Compression.ZipFile]::CreateFromDirectory("build/release", $zip, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
-
-      # ===== kachina 安装版线（只加不改：以上便携版线步骤与以下互不影响） =====
+  # kachina 安装版线：单 job 循环两架构，从编译中间产物解压平铺目录 + 烙安装标志 + 打包
+  kachina:
+    needs: [resolve-version, build]
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: build-${{ needs.resolve-version.outputs.vl }}-win-*
+          path: src/
+          merge-multiple: true
 
       - name: Setup kachina-builder
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 跟最新版（不 pin）：新版接口变了这里直接炸掉，提醒适配；资产名 kachina-builder.exe（0.5.1 实测 12.3MB）
-          $url = gh api repos/YuehaiTeam/kachina-installer/releases/latest --jq '.assets[] | select(.name == "kachina-builder.exe") | .browser_download_url'
-          if ([string]::IsNullOrEmpty($url)) { Write-Error "kachina-builder.exe not found in latest release"; exit 1 }
-          Invoke-WebRequest $url -OutFile kachina-builder.exe
+          Invoke-WebRequest "https://github.com/loliri/kachina-installer/releases/download/1.0.0/kachina-builder.exe" -OutFile kachina-builder.exe
           ./kachina-builder.exe --help | Select-Object -First 1
 
-      - name: Prepare kachina branding assets
+      - name: Prepare branding assets
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
         run: |
-          # 品牌资产源图放 R2 根（走现成 R2 secrets 的 S3 通路拉取，与上传同一条），现场转两种格式：
-          # installer.webp（安装器左侧图，仅支持 webp）+ installer.ico（exe 图标，Windows 只认 ico）
+          # 品牌资产成品缓存在 kachina/asset/（installer.webp + installer.ico）：
+          # 源图 insqr.png 放 R2 根。成品在就直接拉（跳过整套转换）；不在（首次 / 换图后手动删过）
+          # 才拉源图现场转（webp 用 libwebp——GitHub 无 release 实测，二进制在官方下载站；
+          # ico 用 Pillow 多尺寸 256/128/64/48/32/16），转完回传 asset 缓存
           if ([string]::IsNullOrEmpty($env:AWS_ACCESS_KEY_ID) -or [string]::IsNullOrEmpty($env:R2_BUCKET) -or [string]::IsNullOrEmpty($env:R2_ENDPOINT)) {
             Write-Error "R2 secrets not configured"; exit 1
           }
+
+          aws s3 cp "s3://$env:R2_BUCKET/kachina/asset/installer.webp" installer.webp --endpoint-url "$env:R2_ENDPOINT" 2>$null
+          aws s3 cp "s3://$env:R2_BUCKET/kachina/asset/installer.ico" installer.ico --endpoint-url "$env:R2_ENDPOINT" 2>$null
+          # 长度校验：万一 cp 失败留了 0 字节残留，Test-Path 单查会误判命中、坏图进安装包
+          $cached =
+            (Test-Path installer.webp) -and ((Get-Item installer.webp).Length -gt 1KB) -and
+            (Test-Path installer.ico) -and ((Get-Item installer.ico).Length -gt 1KB)
+          if ($cached) {
+            Write-Host "branding assets cached in R2, skip conversion"
+            exit 0
+          }
+
           aws s3 cp "s3://$env:R2_BUCKET/insqr.png" installer.png --endpoint-url "$env:R2_ENDPOINT"
           if (!(Test-Path installer.png) -or (Get-Item installer.png).Length -lt 1KB) { Write-Error "insqr.png download failed"; exit 1 }
 
-          # webp：libwebp 在 GitHub 无任何 release（实测 /releases 为空），二进制在官方下载站——URL 已本地验证
           $url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.5.0-windows-x64.zip"
           Invoke-WebRequest -Uri $url -OutFile libwebp.zip
           if (!(Test-Path libwebp.zip) -or (Get-Item libwebp.zip).Length -lt 1MB) { Write-Error "libwebp zip download failed"; exit 1 }
@@ -325,120 +354,154 @@ jobs:
           if (!(Test-Path installer.webp)) { Write-Error "webp convert failed"; exit 1 }
           Remove-Item libwebp.zip, libwebp -Recurse -Force
 
-          # ico：Pillow 多尺寸（256/128/64/48/32/16），命令已本地验证
           python -m pip install --quiet pillow
           python -c "from PIL import Image; Image.open('installer.png').save('installer.ico', sizes=[(256,256),(128,128),(64,64),(48,48),(32,32),(16,16)])"
           if (!(Test-Path installer.ico)) { Write-Error "ico convert failed"; exit 1 }
 
-      - name: Build kachina installer package
+          aws s3 cp installer.webp "s3://$env:R2_BUCKET/kachina/asset/installer.webp" --endpoint-url "$env:R2_ENDPOINT" --cache-control "no-cache, must-revalidate"
+          aws s3 cp installer.ico "s3://$env:R2_BUCKET/kachina/asset/installer.ico" --endpoint-url "$env:R2_ENDPOINT" --cache-control "no-cache, must-revalidate"
+
+      - name: Build installer packages
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $arch = "${{ matrix.platform }}"
           $vl = "${{ needs.resolve-version.outputs.vl }}"
           $isPre = "${{ inputs.prerelease }}" -eq "true"
           $cdn = "https://starshot-release.cialo.site"
-          # 渠道分流（双渠道更新源，安装器不校验渠道、靠内容轮换收敛）：
-          # 内容源 stable=kachina/Starshot-full-*、preview=kachina/Starshot-preview-*；
-          # stable 发布时两个源都复写为 stable 内容（上传步骤处理），preview 用户顺源升到 stable 收敛
-          # 差分基线在 kachina/asset/ 按渠道分名；拉不到基线=该版纯全量（代价可忽略）
-          $sourceName = if ($isPre) { "Starshot-preview-win-$arch.exe" } else { "Starshot-full-win-$arch.exe" }
-          $baselineName = if ($isPre) { "baseline-preview-win-$arch.zip" } else { "baseline-win-$arch.zip" }
-          # 源=CDN 根固定 URL（与版本无关，全在线，无备用源）；source 为双发布源数组（stable+preview，
-          # 安装器把两个源都当更新源走，渠道收敛靠内容轮换——stable 发布时 preview 源也复写为 stable）
-          # 注意：builder 的 extract 吐的是 zstd 存储形态不是原始字节，不能当基线（本地实测），必须存原始目录
-          $config = @{
-            source = @(
-              @{ id = "stable"; name = "正式版"; uri = "$cdn/kachina/Starshot-full-win-$arch.exe" },
-              @{ id = "preview"; name = "预览版"; uri = "$cdn/kachina/Starshot-preview-win-$arch.exe" }
-            )
-            appName = "Starshot"
-            publisher = "loliri"
-            regName = "Starshot"
-            exeName = "Starshot.exe"
-            uninstallName = "Starshot.Uninst.exe"
-            updaterName = "Starshot.Update.exe"
-            programFilesPath = "Starshot"
-            userDataPath = @()
-            extraUninstallPath = @()
-            title = "Starshot"
-            description = "Windows HDR Screenshot Tool"
-            windowTitle = "Starshot Installer"
-            uacStrategy = "prefer-user"
-          }
-          # serde_json 不吃 BOM，必须无 BOM UTF-8 写入（本地实测 PS 的 utf8 带 BOM 会解析失败）
-          [System.IO.File]::WriteAllText("$PWD/kachina.config.json", ($config | ConvertTo-Json -Depth 5), [System.Text.UTF8Encoding]::new($false))
-          # 品牌参数：--icon exe 图标（ico）+ -t 安装器左侧图片（仅支持 webp，本地实测 -m 是 metadata 不是图片——README 过时）；
-          # 更新器与离线包必须同参数，否则自更新时界面风格跳变
-          ./kachina-builder.exe pack -c kachina.config.json -o Starshot.Update.exe -t installer.webp --icon installer.ico
-          if (!(Test-Path Starshot.Update.exe)) { Write-Error "updater build failed"; exit 1 }
-
-          # 差分基线：拉上一版同渠道原始目录 zip 解压（404=该渠道首个版本，跳过差分纯全量）。
-          # zip 打包时不含包裹目录，解压后 baseline/ 即原始平铺目录
-          $diffArgs = @()
-          try {
-            Invoke-WebRequest "$cdn/kachina/asset/$baselineName" -OutFile baseline.zip
-            Expand-Archive baseline.zip -DestinationPath baseline -Force
-            if (Test-Path baseline) { $diffArgs = @("-d", (Resolve-Path baseline).Path) }
-          } catch {
-            Write-Host "No baseline yet, building full-only package"
-          }
-
-          ./kachina-builder.exe gen -j 8 -i kachina-flat -m kachina-metadata.json -o kachina-hashed -r loliri/Starshot -t $vl -u Starshot.Update.exe @diffArgs
-          ./kachina-builder.exe pack -c kachina.config.json -m kachina-metadata.json -d kachina-hashed -t installer.webp --icon installer.ico -o "$sourceName"
-          if (!(Test-Path "$sourceName")) { Write-Error "full package build failed"; exit 1 }
-
-          # 分发用纯在线安装器 Starshot-installer：与更新器同体（零 app 内嵌，安装时 HTTP 206 对 CDN
-          # kachina/ 下的全量包远程寻址，全部内容在线获取），进 CDN 根目录；仅 stable 发布时复写
-          #（壳与版本无关，preview 发布没有必要动它）；内容源 Starshot-full/preview 只传 CDN，不进 GitHub Release
-          Copy-Item Starshot.Update.exe "Starshot-installer-win-$arch.exe"
-
-          # 本版原始目录 zip = 下一版同渠道差分基线（传 kachina/asset/）
           Add-Type -AssemblyName System.IO.Compression.FileSystem
-          if (Test-Path "$baselineName") { Remove-Item "$baselineName" }
-          [System.IO.Compression.ZipFile]::CreateFromDirectory("kachina-flat", "$baselineName", [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
-          Remove-Item baseline.zip -Force -ErrorAction SilentlyContinue
-          Remove-Item baseline -Recurse -Force -ErrorAction SilentlyContinue
-          Remove-Item kachina-hashed -Recurse -Force -ErrorAction SilentlyContinue
+
+          foreach ($arch in @("x64", "arm64")) {
+            Write-Host "=== kachina $arch ==="
+            # 平铺目录（原始文件名）：从编译中间产物解压出 app 目录
+            $flat = "kachina-flat-$arch"
+            Expand-Archive "src/build-$arch.zip" -DestinationPath "unpack-$arch" -Force
+            Move-Item "unpack-$arch/app" $flat -Force
+            # 安装版标志：烙进主程序 exe 的 DOS stub（偏移 0x40，覆盖无用的 DOS stub 死区文本）。
+            # 运行时读 exe 判定分发线（AppConfig.Installer）——便携 zip 不带标志，两线天然隔离
+            $exe = "$flat/Starshot.exe"
+            $bytes = [System.IO.File]::ReadAllBytes($exe)
+            $eLfanew = [BitConverter]::ToInt32($bytes, 0x3C)
+            $magic = [System.Text.Encoding]::ASCII.GetBytes("STARSHOT-INSTALLER")
+            if ($eLfanew -lt 0x40 + $magic.Length) { Write-Error "DOS stub too small (e_lfanew=$eLfanew), cannot stamp installer flag"; exit 1 }
+            [Array]::Copy($magic, 0, $bytes, 0x40, $magic.Length)
+            [System.IO.File]::WriteAllBytes($exe, $bytes)
+            Write-Host "Installer flag stamped into $exe"
+
+            # 渠道分流（双渠道更新源，安装器不校验渠道、靠内容轮换收敛）：
+            # 内容源 stable=kachina/Starshot-full-*、preview=kachina/Starshot-preview-*；
+            # stable 发布时两个源都复写为 stable 内容（上传步骤处理），preview 用户顺源升到 stable 收敛
+            # 差分基线在 kachina/asset/ 按渠道分名；拉不到基线=该版纯全量（代价可忽略）
+            $sourceName = if ($isPre) { "Starshot-preview-win-$arch.exe" } else { "Starshot-full-win-$arch.exe" }
+            $baselineName = if ($isPre) { "baseline-preview-win-$arch.zip" } else { "baseline-win-$arch.zip" }
+            # 源=CDN 根固定 URL（与版本无关，全在线，无备用源）；source 为双发布源数组（stable+preview，
+            # 安装器把两个源都当更新源走，渠道收敛靠内容轮换——stable 发布时 preview 源也复写为 stable）
+            # 注意：builder 的 extract 吐的是 zstd 存储形态不是原始字节，不能当基线（本地实测），必须存原始目录
+            $config = @{
+              source = @(
+                @{ id = "stable"; name = "正式版"; uri = "$cdn/kachina/Starshot-full-win-$arch.exe" },
+                @{ id = "preview"; name = "预览版"; uri = "$cdn/kachina/Starshot-preview-win-$arch.exe" }
+              )
+              appName = "Starshot"
+              publisher = "loliri"
+              regName = "Starshot"
+              exeName = "Starshot.exe"
+              uninstallName = "Starshot.Uninst.exe"
+              updaterName = "Starshot.Update.exe"
+              programFilesPath = "Starshot"
+              userDataPath = @()
+              extraUninstallPath = @()
+              title = "Starshot"
+              description = "Windows HDR Screenshot Tool"
+              windowTitle = "Starshot Installer"
+              uacStrategy = "prefer-user"
+            }
+            # serde_json 不吃 BOM，必须无 BOM UTF-8 写入（本地实测 PS 的 utf8 带 BOM 会解析失败）
+            $configFile = "kachina.config.$arch.json"
+            [System.IO.File]::WriteAllText("$PWD/$configFile", ($config | ConvertTo-Json -Depth 5), [System.Text.UTF8Encoding]::new($false))
+            # 品牌参数：--icon exe 图标（ico）+ -t 安装器左侧图片（仅支持 webp，本地实测 -m 是 metadata 不是图片——README 过时）；
+            # 更新器与离线包必须同参数，否则自更新时界面风格跳变
+            ./kachina-builder.exe pack -c $configFile -o "Starshot.Update-$arch.exe" -t installer.webp --icon installer.ico
+            if (!(Test-Path "Starshot.Update-$arch.exe")) { Write-Error "updater build failed ($arch)"; exit 1 }
+
+            # 差分基线：拉上一版同渠道原始目录 zip 解压。zip 打包时不含包裹目录，解压后即原始平铺目录。
+            # preview 渠道基线不存在 = 上轮 stable 收敛时删过（preview 安装包内容已被 stable 复写）
+            # → 回退拉 stable 基线，与本渠道安装包当前内容（stable）正好配套
+            $diffArgs = @()
+            try {
+              Invoke-WebRequest "$cdn/kachina/asset/$baselineName" -OutFile "baseline-$arch.zip"
+              Expand-Archive "baseline-$arch.zip" -DestinationPath "baseline-$arch" -Force
+              if (Test-Path "baseline-$arch") { $diffArgs = @("-d", (Resolve-Path "baseline-$arch").Path) }
+            } catch {
+              if ($isPre) {
+                Write-Host "preview baseline missing (stable collapsed it), falling back to stable baseline"
+                try {
+                  Invoke-WebRequest "$cdn/kachina/asset/baseline-win-$arch.zip" -OutFile "baseline-$arch.zip"
+                  Expand-Archive "baseline-$arch.zip" -DestinationPath "baseline-$arch" -Force
+                  if (Test-Path "baseline-$arch") { $diffArgs = @("-d", (Resolve-Path "baseline-$arch").Path) }
+                } catch {
+                  Write-Host "No stable baseline either ($arch), building full-only package"
+                }
+              } else {
+                Write-Host "No baseline yet ($arch), building full-only package"
+              }
+            }
+
+            ./kachina-builder.exe gen -j 8 -i $flat -m "kachina-metadata-$arch.json" -o "kachina-hashed-$arch" -r loliri/Starshot -t $vl -u "Starshot.Update-$arch.exe" @diffArgs
+            ./kachina-builder.exe pack -c $configFile -m "kachina-metadata-$arch.json" -d "kachina-hashed-$arch" -t installer.webp --icon installer.ico -o "$sourceName"
+            if (!(Test-Path "$sourceName")) { Write-Error "full package build failed ($arch)"; exit 1 }
+
+            # 分发用纯在线安装器 Starshot-installer：与更新器同体（零 app 内嵌，安装时 HTTP 206 对 CDN
+            # kachina/ 下的全量包远程寻址，全部内容在线获取），进 CDN 根目录；仅 stable 发布时复写
+            #（壳与版本无关，preview 发布没有必要动它）；内容源 Starshot-full/preview 只传 CDN，不进 GitHub Release
+            Copy-Item "Starshot.Update-$arch.exe" "Starshot-installer-win-$arch.exe"
+
+            # 本版原始目录 zip = 下一版同渠道差分基线（传 kachina/asset/）
+            if (Test-Path $baselineName) { Remove-Item $baselineName }
+            [System.IO.Compression.ZipFile]::CreateFromDirectory($flat, $baselineName, [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
+            Remove-Item "baseline-$arch.zip" -Force -ErrorAction SilentlyContinue
+            Remove-Item "baseline-$arch" -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item "kachina-hashed-$arch" -Recurse -Force -ErrorAction SilentlyContinue
+          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}
+          name: kachina-${{ needs.resolve-version.outputs.vl }}
           path: |
-            Starshot-${{ needs.resolve-version.outputs.vl }}-win-${{ matrix.platform }}.zip
-            Starshot-installer-win-${{ matrix.platform }}.exe
-            Starshot-full-win-${{ matrix.platform }}.exe
-            Starshot-preview-win-${{ matrix.platform }}.exe
-            baseline-win-${{ matrix.platform }}.zip
-            baseline-preview-win-${{ matrix.platform }}.zip
-            diff-*-win-${{ matrix.platform }}.patch
-            launcher-*-win-${{ matrix.platform }}.exe
+            Starshot-installer-win-*.exe
+            Starshot-full-win-*.exe
+            Starshot-preview-win-*.exe
+            baseline-win-*.zip
+            baseline-preview-win-*.zip
 
+      - name: Upload metadata artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: kachina-metadata-${{ needs.resolve-version.outputs.vl }}
+          path: kachina-metadata-x64.json
 
   upload-cdn:
-    needs: [resolve-version, build]
+    needs: [resolve-version, build, portable, kachina]
     runs-on: ubuntu-latest
-    outputs:
-      old_latest: ${{ steps.rootmanifest.outputs.old_latest }}
-      old_latest_preview: ${{ steps.rootmanifest.outputs.old_latest_preview }}
-      new_latest: ${{ steps.rootmanifest.outputs.new_latest }}
-      new_latest_preview: ${{ steps.rootmanifest.outputs.new_latest_preview }}
     env:
       AWS_DEFAULT_REGION: auto
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
       VL: ${{ needs.resolve-version.outputs.vl }}
       PRE: ${{ inputs.prerelease }}
     steps:
-      - name: Download x64 artifact
+      - name: Download portable artifacts
         uses: actions/download-artifact@v8
         with:
-          name: Starshot-${{ needs.resolve-version.outputs.vl }}-win-x64
+          name: portable-${{ needs.resolve-version.outputs.vl }}
           path: upload/
-      - name: Download arm64 artifact
+      - name: Download kachina artifacts
         uses: actions/download-artifact@v8
         with:
-          name: Starshot-${{ needs.resolve-version.outputs.vl }}-win-arm64
+          name: kachina-${{ needs.resolve-version.outputs.vl }}
           path: upload/
 
       - name: List files
@@ -486,8 +549,6 @@ jobs:
             echo "::error::R2 secrets not configured (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_ACCOUNT_ID / R2_BUCKET)"
             exit 1
           fi
-          # 整包 zip（application/zip）+ diff patch（octet-stream）；manifest.json 单独传（json）
-          # baseline-* 是 kachina 差分基线（只属于 kachina/ 子路径），排除防被 *.zip 通配扫进 release/
           aws s3 cp upload/ "s3://$R2_BUCKET/release/$VL/" \
             --endpoint-url "$R2_ENDPOINT" \
             --recursive \
@@ -538,7 +599,7 @@ jobs:
             --content-type "application/json" \
             --cache-control "public, max-age=60"
 
-          # 给 clean-old-versions job 用：更新前后的 latest/latestPreview 各留一代做缓冲，
+          # 给清理步骤用：更新前后的 latest/latestPreview 各留一代做缓冲，
           # 防止客户端刚读到旧 root manifest、正准备下载时资产就被删了
           NEW_LATEST=$(jq -r '.latest' root-manifest.json)
           NEW_LATEST_PREVIEW=$(jq -r '.latestPreview' root-manifest.json)
@@ -606,22 +667,12 @@ jobs:
             fi
           done
 
-  clean-old-versions:
-    needs: upload-cdn
-    runs-on: ubuntu-latest
-    env:
-      AWS_DEFAULT_REGION: auto
-      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-      R2_BUCKET: ${{ secrets.R2_BUCKET }}
-      DRY_RUN: ${{ inputs.dry_run_cleanup }}
-      OLD_LATEST: ${{ needs.upload-cdn.outputs.old_latest }}
-      OLD_LATEST_PREVIEW: ${{ needs.upload-cdn.outputs.old_latest_preview }}
-      NEW_LATEST: ${{ needs.upload-cdn.outputs.new_latest }}
-      NEW_LATEST_PREVIEW: ${{ needs.upload-cdn.outputs.new_latest_preview }}
-    steps:
       - name: Clean old versions
+        env:
+          OLD_LATEST: ${{ steps.rootmanifest.outputs.old_latest }}
+          OLD_LATEST_PREVIEW: ${{ steps.rootmanifest.outputs.old_latest_preview }}
+          NEW_LATEST: ${{ steps.rootmanifest.outputs.new_latest }}
+          NEW_LATEST_PREVIEW: ${{ steps.rootmanifest.outputs.new_latest_preview }}
         run: |
           if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$R2_BUCKET" ] || [ -z "$R2_ENDPOINT" ]; then
             echo "::error::R2 secrets not configured (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_ACCOUNT_ID / R2_BUCKET)"
@@ -657,51 +708,53 @@ jobs:
             exit 0
           fi
 
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "=== dry run：只预览，不会真的删除 ==="
-          fi
-
           for tag in $EXISTING; do
             IS_KEEP=$(echo "$KEEP" | jq --arg t "$tag" 'any(. == $t)')
             if [ "$IS_KEEP" = "true" ]; then
               echo "保留: $tag"
-            elif [ "$DRY_RUN" = "true" ]; then
-              echo "[dry-run] 会删除: $tag"
             else
               echo "删除: $tag"
               aws s3 rm "s3://$R2_BUCKET/release/$tag/" --recursive --endpoint-url "$R2_ENDPOINT"
             fi
           done
 
+          # stable 收敛：preview 安装包已被复写为 stable 内容，preview 基线（上一轮 preview 的原始目录）
+          # 与之不再配套，删掉——下次 preview 构建发现基线缺失会回退用 stable 基线，正好配套
+          if [ "$PRE" != "true" ]; then
+            for arch in x64 arm64; do
+              aws s3 rm "s3://$R2_BUCKET/kachina/asset/baseline-preview-win-$arch.zip" --endpoint-url "$R2_ENDPOINT" 2>/dev/null || true
+            done
+          fi
+
   release:
-    needs: build
+    needs: [resolve-version, portable, kachina]
     runs-on: windows-2025-vs2026
     steps:
-      - name: Download x64
+      - name: Download portable artifacts
         uses: actions/download-artifact@v8
         with:
-          name: Starshot-${{ needs.build.outputs.vl }}-win-x64
-          path: x64
-      - name: Download arm64
+          name: portable-${{ needs.resolve-version.outputs.vl }}
+          path: out/
+      - name: Download kachina artifacts
         uses: actions/download-artifact@v8
         with:
-          name: Starshot-${{ needs.build.outputs.vl }}-win-arm64
-          path: arm64
+          name: kachina-${{ needs.resolve-version.outputs.vl }}
+          path: out/
 
       # draft 开：建草稿（保持人工检查后发布的流程，不自动生成 notes）
       # draft 关：直接发布，GitHub 自动生成 release notes
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ needs.build.outputs.vl }}
-          name: ${{ needs.build.outputs.v }}
+          tag_name: ${{ needs.resolve-version.outputs.vl }}
+          name: ${{ needs.resolve-version.outputs.v }}
           draft: ${{ inputs.draft }}
           generate_release_notes: ${{ !inputs.draft }}
           prerelease: ${{ inputs.prerelease }}
           files: |
-            x64/Starshot-${{ needs.build.outputs.vl }}-win-x64.zip
-            arm64/Starshot-${{ needs.build.outputs.vl }}-win-arm64.zip
-            x64/Starshot-installer-win-x64.exe
-            arm64/Starshot-installer-win-arm64.exe
+            out/Starshot-${{ needs.resolve-version.outputs.vl }}-win-x64.zip
+            out/Starshot-${{ needs.resolve-version.outputs.vl }}-win-arm64.zip
+            out/Starshot-installer-win-x64.exe
+            out/Starshot-installer-win-arm64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
