@@ -14,7 +14,7 @@ namespace Starshot.Controls;
 /// 换源自动取消上一次加载，加载中/失败显示 Background 底色占位。
 /// 基类用 ContentControl（WinUI 的 Border 是密封类不可继承）：默认模板的 Border 呈现 Background/CornerRadius。
 /// </summary>
-public class ImageEx : ContentControl
+public partial class ImageEx : ContentControl
 {
     private readonly Image _image = new();
     private CancellationTokenSource? _cts;
