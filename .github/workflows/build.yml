@@ -53,6 +53,42 @@ jobs:
           path: |
             src-tauri/target/x86_64-win7-windows-msvc/release/*.exe
             src-tauri/target/x86_64-win7-windows-msvc/release/*.pdb
+  build-arm64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Override rust-toolchain for CI
+        run: |
+          (Get-Content src-tauri/rust-toolchain.toml) -replace 'channel = "nightly"', 'channel = "${{ env.RUST_NIGHTLY_VERSION }}"' | Set-Content src-tauri/rust-toolchain.toml
+      - run: rustup toolchain install ${{ env.RUST_NIGHTLY_VERSION }} --profile minimal && rustup component add rust-src --toolchain ${{ env.RUST_NIGHTLY_VERSION }} && rustup target add aarch64-pc-windows-msvc --toolchain ${{ env.RUST_NIGHTLY_VERSION }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-targets: false
+          workspaces: 'src-tauri'
+      - uses: pnpm/action-setup@v4.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install NPM Dependencies
+        run: pnpm i
+      - name: Build (aarch64)
+        shell: cmd
+        run: >-
+          pnpm exec cross-env STATIC_VCRUNTIME=false tauri build -- --target aarch64-pc-windows-msvc
+          && cd src-tauri/target/aarch64-pc-windows-msvc/release
+          && ren kachina-builder.exe kachina-builder-standalone.exe
+          && del kachina-builder.exe
+          && copy /b kachina-builder-standalone.exe+kachina-installer.exe kachina-builder.exe
+      - name: Artifact
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: artifact-arm64
+          path: |
+            src-tauri/target/aarch64-pc-windows-msvc/release/*.exe
+            src-tauri/target/aarch64-pc-windows-msvc/release/*.pdb
   release:
     needs: [build, test]
     runs-on: windows-2022
