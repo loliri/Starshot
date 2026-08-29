@@ -84,7 +84,7 @@ kachina-builder.exe pack -c kachina.config.json -o Kachina.update.exe
 可选：为输出的 exe 设置图标和自定义css/左侧图片：
 
 ```bat
-kachina-builder.exe pack -c kachina.config.json -o Kachina.update.exe --icon icon.ico -m [custom.css | custom.webp]
+kachina-builder.exe pack -c kachina.config.json -o Kachina.update.exe --icon icon.ico -t [custom.css | custom.webp]
 ```
 
 3. 构建Metadata、压缩应用文件
