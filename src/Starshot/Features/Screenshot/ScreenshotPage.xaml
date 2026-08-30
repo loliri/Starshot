@@ -3,6 +3,7 @@
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:fluent="using:FluentIcons.WinUI"
   xmlns:lang="using:Starshot.Language"
   xmlns:local="using:Starshot.Features.Screenshot"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -163,6 +164,17 @@
                 >
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE8A7;" IsTextScaleFactorEnabled="False" />
+                  </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!--  识别文字（打开查看器直接进入 OCR）  -->
+                <MenuFlyoutItem
+                  x:Name="MenuFlyoutItem_Ocr"
+                  Click="MenuFlyoutItem_Ocr_Click"
+                  IsTextScaleFactorEnabled="False"
+                  Text="{x:Bind lang:Lang.ImageViewWindow_Ocr}"
+                >
+                  <MenuFlyoutItem.Icon>
+                    <fluent:SymbolIcon IsTextScaleFactorEnabled="False" Symbol="ScanText" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!--  复制文件  -->

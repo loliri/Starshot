@@ -244,6 +244,18 @@
   <data name="ImageViewWindow_OpenWith" xml:space="preserve">
     <value>次で開く:</value>
   </data>
+  <data name="ImageViewWindow_Ocr" xml:space="preserve">
+    <value>テキストの認識</value>
+  </data>
+  <data name="Ocr_NoneFound" xml:space="preserve">
+    <value>テキストが見つかりません</value>
+  </data>
+  <data name="Ocr_NoEngine" xml:space="preserve">
+    <value>OCR 言語パックがインストールされていません。Windows 設定で追加してください。</value>
+  </data>
+  <data name="Ocr_Failed" xml:space="preserve">
+    <value>テキスト認識に失敗しました</value>
+  </data>
   <data name="ImageViewWindow_Previous" xml:space="preserve">
     <value>前へ</value>
     <comment>Previous Image</comment>

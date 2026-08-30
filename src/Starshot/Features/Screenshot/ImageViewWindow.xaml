@@ -5,6 +5,7 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:fluent="using:FluentIcons.WinUI"
   xmlns:lang="using:Starshot.Language"
   xmlns:local="using:Starshot.Features.Screenshot"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -86,6 +87,24 @@
             Text="{x:Bind lang:Lang.Common_Edit}"
           />
         </StackPanel>
+      </Button>
+      <!--  识别文字：系统 OCR 引擎原位标注（对齐 Windows 照片应用）  -->
+      <Button
+        x:Name="Button_Ocr"
+        Height="36"
+        Margin="8,0,0,0"
+        Padding="10,5,10,5"
+        BorderThickness="0"
+        Click="Button_Ocr_Click"
+        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+        ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow_Ocr}"
+      >
+        <fluent:SymbolIcon
+          FontSize="16"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          IsTextScaleFactorEnabled="False"
+          Symbol="ScanText"
+        />
       </Button>
       <!--  打开菜单  -->
       <Button

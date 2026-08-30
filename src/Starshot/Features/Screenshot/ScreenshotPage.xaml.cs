@@ -430,6 +430,23 @@ public sealed partial class ScreenshotPage : PageBase
         catch { }
     }
 
+    private void MenuFlyoutItem_Ocr_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is FrameworkElement { DataContext: ScreenshotItem item })
+            {
+                _ = new ImageViewWindow().ShowWindowAsync(
+                    this.XamlRoot.ContentIslandEnvironment.AppWindowId,
+                    item,
+                    _screenshotItems,
+                    autoOcr: true
+                );
+            }
+        }
+        catch { }
+    }
+
     private async void MenuFlyoutItem_CopyFile_Click(object sender, RoutedEventArgs e)
     {
         try

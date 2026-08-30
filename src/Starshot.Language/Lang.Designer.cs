@@ -753,6 +753,42 @@
         }
         
         /// <summary>
+        ///   查找类似 Recognize Text 的本地化字符串。
+        /// </summary>
+        public static string ImageViewWindow_Ocr {
+            get {
+                return ResourceManager.GetString("ImageViewWindow_Ocr", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No text found 的本地化字符串。
+        /// </summary>
+        public static string Ocr_NoneFound {
+            get {
+                return ResourceManager.GetString("Ocr_NoneFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No OCR language pack installed. 的本地化字符串。
+        /// </summary>
+        public static string Ocr_NoEngine {
+            get {
+                return ResourceManager.GetString("Ocr_NoEngine", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Text recognition failed 的本地化字符串。
+        /// </summary>
+        public static string Ocr_Failed {
+            get {
+                return ResourceManager.GetString("Ocr_Failed", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Previous 的本地化字符串。
         /// </summary>
         public static string ImageViewWindow_Previous {

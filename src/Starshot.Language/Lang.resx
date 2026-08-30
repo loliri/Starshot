@@ -244,6 +244,18 @@
   <data name="ImageViewWindow_OpenWith" xml:space="preserve">
     <value>Open with</value>
   </data>
+  <data name="ImageViewWindow_Ocr" xml:space="preserve">
+    <value>Recognize Text</value>
+  </data>
+  <data name="Ocr_NoneFound" xml:space="preserve">
+    <value>No text found</value>
+  </data>
+  <data name="Ocr_NoEngine" xml:space="preserve">
+    <value>No OCR language pack installed. Add one in Windows Settings.</value>
+  </data>
+  <data name="Ocr_Failed" xml:space="preserve">
+    <value>Text recognition failed</value>
+  </data>
   <data name="ImageViewWindow_Previous" xml:space="preserve">
     <value>Previous</value>
     <comment>Previous Image</comment>

@@ -278,16 +278,17 @@ public sealed partial class ClipboardPage : PageBase
         catch { }
     }
 
-    private void OpenClipboardItem(ScreenshotItem item)
+    private void OpenClipboardItem(ScreenshotItem item, bool autoOcr = false)
     {
         _ = new ImageViewWindow().ShowWindowAsync(
             this.XamlRoot.ContentIslandEnvironment.AppWindowId,
             item,
-            Items
+            Items,
+            autoOcr
         );
     }
 
-    /// <summary>每个剪贴板项都挂这个专用菜单：信息 / 打开 / 重新复制 / 删除</summary>
+    /// <summary>每个剪贴板项都挂这个专用菜单：信息 / 打开 / 识别文字 / 重新复制 / 删除</summary>
     private void Grid_ImageItem_DataContextChanged(
         FrameworkElement sender,
         DataContextChangedEventArgs args
@@ -321,6 +322,19 @@ public sealed partial class ClipboardPage : PageBase
         open.Icon = new FontIcon { Glyph = "", IsTextScaleFactorEnabled = false };
         open.Click += (_, _) => OpenClipboardItem(item);
         flyout.Items.Add(open);
+        // 识别文字（打开查看器直接进入 OCR）
+        var ocr = new MenuFlyoutItem
+        {
+            Text = Lang.ImageViewWindow_Ocr,
+            IsTextScaleFactorEnabled = false,
+        };
+        ocr.Icon = new FluentIcons.WinUI.SymbolIcon
+        {
+            Symbol = FluentIcons.Common.Symbol.ScanText,
+            IsTextScaleFactorEnabled = false,
+        };
+        ocr.Click += (_, _) => OpenClipboardItem(item, autoOcr: true);
+        flyout.Items.Add(ocr);
         // 重新复制
         var recopy = new MenuFlyoutItem
         {

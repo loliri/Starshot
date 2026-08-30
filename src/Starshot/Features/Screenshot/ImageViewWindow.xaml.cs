@@ -13,8 +13,10 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Effects;
+using Microsoft.Graphics.Canvas.Geometry;
 using Microsoft.Graphics.Display;
 using Microsoft.UI;
+using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -347,11 +349,38 @@ public sealed partial class ImageViewWindow : Window
 
     private Point _imageMoveOldPosition;
 
+    // OCR 文本框式拖选：锚点词索引 + 活动端词索引（_ocrLines 展平后的线性索引，-1 = 无选区）。
+    // 按下点命中哪个词即锚定，拖到哪个词活动端就跟到哪，两点之间连续词全选中（输入框选区语义）
+    private int _ocrSelAnchor = -1;
+    private int _ocrSelActive = -1;
+
     private void ScrollViewer_Image_PointerPressed(
         object sender,
         Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
     )
     {
+        // OCR 模式：文字区按下 = 锚定该词开始拖选；灰色区按下 = 平移画布（与非 OCR 模式同路径）
+        if (_ocrActive)
+        {
+            ScrollViewer_Image.CapturePointer(e.Pointer);
+            var p = e.GetCurrentPoint(CanvasSwapChainPanel_Image).Position;
+            int wordIdx = OcrWordIndexAt(
+                new Windows.Foundation.Point(p.X * UIScale, p.Y * UIScale)
+            );
+            if (wordIdx >= 0)
+            {
+                _ocrSelAnchor = wordIdx;
+                _ocrSelActive = wordIdx;
+                _canImageMoved = false;
+                DrawImage();
+                return;
+            }
+            _ocrSelAnchor = -1;
+            _ocrSelActive = -1;
+            _canImageMoved = true;
+            _imageMoveOldPosition = e.GetCurrentPoint(ScrollViewer_Image).Position;
+            return;
+        }
         _canImageMoved = true;
         ScrollViewer_Image.CapturePointer(e.Pointer);
         _imageMoveOldPosition = e.GetCurrentPoint(ScrollViewer_Image).Position;
@@ -362,6 +391,32 @@ public sealed partial class ImageViewWindow : Window
         Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
     )
     {
+        // OCR 模式悬停光标：文字区 I-beam（拖选），灰色区小手（拖画布）
+        if (_ocrActive)
+        {
+            var hover = e.GetCurrentPoint(CanvasSwapChainPanel_Image).Position;
+            SetOcrCursor(
+                OcrWordIndexAt(new Windows.Foundation.Point(hover.X * UIScale, hover.Y * UIScale))
+                    >= 0
+            );
+            if (_ocrSelAnchor >= 0)
+            {
+                var point = e.GetCurrentPoint(CanvasSwapChainPanel_Image);
+                if (point.Properties.IsLeftButtonPressed)
+                {
+                    var p = point.Position;
+                    int idx = OcrWordIndexAt(
+                        new Windows.Foundation.Point(p.X * UIScale, p.Y * UIScale)
+                    );
+                    if (idx >= 0 && idx != _ocrSelActive)
+                    {
+                        _ocrSelActive = idx;
+                        DrawImage();
+                    }
+                }
+                return;
+            }
+        }
         if (_canImageMoved)
         {
             var point = e.GetCurrentPoint(ScrollViewer_Image);
@@ -385,8 +440,135 @@ public sealed partial class ImageViewWindow : Window
         Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
     )
     {
-        _canImageMoved = false;
         ScrollViewer_Image.ReleasePointerCapture(e.Pointer);
+        // OCR 拖选松开：选区保留（高亮不动），复制只走 Ctrl+C
+        if (_ocrActive)
+        {
+            return;
+        }
+        _canImageMoved = false;
+    }
+
+    /// <summary>
+    /// 词级命中：点落在哪个词的矩形内返回展平索引；命中行但落在词间隙时取该行内 x 最近 的词（输入框
+    /// 按在字符间隙也算该字符的语义）；不在任何行内返回 -1。行判定外扩 15px 与遮罩轮廓一致。
+    /// </summary>
+    private int OcrWordIndexAt(Windows.Foundation.Point px)
+    {
+        const double pad = 15;
+        int flat = 0;
+        foreach (var line in _ocrLines)
+        {
+            int wordsInLine = line.Words.Count;
+            if (
+                px.X >= line.Rect.Left - pad
+                && px.X <= line.Rect.Right + pad
+                && px.Y >= line.Rect.Top - pad
+                && px.Y <= line.Rect.Bottom + pad
+            )
+            {
+                // 词内直接命中
+                for (int i = 0; i < wordsInLine; i++)
+                {
+                    var r = line.Words[i].Rect;
+                    if (px.X >= r.Left && px.X <= r.Right && px.Y >= r.Top && px.Y <= r.Bottom)
+                    {
+                        return flat + i;
+                    }
+                }
+                // 词间隙：取 x 最近 的词
+                int nearest = 0;
+                double bestDist = double.MaxValue;
+                for (int i = 0; i < wordsInLine; i++)
+                {
+                    var r = line.Words[i].Rect;
+                    double cx = r.Left + r.Width / 2;
+                    double dist = Math.Abs(cx - px.X);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        nearest = i;
+                    }
+                }
+                return flat + nearest;
+            }
+            flat += wordsInLine;
+        }
+        return -1;
+    }
+
+    /// <summary>
+    /// 展平索引 → 选中文本：from/to 之间的连续词按行内 x 序、行间 y 序拼接，行间换行。
+    /// </summary>
+    /// <summary>
+    /// 选区扁平索引区间 → 各行命中范围（拖选复制与高亮绘制的同一套投影，
+    /// 改选区语义只动这里）。
+    /// </summary>
+    private IEnumerable<(OcrLine Line, List<OcrWord> Words, int Begin, int End)> EnumSelectedRanges(
+        int lo,
+        int hi
+    )
+    {
+        int flat = 0;
+        foreach (var line in _ocrLines)
+        {
+            var words = line.Words.OrderBy(w => w.Rect.Left).ToList();
+            int n = words.Count;
+            if (n > 0 && !(hi < flat || lo >= flat + n))
+            {
+                yield return (line, words, Math.Max(lo - flat, 0), Math.Min(hi - flat, n - 1));
+            }
+            flat += n;
+        }
+    }
+
+    private string? GetSelectedText(int from, int to)
+    {
+        int lo = Math.Min(from, to);
+        int hi = Math.Max(from, to);
+        var picked = new List<string>();
+        foreach (var (_, words, begin, end) in EnumSelectedRanges(lo, hi))
+        {
+            var part = words.Skip(begin).Take(end - begin + 1).Select(w => w.Text).ToList();
+            if (part.Count > 0)
+            {
+                picked.Add(OcrHelper.JoinWords(part));
+            }
+        }
+        return picked.Count > 0 ? string.Join(Environment.NewLine, picked) : null;
+    }
+
+    private InputCursor? _ocrCursorIbeam;
+    private InputCursor? _ocrCursorHand;
+
+    // UIElement.ProtectedCursor 在 WinAppSDK 1.8 投影里仍是 protected（CS0122 实锤），只能反射设置；
+    // MethodInfo 静态缓存，PointerMoved 高频悬停不做重复元数据查找
+    private static readonly System.Reflection.MethodInfo? _setProtectedCursor =
+        typeof(UIElement).GetMethod(
+            "set_ProtectedCursor",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+        );
+
+    private void SetOcrCursor(bool onText)
+    {
+        // 灰区四向箭头 = 平移画布（InputSystemCursorShape 没有五指 grab，Hand 是链接手不合适）
+        var cursor = onText
+            ? _ocrCursorIbeam ??= InputSystemCursor.Create(InputSystemCursorShape.IBeam)
+            : _ocrCursorHand ??= InputSystemCursor.Create(InputSystemCursorShape.SizeAll);
+        try
+        {
+            _setProtectedCursor?.Invoke(Content, new object[] { cursor });
+        }
+        catch { }
+    }
+
+    private void ResetOcrCursor()
+    {
+        try
+        {
+            _setProtectedCursor?.Invoke(Content, new object?[] { null });
+        }
+        catch { }
     }
 
     private void ScrollViewer_Image_DoubleTapped(
@@ -743,6 +925,7 @@ public sealed partial class ImageViewWindow : Window
                 }
                 _sourceBitmap?.Dispose();
                 _sourceBitmap = bitmap;
+                ExitOcrMode();
                 CurrentFileSizeText = GetSizeText(new FileInfo(filePath).Length);
                 CurrentPixelSizeText =
                     $"{_sourceBitmap.SizeInPixels.Width} x {_sourceBitmap.SizeInPixels.Height}";
@@ -909,6 +1092,82 @@ public sealed partial class ImageViewWindow : Window
                 ds.Units = CanvasUnits.Pixels;
                 ICanvasImage output = GetDrawOutput(out _);
                 ds.DrawImage(output);
+                // OCR 聚光灯（对齐 Windows 照片应用）：非文字区 = 整图几何逐行 Exclude 圆角文字矩形
+                // （外扩 15px、圆角 10px），layer 限制遮罩只画在非文字区——文字透出、轮廓即圆角边界，
+                // 不碰 swapchain 的 alpha（直接 DestinationOut 会削 alpha 透出黑底）。
+                // 遮罩色 rgb(79,79,79) @ alpha 0xA0：实测照片应用两个采样点同时拟合（白 255→145，深 17→56）
+                if (_ocrActive && _ocrLines.Count > 0)
+                {
+                    double w = _sourceBitmap.SizeInPixels.Width;
+                    double h = _sourceBitmap.SizeInPixels.Height;
+                    var maskColor = Windows.UI.Color.FromArgb(0xA0, 0x4F, 0x4F, 0x4F);
+                    using var area = CanvasGeometry.CreateRectangle(
+                        _canvasSwapChain.Device,
+                        0,
+                        0,
+                        (float)w,
+                        (float)h
+                    );
+                    var areaRef = area;
+                    foreach (var line in _ocrLines)
+                    {
+                        using var hole = CanvasGeometry.CreateRoundedRectangle(
+                            _canvasSwapChain.Device,
+                            (float)(line.Rect.Left - 15),
+                            (float)(line.Rect.Top - 15),
+                            (float)(line.Rect.Width + 30),
+                            (float)(line.Rect.Height + 30),
+                            10,
+                            10
+                        );
+                        var next = areaRef.CombineWith(
+                            hole,
+                            System.Numerics.Matrix3x2.Identity,
+                            CanvasGeometryCombine.Exclude
+                        );
+                        if (!ReferenceEquals(areaRef, area))
+                            areaRef.Dispose();
+                        areaRef = next;
+                    }
+                    using (ds.CreateLayer(1f, areaRef))
+                    {
+                        ds.FillRectangle(new Windows.Foundation.Rect(0, 0, w, h), maskColor);
+                    }
+                    if (!ReferenceEquals(areaRef, area))
+                        areaRef.Dispose();
+                    // 拖选高亮（输入框选区语义）：锚点→活动端之间连续词加高亮底
+                    if (_ocrSelAnchor >= 0 && _ocrSelActive >= 0)
+                    {
+                        int lo = Math.Min(_ocrSelAnchor, _ocrSelActive);
+                        int hi = Math.Max(_ocrSelAnchor, _ocrSelActive);
+                        var hlColor = Windows.UI.Color.FromArgb(0x66, 0x58, 0xB4, 0xF0);
+                        foreach (var (line, words, begin, end) in EnumSelectedRanges(lo, hi))
+                        {
+                            for (int i = begin; i <= end; i++)
+                            {
+                                // 词间空隙也铺上高亮（文本框选区是连续的，不留缝）；
+                                // 高亮本身是方的（文字是方的，圆角只用于遮罩透出的区域界定）
+                                double left =
+                                    i == begin
+                                        ? words[i].Rect.Left
+                                        : (words[i - 1].Rect.Right + words[i].Rect.Left) / 2;
+                                double right =
+                                    i == end
+                                        ? words[i].Rect.Right
+                                        : (words[i].Rect.Right + words[i + 1].Rect.Left) / 2;
+                                ds.FillRectangle(
+                                    new Windows.Foundation.Rect(
+                                        left,
+                                        line.Rect.Top,
+                                        right - left,
+                                        line.Rect.Height
+                                    ),
+                                    hlColor
+                                );
+                            }
+                        }
+                    }
+                }
             }
             _canvasSwapChain.Present();
         }
@@ -1079,7 +1338,8 @@ public sealed partial class ImageViewWindow : Window
     public async Task ShowWindowAsync(
         Microsoft.UI.WindowId windowId,
         ScreenshotItem screenshotItem,
-        ObservableCollection<ScreenshotItem>? collection
+        ObservableCollection<ScreenshotItem>? collection,
+        bool autoOcr = false
     )
     {
         try
@@ -1093,6 +1353,10 @@ public sealed partial class ImageViewWindow : Window
             User32.ShowWindow(WindowHandle, ShowWindowCommand.SW_SHOWMAXIMIZED);
             await Task.Delay(1);
             await LoadItemAsync(screenshotItem);
+            if (autoOcr)
+            {
+                await RunOcrAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -1100,7 +1364,12 @@ public sealed partial class ImageViewWindow : Window
         }
     }
 
-    public async Task ShowWindowAsync(Microsoft.UI.WindowId windowId, string file, bool showGallary)
+    public async Task ShowWindowAsync(
+        Microsoft.UI.WindowId windowId,
+        string file,
+        bool showGallary,
+        bool autoOcr = false
+    )
     {
         try
         {
@@ -1135,6 +1404,10 @@ public sealed partial class ImageViewWindow : Window
             User32.ShowWindow(WindowHandle, ShowWindowCommand.SW_SHOWMAXIMIZED);
             await Task.Delay(1);
             await LoadImageAsync(CurrentScreenshot.FilePath);
+            if (autoOcr)
+            {
+                await RunOcrAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -1735,8 +2008,32 @@ public sealed partial class ImageViewWindow : Window
 
     private void RootGrid_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
     {
+        // OCR 模式 Ctrl+C：复制当前拖选选区（复制只走这里，无任何自动复制）
+        // KeyRoutedEventArgs 无 KeyModifiers 属性（Pointer 系 args 才有），只能查键盘状态
+        if (_ocrActive && e.Key is VirtualKey.C)
+        {
+            var ctrl = Microsoft
+                .UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control)
+                .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+            if (ctrl && _ocrSelAnchor >= 0 && _ocrSelActive >= 0)
+            {
+                var text = GetSelectedText(_ocrSelAnchor, _ocrSelActive);
+                if (!string.IsNullOrEmpty(text))
+                {
+                    CopyTextToClipboard(text);
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
         if (e.Key is VirtualKey.Escape)
         {
+            if (_ocrActive)
+            {
+                ExitOcrMode();
+                e.Handled = true;
+                return;
+            }
             Close();
         }
         else if (e.Key is VirtualKey.Left or VirtualKey.Up)
@@ -1750,6 +2047,93 @@ public sealed partial class ImageViewWindow : Window
         else if (e.Key is VirtualKey.F11)
         {
             FullScreen();
+        }
+    }
+
+    #endregion
+
+
+    #region OCR
+
+
+    private bool _ocrActive;
+    private List<OcrLine> _ocrLines = [];
+
+    /// <summary>
+    /// 识别文字：oneocr 引擎（照片应用同款，随安装包分发）+ swapchain 聚光灯遮罩
+    /// （无 XAML overlay，不碰 ScrollViewer 布局）。再点按钮 / ESC / 切图退出；拖选后 Ctrl+C 复制。
+    /// </summary>
+    private async void Button_Ocr_Click(object sender, RoutedEventArgs e)
+    {
+        if (_ocrActive)
+        {
+            ExitOcrMode();
+            return;
+        }
+        await RunOcrAsync();
+    }
+
+    /// <summary>图库/剪贴板右键「识别文字」入口复用：打开查看器加载完直接进入 OCR。</summary>
+    private async Task RunOcrAsync()
+    {
+        if (_sourceBitmap is null)
+            return;
+
+        Button_Ocr.IsEnabled = false;
+        try
+        {
+            // GPU 取像素留在 UI 线程（CanvasDevice 非线程安全），纯 CPU 识别下线程池
+            var prep = OcrHelper.PreparePixels(_sourceBitmap);
+            var lines = await Task.Run(() =>
+                OcrHelper.RecognizeAsync(prep.Pixels, prep.Width, prep.Height, prep.Scale)
+            );
+            // null = 双引擎都不可用（oneocr 缺文件 + 旧引擎无语言包）；空列表 = 识别了但没文字
+            if (lines is null)
+            {
+                ShowInfo(InfoBarSeverity.Warning, Lang.Ocr_NoEngine, "", 5000);
+                _ = await Launcher.LaunchUriAsync(new Uri("ms-settings:regionlanguage"));
+                return;
+            }
+            if (lines.Count == 0)
+            {
+                ShowInfo(InfoBarSeverity.Informational, Lang.Ocr_NoneFound, "", 3000);
+                return;
+            }
+            _ocrLines = lines;
+            _ocrActive = true;
+            DrawImage();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "OCR recognize");
+            ShowInfo(InfoBarSeverity.Error, Lang.Ocr_Failed, "", 5000);
+        }
+        finally
+        {
+            Button_Ocr.IsEnabled = true;
+        }
+    }
+
+    private void ExitOcrMode()
+    {
+        _ocrActive = false;
+        _ocrLines = [];
+        _ocrSelAnchor = -1;
+        _ocrSelActive = -1;
+        ResetOcrCursor();
+        DrawImage();
+    }
+
+    private void CopyTextToClipboard(string text)
+    {
+        try
+        {
+            ClipboardHelper.SetText(text);
+            ShowInfo(InfoBarSeverity.Success, Lang.ImageViewWindow_CopiedToClipboard, "", 2000);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "OCR copy");
         }
     }
 
