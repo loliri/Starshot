@@ -384,25 +384,12 @@ public static partial class AppConfig
 
     /// <summary>
     /// 用户配置的截图库文件夹列表（JSON 数组），供库浏览。
-    /// 兼容读旧版分号分隔串（Windows 路径不含分号，拆分安全）；读到的旧值在下次保存时自动转为数组
+    /// 兼容读旧版三种形态（原生数组 / 双重序列化文本 / 分号串），读到的旧值在下次保存时自动转为原生数组
     /// </summary>
     public static List<string> ExtraScreenshotFolders
     {
-        get
-        {
-            string? raw = GetValue<string>();
-            if (string.IsNullOrWhiteSpace(raw))
-                return [];
-            try
-            {
-                return JsonSerializer.Deserialize<List<string>>(raw) ?? [];
-            }
-            catch (JsonException) { }
-            return raw
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .ToList();
-        }
-        set => SetValue(JsonSerializer.Serialize(value));
+        get => GetListValue();
+        set => SetListValue(value);
     }
 
     /// <summary>
@@ -554,7 +541,9 @@ public static partial class AppConfig
     #region Setting Method
 
 
-    private static Dictionary<string, string?>? _settingCache;
+    // 值放宽为 object：普通键是 string，数组键（ExtraScreenshotFolders）是 List<string> 原生存取，
+    // 读文件时统一解析为 JsonElement 占位（字符串/数组都原样保留，写回时原生输出，无嵌套转义）
+    private static Dictionary<string, object?>? _settingCache;
 
     /// <summary>
     /// 当前配置文件路径（导出/备份直接拷此文件）。
@@ -570,13 +559,51 @@ public static partial class AppConfig
         {
             if (File.Exists(ConfigFilePath))
             {
-                _settingCache =
-                    JsonSerializer.Deserialize<Dictionary<string, string?>>(
-                        File.ReadAllText(ConfigFilePath)
-                    ) ?? [];
+                var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
+                    File.ReadAllText(ConfigFilePath)
+                );
+                if (dict is not null)
+                {
+                    foreach (var (k, v) in dict)
+                    {
+                        _settingCache[k] = v;
+                    }
+                }
+                NormalizeLegacyListValue();
             }
         }
         catch { }
+    }
+
+    /// <summary>
+    /// 旧形态数组值一次性修复（仅 Initialize 时检测）：双重序列化文本 / 分号串 → List<string>，
+    /// 修好立即落盘——文件当场升级为原生数组，此后每次启动此函数直接 miss 退出，零成本
+    /// </summary>
+    private static void NormalizeLegacyListValue()
+    {
+        const string key = nameof(ExtraScreenshotFolders);
+        if (_settingCache!.TryGetValue(key, out object? value) && value is JsonElement
+            {
+                ValueKind: JsonValueKind.String,
+            } je
+        )
+        {
+            string? raw = je.GetString();
+            List<string>? list = null;
+            try
+            {
+                list = JsonSerializer.Deserialize<List<string>>(raw);
+            }
+            catch (JsonException) { }
+            list ??= raw?
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+            if (list is not null)
+            {
+                _settingCache[key] = list;
+                SaveConfigFile();
+            }
+        }
     }
 
     /// <summary>
@@ -618,11 +645,17 @@ public static partial class AppConfig
             return defaultValue;
         }
         InitializeSettingProvider();
-        if (_settingCache?.TryGetValue(key, out string? value) ?? false)
+        if (_settingCache?.TryGetValue(key, out object? value) ?? false)
         {
+            string? raw = value switch
+            {
+                string s => s,
+                JsonElement { ValueKind: JsonValueKind.String } je => je.GetString(),
+                _ => null,
+            };
             try
             {
-                return ConvertFromString(value, defaultValue);
+                return ConvertFromString(raw, defaultValue);
             }
             catch
             {
@@ -660,7 +693,7 @@ public static partial class AppConfig
         try
         {
             string? val = value?.ToString();
-            if (_settingCache!.TryGetValue(key, out string? cacheValue) && cacheValue == val)
+            if (_settingCache!.TryGetValue(key, out object? cacheValue) && AsString(cacheValue) == val)
             {
                 return;
             }
@@ -668,6 +701,54 @@ public static partial class AppConfig
             SaveConfigFile();
         }
         catch { }
+    }
+
+    /// <summary>
+    /// 数组键专用存取：值在文件里是原生 JSON 数组（无嵌套转义）。
+    /// 旧形态（双重序列化文本 / 分号串）在 Initialize 时已归一化为 List，此主路径不做兼容判断
+    /// </summary>
+    public static List<string> GetListValue([CallerMemberName] string? key = null)
+    {
+        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(UserDataFolder))
+        {
+            return [];
+        }
+        InitializeSettingProvider();
+        if (_settingCache?.TryGetValue(key, out object? value) ?? false)
+        {
+            return value switch
+            {
+                List<string> list => list,
+                JsonElement { ValueKind: JsonValueKind.Array } je => je.Deserialize<List<string>>() ?? [],
+                _ => [],
+            };
+        }
+        return [];
+    }
+
+    public static void SetListValue(List<string> value, [CallerMemberName] string? key = null)
+    {
+        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(UserDataFolder))
+        {
+            return;
+        }
+        InitializeSettingProvider();
+        try
+        {
+            _settingCache![key] = value;
+            SaveConfigFile();
+        }
+        catch { }
+    }
+
+    private static string? AsString(object? value)
+    {
+        return value switch
+        {
+            string s => s,
+            JsonElement { ValueKind: JsonValueKind.String } je => je.GetString(),
+            _ => null,
+        };
     }
 
     public static void DeleteAllSettings()
@@ -681,7 +762,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 导入配置：读 JSON 文件 → 校验为合法配置字典（键非空、值为字符串）→ 整档替换并写盘。
+    /// 导入配置：读 JSON 文件 → 校验为合法配置字典（键非空、值为字符串或字符串数组）→ 整档替换并写盘。
     /// 返回 false = 文件不存在/不是合法 JSON/结构不符（调用方提示无效，原配置不动）。
     /// </summary>
     public static bool ImportConfigFile(string path)
@@ -690,12 +771,18 @@ public static partial class AppConfig
         {
             if (!File.Exists(path))
                 return false;
-            var dict = JsonSerializer.Deserialize<Dictionary<string, string?>>(
+            var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
                 File.ReadAllText(path)
             );
-            if (dict is null || dict.Any(kv => string.IsNullOrWhiteSpace(kv.Key)))
+            if (
+                dict is null
+                || dict.Any(kv =>
+                    string.IsNullOrWhiteSpace(kv.Key)
+                    || !IsValidValue(kv.Value)
+                )
+            )
                 return false;
-            _settingCache = dict;
+            _settingCache = dict.ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
             SaveConfigFile();
             return true;
         }
@@ -703,6 +790,18 @@ public static partial class AppConfig
         {
             return false;
         }
+    }
+
+    private static bool IsValidValue(JsonElement value)
+    {
+        return value.ValueKind switch
+        {
+            JsonValueKind.String => true,
+            JsonValueKind.Array => value.EnumerateArray().All(e =>
+                e.ValueKind == JsonValueKind.String
+            ),
+            _ => false,
+        };
     }
 
     public static void ClearCache()
