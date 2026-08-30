@@ -112,7 +112,7 @@ jobs:
 
       - name: Remove unuse
         run: |
-          Remove-Item -Force build/release/app/RestartAgent.exe, build/release/app/DirectML.dll, build/release/app/onnxruntime.dll, build/release/app/onnxruntime_providers_shared.dll, build/release/app/Microsoft.ML.OnnxRuntime.dll, build/release/app/VP9DecoderMFT.dll, build/release/app/avifdec.exe, build/release/app/djxl.exe, build/release/app/avifgainmaputil.exe, build/release/app/jxlinfo.exe -ErrorAction SilentlyContinue
+          Remove-Item -Force build/release/app/RestartAgent.exe, build/release/app/DirectML.dll, build/release/app/onnxruntime_providers_shared.dll, build/release/app/Microsoft.ML.OnnxRuntime.dll, build/release/app/VP9DecoderMFT.dll, build/release/app/avifdec.exe, build/release/app/djxl.exe, build/release/app/avifgainmaputil.exe, build/release/app/jxlinfo.exe -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force build/release/app/NpuDetect -ErrorAction SilentlyContinue
           Remove-Item -Force build/release/app/workloads*.json -ErrorAction SilentlyContinue
 
