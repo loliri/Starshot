@@ -33,6 +33,7 @@ Starshot directly captures the raw `R16G16B16A16Float` scRGB framebuffer from th
 - 🧠 **Smart HDR/SDR Detection** — Automatically distinguishes genuine HDR content from SDR content wrapped in an HDR format, avoiding wasted space.
 - ✂️ **Region Screenshot** — Frozen-frame multi-monitor overlay with window detection and magnifier for pixel-precise selection.
 - 📋 **Clipboard Support** — Screenshots auto-copy to clipboard; browse clipboard history images in a dedicated page, preview / recopy / delete
+- 🔤 **Text Recognition (OCR)** — Same OneOCR engine as the Windows Photos app; drag-select and copy in the viewer, or grab text with a global shortcut
 - 🗂️ **Multi-format Support** — AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG, including a batch conversion tool.
 - 🖥️ **Multi-Monitor** — Region screenshots can span across monitors, composing captures that cross screen boundaries.
 - 🔄 **Auto Update Check** — Built-in update check; delta updates on new releases.
@@ -82,6 +83,8 @@ Two distribution lines — whichever you install is the line you stay on; they n
 
 ![Screenshot](docs/Screenshot.jpg)
 
+> For more screenshots, visit the [website](https://starshot.cialo.site).
+
 ## Quick Start
 
 | Action                                                            | Default Shortcut |
@@ -89,6 +92,7 @@ Two distribution lines — whichever you install is the line you stay on; they n
 | Full-screen screenshot                                            | Alt+W            |
 | Region screenshot (save file + copy to clipboard after selection) | Alt+Q            |
 | Region copy only (copy to clipboard only, no file saved)          | Alt+A            |
+| Recognize text & copy (OCR text to clipboard after selection)     | Alt+O            |
 
 All shortcuts can be customized in Settings.
 
@@ -153,7 +157,7 @@ The WinRT `Clipboard.SetContent` from unpackaged WinUI apps is unreliable (defer
 - Quality levels: Medium / High / Lossless.
 - XMP metadata (CreatorTool = Starshot).
 - Serialized encoding (SemaphoreSlim) to avoid concurrent encoding conflicts.
-- **Storage Statistics**: Settings page shows disk usage for screenshots / thumbnail cache / wallpapers / logs / backups, with refresh and one-click cache cleanup (also cleans up orphaned wallpaper files).
+- **Storage Statistics**: Settings page shows disk usage for screenshots / thumbnail cache / wallpapers / logs / backups / OCR engine, with refresh and one-click cache cleanup (also cleans up orphaned wallpaper files).
 
 #### Supported Formats
 
@@ -217,6 +221,14 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - **Edit Panel**: HDR / SDR / Auto display mode toggle, SDR brightness slider (100–500 nits), image and display info.
 - **Format Conversion**: HDR display mode → AVIF / JPEG XL; SDR display mode + HDR source → SDR JPEG / Ultra HDR JPEG / SDR PNG (all WYSIWYG tone-mapped output); SDR source → PNG / AVIF / JPEG XL.
 - **Color Management**: Reads display ICC profile and AdvancedColorInfo.
+- **Text Recognition**: See the next section.
+
+### Text Recognition (OCR)
+
+- **Dual engines**: OneOCR (the same engine as the Windows Photos app, higher accuracy) takes priority; falls back to the system engine (Windows.Media.Ocr, no download needed, lower accuracy) when unavailable. Switchable in Settings → Screenshot → Configure Engine.
+- **On-demand engine files**: OneOCR engine files (about 95 MB) are not bundled with the installer. A configuration dialog appears on first use — copy them directly from the local Windows Snipping Tool or Photos app (no download), or download from CDN; delete them from the same dialog when no longer needed.
+- **In-viewer recognition**: Enter via the toolbar button or the "Recognize Text" context-menu item in the gallery / clipboard pages. A spotlight mask marks all text regions (same interaction as the Photos app); drag over text and press Ctrl+C to copy. Extra spaces between characters in mixed CJK/Latin text are removed automatically.
+- **Global shortcut Alt+O**: Drag a region → recognized text goes straight to the clipboard (no file saved, image not copied); same entry in the tray menu; result feedback shows in the on-screen info popup.
 
 ### Batch Format Conversion
 
@@ -248,7 +260,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 
 ### System Tray
 
-- Left-click shows the main window; right-click opens a context menu (Show / Exit).
+- Left-click shows the main window; right-click opens a context menu (Screenshot / Region / Copy only / Recognize text / Show / Exit).
 - Closing the main window minimizes to tray (toggleable).
 - `ForceExit` mechanism ensures "Exit" from the tray truly exits.
 
@@ -412,7 +424,7 @@ Restart Starshot after updating. If the issue persists, please [submit an Issue]
 <details>
 <summary><b>HDR PNG (PNGv3) looks grayish/dim in image viewers?</b></summary>
 
-HDR in PNGv3 (W3C PNG Third Edition, finalized in 2025) relies on cICP metadata tagging BT.2020 + PQ — a brand-new standard. Chrome / Edge / Firefox render its HDR correctly, but most image viewers (e.g. Windows Photos) still decode it as a plain PNG, so it looks grayish/dim. This is the current ecosystem, not a broken file. For broad compatibility choose AVIF (the mainstream HDR format) or enable the Ultra HDR JPEG fallback.
+HDR in PNGv3 (W3C PNG Third Edition, finalized in 2025) relies on cICP metadata tagging BT.2020 + PQ — a brand-new standard. Chrome / Edge / Firefox render its HDR correctly, but most image viewers (e.g. Windows Photos) still decode it as a plain PNG, so it looks grayish/dim. This is the current ecosystem, not a broken file. **The built-in Starshot image viewer is recommended — it renders HDR PNG v3 correctly.** For broad compatibility choose AVIF (the mainstream HDR format) or enable the Ultra HDR JPEG fallback.
 
 </details>
 
