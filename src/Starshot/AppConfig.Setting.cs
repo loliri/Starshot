@@ -582,21 +582,20 @@ public static partial class AppConfig
     private static void NormalizeLegacyListValue()
     {
         const string key = nameof(ExtraScreenshotFolders);
-        if (_settingCache!.TryGetValue(key, out object? value) && value is JsonElement
-            {
-                ValueKind: JsonValueKind.String,
-            } je
+        if (
+            _settingCache!.TryGetValue(key, out object? value)
+            && value is JsonElement { ValueKind: JsonValueKind.String } je
         )
         {
             string? raw = je.GetString();
             List<string>? list = null;
             try
             {
-                list = JsonSerializer.Deserialize<List<string>>(raw);
+                list = JsonSerializer.Deserialize<List<string>>(raw!);
             }
             catch (JsonException) { }
-            list ??= raw?
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            list ??= raw
+                ?.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .ToList();
             if (list is not null)
             {
@@ -693,7 +692,10 @@ public static partial class AppConfig
         try
         {
             string? val = value?.ToString();
-            if (_settingCache!.TryGetValue(key, out object? cacheValue) && AsString(cacheValue) == val)
+            if (
+                _settingCache!.TryGetValue(key, out object? cacheValue)
+                && AsString(cacheValue) == val
+            )
             {
                 return;
             }
@@ -719,7 +721,8 @@ public static partial class AppConfig
             return value switch
             {
                 List<string> list => list,
-                JsonElement { ValueKind: JsonValueKind.Array } je => je.Deserialize<List<string>>() ?? [],
+                JsonElement { ValueKind: JsonValueKind.Array } je => je.Deserialize<List<string>>()
+                    ?? [],
                 _ => [],
             };
         }
@@ -776,10 +779,7 @@ public static partial class AppConfig
             );
             if (
                 dict is null
-                || dict.Any(kv =>
-                    string.IsNullOrWhiteSpace(kv.Key)
-                    || !IsValidValue(kv.Value)
-                )
+                || dict.Any(kv => string.IsNullOrWhiteSpace(kv.Key) || !IsValidValue(kv.Value))
             )
                 return false;
             _settingCache = dict.ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
@@ -797,9 +797,9 @@ public static partial class AppConfig
         return value.ValueKind switch
         {
             JsonValueKind.String => true,
-            JsonValueKind.Array => value.EnumerateArray().All(e =>
-                e.ValueKind == JsonValueKind.String
-            ),
+            JsonValueKind.Array => value
+                .EnumerateArray()
+                .All(e => e.ValueKind == JsonValueKind.String),
             _ => false,
         };
     }
