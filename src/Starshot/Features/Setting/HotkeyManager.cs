@@ -31,6 +31,14 @@ internal static class HotkeyManager
             User32.VK.VK_A
         );
 
+    public static HotkeyInfo RegionOcrCopy { get; private set; } =
+        new HotkeyInfo(
+            nameof(AppConfig.RegionOcrHotkey),
+            44448,
+            User32.HotKeyModifiers.MOD_ALT,
+            User32.VK.VK_O
+        );
+
     private static nint _registeredHwnd;
 
     public static void InitializeHotkey(nint hwnd)
@@ -39,7 +47,7 @@ internal static class HotkeyManager
         try
         {
             foreach (
-                var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly }
+                var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly, RegionOcrCopy }
             )
             {
                 User32.HotKeyModifiers modifiers = User32.HotKeyModifiers.MOD_NONE;
@@ -102,7 +110,7 @@ internal static class HotkeyManager
     /// </summary>
     public static void ShowRegistrationErrors()
     {
-        foreach (var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly })
+        foreach (var item in new HotkeyInfo[] { ScreenshotCapture, RegionCapture, RegionCopyOnly, RegionOcrCopy })
         {
             if (item.ErrorShown || item.Error.Succeeded)
                 continue;
@@ -239,6 +247,7 @@ internal static class HotkeyManager
             44445 => ScreenshotCapture,
             44446 => RegionCapture,
             44447 => RegionCopyOnly,
+            44448 => RegionOcrCopy,
             _ => null,
         };
     }

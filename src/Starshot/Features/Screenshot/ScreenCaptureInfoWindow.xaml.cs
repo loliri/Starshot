@@ -99,6 +99,12 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
 
     private bool _isCopy; // 仅复制模式：显示"已复制"而非"已保存"+打开按钮
 
+    private string? _statusTextOverride; // OCR 复制等场景的状态文案覆盖（null=默认"已复制"）
+
+    private bool _noCopyStatus; // 空结果等"非成功非失败"态：右侧图标转黄、小字改"未复制"
+
+    private string? _errorTextOverride; // OCR 失败等场景的错误主文案覆盖（null=默认"截图失败"）
+
     private string? _lastFile;
 
     private CanvasImageSource _imageSource;
@@ -212,14 +218,20 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
     }
 
     /// <summary>
-    /// 仅复制成功：显示缩略图 + "已复制"，无文件、无打开按钮
+    /// 仅复制成功：显示缩略图 + "已复制"，无文件、无打开按钮。
+    /// statusText 覆盖状态主文案（OCR 复制传"已复制识别文本"）；noCopy=true 表示
+    /// 非成功非失败的中性态（未识别到文字）：右侧图标转黄、小字改"未复制"。
     /// </summary>
     public void CaptureCopySuccess(
         Microsoft.UI.DisplayId displayId,
         CanvasBitmap? bitmap,
-        float maxCLL = -1
+        float maxCLL = -1,
+        string? statusText = null,
+        bool noCopy = false
     )
     {
+        _statusTextOverride = statusText;
+        _noCopyStatus = noCopy;
         if (bitmap is null)
             return;
         try
@@ -276,7 +288,25 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         bool complete = _finishedImageCount == _captureImageCount;
         if (_isCopy)
         {
-            TextBlock_State.Text = Lang.Common_CopiedToClipboard;
+            TextBlock_State.Text = _statusTextOverride ?? Lang.Common_CopiedToClipboard;
+            if (_noCopyStatus)
+            {
+                // 中性态（未识别到文字）：图标黄、小字"未复制"——非成功非失败
+                FontIcon_CopyStatus.Foreground = (
+                    Application.Current.Resources["SystemFillColorCautionBrush"]
+                    as Microsoft.UI.Xaml.Media.Brush
+                )!;
+                TextBlock_CopyStatusDetail.Text = Lang.Ocr_NotCopied;
+            }
+            else
+            {
+                // 单例复用：中性态染色后，正常复制要恢复绿对勾与"已复制"
+                FontIcon_CopyStatus.Foreground = (
+                    Application.Current.Resources["SystemFillColorSuccessBrush"]
+                    as Microsoft.UI.Xaml.Media.Brush
+                )!;
+                TextBlock_CopyStatusDetail.Text = Lang.Starshot_InfoCopied;
+            }
             ProgressRing_Process.Visibility = Visibility.Collapsed;
             FontIcon_Complete.Visibility = Visibility.Collapsed;
             TextBlock_Repeat.Visibility = Visibility.Collapsed;
@@ -374,8 +404,9 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
     /// </summary>
     /// <param name="hwnd"></param>
     /// <param name="ex"></param>
-    public void CaptureError(nint hwnd, bool captureStarted)
+    public void CaptureError(nint hwnd, bool captureStarted, string? errorText = null)
     {
+        _errorTextOverride = errorText;
         try
         {
             IsError = true;
@@ -388,6 +419,8 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = new CancellationTokenSource();
             _openImageCancellationToken = _cancellationTokenSource.Token;
+            TextBlock_ErrorText.Text =
+                _errorTextOverride ?? Lang.ScreenCaptureInfoWindow_ScreenshotFailed;
             DisplayWindow(hwnd, false, _cancellationTokenSource.Token);
         }
         catch (Exception ex)

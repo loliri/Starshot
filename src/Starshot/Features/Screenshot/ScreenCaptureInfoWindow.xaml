@@ -105,12 +105,14 @@
       Visibility="Collapsed"
     >
       <FontIcon
+        x:Name="FontIcon_CopyStatus"
         HorizontalAlignment="Center"
         Foreground="{ThemeResource SystemFillColorSuccessBrush}"
         Glyph="&#xE8C8;"
         IsTextScaleFactorEnabled="False"
       />
       <TextBlock
+        x:Name="TextBlock_CopyStatusDetail"
         HorizontalAlignment="Center"
         FontSize="12"
         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -135,6 +137,7 @@
       Visibility="{x:Bind IsError}"
     >
       <TextBlock
+        x:Name="TextBlock_ErrorText"
         Foreground="{ThemeResource SystemFillColorCriticalBrush}"
         IsTextScaleFactorEnabled="False"
         Text="{x:Bind lang:Lang.ScreenCaptureInfoWindow_ScreenshotFailed}"

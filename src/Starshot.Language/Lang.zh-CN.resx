@@ -262,6 +262,15 @@
   <data name="Ocr_InitFailed" xml:space="preserve">
     <value>OneOCR 引擎启动失败，已用系统引擎；详见日志，或在设置中重新获取引擎文件</value>
   </data>
+  <data name="Ocr_CopiedText" xml:space="preserve">
+    <value>已复制识别文本</value>
+  </data>
+  <data name="Ocr_NotCopied" xml:space="preserve">
+    <value>未复制</value>
+  </data>
+  <data name="Ocr_EngineUnavailable" xml:space="preserve">
+    <value>OCR 引擎未就绪：在设置中获取 OneOCR 引擎文件，或安装 Windows OCR 语言包</value>
+  </data>
   <data name="OcrEngineDialog_Title" xml:space="preserve">
     <value>OCR 引擎</value>
   </data>
@@ -612,6 +621,12 @@
   </data>
   <data name="Starshot_HotkeyRegionCopyDesc" xml:space="preserve">
     <value>框选区域或单击窗口。只把位图复制到剪贴板，不保存文件。</value>
+  </data>
+  <data name="Starshot_HotkeyRegionOcr" xml:space="preserve">
+    <value>识别文字并复制</value>
+  </data>
+  <data name="Starshot_HotkeyRegionOcrDesc" xml:space="preserve">
+    <value>框选区域或单击窗口。识别其中的文字并复制到剪贴板，不保存文件。</value>
   </data>
   <data name="Starshot_SDRFormat" xml:space="preserve">
     <value>SDR 格式</value>

@@ -262,6 +262,15 @@
   <data name="Ocr_InitFailed" xml:space="preserve">
     <value>OneOCR engine failed to start, using the system engine; check the log, or re-fetch the engine files in Settings</value>
   </data>
+  <data name="Ocr_CopiedText" xml:space="preserve">
+    <value>Recognized text copied</value>
+  </data>
+  <data name="Ocr_NotCopied" xml:space="preserve">
+    <value>Not copied</value>
+  </data>
+  <data name="Ocr_EngineUnavailable" xml:space="preserve">
+    <value>OCR engine not ready: fetch the OneOCR engine files in Settings, or install a Windows OCR language pack</value>
+  </data>
   <data name="OcrEngineDialog_Title" xml:space="preserve">
     <value>OCR Engine</value>
   </data>
@@ -612,6 +621,12 @@
   </data>
   <data name="Starshot_HotkeyRegionCopyDesc" xml:space="preserve">
     <value>Drag a region or click a window. Copies the bitmap to the clipboard only; no file is saved.</value>
+  </data>
+  <data name="Starshot_HotkeyRegionOcr" xml:space="preserve">
+    <value>Recognize Text and Copy</value>
+  </data>
+  <data name="Starshot_HotkeyRegionOcrDesc" xml:space="preserve">
+    <value>Drag a region or click a window. Recognizes the text in it and copies it to the clipboard; no file is saved.</value>
   </data>
   <data name="Starshot_SDRFormat" xml:space="preserve">
     <value>SDR Format</value>

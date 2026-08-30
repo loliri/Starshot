@@ -236,6 +236,76 @@
             />
           </Grid>
         </Border>
+
+        <!--  识别文字并复制  -->
+        <Border
+          Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+          BorderThickness="1"
+          CornerRadius="8"
+          Padding="20"
+        >
+          <Grid RowSpacing="12">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  图标  -->
+            <Border
+              Grid.Row="0"
+              Grid.RowSpan="2"
+              Width="48"
+              Height="48"
+              Margin="0,0,16,0"
+              Background="{ThemeResource AccentFillColorTertiaryBrush}"
+              CornerRadius="8"
+            >
+              <FontIcon
+                FontSize="24"
+                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                Glyph="&#xE8D2;"
+              />
+            </Border>
+
+            <!--  标题和描述  -->
+            <TextBlock
+              Grid.Row="0"
+              Grid.Column="1"
+              FontSize="16"
+              FontWeight="SemiBold"
+              Text="{x:Bind lang:Lang.Starshot_HotkeyRegionOcr}"
+            />
+            <TextBlock
+              Grid.Row="1"
+              Grid.Column="1"
+              FontSize="13"
+              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+              Text="{x:Bind lang:Lang.Starshot_HotkeyRegionOcrDesc}"
+              TextWrapping="Wrap"
+            />
+
+            <!--  快捷键输入  -->
+            <local:HotkeyInput
+              x:Name="HotkeyInput_RegionOcr"
+              Grid.Row="2"
+              Grid.Column="0"
+              Grid.ColumnSpan="2"
+              MinWidth="240"
+              HorizontalAlignment="Left"
+              HotkeyDeleted="HotkeyInput_HotkeyDeleted"
+              HotkeyEditFinished="HotkeyInput_HotkeyEditFinished"
+              HotkeyEditing="HotkeyInput_HotkeyEditing"
+              HotkeyId="44448"
+              WindowHandle="{x:Bind WindowHandle}"
+            />
+          </Grid>
+        </Border>
       </StackPanel>
     </StackPanel>
   </ScrollViewer>

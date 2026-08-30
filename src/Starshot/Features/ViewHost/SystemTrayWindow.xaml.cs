@@ -23,6 +23,8 @@ public sealed partial class SystemTrayWindow : WindowEx
 
     private const int HOTKEY_REGION_COPY = 44447;
 
+    private const int HOTKEY_REGION_OCR = 44448;
+
     public SystemTrayWindow()
     {
         this.InitializeComponent();
@@ -61,6 +63,9 @@ public sealed partial class SystemTrayWindow : WindowEx
                     break;
                 case HOTKEY_REGION_COPY:
                     ScreenCaptureService.CaptureRegionCopyOnly();
+                    break;
+                case HOTKEY_REGION_OCR:
+                    ScreenCaptureService.CaptureRegionOcrCopy();
                     break;
             }
         }
@@ -208,6 +213,13 @@ public sealed partial class SystemTrayWindow : WindowEx
     {
         Hide();
         ScreenCaptureService.CaptureRegionCopyOnly();
+    }
+
+    [RelayCommand]
+    private void CaptureRegionOcr()
+    {
+        Hide();
+        ScreenCaptureService.CaptureRegionOcrCopy();
     }
 
     private void WindowEx_Closed(object sender, WindowEventArgs args)

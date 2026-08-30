@@ -262,6 +262,15 @@
   <data name="Ocr_InitFailed" xml:space="preserve">
     <value>OneOCR エンジンの起動に失敗したため、システム エンジンを使用しました。ログを確認するか、設定でエンジン ファイルを再取得してください</value>
   </data>
+  <data name="Ocr_CopiedText" xml:space="preserve">
+    <value>認識したテキストをコピーしました</value>
+  </data>
+  <data name="Ocr_NotCopied" xml:space="preserve">
+    <value>未コピー</value>
+  </data>
+  <data name="Ocr_EngineUnavailable" xml:space="preserve">
+    <value>OCR エンジン未準備：設定で OneOCR エンジン ファイルを取得、または Windows の OCR 言語パックをインストールしてください</value>
+  </data>
   <data name="OcrEngineDialog_Title" xml:space="preserve">
     <value>OCR エンジン</value>
   </data>
@@ -612,6 +621,12 @@
   </data>
   <data name="Starshot_HotkeyRegionCopyDesc" xml:space="preserve">
     <value>領域をドラッグ、またはウィンドウをクリック。ビットマップをクリップボードにコピーするのみでファイルは保存しない。</value>
+  </data>
+  <data name="Starshot_HotkeyRegionOcr" xml:space="preserve">
+    <value>テキストを認識してコピー</value>
+  </data>
+  <data name="Starshot_HotkeyRegionOcrDesc" xml:space="preserve">
+    <value>領域をドラッグ、またはウィンドウをクリック。テキストを認識してクリップボードにコピーするのみでファイルは保存しない。</value>
   </data>
   <data name="Starshot_SDRFormat" xml:space="preserve">
     <value>SDR形式</value>

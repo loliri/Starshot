@@ -27,6 +27,8 @@ public sealed partial class MainWindow : WindowEx
 
     private const int HOTKEY_REGION_COPY = 44447;
 
+    private const int HOTKEY_REGION_OCR = 44448;
+
     public bool ForceExit;
 
     private SystemBackdropHelper? _backdropHelper;
@@ -220,6 +222,10 @@ public sealed partial class MainWindow : WindowEx
             else if (wParam == HOTKEY_REGION_COPY)
             {
                 ScreenCaptureService.CaptureRegionCopyOnly();
+            }
+            else if (wParam == HOTKEY_REGION_OCR)
+            {
+                ScreenCaptureService.CaptureRegionOcrCopy();
             }
         }
         else if (uMsg == (uint)User32.WindowMessage.WM_ACTIVATE)

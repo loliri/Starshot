@@ -437,6 +437,16 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 识别文字快捷键（区域选区 → OCR 文本进剪贴板，不存文件）
+    /// </summary>
+    public static string? RegionOcrHotkey
+    {
+        // Alt + O
+        get => GetValue("1+79");
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// HDR 截图在主 HDR 文件之外额外保存一份 Ultra HDR JPEG（SDR 基图 + gain map，
     /// 不支持 HDR 的软件也能正常显示）。主文件不受影响。
     /// </summary>

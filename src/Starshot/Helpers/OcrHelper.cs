@@ -188,9 +188,17 @@ public static class OcrHelper
             var words = new List<OcrWord>(line.Words.Count);
             foreach (var w in line.Words)
             {
-                words.Add(new OcrWord(w.Text, ScaleRect(w.BoundingRect, restore)));
+                words.Add(
+                    new OcrWord(SquashCjkSpaces(w.Text), ScaleRect(w.BoundingRect, restore))
+                );
             }
-            lines.Add(new OcrLine(line.Text, UnionRects(words.Select(w => w.Rect)), words));
+            lines.Add(
+                new OcrLine(
+                    SquashCjkSpaces(line.Text),
+                    UnionRects(words.Select(w => w.Rect)),
+                    words
+                )
+            );
         }
         Log.Information(
             "[OCR] engine=Legacy, {Count} lines, scale={Scale}, {Ms}ms",
@@ -278,8 +286,9 @@ public static class OcrHelper
     }
 
     /// <summary>
-    /// oneocr 的行文本是 token 空格拼接（中文 token = 单字，字间全带空格；照片应用展示前也做了同样处理）。
-    /// 删除空格当且仅当两侧都不是拉丁字母/数字——汉字间删、汉字与标点间删、英文词间与中英之间保留。
+    /// 两引擎的行文本都是 token 空格拼接（中文 token = 单字，字间全带空格；照片应用展示前也做了同样处理；
+    /// Windows.Media.Ocr 的 line.Text 同样按词空格拼接）。删除空格当且仅当两侧都不是拉丁字母/数字——
+    /// 汉字间删、汉字与标点间删、英文词间与中英之间保留。
     /// </summary>
     private static string SquashCjkSpaces(string text)
     {

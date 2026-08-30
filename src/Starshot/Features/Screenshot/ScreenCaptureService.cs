@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading;
@@ -208,7 +209,63 @@ internal class ScreenCaptureService
         Instance.CaptureRegionInternal(copyOnly: true);
     }
 
-    private async void CaptureRegionInternal(bool copyOnly = false)
+    /// <summary>
+    /// 识别文字：区域选区 → OCR 全文进剪贴板，不存文件
+    /// </summary>
+    public static void CaptureRegionOcrCopy()
+    {
+        Instance.CaptureRegionInternal(ocrCopy: true);
+    }
+
+    private enum OcrCopyResult
+    {
+        Copied,
+        NoText,
+        NoEngine,
+        Failed,
+    }
+
+    /// <summary>
+    /// 选区 OCR → 全文进剪贴板。sdrCrop 已是覆盖层 tonemap 好的 B8G8R8A8，
+    /// UI 线程取像素（GPU 回读不跨线程），纯 CPU 识别下线程池。
+    /// 状态提示由调用方走信息浮窗（此处只 log）。
+    /// </summary>
+    private async Task<OcrCopyResult> OcrCopyRegionAsync(CanvasRenderTarget? sdrCrop)
+    {
+        if (sdrCrop is null)
+        {
+            return OcrCopyResult.Failed;
+        }
+        try
+        {
+            var size = sdrCrop.SizeInPixels;
+            byte[] pixels = sdrCrop.GetPixelBytes();
+            var lines = await Task.Run(
+                () => OcrHelper.RecognizeAsync(pixels, (int)size.Width, (int)size.Height, 1.0)
+            );
+            if (lines is null)
+            {
+                _logger.LogWarning("Region OCR copy: no engine available");
+                return OcrCopyResult.NoEngine;
+            }
+            if (lines.Count == 0)
+            {
+                _logger.LogInformation("Region OCR copy: no text found");
+                return OcrCopyResult.NoText;
+            }
+            string text = string.Join(Environment.NewLine, lines.Select(l => l.Text));
+            ClipboardHelper.SetText(text);
+            _logger.LogInformation("Region OCR copy: {Count} lines copied", lines.Count);
+            return OcrCopyResult.Copied;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Region OCR copy failed");
+            return OcrCopyResult.Failed;
+        }
+    }
+
+    private async void CaptureRegionInternal(bool copyOnly = false, bool ocrCopy = false)
     {
         if (Interlocked.CompareExchange(ref _isCapturing, 1, 0) != 0)
             return;
@@ -365,10 +422,18 @@ internal class ScreenCaptureService
             // 覆盖层隐藏时已从 _displayBitmap（tonemap 好的 SDR）裁出选区
             sdrCrop = _regionWindow.SdrCrop;
 
-            if (copyOnly)
+            if (copyOnly || ocrCopy)
             {
-                // 仅复制：不存文件、无视"自动复制"开关
-                await CopyCaptureToClipboardAsync(sdrCrop, force: true);
+                OcrCopyResult ocrResult = OcrCopyResult.Copied;
+                if (ocrCopy)
+                {
+                    ocrResult = await OcrCopyRegionAsync(sdrCrop);
+                }
+                else
+                {
+                    // 仅复制：不存文件、无视"自动复制"开关
+                    await CopyCaptureToClipboardAsync(sdrCrop, force: true);
+                }
                 var mon = User32.MonitorFromWindow(
                     fgHwnd,
                     User32.MonitorFlags.MONITOR_DEFAULTTONEAREST
@@ -377,9 +442,47 @@ internal class ScreenCaptureService
                 if (ShouldShowInfoWindow())
                 {
                     _infoWindow ??= new ScreenCaptureInfoWindow();
-                    _infoWindow.CaptureCopySuccess(dispId, sdrCrop);
+                    if (ocrCopy)
+                    {
+                        // 状态全部走信息浮窗（热键触发时主窗口可能不可见）
+                        switch (ocrResult)
+                        {
+                            case OcrCopyResult.NoEngine:
+                                // 成因二义（oneocr 文件未获取 或 系统无 OCR 语言包），
+                                // 两条出路都指：热键场景弹不了配置对话框，文案兼容引导
+                                _infoWindow.CaptureError(
+                                    fgHwnd,
+                                    captureStarted: true,
+                                    errorText: Lang.Ocr_EngineUnavailable
+                                );
+                                break;
+                            case OcrCopyResult.Failed:
+                                _infoWindow.CaptureError(
+                                    fgHwnd,
+                                    captureStarted: true,
+                                    errorText: Lang.Ocr_Failed
+                                );
+                                break;
+                            default:
+                                // 成功 / 未识别到文字都显示选区图：主文案区分，
+                                // 空结果走中性态（图标黄、右侧"未复制"）
+                                _infoWindow.CaptureCopySuccess(
+                                    dispId,
+                                    sdrCrop,
+                                    statusText: ocrResult is OcrCopyResult.NoText
+                                        ? Lang.Ocr_NoneFound
+                                        : Lang.Ocr_CopiedText,
+                                    noCopy: ocrResult is OcrCopyResult.NoText
+                                );
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        _infoWindow.CaptureCopySuccess(dispId, sdrCrop);
+                    }
                 }
-                _logger.LogInformation("Region copy-only done");
+                _logger.LogInformation(ocrCopy ? "Region OCR copy done" : "Region copy-only done");
                 return;
             }
 

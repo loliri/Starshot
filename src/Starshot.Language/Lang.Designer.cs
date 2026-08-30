@@ -807,6 +807,33 @@
         }
 
         /// <summary>
+        ///   查找类似 Recognized text copied 的本地化字符串。
+        /// </summary>
+        public static string Ocr_CopiedText {
+            get {
+                return ResourceManager.GetString("Ocr_CopiedText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Not copied 的本地化字符串。
+        /// </summary>
+        public static string Ocr_NotCopied {
+            get {
+                return ResourceManager.GetString("Ocr_NotCopied", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OCR engine not ready 的本地化字符串。
+        /// </summary>
+        public static string Ocr_EngineUnavailable {
+            get {
+                return ResourceManager.GetString("Ocr_EngineUnavailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 OCR Engine 的本地化字符串。
         /// </summary>
         public static string OcrEngineDialog_Title {
@@ -1801,6 +1828,24 @@
         public static string Starshot_HotkeyRegionCopyDesc {
             get {
                 return ResourceManager.GetString("Starshot_HotkeyRegionCopyDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Recognize Text and Copy 的本地化字符串。
+        /// </summary>
+        public static string Starshot_HotkeyRegionOcr {
+            get {
+                return ResourceManager.GetString("Starshot_HotkeyRegionOcr", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Drag a region or click a window. Recognizes the text in it 的本地化字符串。
+        /// </summary>
+        public static string Starshot_HotkeyRegionOcrDesc {
+            get {
+                return ResourceManager.GetString("Starshot_HotkeyRegionOcrDesc", resourceCulture);
             }
         }
         
