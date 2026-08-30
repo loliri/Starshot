@@ -430,12 +430,20 @@ public sealed partial class ScreenshotPage : PageBase
         catch { }
     }
 
-    private void MenuFlyoutItem_Ocr_Click(object sender, RoutedEventArgs e)
+    private async void MenuFlyoutItem_Ocr_Click(object sender, RoutedEventArgs e)
     {
         try
         {
             if (sender is FrameworkElement { DataContext: ScreenshotItem item })
             {
+                // 未就绪检测在主窗口完成：toast + 配置对话框都在主窗口，不开查看器
+                if (AppConfig.OcrEngine == 0 && !OcrHelper.IsOneOcrReady)
+                {
+                    InAppToast.MainWindow?.Information(null, Lang.Ocr_NotConfigured, 3000);
+                    var dialog = new Setting.OcrEngineDialog { XamlRoot = this.XamlRoot };
+                    await dialog.ShowAsync();
+                    return;
+                }
                 _ = new ImageViewWindow().ShowWindowAsync(
                     this.XamlRoot.ContentIslandEnvironment.AppWindowId,
                     item,

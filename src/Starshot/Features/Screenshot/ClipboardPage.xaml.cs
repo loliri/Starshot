@@ -278,8 +278,16 @@ public sealed partial class ClipboardPage : PageBase
         catch { }
     }
 
-    private void OpenClipboardItem(ScreenshotItem item, bool autoOcr = false)
+    private async void OpenClipboardItem(ScreenshotItem item, bool autoOcr = false)
     {
+        // 右键「识别文字」未就绪：检测留在主窗口，toast + 配置对话框都在主窗口，不开查看器
+        if (autoOcr && AppConfig.OcrEngine == 0 && !OcrHelper.IsOneOcrReady)
+        {
+            InAppToast.MainWindow?.Information(null, Lang.Ocr_NotConfigured, 3000);
+            var dialog = new Setting.OcrEngineDialog { XamlRoot = this.XamlRoot };
+            await dialog.ShowAsync();
+            return;
+        }
         _ = new ImageViewWindow().ShowWindowAsync(
             this.XamlRoot.ContentIslandEnvironment.AppWindowId,
             item,
