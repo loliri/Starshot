@@ -320,6 +320,20 @@ public static partial class AppConfig
     public const string RepoApiBaseUrl = "https://api.github.com/repos/loliri/Starshot";
 
     /// <summary>
+    /// OCR 引擎包 CDN 地址（oneocr.dll + oneocr.onemodel 平铺 zip，供按需下载）
+    /// </summary>
+    public const string OcrCdnUrl = CdnBase + "/ocr/oneocr.zip";
+
+    /// <summary>
+    /// OCR 引擎选择：0=OneOCR（默认，精度高，需 exe 旁的 oneocr 文件），1=系统引擎（Windows.Media.Ocr，免下载精度低）
+    /// </summary>
+    public static int OcrEngine
+    {
+        get => GetValue(0);
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 每次启动把进程提升为高优先级（应用自设，与启动方式无关）。关=跟随系统默认（Normal）。
     /// </summary>
     public static bool HighPriorityProcess

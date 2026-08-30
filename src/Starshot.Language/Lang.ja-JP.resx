@@ -256,6 +256,60 @@
   <data name="Ocr_Failed" xml:space="preserve">
     <value>テキスト認識に失敗しました</value>
   </data>
+  <data name="Ocr_NotConfigured" xml:space="preserve">
+    <value>OneOCR が未設定です</value>
+  </data>
+  <data name="Ocr_InitFailed" xml:space="preserve">
+    <value>OneOCR エンジンの起動に失敗したため、システム エンジンを使用しました。ログを確認するか、設定でエンジン ファイルを再取得してください</value>
+  </data>
+  <data name="OcrEngineDialog_Title" xml:space="preserve">
+    <value>OCR エンジン</value>
+  </data>
+  <data name="OcrEngineDialog_OneOcr" xml:space="preserve">
+    <value>OneOCR（推奨）</value>
+  </data>
+  <data name="OcrEngineDialog_System" xml:space="preserve">
+    <value>システム エンジン</value>
+  </data>
+  <data name="OcrEngineDialog_SystemDesc" xml:space="preserve">
+    <value>OneOCR は Windows フォト アプリと同じエンジンで精度が高い一方、エンジン ファイルが必要です。システム エンジンはダウンロード不要ですが精度は低くなります。</value>
+  </data>
+  <data name="OcrEngineDialog_Ready" xml:space="preserve">
+    <value>OneOCR エンジン ファイル準備完了</value>
+  </data>
+  <data name="OcrEngineDialog_NotReady" xml:space="preserve">
+    <value>OneOCR エンジン ファイルが未準備です</value>
+  </data>
+  <data name="OcrEngineDialog_FromLocal" xml:space="preserve">
+    <value>この PC からコピー</value>
+  </data>
+  <data name="OcrEngineDialog_FromCdn" xml:space="preserve">
+    <value>CDN からダウンロード（約 95 MB）</value>
+  </data>
+  <data name="OcrEngineDialog_Delete" xml:space="preserve">
+    <value>エンジン ファイルを削除</value>
+  </data>
+  <data name="OcrEngineDialog_LocalMissing" xml:space="preserve">
+    <value>この PC に Windows スニッピング ツールの OCR ファイルが見つかりません</value>
+  </data>
+  <data name="OcrEngineDialog_DownloadFailed" xml:space="preserve">
+    <value>ダウンロードに失敗しました</value>
+  </data>
+  <data name="OcrEngineDialog_DeleteNeedRestart" xml:space="preserve">
+    <value>エンジン使用中のため、削除にはアプリの再起動が必要です</value>
+  </data>
+  <data name="OcrEngineDialog_UpdateNeedRestart" xml:space="preserve">
+    <value>エンジン使用中のため、上書きにはアプリの再起動が必要です</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngine" xml:space="preserve">
+    <value>OCR テキスト認識</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngineConfigButton" xml:space="preserve">
+    <value>エンジンの設定</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngineDesc" xml:space="preserve">
+    <value>ビューアーで画像内のテキストを認識します</value>
+  </data>
   <data name="ImageViewWindow_Previous" xml:space="preserve">
     <value>前へ</value>
     <comment>Previous Image</comment>
@@ -765,6 +819,9 @@
   </data>
   <data name="Starshot_StatsBackup" xml:space="preserve">
     <value>バックアップ</value>
+  </data>
+  <data name="Starshot_StatsOcrEngine" xml:space="preserve">
+    <value>OCR エンジン</value>
   </data>
   <data name="Starshot_CheckPrerelease" xml:space="preserve">
     <value>プレリリース版を含める</value>

@@ -34,11 +34,42 @@ public static class OcrHelper
     private static IntPtr _pipeline;
     private static IntPtr _processOptions;
 
+    private static string DllPath => Path.Combine(AppContext.BaseDirectory, "oneocr.dll");
+
+    private static string ModelPath => Path.Combine(AppContext.BaseDirectory, "oneocr.onemodel");
+
+    /// <summary>oneocr 两个文件是否已落地 exe 旁（只查文件，不触发初始化）。</summary>
+    public static bool IsOneOcrReady => File.Exists(DllPath) && File.Exists(ModelPath);
+
+    /// <summary>
+    /// 文件在但 init 失败（模型/dll 损坏类深层问题，区别于未配置）。
+    /// EnsureOneOcr 对文件缺失不置状态，state==2 必然是「试过且失败」。
+    /// </summary>
+    public static bool OneOcrInitFailed => _oneOcrState == 2;
+
+    /// <summary>
+    /// 重新配置（本机获取 / CDN 下载 / 删除）后重置探测缓存，让下次识别重新尝试 init。
+    /// native pipeline 已加载时不释放（进程生命周期内无法卸载）。
+    /// </summary>
+    public static void ResetEngineCache()
+    {
+        lock (_oneOcrLock)
+        {
+            _oneOcrState = 0;
+            _pipeline = IntPtr.Zero;
+            _processOptions = IntPtr.Zero;
+        }
+    }
+
     /// <summary>
     /// oneocr 引擎可用性（懒初始化一次）。失败缓存为不可用，后续调用直接走降级引擎。
     /// </summary>
     private static bool EnsureOneOcr()
     {
+        if (!IsOneOcrReady)
+        {
+            return false;
+        }
         if (_oneOcrState != 0)
         {
             return _oneOcrState == 1;
@@ -58,7 +89,7 @@ public static class OcrHelper
                 OneOcrNative.OcrInitOptionsSetUseModelDelayLoad(initOptions, 0);
                 Check(
                     OneOcrNative.CreateOcrPipeline(
-                        Path.Combine(AppContext.BaseDirectory, "oneocr.onemodel"),
+                        ModelPath,
                         OneOcrNative.ModelKey,
                         initOptions,
                         out _pipeline
@@ -122,7 +153,8 @@ public static class OcrHelper
         var sw = Stopwatch.StartNew();
         double restore = 1.0 / scale;
 
-        if (EnsureOneOcr())
+        // 引擎选择：用户配了系统引擎（OcrEngine=1）直接跳过 oneocr
+        if (AppConfig.OcrEngine == 0 && EnsureOneOcr())
         {
             try
             {

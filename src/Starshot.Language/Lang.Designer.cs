@@ -789,6 +789,141 @@
         }
 
         /// <summary>
+        ///   查找类似 OneOCR is not configured 的本地化字符串。
+        /// </summary>
+        public static string Ocr_NotConfigured {
+            get {
+                return ResourceManager.GetString("Ocr_NotConfigured", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OneOCR engine failed to start 的本地化字符串。
+        /// </summary>
+        public static string Ocr_InitFailed {
+            get {
+                return ResourceManager.GetString("Ocr_InitFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OCR Engine 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_Title {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OneOCR (Recommended) 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_OneOcr {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_OneOcr", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 System Engine 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_System {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_System", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OneOCR is the same engine as the Windows Photos app 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_SystemDesc {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_SystemDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OneOCR engine files ready 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_Ready {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_Ready", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OneOCR engine files not present 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_NotReady {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_NotReady", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Get from this PC 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_FromLocal {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_FromLocal", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Download from CDN 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_FromCdn {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_FromCdn", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Delete files 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_Delete {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_Delete", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OCR files of the Windows Snipping Tool not found on this PC 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_LocalMissing {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_LocalMissing", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Download failed 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_DownloadFailed {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_DownloadFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Engine is in use; restart the app to delete 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_DeleteNeedRestart {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_DeleteNeedRestart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Engine is in use; restart the app to overwrite 的本地化字符串。
+        /// </summary>
+        public static string OcrEngineDialog_UpdateNeedRestart {
+            get {
+                return ResourceManager.GetString("OcrEngineDialog_UpdateNeedRestart", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Previous 的本地化字符串。
         /// </summary>
         public static string ImageViewWindow_Previous {
@@ -1011,6 +1146,33 @@
         public static string ScreenshotSetting_ColorManagement {
             get {
                 return ResourceManager.GetString("ScreenshotSetting_ColorManagement", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OCR Text Recognition 的本地化字符串。
+        /// </summary>
+        public static string ScreenshotSetting_OcrEngine {
+            get {
+                return ResourceManager.GetString("ScreenshotSetting_OcrEngine", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Configure Engine 的本地化字符串。
+        /// </summary>
+        public static string ScreenshotSetting_OcrEngineConfigButton {
+            get {
+                return ResourceManager.GetString("ScreenshotSetting_OcrEngineConfigButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Recognize text in images from the viewer 的本地化字符串。
+        /// </summary>
+        public static string ScreenshotSetting_OcrEngineDesc {
+            get {
+                return ResourceManager.GetString("ScreenshotSetting_OcrEngineDesc", resourceCulture);
             }
         }
         
@@ -1918,6 +2080,15 @@
         public static string Starshot_StatsBackup {
             get {
                 return ResourceManager.GetString("Starshot_StatsBackup", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 OCR Engine 的本地化字符串。
+        /// </summary>
+        public static string Starshot_StatsOcrEngine {
+            get {
+                return ResourceManager.GetString("Starshot_StatsOcrEngine", resourceCulture);
             }
         }
         

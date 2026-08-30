@@ -1,4 +1,6 @@
+using System;
 using System.Threading.Tasks;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starshot.Features.Screenshot;
 using Starshot.Frameworks;
@@ -135,5 +137,11 @@ public sealed partial class ScreenshotSetting : PageBase
     public ScreenshotSetting()
     {
         InitializeComponent();
+    }
+
+    private async void Button_OcrEngineConfig_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OcrEngineDialog { XamlRoot = this.XamlRoot };
+        await dialog.ShowAsync();
     }
 }

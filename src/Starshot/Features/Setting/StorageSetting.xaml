@@ -362,6 +362,11 @@
               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
               Text="{x:Bind lang:Lang.Starshot_StatsBackup}"
             />
+            <LineBreak />
+            <Run
+              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+              Text="{x:Bind lang:Lang.Starshot_StatsOcrEngine}"
+            />
           </TextBlock>
           <TextBlock>
             <Run Text="{x:Bind ScreenshotFolderSize}" />
@@ -373,6 +378,8 @@
             <Run Text="{x:Bind LogSize}" />
             <LineBreak />
             <Run Text="{x:Bind BackupSize}" />
+            <LineBreak />
+            <Run Text="{x:Bind OcrEngineSize}" />
           </TextBlock>
         </StackPanel>
         <Button

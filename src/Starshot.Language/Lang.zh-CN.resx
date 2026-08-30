@@ -256,6 +256,60 @@
   <data name="Ocr_Failed" xml:space="preserve">
     <value>文字识别失败</value>
   </data>
+  <data name="Ocr_NotConfigured" xml:space="preserve">
+    <value>OneOCR 未配置</value>
+  </data>
+  <data name="Ocr_InitFailed" xml:space="preserve">
+    <value>OneOCR 引擎启动失败，已用系统引擎；详见日志，或在设置中重新获取引擎文件</value>
+  </data>
+  <data name="OcrEngineDialog_Title" xml:space="preserve">
+    <value>OCR 引擎</value>
+  </data>
+  <data name="OcrEngineDialog_OneOcr" xml:space="preserve">
+    <value>OneOCR（推荐）</value>
+  </data>
+  <data name="OcrEngineDialog_System" xml:space="preserve">
+    <value>系统引擎</value>
+  </data>
+  <data name="OcrEngineDialog_SystemDesc" xml:space="preserve">
+    <value>OneOCR 与 Windows 照片应用同款引擎，精度更高，需获取引擎文件；系统引擎无需下载，精度较低。</value>
+  </data>
+  <data name="OcrEngineDialog_Ready" xml:space="preserve">
+    <value>OneOCR 引擎文件已就绪</value>
+  </data>
+  <data name="OcrEngineDialog_NotReady" xml:space="preserve">
+    <value>OneOCR 引擎文件未就绪</value>
+  </data>
+  <data name="OcrEngineDialog_FromLocal" xml:space="preserve">
+    <value>从本机复制</value>
+  </data>
+  <data name="OcrEngineDialog_FromCdn" xml:space="preserve">
+    <value>从 CDN 下载（约 95 MB）</value>
+  </data>
+  <data name="OcrEngineDialog_Delete" xml:space="preserve">
+    <value>删除引擎文件</value>
+  </data>
+  <data name="OcrEngineDialog_LocalMissing" xml:space="preserve">
+    <value>本机未找到 Windows 截图工具的 OCR 文件</value>
+  </data>
+  <data name="OcrEngineDialog_DownloadFailed" xml:space="preserve">
+    <value>下载失败</value>
+  </data>
+  <data name="OcrEngineDialog_DeleteNeedRestart" xml:space="preserve">
+    <value>引擎正在使用，重启应用后才能删除</value>
+  </data>
+  <data name="OcrEngineDialog_UpdateNeedRestart" xml:space="preserve">
+    <value>引擎正在使用，重启应用后才能覆盖</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngine" xml:space="preserve">
+    <value>OCR 文字识别</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngineConfigButton" xml:space="preserve">
+    <value>配置引擎</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngineDesc" xml:space="preserve">
+    <value>查看器内识别图片文字</value>
+  </data>
   <data name="ImageViewWindow_Previous" xml:space="preserve">
     <value>上一个</value>
     <comment>Previous Image</comment>
@@ -765,6 +819,9 @@
   </data>
   <data name="Starshot_StatsBackup" xml:space="preserve">
     <value>备份</value>
+  </data>
+  <data name="Starshot_StatsOcrEngine" xml:space="preserve">
+    <value>OCR 引擎</value>
   </data>
   <data name="Starshot_CheckPrerelease" xml:space="preserve">
     <value>检查预发布版本</value>

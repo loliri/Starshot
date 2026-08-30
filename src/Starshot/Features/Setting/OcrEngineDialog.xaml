@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+  x:Class="Starshot.Features.Setting.OcrEngineDialog"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:lang="using:Starshot.Language"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  x:DefaultBindMode="OneWay"
+  Background="{ThemeResource CustomAcrylicBrush}"
+  BorderThickness="0"
+  CornerRadius="8"
+  Style="{ThemeResource DefaultContentDialogStyle}"
+  mc:Ignorable="d"
+>
+  <ContentDialog.Resources>
+    <x:Double x:Key="ContentDialogMaxWidth">480</x:Double>
+    <Thickness x:Key="ContentDialogPadding">0</Thickness>
+    <StaticResource x:Key="ContentDialogSmokeFill" ResourceKey="ControlFillColorTransparentBrush" />
+    <StaticResource
+      x:Key="ContentDialogTopOverlay"
+      ResourceKey="ControlFillColorTransparentBrush"
+    />
+  </ContentDialog.Resources>
+
+  <Grid MinWidth="420">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!--  标题  -->
+    <TextBlock Margin="24,24,0,12" FontSize="20" Text="{x:Bind lang:Lang.OcrEngineDialog_Title}" />
+
+    <!--  引擎选择  -->
+    <StackPanel Grid.Row="1" Margin="24,0,24,0" Spacing="8">
+      <cwc:Segmented SelectedIndex="{x:Bind EngineIndex, Mode=TwoWay}">
+        <cwc:SegmentedItem Content="{x:Bind lang:Lang.OcrEngineDialog_OneOcr}" />
+        <cwc:SegmentedItem Content="{x:Bind lang:Lang.OcrEngineDialog_System}" />
+      </cwc:Segmented>
+      <TextBlock
+        FontSize="12"
+        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+        Text="{x:Bind lang:Lang.OcrEngineDialog_SystemDesc}"
+        TextWrapping="Wrap"
+      />
+    </StackPanel>
+
+    <MenuFlyoutSeparator Grid.Row="2" Margin="24,16,24,0" />
+
+    <!--  OneOCR 文件状态  -->
+    <StackPanel Grid.Row="3" Margin="24,16,24,0" Spacing="8">
+      <!--  未就绪：红字状态 + 获取按钮（约 95 MB）  -->
+      <StackPanel Spacing="10" Visibility="{x:Bind IsNotReady}">
+        <TextBlock
+          FontSize="14"
+          Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+          Text="{x:Bind lang:Lang.OcrEngineDialog_NotReady}"
+          TextWrapping="Wrap"
+        />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button
+            x:Name="Button_FromLocal"
+            Click="Button_FromLocal_Click"
+            Content="{x:Bind lang:Lang.OcrEngineDialog_FromLocal}"
+          />
+          <Button
+            x:Name="Button_FromCdn"
+            Click="Button_FromCdn_Click"
+            Content="{x:Bind lang:Lang.OcrEngineDialog_FromCdn}"
+          />
+        </StackPanel>
+      </StackPanel>
+
+      <!--  已就绪：绿字状态（实际大小）+ 删除  -->
+      <StackPanel Spacing="10" Visibility="{x:Bind IsReady}">
+        <TextBlock
+          FontSize="14"
+          Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+          Text="{x:Bind ReadySizeText}"
+          TextWrapping="Wrap"
+        />
+        <Button
+          x:Name="Button_Delete"
+          HorizontalAlignment="Left"
+          Click="Button_Delete_Click"
+          Content="{x:Bind lang:Lang.OcrEngineDialog_Delete}"
+        />
+      </StackPanel>
+
+      <!--  获取 / 下载中  -->
+      <StackPanel Spacing="8" Visibility="{x:Bind IsBusy}">
+        <ProgressBar
+          Maximum="100"
+          IsIndeterminate="{x:Bind IsIndeterminate}"
+          Value="{x:Bind ProgressPercent}"
+        />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock
+            VerticalAlignment="Center"
+            FontSize="12"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{x:Bind ProgressText}"
+          />
+          <Button
+            x:Name="Button_Cancel"
+            Padding="10,4"
+            Click="Button_Cancel_Click"
+            Content="{x:Bind lang:Lang.Common_Cancel}"
+            FontSize="12"
+            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+            Visibility="{x:Bind ShowCancel}"
+          />
+        </StackPanel>
+      </StackPanel>
+
+      <!--  结果提示  -->
+      <TextBlock
+        FontSize="12"
+        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+        Text="{x:Bind StatusMessage}"
+        TextWrapping="Wrap"
+      />
+    </StackPanel>
+
+    <!--  关闭  -->
+    <Button
+      Grid.Row="4"
+      Margin="24,24,24,24"
+      HorizontalAlignment="Right"
+      Click="Button_Close_Click"
+      Content="{x:Bind lang:Lang.Common_OK}"
+      Style="{ThemeResource AccentButtonStyle}"
+    />
+  </Grid>
+</ContentDialog>

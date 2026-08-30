@@ -256,6 +256,60 @@
   <data name="Ocr_Failed" xml:space="preserve">
     <value>Text recognition failed</value>
   </data>
+  <data name="Ocr_NotConfigured" xml:space="preserve">
+    <value>OneOCR is not configured</value>
+  </data>
+  <data name="Ocr_InitFailed" xml:space="preserve">
+    <value>OneOCR engine failed to start, using the system engine; check the log, or re-fetch the engine files in Settings</value>
+  </data>
+  <data name="OcrEngineDialog_Title" xml:space="preserve">
+    <value>OCR Engine</value>
+  </data>
+  <data name="OcrEngineDialog_OneOcr" xml:space="preserve">
+    <value>OneOCR (Recommended)</value>
+  </data>
+  <data name="OcrEngineDialog_System" xml:space="preserve">
+    <value>System Engine</value>
+  </data>
+  <data name="OcrEngineDialog_SystemDesc" xml:space="preserve">
+    <value>OneOCR is the same engine as the Windows Photos app, more accurate but requires engine files. The system engine needs no download but is less accurate.</value>
+  </data>
+  <data name="OcrEngineDialog_Ready" xml:space="preserve">
+    <value>OneOCR engine files ready</value>
+  </data>
+  <data name="OcrEngineDialog_NotReady" xml:space="preserve">
+    <value>OneOCR engine files not present</value>
+  </data>
+  <data name="OcrEngineDialog_FromLocal" xml:space="preserve">
+    <value>Copy from this PC</value>
+  </data>
+  <data name="OcrEngineDialog_FromCdn" xml:space="preserve">
+    <value>Download from CDN (about 95 MB)</value>
+  </data>
+  <data name="OcrEngineDialog_Delete" xml:space="preserve">
+    <value>Delete engine files</value>
+  </data>
+  <data name="OcrEngineDialog_LocalMissing" xml:space="preserve">
+    <value>OCR files of the Windows Snipping Tool not found on this PC</value>
+  </data>
+  <data name="OcrEngineDialog_DownloadFailed" xml:space="preserve">
+    <value>Download failed</value>
+  </data>
+  <data name="OcrEngineDialog_DeleteNeedRestart" xml:space="preserve">
+    <value>Engine is in use; restart the app to delete</value>
+  </data>
+  <data name="OcrEngineDialog_UpdateNeedRestart" xml:space="preserve">
+    <value>Engine is in use; restart the app to overwrite</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngine" xml:space="preserve">
+    <value>OCR Text Recognition</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngineConfigButton" xml:space="preserve">
+    <value>Configure Engine</value>
+  </data>
+  <data name="ScreenshotSetting_OcrEngineDesc" xml:space="preserve">
+    <value>Recognize text in images from the viewer</value>
+  </data>
   <data name="ImageViewWindow_Previous" xml:space="preserve">
     <value>Previous</value>
     <comment>Previous Image</comment>
@@ -765,6 +819,9 @@
   </data>
   <data name="Starshot_StatsBackup" xml:space="preserve">
     <value>Backup</value>
+  </data>
+  <data name="Starshot_StatsOcrEngine" xml:space="preserve">
+    <value>OCR Engine</value>
   </data>
   <data name="Starshot_CheckPrerelease" xml:space="preserve">
     <value>Check Pre-release Versions</value>

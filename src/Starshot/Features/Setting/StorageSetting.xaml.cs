@@ -547,6 +547,13 @@ public sealed partial class StorageSetting : PageBase
         set => SetProperty(ref field, value);
     } = "—";
 
+    /// <summary>OCR 引擎文件（exe 旁 oneocr.dll + oneocr.onemodel）大小，仅展示，不参与任何清理逻辑</summary>
+    public string OcrEngineSize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "—";
+
     [RelayCommand]
     private async Task RefreshStats()
     {
@@ -602,14 +609,26 @@ public sealed partial class StorageSetting : PageBase
             string logDir = Path.Combine(AppConfig.LogFolder, "log");
             string backupDir = ConfigBackupFolder;
 
-            var (ssSize, cacheSize, bgSize, logSize, backupSize) = await Task.Run(() =>
+            var (ssSize, cacheSize, bgSize, logSize, backupSize, ocrSize) = await Task.Run(() =>
             {
                 long s = StorageStatsHelper.GetDirectorySize(ssFolder);
                 long bg = StorageStatsHelper.GetDirectorySize(bgDir);
                 long cc = StorageStatsHelper.GetDirectorySize(Path.Combine(cache, "thumb"));
                 long ll = StorageStatsHelper.GetDirectorySize(logDir);
                 long bk = StorageStatsHelper.GetDirectorySize(backupDir);
-                return (s, cc, bg, ll, bk);
+                long ocr = 0;
+                try
+                {
+                    string dir = AppContext.BaseDirectory;
+                    string dll = Path.Combine(dir, "oneocr.dll");
+                    string model = Path.Combine(dir, "oneocr.onemodel");
+                    if (File.Exists(dll))
+                        ocr += new FileInfo(dll).Length;
+                    if (File.Exists(model))
+                        ocr += new FileInfo(model).Length;
+                }
+                catch { }
+                return (s, cc, bg, ll, bk, ocr);
             });
 
             ScreenshotFolderSize = StorageStatsHelper.FormatSize(ssSize);
@@ -617,6 +636,7 @@ public sealed partial class StorageSetting : PageBase
             WallpaperSize = StorageStatsHelper.FormatSize(bgSize);
             LogSize = StorageStatsHelper.FormatSize(logSize);
             BackupSize = StorageStatsHelper.FormatSize(backupSize);
+            OcrEngineSize = StorageStatsHelper.FormatSize(ocrSize);
         }
         catch (Exception ex)
         {

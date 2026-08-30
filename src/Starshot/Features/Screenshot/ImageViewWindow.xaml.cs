@@ -2079,6 +2079,19 @@ public sealed partial class ImageViewWindow : Window
         if (_sourceBitmap is null)
             return;
 
+        // 选了 OneOCR 但文件未落地：首次使用引导配置（toast + 弹配置对话框）。
+        // 不自动重跑：配置完用户再点一次即可，递归重试反而引入风险。
+        if (AppConfig.OcrEngine == 0 && !OcrHelper.IsOneOcrReady)
+        {
+            ShowInfo(InfoBarSeverity.Informational, Lang.Ocr_NotConfigured, "", 3000);
+            var dialog = new Starshot.Features.Setting.OcrEngineDialog
+            {
+                XamlRoot = Content.XamlRoot,
+            };
+            await dialog.ShowAsync();
+            return;
+        }
+
         Button_Ocr.IsEnabled = false;
         try
         {
@@ -2102,6 +2115,12 @@ public sealed partial class ImageViewWindow : Window
             _ocrLines = lines;
             _ocrActive = true;
             DrawImage();
+            // 文件在但 init 失败（模型/dll 损坏类深层问题）：不弹配置对话框，
+            // toast 指路日志与重新获取；识别本身已降级系统引擎完成
+            if (AppConfig.OcrEngine == 0 && OcrHelper.OneOcrInitFailed)
+            {
+                ShowInfo(InfoBarSeverity.Warning, Lang.Ocr_InitFailed, "", 5000);
+            }
         }
         catch (Exception ex)
         {

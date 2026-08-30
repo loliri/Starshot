@@ -102,6 +102,24 @@
           <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_MonitorCursor}" />
         </cwc:Segmented>
       </StackPanel>
+
+      <!--  OCR 文字识别  -->
+      <StackPanel Spacing="12">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.ScreenshotSetting_OcrEngine}" />
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Button
+            Click="Button_OcrEngineConfig_Click"
+            Content="{x:Bind lang:Lang.ScreenshotSetting_OcrEngineConfigButton}"
+          />
+          <TextBlock
+            VerticalAlignment="Center"
+            FontSize="12"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{x:Bind lang:Lang.ScreenshotSetting_OcrEngineDesc}"
+            TextWrapping="Wrap"
+          />
+        </StackPanel>
+      </StackPanel>
     </StackPanel>
   </ScrollViewer>
 </sf:PageBase>
