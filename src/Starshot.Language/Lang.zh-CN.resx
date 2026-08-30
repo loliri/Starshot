@@ -827,7 +827,7 @@
     <value>支持。可以使用所有截图功能。</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported1" xml:space="preserve">
-    <value>当前环境不支持（也可能是判断错雾？</value>
+    <value>当前环境不支持。</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported2" xml:space="preserve">
     <value>这意味着你无法使用本软件的所有截图功能，程序崩溃为可预见现象。</value>

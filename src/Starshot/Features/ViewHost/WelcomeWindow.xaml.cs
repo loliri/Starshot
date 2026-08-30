@@ -10,6 +10,7 @@ using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
 using Windows.Graphics;
+using Windows.Graphics.Capture;
 
 namespace Starshot.Features.ViewHost;
 
@@ -100,34 +101,17 @@ public sealed partial class WelcomeWindow : WindowEx
             ? Lang.Starshot_WelcomeDbDescInstaller
             : Lang.Starshot_WelcomeDbDescPortable;
 
-    private async void Grid_Loaded(object sender, RoutedEventArgs e)
+    private void Grid_Loaded(object sender, RoutedEventArgs e)
     {
-        await Task.Delay(100);
         try
         {
-            // 实际尝试截图：IsSupported 只查 API 是否存在，不查实际能否捕获
-            //（不支持 DXGI 的机器接口在也返回 true），必须真截一次才知道
-            var displays = Microsoft.UI.Windowing.DisplayArea.FindAll();
-            var mainDisplay = displays.Count > 0 ? displays[0] : null;
-            if (mainDisplay is null)
-            {
-                DxgiSupported = Visibility.Collapsed;
-                DxgiNotSupported = Visibility.Visible;
-                return;
-            }
-            using var bitmap = await ScreenCaptureHelper.CaptureMonitorAsync(
-                (nint)mainDisplay.DisplayId.Value,
-                Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized,
-                default
-            );
-            if (bitmap is null || bitmap.ContentSize.Width == 0 || bitmap.ContentSize.Height == 0)
-            {
-                DxgiSupported = Visibility.Collapsed;
-                DxgiNotSupported = Visibility.Visible;
-                return;
-            }
-            DxgiSupported = Visibility.Visible;
-            DxgiNotSupported = Visibility.Collapsed;
+            // 只查 API 可用性：真截一张的实测判定有误判风险，API 检测是确定性结论
+            DxgiSupported = GraphicsCaptureSession.IsSupported()
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            DxgiNotSupported = DxgiSupported is Visibility.Visible
+                ? Visibility.Collapsed
+                : Visibility.Visible;
         }
         catch
         {

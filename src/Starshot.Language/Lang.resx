@@ -827,7 +827,7 @@
     <value>Supported. All screenshot features are available.</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported1" xml:space="preserve">
-    <value>Not supported in the current environment (the detection may be wrong)</value>
+    <value>Not supported in the current environment.</value>
   </data>
   <data name="Starshot_WelcomeDxgiNotSupported2" xml:space="preserve">
     <value>Screenshot features will not work; crashes are expected.</value>
