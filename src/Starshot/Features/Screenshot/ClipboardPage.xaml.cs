@@ -368,7 +368,24 @@ public sealed partial class ClipboardPage : PageBase
                 Application.Current.Resources["SystemFillColorCriticalBrush"];
         }
         catch { }
-        delete.Click += (_, _) => DeleteClipboardItem(item.HistoryItem!);
+        // 多选模式下作用于全部选中项（右键点在选中项上删整批，否则删单项）
+        delete.Click += (_, _) =>
+        {
+            if (MutliSelect && GridView_Images.SelectedItems.Count > 1)
+            {
+                foreach (var sel in GridView_Images.SelectedItems.Cast<ScreenshotItem>().ToList())
+                {
+                    if (sel.HistoryItem is not null)
+                    {
+                        DeleteClipboardItem(sel.HistoryItem);
+                    }
+                }
+            }
+            else
+            {
+                DeleteClipboardItem(item.HistoryItem!);
+            }
+        };
         flyout.Items.Add(delete);
         return flyout;
     }
