@@ -217,6 +217,8 @@ public sealed partial class ClipboardPage : PageBase
             }
             _clipboardDirty = false;
             UpdateSelectCountText();
+            // 空列表→有内容的切换只发生在全量刷新；增量首图进来时也切，否则 GridView 仍 Collapsed
+            UpdateEmptyState(historyEnabled: true);
         }
         catch (Exception ex)
         {
