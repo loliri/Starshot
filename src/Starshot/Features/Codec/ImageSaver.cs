@@ -360,7 +360,8 @@ internal static class ImageSaver
         int quality,
         byte[]? xmpData = null,
         bool writeColorProfile = true,
-        float? maxCLL = null
+        float? maxCLL = null,
+        float? maxFALL = null
     )
     {
         uint width = bitmap.SizeInPixels.Width;
@@ -420,7 +421,8 @@ internal static class ImageSaver
                     quality,
                     xmpData,
                     writeColorProfile,
-                    maxCLL
+                    maxCLL,
+                    maxFALL
                 )
                 .ConfigureAwait(false);
         }
@@ -440,7 +442,8 @@ internal static class ImageSaver
         int quality,
         byte[]? xmpData = null,
         bool writeColorProfile = true,
-        float? maxCLL = null
+        float? maxCLL = null,
+        float? maxFALL = null
     )
     {
         quality = Math.Clamp(quality, 0, 100);
@@ -494,11 +497,14 @@ internal static class ImageSaver
                         image.ColorPrimaries = avifColorPrimaries.BT2020;
                         image.TransferCharacteristics = avifTransferCharacteristics.SMPTE2084;
                         image.MatrixCoefficients = avifMatrixCoefficients.BT2020_NCL;
-                        // clli（maxCLL）：无此元数据时 Chrome 做保守 tone-map 压高光（屏幕越暗越明显，issue #4）；
-                        // maxPALL 管线未算，按规范 0=unknown，Chrome 决策只看 maxCLL
+                        // clli（maxCLL + maxFALL）：无 maxCLL 元数据时 Chrome 做保守 tone-map 压高光（屏幕越暗越明显，issue #4）；
+                        // Chrome 决策只看 maxCLL，maxFALL 属顺手补全（直方图加权平均，零额外管线开销）
                         if (maxCLL is > 0)
                         {
-                            image.SetMaxCLL((ushort)Math.Clamp(maxCLL.Value, 0, 65535), 0);
+                            image.SetMaxCLL(
+                                (ushort)Math.Clamp(maxCLL.Value, 0, 65535),
+                                (ushort)Math.Clamp(maxFALL ?? 0, 0, 65535)
+                            );
                         }
                     }
                     else

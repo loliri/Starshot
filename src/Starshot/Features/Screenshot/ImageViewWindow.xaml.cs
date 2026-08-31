@@ -236,6 +236,12 @@ public sealed partial class ImageViewWindow : Window
         set => SetProperty(ref field, value);
     }
 
+    public float MaxFALL
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
     public string ImageInformationText
     {
         get;
@@ -265,7 +271,7 @@ public sealed partial class ImageViewWindow : Window
             )
             {
                 IsHDRImage = true;
-                MaxCLL = ScreenCaptureService.GetMaxCLL(bitmap);
+                (MaxCLL, MaxFALL) = ScreenCaptureService.GetContentLightLevels(bitmap);
             }
             else
             {
@@ -1805,6 +1811,7 @@ public sealed partial class ImageViewWindow : Window
             }
             var bitmap = _sourceBitmap;
             float maxCLL = MaxCLL,
+                maxFALL = MaxFALL,
                 outputNits = SDRLuminance;
             ColorPrimaries colorPrimaries = ImageColorPrimaries;
             string name = Path.GetFileNameWithoutExtension(CurrentFileName);
@@ -1844,7 +1851,8 @@ public sealed partial class ImageViewWindow : Window
                         100,
                         null,
                         writeColorProfile,
-                        MaxCLL
+                        MaxCLL,
+                        MaxFALL
                     ),
                     ".jxl" => ImageSaver.SaveAsJxlAsync(
                         bitmap,

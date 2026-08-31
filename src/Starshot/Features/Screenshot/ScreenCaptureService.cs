@@ -128,11 +128,12 @@ internal class ScreenCaptureService
             );
 
             float maxCLL = -1;
+            float maxFALL = -1;
             float sdrWhiteLevel = 80;
             bool hdr = canvasBitmap.Format is DirectXPixelFormat.R16G16B16A16Float;
             if (hdr)
             {
-                maxCLL = GetMaxCLL(canvasBitmap);
+                (maxCLL, maxFALL) = GetContentLightLevels(canvasBitmap);
                 sdrWhiteLevel = (float)colorInfo.SdrWhiteLevelInNits;
             }
 
@@ -171,6 +172,7 @@ internal class ScreenCaptureService
                 frameTime,
                 displayInfo,
                 maxCLL,
+                maxFALL,
                 sdrWhiteLevel,
                 displayId
             );
@@ -508,7 +510,12 @@ internal class ScreenCaptureService
             // ===== 走保存管线 =====
             DateTimeOffset frameTime = DateTimeOffset.Now;
             bool hdr = cropped.Format is DirectXPixelFormat.R16G16B16A16Float;
-            float maxCLL = hdr ? GetMaxCLL(cropped) : -1;
+            float maxCLL = -1;
+            float maxFALL = -1;
+            if (hdr)
+            {
+                (maxCLL, maxFALL) = GetContentLightLevels(cropped);
+            }
 
             string processName = GetProcessNameFromWindowHandle(fgHwnd);
             string processExeName = GetProcessExeNameFromWindowHandle(fgHwnd);
@@ -557,6 +564,7 @@ internal class ScreenCaptureService
                     frameTime,
                     regionDisplayInfo,
                     maxCLL,
+                    maxFALL,
                     sdrWhiteLevel,
                     regionDisplayId,
                     true,
@@ -598,6 +606,7 @@ internal class ScreenCaptureService
         DateTimeOffset frameTime,
         DisplayInformation displayInfo,
         float maxCLL,
+        float maxFALL,
         float sdrWhiteLevel,
         Microsoft.UI.DisplayId displayId,
         bool isRegion = false,
@@ -737,7 +746,8 @@ internal class ScreenCaptureService
                     quality,
                     xmpData,
                     writeColorProfile,
-                    maxCLL
+                    maxCLL,
+                    maxFALL
                 );
             }
             else if (extension is "jxl")
@@ -1138,9 +1148,10 @@ internal class ScreenCaptureService
     }
 
     /// <summary>
-    /// 图片最大亮度
+    /// clli 内容亮度双值：MaxCLL（内容最大亮度）+ MaxFALL（内容平均亮度）。
+    /// GPU 缩放 + 亮度直方图（500 bins）一次读回，两个值都是直方图的 CPU 归约——零额外管线开销。
     /// </summary>
-    public static float GetMaxCLL(CanvasBitmap canvasBitmap)
+    public static (float MaxCLL, float MaxFALL) GetContentLightLevels(CanvasBitmap canvasBitmap)
     {
         float pixelScale = MathF.Min(
             0.5f,
@@ -1201,6 +1212,7 @@ internal class ScreenCaptureService
         ds.Dispose();
         float[] histogram = new float[500];
         histogramEffect.GetHistogramOutput(histogram);
+        // MaxCLL：累计频率到 0.01% 的最高 bin（滤孤立噪点像素）
         int maxBinIndex = 0;
         float cumulative = 0;
         for (int i = histogram.Length - 1; i >= 0; i--)
@@ -1212,6 +1224,16 @@ internal class ScreenCaptureService
                 break;
             }
         }
-        return MathF.Pow((maxBinIndex + 0.5f) / histogram.Length, 2f) * 10000;
+        float maxCLL = MathF.Pow((maxBinIndex + 0.5f) / histogram.Length, 2f) * 10000;
+        // MaxFALL：全图像素平均亮度（bin 加权平均；与 gamma² 解码同式）
+        double total = 0;
+        double weighted = 0;
+        for (int i = 0; i < histogram.Length; i++)
+        {
+            total += histogram[i];
+            weighted += histogram[i] * MathF.Pow((i + 0.5f) / histogram.Length, 2f) * 10000;
+        }
+        float maxFALL = total > 0 ? (float)(weighted / total) : 0;
+        return (maxCLL, maxFALL);
     }
 }

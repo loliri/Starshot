@@ -812,7 +812,9 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         {
             throw new NotSupportedException("Ultra HDR JPG is only applicable to HDR images.");
         }
-        float maxCLL = ScreenCaptureService.GetMaxCLL(imageInfo.CanvasBitmap);
+        float maxCLL = ScreenCaptureService
+            .GetContentLightLevels(imageInfo.CanvasBitmap)
+            .MaxCLL;
         using var ms = new MemoryStream();
         // SDR 白 300 nits：与查看器导出 Ultra HDR 的默认显示亮度一致（SDRLuminance 默认值）
         await ImageSaver.SaveAsUhdrAsync(imageInfo.CanvasBitmap, ms, maxCLL, 300);
@@ -839,10 +841,17 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         );
         if (_format == ".avif")
         {
-            // HDR 源现算 maxCLL 写 clli（与截图管线同动机：无元数据时浏览器保守 tone-map 压高光）
-            float? maxCLL = imageInfo.HDR
-                ? ScreenCaptureService.GetMaxCLL(imageInfo.CanvasBitmap)
-                : null;
+            // HDR 源现算 maxCLL/maxFALL 写 clli（与截图管线同动机：无元数据时浏览器保守 tone-map 压高光）
+            float? maxCLL = null;
+            float? maxFALL = null;
+            if (imageInfo.HDR)
+            {
+                var (cll, fall) = ScreenCaptureService.GetContentLightLevels(
+                    imageInfo.CanvasBitmap
+                );
+                maxCLL = cll;
+                maxFALL = fall;
+            }
             using var ms = new MemoryStream();
             await SaveAsAvifAsync(
                 imageInfo.CanvasBitmap,
@@ -850,7 +859,8 @@ public sealed partial class ImageBatchConvertWindow : PageBase
                 item.SourceFileTime,
                 _quality,
                 cancellationToken,
-                maxCLL
+                maxCLL,
+                maxFALL
             );
             using var fs = File.Create(outputPath);
             ms.Position = 0;
@@ -880,7 +890,8 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         DateTimeOffset frameTime,
         int quality,
         CancellationToken cancellationToken = default,
-        float? maxCLL = null
+        float? maxCLL = null,
+        float? maxFALL = null
     )
     {
         uint width = bitmap.SizeInPixels.Width;
@@ -972,7 +983,10 @@ public sealed partial class ImageBatchConvertWindow : PageBase
                         image.MatrixCoefficients = avifMatrixCoefficients.BT2020_NCL;
                         if (maxCLL is > 0)
                         {
-                            image.SetMaxCLL((ushort)Math.Clamp(maxCLL.Value, 0, 65535), 0);
+                            image.SetMaxCLL(
+                                (ushort)Math.Clamp(maxCLL.Value, 0, 65535),
+                                (ushort)Math.Clamp(maxFALL ?? 0, 0, 65535)
+                            );
                         }
                         image.SetXMPMetadata(ScreenCaptureService.BuildXMPMetadata(frameTime));
                         image.FromRGBImage(rgb);
