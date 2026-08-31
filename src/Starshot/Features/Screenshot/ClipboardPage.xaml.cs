@@ -269,6 +269,22 @@ public sealed partial class ClipboardPage : PageBase
         UpdateSelectCountText();
     }
 
+    /// <summary>
+    /// 拖拽出图：与「复制图像」同一条路——内存位图直接 SetBitmap（ClipboardStream 现成），
+    /// 不落盘。多选拖动只带第一张（DataPackage 位图格式是单实例）；资源管理器不接收位图拖放属正常。
+    /// </summary>
+    private void GridView_Images_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
+    {
+        var item = e
+            .Items.OfType<ScreenshotItem>()
+            .FirstOrDefault(i => i.ClipboardStream is not null);
+        if (item is not null)
+        {
+            e.Data.RequestedOperation = DataPackageOperation.Copy;
+            e.Data.SetBitmap(item.ClipboardStream);
+        }
+    }
+
     private void UpdateSelectCountText()
     {
         try

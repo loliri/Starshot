@@ -83,6 +83,8 @@
       x:Name="GridView_Images"
       Grid.Row="2"
       Padding="24,16,12,12"
+      CanDragItems="True"
+      DragItemsStarting="GridView_Images_DragItemsStarting"
       IsItemClickEnabled="True"
       ItemClick="GridView_Images_ItemClick"
       ItemsSource="{x:Bind Items}"
