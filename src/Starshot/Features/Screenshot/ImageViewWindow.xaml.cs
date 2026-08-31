@@ -2026,6 +2026,22 @@ public sealed partial class ImageViewWindow : Window
                 }
             }
         }
+        // OCR 模式 Ctrl+A：全选（输入框选区语义）
+        if (_ocrActive && e.Key is VirtualKey.A)
+        {
+            var ctrl = Microsoft
+                .UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control)
+                .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+            int totalWords = _ocrLines.Sum(l => l.Words.Count);
+            if (ctrl && totalWords > 0)
+            {
+                _ocrSelAnchor = 0;
+                _ocrSelActive = totalWords - 1;
+                DrawImage();
+                e.Handled = true;
+                return;
+            }
+        }
         if (e.Key is VirtualKey.Escape)
         {
             if (_ocrActive)
