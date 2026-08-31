@@ -958,6 +958,18 @@
   <data name="Starshot_ResetToDefault" xml:space="preserve">
     <value>初期値に戻す</value>
   </data>
+  <data name="Starshot_FolderHistory" xml:space="preserve">
+    <value>変更履歴</value>
+  </data>
+  <data name="Starshot_ScreenshotFolderHistoryTitle" xml:space="preserve">
+    <value>スクリーンショット フォルダーの変更履歴</value>
+  </data>
+  <data name="Starshot_LogFolderHistoryTitle" xml:space="preserve">
+    <value>ログ フォルダーの変更履歴</value>
+  </data>
+  <data name="Starshot_FolderHistoryEmpty" xml:space="preserve">
+    <value>履歴はまだありません</value>
+  </data>
   <data name="Starshot_AlreadyDefault" xml:space="preserve">
     <value>すでに既定値です</value>
   </data>

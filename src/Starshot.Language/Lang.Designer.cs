@@ -1716,6 +1716,42 @@
         }
 
         /// <summary>
+        ///   查找类似 Folder History 的本地化字符串。
+        /// </summary>
+        public static string Starshot_FolderHistory {
+            get {
+                return ResourceManager.GetString("Starshot_FolderHistory", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Screenshot Folder History 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ScreenshotFolderHistoryTitle {
+            get {
+                return ResourceManager.GetString("Starshot_ScreenshotFolderHistoryTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Log Folder History 的本地化字符串。
+        /// </summary>
+        public static string Starshot_LogFolderHistoryTitle {
+            get {
+                return ResourceManager.GetString("Starshot_LogFolderHistoryTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No history yet 的本地化字符串。
+        /// </summary>
+        public static string Starshot_FolderHistoryEmpty {
+            get {
+                return ResourceManager.GetString("Starshot_FolderHistoryEmpty", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Already the default 的本地化字符串。
         /// </summary>
         public static string Starshot_AlreadyDefault {

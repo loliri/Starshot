@@ -247,6 +247,35 @@ public sealed partial class StorageSetting : PageBase
     }
 
     [RelayCommand]
+    private async Task ShowScreenshotFolderHistory()
+    {
+        var dialog = new FolderHistoryDialog(
+            Lang.Starshot_ScreenshotFolderHistoryTitle,
+            () => AppConfig.ScreenshotFolderHistory,
+            list => AppConfig.ScreenshotFolderHistory = list,
+            ResetScreenshotFolder
+        )
+        {
+            XamlRoot = this.XamlRoot,
+        };
+        await dialog.ShowAsync();
+    }
+
+    [RelayCommand]
+    private async Task ShowLogFolderHistory()
+    {
+        var dialog = new FolderHistoryDialog(
+            Lang.Starshot_LogFolderHistoryTitle,
+            () => AppConfig.LogFolderHistory,
+            list => AppConfig.LogFolderHistory = list,
+            ResetLogFolder
+        )
+        {
+            XamlRoot = this.XamlRoot,
+        };
+        await dialog.ShowAsync();
+    }
+
     private void ResetScreenshotFolder()
     {
         try
@@ -325,7 +354,6 @@ public sealed partial class StorageSetting : PageBase
         }
     }
 
-    [RelayCommand]
     private void ResetLogFolder()
     {
         string defaultFolder = Path.Combine(

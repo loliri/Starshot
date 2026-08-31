@@ -958,6 +958,18 @@
   <data name="Starshot_ResetToDefault" xml:space="preserve">
     <value>恢复默认</value>
   </data>
+  <data name="Starshot_FolderHistory" xml:space="preserve">
+    <value>更改历史</value>
+  </data>
+  <data name="Starshot_ScreenshotFolderHistoryTitle" xml:space="preserve">
+    <value>截图目录的更改历史</value>
+  </data>
+  <data name="Starshot_LogFolderHistoryTitle" xml:space="preserve">
+    <value>日志目录的更改历史</value>
+  </data>
+  <data name="Starshot_FolderHistoryEmpty" xml:space="preserve">
+    <value>暂无历史记录</value>
+  </data>
   <data name="Starshot_AlreadyDefault" xml:space="preserve">
     <value>已是默认值</value>
   </data>

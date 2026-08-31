@@ -132,12 +132,12 @@
             Margin="8,0,0,0"
             Padding="0"
             BorderThickness="0"
-            Command="{x:Bind ResetScreenshotFolderCommand}"
+            Command="{x:Bind ShowScreenshotFolderHistoryCommand}"
             CornerRadius="20"
-            ToolTipService.ToolTip="{x:Bind lang:Lang.Starshot_ResetToDefault}"
+            ToolTipService.ToolTip="{x:Bind lang:Lang.Starshot_FolderHistory}"
             Visibility="{x:Bind DevModeVisibility}"
           >
-            <FontIcon FontSize="16" Glyph="&#xE7A7;" />
+            <FontIcon FontSize="16" Glyph="&#xE823;" />
           </Button>
         </Grid>
       </StackPanel>
@@ -286,12 +286,12 @@
             Margin="8,0,0,0"
             Padding="0"
             BorderThickness="0"
-            Command="{x:Bind ResetLogFolderCommand}"
+            Command="{x:Bind ShowLogFolderHistoryCommand}"
             CornerRadius="20"
-            ToolTipService.ToolTip="{x:Bind lang:Lang.Starshot_ResetToDefault}"
+            ToolTipService.ToolTip="{x:Bind lang:Lang.Starshot_FolderHistory}"
             Visibility="{x:Bind DevModeVisibility}"
           >
-            <FontIcon FontSize="16" Glyph="&#xE7A7;" />
+            <FontIcon FontSize="16" Glyph="&#xE823;" />
           </Button>
         </Grid>
       </StackPanel>

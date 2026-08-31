@@ -372,7 +372,22 @@ public static partial class AppConfig
                     "Starshot"
                 )
             )!;
-        set => SetValue(value);
+        set
+        {
+            var history = LogFolderHistory;
+            if (PushFolderHistory(history, LogFolder, value))
+            {
+                LogFolderHistory = history;
+            }
+            SetValue(value);
+        }
+    }
+
+    /// <summary>日志目录的曾用路径历史（旧值在改目录时进入，最多 5 条，新的在顶）</summary>
+    public static List<string> LogFolderHistory
+    {
+        get => GetListValue();
+        set => SetListValue(value);
     }
 
     /// <summary>
@@ -402,7 +417,49 @@ public static partial class AppConfig
                     "Starshot"
                 )
             );
-        set => SetValue(value);
+        set
+        {
+            var history = ScreenshotFolderHistory;
+            if (PushFolderHistory(history, ScreenshotFolder, value))
+            {
+                ScreenshotFolderHistory = history;
+            }
+            SetValue(value);
+        }
+    }
+
+    /// <summary>截图目录的曾用路径历史（旧值在改目录时进入，最多 5 条，新的在顶）</summary>
+    public static List<string> ScreenshotFolderHistory
+    {
+        get => GetListValue();
+        set => SetListValue(value);
+    }
+
+    /// <summary>
+    /// 目录改走时把被替换的旧路径压进历史（就地改传入列表）：与当前值相同不记；
+    /// 已在列先移除再置顶；容量 5。返回是否有变化（有则调用方需写回落盘）。
+    /// </summary>
+    private static bool PushFolderHistory(List<string> history, string? old, string? newValue)
+    {
+        try
+        {
+            if (
+                string.IsNullOrWhiteSpace(old)
+                || string.Equals(old, newValue, StringComparison.OrdinalIgnoreCase)
+            )
+                return false;
+            history.RemoveAll(x => string.Equals(x, old, StringComparison.OrdinalIgnoreCase));
+            history.Insert(0, old);
+            if (history.Count > 5)
+            {
+                history.RemoveRange(5, history.Count - 5);
+            }
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>
