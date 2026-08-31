@@ -18,7 +18,16 @@ internal static class ClipboardHelper
             var data = new DataPackage { RequestedOperation = DataPackageOperation.Copy };
             data.SetText(value);
             Clipboard.SetContent(data);
-            Clipboard.Flush();
+            try
+            {
+                Clipboard.Flush();
+            }
+            catch (Exception ex)
+            {
+                // CLIPBRD_E_CANT_OPEN（剪贴板被他进程短暂占用）：SetContent 已成功、内容可用，
+                // Flush 只是「应用退出后仍可读」的增强，失败不构成失败
+                Serilog.Log.Warning(ex, "[Clipboard] Flush after SetText failed (content is still valid)");
+            }
         }
     }
 
