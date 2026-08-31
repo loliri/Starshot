@@ -72,6 +72,7 @@
         BorderThickness="0"
         Click="Button_EditImage_Click"
         Style="{ThemeResource AccentButtonStyle}"
+        ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Edit}"
       >
         <StackPanel Orientation="Horizontal" Spacing="8">
           <FontIcon
@@ -114,6 +115,7 @@
         Margin="8,0,0,0"
         Padding="0"
         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+        ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Open}"
       >
         <FontIcon
           FontSize="16"
