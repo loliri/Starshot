@@ -4,6 +4,7 @@
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:fluent="using:FluentIcons.WinUI"
   xmlns:lang="using:Starshot.Language"
   xmlns:local="using:Starshot.Features.Setting"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -266,11 +267,12 @@
               Background="{ThemeResource AccentFillColorTertiaryBrush}"
               CornerRadius="8"
             >
-              <FontIcon
-                FontSize="24"
-                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                Glyph="&#xE8D2;"
-              />
+            <!--  与查看器 / 右键菜单 / 托盘的识别文字图标统一（Segoe 无 ScanText 等价字形）  -->
+            <fluent:SymbolIcon
+              FontSize="24"
+              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+              Symbol="ScanText"
+            />
             </Border>
 
             <!--  标题和描述  -->

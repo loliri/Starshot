@@ -169,7 +169,7 @@
           Style="{ThemeResource AccentButtonStyle}"
         >
           <StackPanel Orientation="Horizontal" Spacing="8">
-            <FontIcon FontSize="14" Glyph="&#xE72C;" />
+            <FontIcon FontSize="14" Glyph="&#xE777;" />
             <TextBlock Text="{x:Bind lang:Lang.Starshot_CheckUpdate}" />
           </StackPanel>
         </Button>

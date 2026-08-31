@@ -219,7 +219,7 @@
                   Text="{x:Bind lang:Lang.ImageViewWindow_OpenWithDefaultApp}"
                 >
                   <MenuFlyoutItem.Icon>
-                    <FontIcon Glyph="&#xE91B;" IsTextScaleFactorEnabled="False" />
+                    <FontIcon Glyph="&#xE8E5;" IsTextScaleFactorEnabled="False" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!--  打开方式  -->
