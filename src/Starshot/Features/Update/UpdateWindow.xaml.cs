@@ -88,7 +88,8 @@ public sealed partial class UpdateWindow : WindowEx
     public UpdateWindow()
     {
         InitializeComponent();
-        Title = "Starshot";
+        // 与主窗口区分（任务栏/Alt+Tab 同名易点错）
+        Title = "Starshot · Update";
         // 安装版线：更新由外部更新器接管，无差分/全量之分，主按钮换成单按钮
         if (AppConfig.Installer)
         {
