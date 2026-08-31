@@ -163,7 +163,7 @@ public sealed partial class MainWindow : WindowEx
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs e)
     {
         Activated -= MainWindow_Activated;
-        NavView.SelectedItem = NavView.MenuItems[0];
+        NavView.SelectedItem = NavView.MenuItems[Math.Clamp(AppConfig.StartPage, 0, 1)];
     }
 
     private void NavView_SelectionChanged(

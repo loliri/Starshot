@@ -1229,6 +1229,15 @@
                 return ResourceManager.GetString("SettingPage_Language", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Start Page 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_StartPage {
+            get {
+                return ResourceManager.GetString("SettingPage_StartPage", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 MIT License 的本地化字符串。

@@ -334,6 +334,15 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 启动首页：0=截图库（默认），1=剪贴板
+    /// </summary>
+    public static int StartPage
+    {
+        get => GetValue(0);
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 每次启动把进程提升为高优先级（应用自设，与启动方式无关）。关=跟随系统默认（Normal）。
     /// </summary>
     public static bool HighPriorityProcess

@@ -157,6 +157,9 @@
   <data name="SettingPage_Language" xml:space="preserve">
     <value>Language</value>
   </data>
+  <data name="SettingPage_StartPage" xml:space="preserve">
+    <value>Start Page</value>
+  </data>
   <data name="SettingPage_FollowSystem" xml:space="preserve">
     <value>Follow System</value>
   </data>

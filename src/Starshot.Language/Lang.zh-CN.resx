@@ -157,6 +157,9 @@
   <data name="SettingPage_Language" xml:space="preserve">
     <value>语言</value>
   </data>
+  <data name="SettingPage_StartPage" xml:space="preserve">
+    <value>启动首页</value>
+  </data>
   <data name="SettingPage_FollowSystem" xml:space="preserve">
     <value>跟随系统</value>
   </data>

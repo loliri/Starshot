@@ -289,6 +289,19 @@ public sealed partial class GeneralSetting : PageBase
 
     public Visibility DevModeVisibility => DevMode ? Visibility.Visible : Visibility.Collapsed;
 
+    /// <summary>启动首页：0=截图库，1=剪贴板；下次启动生效</summary>
+    public int StartPage
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.StartPage = value;
+            }
+        }
+    } = AppConfig.StartPage;
+
     public int LanguageIndex
     {
         get;

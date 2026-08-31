@@ -26,6 +26,15 @@
         </ComboBox>
       </StackPanel>
 
+      <!--  启动首页  -->
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.SettingPage_StartPage}" />
+        <cwc:Segmented SelectedIndex="{x:Bind StartPage, Mode=TwoWay}">
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Starshot_Nav_Gallery}" />
+          <cwc:SegmentedItem Content="{x:Bind lang:Lang.Common_Clipboard}" />
+        </cwc:Segmented>
+      </StackPanel>
+
       <!--  更新源（安装版线只藏源选择：源在 kachina config 写死；直连开关保留供 release notes 拉取）  -->
       <StackPanel Spacing="8">
         <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_Update}" />
