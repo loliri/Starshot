@@ -734,7 +734,8 @@ internal class ScreenCaptureService
                     colorPrimaries,
                     xmpData,
                     writeColorProfile,
-                    maxCLL
+                    maxCLL,
+                    maxFALL
                 );
             }
             else if (extension is "avif")

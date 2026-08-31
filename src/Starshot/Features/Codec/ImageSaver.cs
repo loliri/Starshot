@@ -98,7 +98,8 @@ internal static class ImageSaver
         ColorPrimaries colorPrimaries,
         byte[]? xmpData = null,
         bool writeColorProfile = true,
-        float? maxCLL = null
+        float? maxCLL = null,
+        float? maxFALL = null
     )
     {
         uint width = bitmap.SizeInPixels.Width;
@@ -156,7 +157,8 @@ internal static class ImageSaver
                     ColorPrimaries.BT2020,
                     xmpData,
                     writeColorProfile,
-                    maxCLL
+                    maxCLL,
+                    maxFALL
                 )
                 .ConfigureAwait(false);
         }
@@ -175,7 +177,8 @@ internal static class ImageSaver
         ColorPrimaries colorPrimaries,
         byte[]? xmpData = null,
         bool writeColorProfile = true,
-        float? maxCLL = null
+        float? maxCLL = null,
+        float? maxFALL = null
     )
     {
         BitmapPixelFormat format = pixelFormat switch
@@ -211,7 +214,7 @@ internal static class ImageSaver
                 cicp.FullRangeFlag = 1;
                 cicpChunk.UpdateCrc32();
                 // cLLi（PNGv3 内容亮度元数据，与 AVIF 的 clli 同动机）：无此元数据时浏览器做保守
-                // tone-map 压高光；maxFALL 未算，0=unknown。PngChunkType 不接受强转，整块手拼
+                // tone-map 压高光；maxFALL 是直方图加权平均（零额外管线开销）。PngChunkType 不接受强转，整块手拼
                 if (id == 9 && maxCLL is > 0)
                 {
                     Span<byte> chunk = new byte[20];
@@ -220,6 +223,10 @@ internal static class ImageSaver
                     System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(
                         chunk[8..],
                         (uint)Math.Clamp(maxCLL.Value, 0, uint.MaxValue)
+                    );
+                    System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(
+                        chunk[12..],
+                        (uint)Math.Clamp(maxFALL ?? 0, 0, uint.MaxValue)
                     );
                     System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(
                         chunk[16..],
