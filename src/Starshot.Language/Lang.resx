@@ -770,7 +770,7 @@
     <value>MIT License</value>
   </data>
   <data name="Starshot_AboutDesc" xml:space="preserve">
-    <value>Starshot pulls the raw R16G16B16A16Float scRGB frame buffer straight from the DXGI layer, fully preserving HDR luminance (up to thousands of nits), and encodes it as 16bit HDR AVIF, JPEG XL, or PNGv3 with BT2020 + PQ transfer-function metadata written into the color space. It also ships the features a general screenshot tool should have: automatic fallback on SDR displays, region capture, and multi-format batch conversion.</value>
+    <value>Starshot captures game window content with Windows Graphics Capture (WGC). Compared to BitBlt and DXGI Duplicate, it offers hardware acceleration, lower CPU usage, HDR content support, and per-window capture. The captured raw R16G16B16A16Float scRGB framebuffer fully preserves HDR luminance (up to thousands of nits) and is encoded as 16bit HDR AVIF, JPEG XL, or PNGv3 with BT2020 color space and PQ transfer-function metadata. It also ships the features a general screenshot tool should have: automatic fallback on SDR displays, region capture, and multi-format batch conversion.</value>
   </data>
   <data name="Starshot_AboutTagline" xml:space="preserve">
     <value>Next-generation native Windows HDR screenshot tool</value>

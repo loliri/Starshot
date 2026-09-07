@@ -770,7 +770,7 @@
     <value>MIT ライセンス</value>
   </data>
   <data name="Starshot_AboutDesc" xml:space="preserve">
-    <value>DXGIレイヤーからディスプレイ出力のR16G16B16A16Float scRGBフレームバッファを直接取得し、HDR輝度情報（数千nitまで）を完全に保持。16bit HDR AVIF、JPEG XL、PNGv3としてBT2020+PQ伝達関数付きでエンコード。SDRディスプレイ自動フォールバック、領域キャプチャ、マルチフォーマット一括変換も搭載。</value>
+    <value>Starshot は Windows Graphics Capture (WGC) でゲームウィンドウの内容をキャプチャします。BitBlt や DXGI Duplicate と比べ、ハードウェアアクセラレーション、低い CPU 使用率、HDR コンテンツ対応、ウィンドウ単位のキャプチャに対応します。取得した R16G16B16A16Float scRGB フレームバッファは HDR 輝度情報（数千 nit まで）を完全に保持し、BT2020 + PQ 伝達関数メタデータ付きの 16bit HDR AVIF / JPEG XL / PNGv3 としてエンコードされます。SDR ディスプレイ自動フォールバック、領域キャプチャ、マルチフォーマット一括変換など、汎用スクリーンショットツールに必要な機能も搭載。</value>
   </data>
   <data name="Starshot_AboutTagline" xml:space="preserve">
     <value>次世代のWindowsネイティブHDRスクリーンショットツール</value>

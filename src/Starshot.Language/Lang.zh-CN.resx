@@ -770,7 +770,7 @@
     <value>MIT 许可证</value>
   </data>
   <data name="Starshot_AboutDesc" xml:space="preserve">
-    <value>Starshot 直接从 DXGI 层获取显示器输出的原始 R16G16B16A16Float scRGB 帧缓冲，完整保留 HDR 亮度信息（可达数千 nit），编码为 16bit HDR AVIF、JPEG XL 或 PNGv3，色彩空间写入 BT2020 + PQ 传输函数元数据。同时提供 SDR 显示器自动降级、区域截图、多格式批量转换等通用截图工具应有的功能。</value>
+    <value>Starshot 使用 Windows Graphics Capture (WGC) 捕获游戏窗口的内容，相比于 BitBlt 和 DXGI Duplicate，它具有支持硬件加速、占用 CPU 较小、支持 HDR 内容、可捕获特定窗口等优点。获取到的原始 R16G16B16A16Float scRGB 帧缓冲，完整保留了 HDR 亮度信息（可达数千 nit），然后将其编码为 16bit HDR AVIF、JPEG XL 或 PNGv3，色彩空间写入 BT2020 + PQ 传输函数元数据。同时提供 SDR 显示器自动降级、区域截图、多格式批量转换等通用截图工具应有的功能。</value>
   </data>
   <data name="Starshot_AboutTagline" xml:space="preserve">
     <value>新一代 Windows 原生 HDR 截图工具</value>
