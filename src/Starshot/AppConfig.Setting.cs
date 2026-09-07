@@ -428,6 +428,24 @@ public static partial class AppConfig
         }
     }
 
+    /// <summary>
+    /// 按文件夹分类截图：开则保存路径 = 截图目录下「模板展开的子文件夹名」内
+    /// </summary>
+    public static bool ScreenshotSubfolderEnabled
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 截图子文件夹名模板（文件名模板同款占位符语法，如 {process}）
+    /// </summary>
+    public static string ScreenshotSubfolderPattern
+    {
+        get => GetValue("{process}")!;
+        set => SetValue(value);
+    }
+
     /// <summary>截图目录的曾用路径历史（旧值在改目录时进入，最多 5 条，新的在顶）</summary>
     public static List<string> ScreenshotFolderHistory
     {

@@ -970,6 +970,12 @@
   <data name="Starshot_FolderHistoryEmpty" xml:space="preserve">
     <value>No history yet</value>
   </data>
+  <data name="Starshot_ScreenshotSubfolder" xml:space="preserve">
+    <value>Classify screenshots into subfolders</value>
+  </data>
+  <data name="Starshot_ScreenshotSubfolderDesc" xml:space="preserve">
+    <value>When enabled, screenshots are saved into a subfolder under the screenshot folder, named by the template below.</value>
+  </data>
   <data name="Starshot_AlreadyDefault" xml:space="preserve">
     <value>Already the default</value>
   </data>

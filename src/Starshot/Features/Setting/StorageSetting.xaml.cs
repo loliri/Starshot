@@ -89,9 +89,59 @@ public sealed partial class StorageSetting : PageBase
                 AppConfig.ScreenshotFileNameTitleMaxLength = value;
                 FileNamePreview = BuildPreview(FileNamePattern);
                 RegionFileNamePreview = BuildPreview(RegionFileNamePattern);
+                SubfolderPreview = BuildSubfolderPreview(ScreenshotSubfolderPattern);
             }
         }
     } = AppConfig.ScreenshotFileNameTitleMaxLength;
+
+    /// <summary>按文件夹分类截图开关：输入框随开关显隐</summary>
+    public bool ScreenshotSubfolderEnabled
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.ScreenshotSubfolderEnabled = value;
+                OnPropertyChanged(nameof(SubfolderInputVisibility));
+            }
+        }
+    } = AppConfig.ScreenshotSubfolderEnabled;
+
+    public Visibility SubfolderInputVisibility =>
+        ScreenshotSubfolderEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+    public string ScreenshotSubfolderPattern
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.ScreenshotSubfolderPattern = value;
+                SubfolderPreview = BuildSubfolderPreview(value);
+            }
+        }
+    } = AppConfig.ScreenshotSubfolderPattern;
+
+    public string SubfolderPreview
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = BuildSubfolderPreview(AppConfig.ScreenshotSubfolderPattern);
+
+    private static string BuildSubfolderPreview(string pattern)
+    {
+        return ScreenCaptureService.BuildFileName(
+            "explorer",
+            "explorer.exe",
+            "StarRail",
+            DateTimeOffset.Now,
+            3840,
+            2160,
+            pattern
+        );
+    }
 
     private static string BuildPreview(string pattern)
     {
@@ -152,12 +202,7 @@ public sealed partial class StorageSetting : PageBase
         string repo = AppConfig.RepoBaseUrl;
         return AppConfig.Language switch
         {
-            "zh-CN" => $"{repo}/blob/main/docs/README.zh-CN.md#文件名模板",
-            "zh-TW" => $"{repo}/blob/main/docs/README.zh-TW.md#檔案名稱範本",
-            "ja-JP" => $"{repo}/blob/main/docs/README.ja.md#ファイル名テンプレート",
-            "fr-FR" => $"{repo}/blob/main/docs/README.fr.md#modèles-de-nom-de-fichier",
-            "ru-RU" => $"{repo}/blob/main/docs/README.ru.md#шаблоны-имён-файлов",
-            "es-ES" => $"{repo}/blob/main/docs/README.es.md#plantillas-de-nombre-de-archivo",
+            "zh-CN" => $"{repo}/blob/main/README.zh-CN.md#文件名模板",
             _ => $"{repo}#filename-templates",
         };
     }

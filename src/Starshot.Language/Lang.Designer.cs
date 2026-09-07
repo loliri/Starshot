@@ -1752,6 +1752,24 @@
         }
 
         /// <summary>
+        ///   查找类似 Classify screenshots into subfolders 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ScreenshotSubfolder {
+            get {
+                return ResourceManager.GetString("Starshot_ScreenshotSubfolder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 When enabled, screenshots are saved into a subfolder 的本地化字符串。
+        /// </summary>
+        public static string Starshot_ScreenshotSubfolderDesc {
+            get {
+                return ResourceManager.GetString("Starshot_ScreenshotSubfolderDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Already the default 的本地化字符串。
         /// </summary>
         public static string Starshot_AlreadyDefault {

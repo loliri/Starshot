@@ -296,6 +296,38 @@
         </Grid>
       </StackPanel>
 
+      <!--  按文件夹分类截图  -->
+      <StackPanel Spacing="8">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_ScreenshotSubfolder}" />
+        </StackPanel>
+        <TextBlock
+          FontSize="12"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="{x:Bind lang:Lang.Starshot_ScreenshotSubfolderDesc}"
+          TextWrapping="Wrap"
+        />
+        <ToggleSwitch
+          IsOn="{x:Bind ScreenshotSubfolderEnabled, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_ScreenshotSubfolder}"
+          OnContent="{x:Bind lang:Lang.Starshot_ScreenshotSubfolder}"
+        />
+        <StackPanel Spacing="6" Visibility="{x:Bind SubfolderInputVisibility}">
+          <TextBox
+            x:Name="SubfolderTextBox"
+            HorizontalAlignment="Stretch"
+            GotFocus="TemplateTextBox_GotFocus"
+            Text="{x:Bind ScreenshotSubfolderPattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+          />
+          <TextBlock
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+            Text="{x:Bind SubfolderPreview}"
+            TextTrimming="CharacterEllipsis"
+          />
+        </StackPanel>
+      </StackPanel>
+
       <!--  日志级别  -->
       <StackPanel Spacing="8">
         <TextBlock FontSize="14" Text="{x:Bind lang:Lang.Starshot_LogLevel}" />

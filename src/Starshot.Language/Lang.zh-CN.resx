@@ -970,6 +970,12 @@
   <data name="Starshot_FolderHistoryEmpty" xml:space="preserve">
     <value>暂无历史记录</value>
   </data>
+  <data name="Starshot_ScreenshotSubfolder" xml:space="preserve">
+    <value>按文件夹分类截图</value>
+  </data>
+  <data name="Starshot_ScreenshotSubfolderDesc" xml:space="preserve">
+    <value>开启后截图保存到截图目录下按下方模板命名的子文件夹。</value>
+  </data>
   <data name="Starshot_AlreadyDefault" xml:space="preserve">
     <value>已是默认值</value>
   </data>

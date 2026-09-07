@@ -149,23 +149,37 @@ public sealed partial class ScreenshotPage : PageBase
             }
 
             List<ScreenshotItem> screenshots = new();
+            // 图库行为跟随分类开关：关 = 原样顶层扫描 + 文件名键；开 = 递归 + 全路径键（跨子文件夹同名不冲突）
+            bool recursive = AppConfig.ScreenshotSubfolderEnabled;
             foreach (var folderItem in _folders)
             {
-                var files = Directory.GetFiles(folderItem.Folder);
+                string[] files;
+                try
+                {
+                    files = Directory.GetFiles(
+                        folderItem.Folder,
+                        "*",
+                        recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // 外置文件夹失效（拔盘/断连/权限）：只跳过该文件夹，不让整个图库初始化一起挂
+                    _logger.LogWarning(ex, "Scan folder failed: {Folder}", folderItem.Folder);
+                    continue;
+                }
                 foreach (var file in files)
                 {
-                    string name = Path.GetFileName(file);
-                    if (_screenshotDict.ContainsKey(name))
+                    string key = recursive ? file : Path.GetFileName(file);
+                    if (_screenshotDict.ContainsKey(key))
                     {
                         continue;
                     }
-                    if (
-                        ScreenshotHelper.IsSupportedExtension(file) /*&& !File.GetAttributes(file).HasFlag((System.IO.FileAttributes)0x440000)*/
-                    )
+                    if (ScreenshotHelper.IsSupportedExtension(file))
                     {
                         var item = new ScreenshotItem(file);
                         screenshots.Add(item);
-                        _screenshotDict[name] = item;
+                        _screenshotDict[key] = item;
                     }
                 }
             }
@@ -191,6 +205,7 @@ public sealed partial class ScreenshotPage : PageBase
         {
             watcher.Filters.Add(item);
         }
+        watcher.IncludeSubdirectories = AppConfig.ScreenshotSubfolderEnabled; // 分类开关开时才监听子目录
         watcher.Created += FileSystemWatcher_Created;
         watcher.Deleted += FileSystemWatcher_Deleted;
         watcher.EnableRaisingEvents = true;
@@ -203,7 +218,6 @@ public sealed partial class ScreenshotPage : PageBase
         {
             if (e.ChangeType == WatcherChangeTypes.Created)
             {
-                string name = Path.GetFileName(e.FullPath);
                 if (ScreenshotHelper.IsSupportedExtension(e.FullPath) && File.Exists(e.FullPath))
                 {
                     await ScreenshotHelper.WaitForFileReleaseAsync(
@@ -219,9 +233,13 @@ public sealed partial class ScreenshotPage : PageBase
                         ScreenshotGroups ??= new();
                         if (_screenshotDict is null)
                             return;
-                        if (_screenshotDict.ContainsKey(name))
+                        // 键随分类开关：关 = 文件名（原行为）；开 = 全路径（跨子文件夹同名不冲突）
+                        string key = AppConfig.ScreenshotSubfolderEnabled
+                            ? e.FullPath
+                            : Path.GetFileName(e.FullPath);
+                        if (_screenshotDict.ContainsKey(key))
                             return;
-                        _screenshotDict[name] = item;
+                        _screenshotDict[key] = item;
                         _screenshotItems ??= new();
                         _screenshotItems.Insert(0, item);
                         if (
@@ -256,8 +274,11 @@ public sealed partial class ScreenshotPage : PageBase
             {
                 if (_screenshotDict is null)
                     return;
-                string name = Path.GetFileName(e.FullPath);
-                if (_screenshotDict.TryGetValue(name, out ScreenshotItem? item))
+                // 键随分类开关（与 Created 的存键对称）：关 = 文件名（原行为）；开 = 全路径
+                string key = AppConfig.ScreenshotSubfolderEnabled
+                    ? e.FullPath
+                    : Path.GetFileName(e.FullPath);
+                if (_screenshotDict.TryGetValue(key, out ScreenshotItem? item))
                 {
                     if (e.FullPath == item.FilePath)
                     {
@@ -268,9 +289,7 @@ public sealed partial class ScreenshotPage : PageBase
                         {
                             if (group.Contains(item))
                             {
-                                // 字典键带扩展名（Created 用 GetFileName 存），item.Name 是去扩展名的显示名——之前拿它删键永不命中，
-                                // 幽灵键残留导致同名文件重建时被 Created 的 ContainsKey 拦截、从图库消失
-                                _screenshotDict.Remove(item.FileName);
+                                _screenshotDict.Remove(key);
                                 _screenshotItems?.Remove(item);
                                 group.Remove(item);
                                 if (group.Count == 0)
@@ -688,7 +707,11 @@ public sealed partial class ScreenshotPage : PageBase
                     {
                         if (group.Remove(item))
                         {
-                            _screenshotDict.Remove(item.FileName);
+                            _screenshotDict.Remove(
+                                AppConfig.ScreenshotSubfolderEnabled
+                                    ? item.FilePath
+                                    : item.FileName
+                            );
                             if (group.Count == 0)
                             {
                                 ScreenshotGroups.Remove(group);
@@ -712,7 +735,9 @@ public sealed partial class ScreenshotPage : PageBase
                 {
                     if (group.Remove(item))
                     {
-                        _screenshotDict.Remove(item.FileName);
+                        _screenshotDict.Remove(
+                            AppConfig.ScreenshotSubfolderEnabled ? item.FilePath : item.FileName
+                        );
                         if (group.Count == 0)
                         {
                             ScreenshotGroups.Remove(group);

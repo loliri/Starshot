@@ -663,6 +663,23 @@ internal class ScreenCaptureService
             targetFolder = Path.Join(AppConfig.UserDataFolder, "Screenshots");
         }
         string screenshotFolder = Path.GetFullPath(targetFolder);
+        // 按文件夹分类截图：模板展开为子文件夹名（BuildFileName 自带非法字符清洗），建在截图目录下
+        if (AppConfig.ScreenshotSubfolderEnabled)
+        {
+            string subfolder = BuildFileName(
+                processName,
+                processExeName,
+                windowTitle,
+                frameTime,
+                bitmap.SizeInPixels.Width,
+                bitmap.SizeInPixels.Height,
+                AppConfig.ScreenshotSubfolderPattern
+            );
+            if (!string.IsNullOrWhiteSpace(subfolder))
+            {
+                screenshotFolder = Path.Combine(screenshotFolder, subfolder);
+            }
+        }
         Directory.CreateDirectory(screenshotFolder);
 
         // 扩展名：HDR 输出走 HDR 格式；SDR（含 deleteHDR）走 SDR 格式
