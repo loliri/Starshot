@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -200,7 +201,9 @@ public sealed partial class StorageSetting : PageBase
     private static string GetHelpUrl()
     {
         string repo = AppConfig.RepoBaseUrl;
-        return AppConfig.Language switch
+        // 跟随系统时配置为空，用运行时生效的 UICulture 判定（否则中文系统落到英文分支）
+        string language = AppConfig.Language ?? CultureInfo.CurrentUICulture.Name;
+        return language switch
         {
             "zh-CN" => $"{repo}/blob/main/README.zh-CN.md#文件名模板",
             _ => $"{repo}#filename-templates",
