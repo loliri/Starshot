@@ -136,7 +136,7 @@ All three modes share the same HDR detection, color management, filename templat
 
 - **Frozen Frame**: Captures all monitors into a single stitched bitmap first; the overlay displays this frozen frame so the image stays still during selection. The overlay itself is excluded from the screenshot.
 - **Multi-Monitor**: Covers the entire virtual screen. Selections can span across monitors (brightness stays accurate even on mixed HDR+SDR setups); the magnifier and coordinate box are limited to the cursor's current monitor.
-- **Window Detection**: EnumWindows + DWM cloaked/toolwindow filtering + DWM extended frame bounds (de-shadow) + client-area dual candidate + Z-order selection. Click a window to capture it directly (QuickCrop).
+- **Window Detection**: EnumWindows + DWM cloaked/toolwindow filtering + DWM extended frame bounds (de-shadow) + Z-order selection. Click a window to capture it directly (hover the content area to capture it without the title bar; hover the title bar to capture the whole window).
 - **Magnifier**: NearestNeighbor integer-aligned + pixel grid (15×15 pixels, 10px each), making individual pixels clearly distinguishable.
 - **Animated Marching Ants + Real-time Coordinates**: Selection X/Y/W/H + cursor physical coordinates.
 - **Pixel Precision**: Drag marquee +1px; window rectangle +0.
@@ -440,6 +440,22 @@ Images in the clipboard history are in-memory bitmaps (same path as "Copy Image"
 </details>
 
 <details>
+<summary><b>Why are window screenshots rounded?</b></summary>
+
+Windows 11's rounded window corners are applied by DWM at the composition layer. Frames obtained through WGC already carry the rounded-corner clipping — this is an inherent limitation of the capture path and cannot be bypassed; OBS window capture, which also uses WGC, has the same issue (see references below).
+
+Both WGC capture paths carry the rounded corners; they differ only in the corner pixels: monitor capture takes the final composited result, where the window corners show the underlying content beneath; window capture takes the window's own frame, where the corners are transparent. Either way, the corners occupy only a few pixels — negligible for the overall image even on high-resolution screens.
+
+References:
+
+- [Apply rounded corners in desktop apps — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/ui/apply-rounded-corners)
+- [Disable the rounded corners in Windows 11 (DWM internals)](https://valinet.ro/2022/01/21/Disable-the-rounded-corners-in-Windows-11.html)
+- [Greenshot: capturing windows with rounded corners (#373)](https://github.com/greenshot/greenshot/issues/373)
+- [OBS: Remove rounded corners in Window Capture](https://www.reddit.com/r/obs/comments/1n9dgnq/how_do_i_remove_the_rounded_corners_when_using/)
+
+</details>
+
+<details>
 <summary><b>Screenshot save crashes (VMs / some monitors)</b></summary>
 
 These environments (VMs, devices without an ICC profile) report invalid monitor color configurations; with color management on, the encoder (lcms2) crashes processing the malformed gamut data. Keep color management off (the default) to avoid this; HDR screenshots are unaffected.
@@ -463,7 +479,7 @@ Starshot uses the Win32 native clipboard API for writing, which is theoretically
 <details>
 <summary><b>Screenshots on Windows 10 come out as SDR — where's HDR?</b></summary>
 
-Windows Graphics Capture on Windows 10 does not support HDR pixel format capture; the system compositor can only provide 8-bit SDR frames. On Windows 10, both full-screen and region captures are SDR only. HDR capture requires Windows 11.
+WGC on Windows 10 does not support HDR pixel format capture; the system compositor can only provide 8-bit SDR frames. On Windows 10, both full-screen and region captures are SDR only. HDR capture requires Windows 11.
 
 </details>
 

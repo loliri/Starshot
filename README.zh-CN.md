@@ -138,7 +138,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 - **冻结帧**：先截所有显示器合成一张位图，覆盖层显示冻结帧——选区时画面不动，覆盖层不在截图里
 - **多显示器**：覆盖整个虚拟屏幕，选区可跨屏框选（HDR+SDR 混合屏亮度也准确）；放大镜与坐标框仅限光标所在显示器
-- **窗口检测**：EnumWindows + DWM cloaked/toolwindow 过滤 + DWM 扩展边界去阴影 + 客户区双候选 + Z 序选择，单击窗口直接截（QuickCrop）
+- **窗口检测**：EnumWindows + DWM cloaked/toolwindow 过滤 + DWM 扩展边界去阴影 + Z 序选择，单击窗口直接截（悬停内容区截无标题栏的画面，悬停标题栏截整个窗口）
 - **放大镜**：NearestNeighbor 整数对齐 + 像素网格（15×15 像素，每个 10px），像素清晰可辨
 - **动画蚂蚁线 + 实时坐标**：选区 X/Y/W/H + 光标物理坐标
 - **像素精度**：拖拽框选 +1px，窗口矩形 +0
@@ -442,6 +442,22 @@ PNGv3（W3C PNG 第三版，2025 年定稿）的 HDR 依靠 cICP 元数据标注
 </details>
 
 <details>
+<summary><b>为什么窗口截图是圆角的？</b></summary>
+
+Windows 11 的窗口圆角由 DWM 在窗口合成层应用。WGC 拿到的帧已带上圆角裁剪——这是该捕获途径的天然限制，无法绕过，同样使用 WGC 的 OBS 窗口捕获也不例外（见下方参考）。
+
+WGC 的两种捕获路径都会带上圆角，区别只在圆角处的像素：显示器捕获截的是最终合成结果，窗口四角是透出的下层内容；窗口捕获拿到的原始帧里圆角处是透明。不过圆角只占窗口四角的少量像素，即使高分屏上对整体画面的影响也可忽略。
+
+参考文献：
+
+- [Apply rounded corners in desktop apps — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/ui/apply-rounded-corners)
+- [Disable the rounded corners in Windows 11（DWM 内部机制分析）](https://valinet.ro/2022/01/21/Disable-the-rounded-corners-in-Windows-11.html)
+- [Greenshot: capturing windows with rounded corners (#373)](https://github.com/greenshot/greenshot/issues/373)
+- [OBS: Remove rounded corners in Window Capture](https://www.reddit.com/r/obs/comments/1n9dgnq/how_do_i_remove_the_rounded_corners_when_using/)
+
+</details>
+
+<details>
 <summary><b>截图保存时闪退（虚拟机 / 部分显示器）</b></summary>
 
 这类环境（虚拟机、无 ICC profile 的设备）的显示器色彩配置异常，色彩管理开启时编码器（lcms2）处理畸形色域数据会崩溃。保持色彩管理关闭（默认）即可规避；HDR 截图不受影响。
@@ -465,7 +481,7 @@ Starshot 使用 Win32 原生剪贴板 API 写入，理论上比 WinRT 更可靠�
 <details>
 <summary><b>Windows 10 截图是 SDR 的，HDR 功能在哪？</b></summary>
 
-Windows 10 的 Windows.Graphics.Capture 不支持 HDR 像素格式捕获，系统合成器只能提供 8bit SDR 帧。因此在 Windows 10 上无论全屏还是区域截图都只能得到 SDR 图像；HDR 截图需要 Windows 11。
+Windows 10 的 WGC 不支持 HDR 像素格式捕获，系统合成器只能提供 8bit SDR 帧。因此在 Windows 10 上无论全屏还是区域截图都只能得到 SDR 图像；HDR 截图需要 Windows 11。
 
 </details>
 
