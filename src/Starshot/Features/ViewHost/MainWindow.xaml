@@ -13,7 +13,7 @@
   mc:Ignorable="d"
 >
   <Grid Background="Transparent">
-    <background:AppBackground />
+    <background:AppBackground x:Name="AppBackground" />
 
     <Border
       x:Name="Border_OverlayMask"

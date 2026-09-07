@@ -118,6 +118,45 @@ public sealed partial class AppBackground : UserControl
         catch { }
     }
 
+    private bool _pausedBySessionLocked;
+
+    /// <summary>
+    /// 锁屏暂停视频壁纸（省电：解码与 CopyFrameToVideoSurface 不再照跑）。
+    /// sessionLock 标记暂停来源，只有因锁屏暂停的才在解锁时自动恢复。
+    /// </summary>
+    public void PauseVideo(bool sessionLock = false)
+    {
+        try
+        {
+            if (
+                _mediaPlayer?.PlaybackSession?.PlaybackState
+                is MediaPlaybackState.Playing
+            )
+            {
+                _pausedBySessionLocked = sessionLock;
+            }
+            _mediaPlayer?.Pause();
+        }
+        catch { }
+    }
+
+    public void PlayVideo(bool sessionUnlock = false)
+    {
+        try
+        {
+            if (!sessionUnlock)
+            {
+                _mediaPlayer?.Play();
+            }
+            else if (_pausedBySessionLocked)
+            {
+                _pausedBySessionLocked = false;
+                _mediaPlayer?.Play();
+            }
+        }
+        catch { }
+    }
+
     public async Task UpdateBackgroundAsync()
     {
         try

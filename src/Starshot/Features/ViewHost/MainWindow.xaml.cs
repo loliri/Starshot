@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
@@ -84,6 +85,8 @@ public sealed partial class MainWindow : WindowEx
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         ((FrameworkElement)sender).Loaded -= MainWindow_Loaded;
+        // 锁屏/解锁暂停视频壁纸（WM_WTSSESSION_CHANGE 需先注册接收窗口）
+        WTSRegisterSessionNotification(WindowHandle, 0);
         await Task.Delay(700);
         var fade = new DoubleAnimation
         {
@@ -200,6 +203,9 @@ public sealed partial class MainWindow : WindowEx
         Hide();
     }
 
+    [DllImport("Wtsapi32.dll")]
+    private static extern bool WTSRegisterSessionNotification(IntPtr hWnd, int dwFlags);
+
     protected override nint WindowSubclassProc(
         HWND hWnd,
         uint uMsg,
@@ -209,7 +215,20 @@ public sealed partial class MainWindow : WindowEx
         nint dwRefData
     )
     {
-        if (uMsg == (uint)User32.WindowMessage.WM_HOTKEY)
+        if (uMsg == (uint)User32.WindowMessage.WM_WTSSESSION_CHANGE)
+        {
+            // WTS_SESSION_LOCK / WTS_SESSION_UNLOCK：锁屏暂停视频壁纸（省电），
+            // 解锁只恢复因锁屏暂停的
+            if (wParam == 0x7)
+            {
+                AppBackground.PauseVideo(sessionLock: true);
+            }
+            else if (wParam == 0x8)
+            {
+                AppBackground.PlayVideo(sessionUnlock: true);
+            }
+        }
+        else if (uMsg == (uint)User32.WindowMessage.WM_HOTKEY)
         {
             if (wParam == HOTKEY_CAPTURE)
             {
