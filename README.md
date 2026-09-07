@@ -25,7 +25,7 @@ Full 16-bit HDR Pipeline · Region Screenshot · AVIF / JPEG XL / PNGv3 Encoding
 
 Windows' built-in screenshot tool (Snipping Tool, Win+Shift+S) can only capture 8-bit SDR images even on HDR displays — the system compositor compresses 16-bit HDR frames on output, highlights are clipped, the color gamut is narrowed, resulting in screenshots that appear washed out, overexposed, or have incorrect color mapping. Common third-party screenshot tools are likewise limited by the traditional GDI/BitBlt capture pipeline and cannot perceive HDR data.
 
-Starshot directly captures the raw `R16G16B16A16Float` scRGB framebuffer from the DXGI layer, fully preserving HDR luminance information (up to thousands of nits). Screenshots are encoded as 16bit HDR AVIF, JPEG XL, or PNGv3 with BT.2020 color space and PQ transfer function metadata. It also provides SDR display auto-degradation, region screenshot, multi-format batch conversion, and everything else you'd expect from a general-purpose screenshot tool.
+Starshot captures game window content with [Windows Graphics Capture](https://learn.microsoft.com/windows/uwp/audio-video-camera/screen-capture) (WGC). Compared to BitBlt and DXGI Duplicate, it offers hardware acceleration, lower CPU usage, HDR content support, and per-window capture. The captured raw `R16G16B16A16Float` scRGB framebuffer fully preserves HDR luminance information (up to thousands of nits) and is encoded as 16bit HDR AVIF, JPEG XL, or PNGv3 with BT.2020 color space and PQ transfer function metadata. It also provides SDR display auto-degradation, region screenshot, multi-format batch conversion, and everything else you'd expect from a general-purpose screenshot tool.
 
 **Key Features**
 
@@ -152,12 +152,13 @@ The WinRT `Clipboard.SetContent` from unpackaged WinUI apps is unreliable (defer
 
 ### Save
 
-- **Flat structure** (no subfolders). Defaults to `Pictures\Starshot`, customizable.
+- Files are stored flat by default in `Pictures\Starshot` (customizable); optional **subfolder classification** (a toggle plus a subfolder name template using the same placeholders as filename templates, e.g. `{process}` to group by app).
 - **SDR format** (PNG / AVIF / JPEG XL; default PNG) and **HDR format** (AVIF / JPEG XL / PNGv3; default AVIF) configured separately.
 - Quality levels: Medium / High / Lossless.
 - XMP metadata (CreatorTool = Starshot).
 - Serialized encoding (SemaphoreSlim) to avoid concurrent encoding conflicts.
 - **Storage Statistics**: Settings page shows disk usage for screenshots / thumbnail cache / wallpapers / logs / backups / OCR engine, with refresh and one-click cache cleanup (also cleans up orphaned wallpaper files).
+- **Folder change history**: recent paths of the screenshot / log folders (up to 5 entries), each can be opened or deleted; the restore-default entry now lives inside the history dialog.
 
 #### Supported Formats
 
@@ -184,7 +185,7 @@ Full-screen and region screenshots use **independent templates**.
 | `{width}` `{height}`                                      | Image dimensions (px)                            | `1920` `1080`       |
 | `{year}` `{month}` `{day}` `{hour}` `{minute}` `{second}` | Time components                                  |                     |
 
-Illegal filename characters are uniformly replaced with `_`.
+Illegal filename characters are uniformly replaced with `_`. The subfolder classification template uses the same placeholder syntax.
 
 ### Info Toast
 
@@ -209,7 +210,7 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 - **Current-clipboard card**: images above the system history per-item size limit (~4MB) still land on the clipboard but never enter Win+V — the card shows the current clipboard content in real time at the top of the page; pixel-compared against the first history entry and hidden when identical (small images never appear twice)
 - Auto-refresh on clipboard change (ContentChanged + throttle) + refresh on window activation
 - Click to preview (image viewer, with previous/next navigation)
-- Context menu: Info (format/size/dimensions) / Open / Recopy / Delete from history
+- Context menu: Info (format/size/dimensions) / Open / Recognize Text / Recopy / Delete from history; deleting with multiple items selected removes all of them
 - Requires clipboard history enabled in Windows Settings; the current-clipboard card works regardless
 - Empty state: prompt + link to `ms-settings:clipboard` when not enabled; "no images" when empty
 
@@ -227,7 +228,7 @@ After a screenshot, a thumbnail + status toast pops up (does not interfere with 
 
 - **Dual engines**: OneOCR (the same engine as the Windows Photos app, higher accuracy) takes priority; falls back to the system engine (Windows.Media.Ocr, no download needed, lower accuracy) when unavailable. Switchable in Settings → Screenshot → Configure Engine.
 - **On-demand engine files**: OneOCR engine files (about 95 MB) are not bundled with the installer. A configuration dialog appears on first use — copy them directly from the local Windows Snipping Tool or Photos app (no download), or download from CDN; delete them from the same dialog when no longer needed.
-- **In-viewer recognition**: Enter via the toolbar button or the "Recognize Text" context-menu item in the gallery / clipboard pages. A spotlight mask marks all text regions (same interaction as the Photos app); drag over text and press Ctrl+C to copy. Extra spaces between characters in mixed CJK/Latin text are removed automatically.
+- **In-viewer recognition**: Enter via the toolbar button or the "Recognize Text" context-menu item in the gallery / clipboard pages. A spotlight mask marks all text regions (same interaction as the Photos app); drag over text (Ctrl+A to select all) and press Ctrl+C to copy. Extra spaces between characters in mixed CJK/Latin text are removed automatically.
 - **Global shortcut Alt+O**: Drag a region → recognized text goes straight to the clipboard (no file saved, image not copied); same entry in the tray menu; result feedback shows in the on-screen info popup.
 
 ### Batch Format Conversion
@@ -271,6 +272,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 - Optional `--hide` flag to start minimized to tray (requires tray to be enabled).
 - The toggle reads the registry in real time (no cached setting): Task Manager disabling only touches StartupApproved without removing the Run entry — the toggle still shows as on.
 - On startup, checks whether the exe pointed to by the auto-start entry exists; if not, automatically removes the startup entry and shows a toast.
+- The start page (Gallery / Clipboard) can be chosen in Settings.
 
 ## Known Limitations
 
@@ -397,13 +399,15 @@ Translation contributions welcome: fork the repo → copy `Lang.resx` to `Lang.{
 
 ## Development Notes
 
-This project is under active development. Features may change at any time — stay tuned for updates!
+Starshot's core features and interaction design have matured into a stable polishing phase — issues encountered in daily use get priority, and experience details keep improving. New feature ideas are just as welcome: every piece of Issue feedback is read and evaluated carefully, and it is what keeps Starshot getting better.
 
 Contributions welcome:
 
 - Found a bug? [Submit an Issue](../../issues/new)
 - Have a feature suggestion? [Start a Discussion](../../issues/new)
 - Want to contribute code? Submit a [Pull Request](../../pulls)
+
+Thanks to every user for the feedback and support!
 
 ## FAQ
 
@@ -425,6 +429,13 @@ Restart Starshot after updating. If the issue persists, please [submit an Issue]
 <summary><b>HDR PNG (PNGv3) looks grayish/dim in image viewers?</b></summary>
 
 HDR in PNGv3 (W3C PNG Third Edition, finalized in 2025) relies on cICP metadata tagging BT.2020 + PQ — a brand-new standard. Chrome / Edge / Firefox render its HDR correctly, but most image viewers (e.g. Windows Photos) still decode it as a plain PNG, so it looks grayish/dim. This is the current ecosystem, not a broken file. **The built-in Starshot image viewer is recommended — it renders HDR PNG v3 correctly.** For broad compatibility choose AVIF (the mainstream HDR format) or enable the Ultra HDR JPEG fallback.
+
+</details>
+
+<details>
+<summary><b>Why can't images dragged from the clipboard page be sent directly to WeChat / QQ, while images from the gallery can?</b></summary>
+
+Images in the clipboard history are in-memory bitmaps (same path as "Copy Image", nothing written to disk) — dragging carries bitmap data; images in the gallery are files on disk — dragging carries the file itself. WeChat / QQ's drop target only accepts files, not bitmap drops — so gallery images can be dragged straight into a chat window while clipboard images cannot. Workaround: paste (Ctrl+V) or right-click "Recopy"; WeChat / QQ will save the bitmap as a file and send it.
 
 </details>
 
