@@ -112,6 +112,9 @@ internal class ScreenCaptureService
             Microsoft.UI.DisplayId displayId = new((ulong)monitor.DangerousGetHandle());
             using DisplayInformation displayInfo = DisplayInformation.CreateForDisplayId(displayId);
             DisplayAdvancedColorInfo colorInfo = displayInfo.GetAdvancedColorInfo();
+            // 格式按显示器模式分支（内容真假此时未知，WGC 也无接口预查）：SDR 显示器整条合成就是
+            // 8bit sRGB，RGBA8 无损直拷；HDR 显示器一律 float——SDR 内容经 DWM 合成也被拉到
+            // [0, SDRWhiteLevel/80] 值域（最高 6 倍），走 8bit 通道会被系统截掉，必须 float 抓后自己映射
             DirectXPixelFormat pixelFormat =
                 colorInfo.CurrentAdvancedColorKind is DisplayAdvancedColorKind.HighDynamicRange
                     ? DirectXPixelFormat.R16G16B16A16Float
@@ -615,7 +618,8 @@ internal class ScreenCaptureService
     {
         bool hdr = bitmap.Format is DirectXPixelFormat.R16G16B16A16Float;
 
-        // 提前判定内容是否真 HDR + 各分支标志（maxCLL 入口已有，无需等编码后再判）
+        // 内容级判定（第二级；格式已由显示器模式在捕获前定死）：HDR 显示器上 SDR 内容也是 float 帧
+        // （值域 ≤ SDRWhiteLevel），MaxCLL 超过 SDRWhiteLevel 才是真 HDR；+5 容差防边界抖动
         bool contentIsHDR = hdr && maxCLL > sdrWhiteLevel + 5;
         bool deleteHDR = hdr && AppConfig.DeleteHDRIfSDRContent && !contentIsHDR;
         bool autoConvertSDR = hdr && AppConfig.AutoSaveUltraHDRJpeg && !deleteHDR;

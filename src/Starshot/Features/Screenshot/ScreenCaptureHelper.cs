@@ -42,6 +42,13 @@ internal partial class ScreenCaptureHelper
 
     public static readonly bool IsWin10 = Environment.OSVersion.Version.Build < 22000;
 
+    /// <summary>
+    /// 按窗口捕获（WGC 窗口级 item）。⚠ 截屏语义上不适用，主流程零调用、仅作设施保留：
+    /// 窗口捕获拿到的是该窗口自身的 DWM surface——上方覆盖物（弹窗/其他窗口）不在帧里，
+    /// 截到的不是「用户看到的画面」；且窗口最小化即不可捕获。截屏软件要的是合成后的显示器
+    /// 输出（CaptureMonitorAsync + 矩形裁剪），所见即所得。窗口级捕获仅适合「只要窗口内容、
+    /// 别盖东西反而干净」的场景（如游戏工具截取后台游戏画面）。
+    /// </summary>
     public static async Task<Direct3D11CaptureFrame> CaptureWindowAsync(
         nint hwnd,
         DirectXPixelFormat pixelFormat,
@@ -140,6 +147,10 @@ internal partial class ScreenCaptureHelper
         }
     }
 
+    /// <summary>
+    /// 按窗口创建捕获项。TryCreateFromWindowId 仅 Win11 可用；Win10 走
+    /// IGraphicsCaptureItemInterop.CreateForWindow（Guid 见文档约定，接口由 GeneratedComInterface 声明）。
+    /// </summary>
     public static GraphicsCaptureItem CreateGraphicsCaptureItemForWindow(nint hwnd)
     {
         GraphicsCaptureItem graphicsCaptureItem;
@@ -160,6 +171,10 @@ internal partial class ScreenCaptureHelper
         return graphicsCaptureItem;
     }
 
+    /// <summary>
+    /// 按显示器创建捕获项。TryCreateFromDisplayId 仅 Win11 可用；Win10 走
+    /// IGraphicsCaptureItemInterop.CreateForMonitor。
+    /// </summary>
     public static GraphicsCaptureItem CreateGraphicsCaptureItemForMonitor(nint monitor)
     {
         GraphicsCaptureItem graphicsCaptureItem;
