@@ -486,14 +486,14 @@ public sealed partial class ImageBatchConvertWindow : PageBase
         try
         {
             item.Converting = true;
-            if (item.SourceExtension == _format)
+            bool skippedSameFormat = false;
+            // 同格式 + 跳过/覆盖模式：保持原行为——输出名解析为源文件自身、恒「已存在」、
+            // 不转换不写源文件（覆盖即跳过，避免截断源文件的安全问题）。
+            // 同格式 + 重命名模式：落入下方 dispatch 重新编码到 _1 副本（质量参数生效）。
+            if (item.SourceExtension == _format && _overwriteMode is 0 or 1)
             {
-                string outputPath = GetOutputPath(item, true);
-                if (!File.Exists(outputPath))
-                {
-                    File.Copy(item.SourceFilePath, outputPath);
-                }
-                item.OutputFilePath = outputPath;
+                item.OutputFilePath = GetOutputPath(item, true);
+                skippedSameFormat = true;
             }
             else
             {
@@ -532,20 +532,30 @@ public sealed partial class ImageBatchConvertWindow : PageBase
             item.OutputFileName = Path.GetFileName(item.OutputFilePath);
             item.OutputFileSize = new FileInfo(item.OutputFilePath).Length;
             item.OutputFileSizeText = $"{item.OutputFileSize / 1024:N0} KB";
-            long delta = item.OutputFileSize - item.SourceFileSize;
-            double percent = item.SourceFileSize == 0 ? 0 : (double)delta / item.SourceFileSize;
-            item.FileDeltaPercent = percent switch
+            if (skippedSameFormat)
             {
-                > 0 => $"+{percent:P0}",
-                < 0 => $"{percent:P0}",
-                _ => "0%",
-            };
-            item.FileDeltaTextBrush = delta switch
+                // 跳过未转换，体积差显示「未转换」而非误导性的 0%
+                item.FileDeltaPercent = Lang.ImageBatchConvertWindow_NotConverted;
+                item.FileDeltaTextBrush = _deltaZeroBrush;
+            }
+            else
             {
-                > 0 => _deltaAddBrush,
-                < 0 => _deltaDecreseBrush,
-                _ => _deltaZeroBrush,
-            };
+                long delta = item.OutputFileSize - item.SourceFileSize;
+                double percent =
+                    item.SourceFileSize == 0 ? 0 : (double)delta / item.SourceFileSize;
+                item.FileDeltaPercent = percent switch
+                {
+                    > 0 => $"+{percent:P0}",
+                    < 0 => $"{percent:P0}",
+                    _ => "0%",
+                };
+                item.FileDeltaTextBrush = delta switch
+                {
+                    > 0 => _deltaAddBrush,
+                    < 0 => _deltaDecreseBrush,
+                    _ => _deltaZeroBrush,
+                };
+            }
             item.ConvertSuccess = true;
             SuccessCount++;
             TotalSourceFileSize += item.SourceFileSize;

@@ -526,6 +526,15 @@
                 return ResourceManager.GetString("ImageBatchConvertWindow_SkipDefault", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Not converted 的本地化字符串。
+        /// </summary>
+        public static string ImageBatchConvertWindow_NotConverted {
+            get {
+                return ResourceManager.GetString("ImageBatchConvertWindow_NotConverted", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Start Convert 的本地化字符串。

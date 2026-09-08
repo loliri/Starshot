@@ -490,6 +490,9 @@
   <data name="ImageBatchConvertWindow_SkipDefault" xml:space="preserve">
     <value>Skip (Default)</value>
   </data>
+  <data name="ImageBatchConvertWindow_NotConverted" xml:space="preserve">
+    <value>Not converted</value>
+  </data>
   <data name="ImageBatchConvertWindow_Overwrite" xml:space="preserve">
     <value>Overwrite</value>
   </data>

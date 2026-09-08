@@ -490,6 +490,9 @@
   <data name="ImageBatchConvertWindow_SkipDefault" xml:space="preserve">
     <value>跳过 (默认)</value>
   </data>
+  <data name="ImageBatchConvertWindow_NotConverted" xml:space="preserve">
+    <value>未转换</value>
+  </data>
   <data name="ImageBatchConvertWindow_Overwrite" xml:space="preserve">
     <value>覆盖</value>
   </data>
