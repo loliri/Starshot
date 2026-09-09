@@ -1,0 +1,63 @@
+name: Check Pull Requests
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Build launcher
+        run: msbuild src/Starshot.Launcher/Starshot.Launcher.vcxproj -p:Configuration=Release -p:Platform=x64
+
+      - name: Publish main app
+        run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=x64 -r win-x64
+
+      - name: Remove unuse
+        run: |
+          Remove-Item -Force build/release/app/RestartAgent.exe, build/release/app/DirectML.dll, build/release/app/onnxruntime_providers_shared.dll, build/release/app/Microsoft.ML.OnnxRuntime.dll, build/release/app/VP9DecoderMFT.dll, build/release/app/avifdec.exe, build/release/app/djxl.exe, build/release/app/avifgainmaputil.exe, build/release/app/jxlinfo.exe -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force build/release/app/NpuDetect -ErrorAction SilentlyContinue
+          Remove-Item -Force build/release/app/workloads*.json -ErrorAction SilentlyContinue
+
+      - name: Trim unsupported locales
+        run: |
+          # 从 Starshot.Language 的 Lang.{locale}.resx 读程序支持的语言（Lang.resx 是默认 en，主 dll 内无目录）
+          $supported = Get-ChildItem src/Starshot.Language/Lang.*.resx | ForEach-Object {
+            if ($_.Name -match '^Lang\.([a-z]{2}(-[A-Za-z0-9]+)?)\.resx$') { $Matches[1] }
+          }
+          Write-Host "Supported locales: $($supported -join ', ')"
+          Get-ChildItem build/release/app -Directory | Where-Object {
+            if ($supported -contains $_.Name -or $_.Name -eq "en-US") { return $false }
+            try { [void][System.Globalization.CultureInfo]::GetCultureInfo($_.Name); return $true } catch { return $false }
+          } | Remove-Item -Recurse -Force
+
+      - name: Zip build output
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          if (Test-Path build-win-x64.zip) { Remove-Item build-win-x64.zip }
+          [System.IO.Compression.ZipFile]::CreateFromDirectory("build/release", "build-win-x64.zip", [System.IO.Compression.CompressionLevel]::SmallestSize, $false)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: pr-build-win-x64
+          path: build-win-x64.zip
