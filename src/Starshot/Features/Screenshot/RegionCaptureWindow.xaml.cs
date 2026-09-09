@@ -542,30 +542,19 @@ public sealed partial class RegionCaptureWindow : WindowEx
                 );
             }
 
-            // 3+4. 放大镜与鼠标坐标框都钳制到光标所在显示器（不跨屏）
+            // 3. 放大镜（含下方坐标条，一体钳制到光标所在显示器，不跨屏）
             float mx = (float)_currentMousePos.X,
                 my = (float)_currentMousePos.Y;
             GetActiveMonitorDip(mx, my, out float ml, out float mt, out float mr, out float mb);
-            DrawMagnifier(ds, mx, my, ml, mt, mr, mb);
-
-            // 鼠标坐标框：同样钳制到当前显示器
-            const float cbW = 160,
-                cbH = 22,
-                cbOff = 12;
-            float cbX = mx + cbOff,
-                cbY = my + cbOff;
-            if (cbX + cbW > mr)
-                cbX = mx - cbOff - cbW;
-            if (cbY + cbH > mb)
-                cbY = my - cbOff - cbH;
-            if (cbX < ml)
-                cbX = ml;
-            if (cbY < mt)
-                cbY = mt;
-            DrawInfoBox(
+            DrawMagnifier(
                 ds,
-                $"X: {(int)(mx * _scale)} Y: {(int)(my * _scale)}",
-                new Vector2(cbX, cbY)
+                mx,
+                my,
+                ml,
+                mt,
+                mr,
+                mb,
+                $"X: {(int)(mx * _scale)} Y: {(int)(my * _scale)}"
             );
         }
         _swapChain.Present();
@@ -622,7 +611,8 @@ public sealed partial class RegionCaptureWindow : WindowEx
         float monLeft,
         float monTop,
         float monRight,
-        float monBottom
+        float monBottom,
+        string coordText
     )
     {
         if (_displayBitmap is null)
@@ -630,13 +620,17 @@ public sealed partial class RegionCaptureWindow : WindowEx
         int halfCount = MagnifierPixelCount / 2;
         int magSize = MagnifierPixelCount * MagnifierPixelSize;
         const int offset = 10;
+        // 放大镜 + 下方坐标条是一体组合，钳制按整体高度算
+        const int coordGap = 4,
+            coordH = 22;
+        int totalH = magSize + coordGap + coordH;
 
         float destX = mx + offset;
         float destY = my + offset;
         if (destX + magSize > monRight)
             destX = mx - offset - magSize;
-        if (destY + magSize > monBottom)
-            destY = my - offset - magSize;
+        if (destY + totalH > monBottom)
+            destY = my - offset - totalH;
         if (destX < monLeft)
             destX = monLeft;
         if (destY < monTop)
@@ -679,6 +673,41 @@ public sealed partial class RegionCaptureWindow : WindowEx
         ds.FillRectangle(new Rect(cx + ps / 2, cy - ps / 2, destX + magSize - cx - ps / 2, ps), cc);
         ds.FillRectangle(new Rect(cx - ps / 2, destY, ps, cy - ps / 2 - destY), cc);
         ds.FillRectangle(new Rect(cx - ps / 2, cy + ps / 2, ps, destY + magSize - cy - ps / 2), cc);
+
+        // 坐标条：放大镜正下方，文字居中，同款黑底样式
+        DrawCoordStrip(ds, coordText, destX, destY + magSize + coordGap, magSize);
+    }
+
+    /// <summary>坐标条：宽与放大镜对齐，文本水平居中，黑底白字圆角。</summary>
+    private void DrawCoordStrip(
+        CanvasDrawingSession ds,
+        string text,
+        float x,
+        float y,
+        float width
+    )
+    {
+        try
+        {
+            using var fmt = new Microsoft.Graphics.Canvas.Text.CanvasTextFormat
+            {
+                FontSize = 13,
+                FontFamily = "Consolas",
+                HorizontalAlignment = Microsoft.Graphics.Canvas.Text.CanvasHorizontalAlignment.Center,
+            };
+            using var layout = new Microsoft.Graphics.Canvas.Text.CanvasTextLayout(
+                ds,
+                text,
+                fmt,
+                width,
+                22
+            );
+            float textY = y + (22 - (float)layout.LayoutBounds.Height) / 2;
+            ds.FillRoundedRectangle(new Rect(x, y, width, 22), 3, 3, Color.FromArgb(200, 0, 0, 0));
+            ds.DrawRoundedRectangle(new Rect(x, y, width, 22), 3, 3, Color.FromArgb(200, 128, 128, 128), 1);
+            ds.DrawTextLayout(layout, new Vector2(x, textY), Colors.White);
+        }
+        catch { }
     }
 
     private void DrawInfoBox(CanvasDrawingSession ds, string text, Vector2 pos)
