@@ -28,6 +28,8 @@ public sealed partial class RegionCaptureWindow : WindowEx
     private const int MinimumRectangleSize = 5;
     private const int MagnifierPixelCount = 15;
     private const int MagnifierPixelSize = 10;
+    private const int MagnifierCoordGap = 4;
+    private const int MagnifierCoordHeight = 22;
 
     public Rect SelectionRect { get; private set; }
     public bool IsConfirmed { get; private set; }
@@ -542,7 +544,7 @@ public sealed partial class RegionCaptureWindow : WindowEx
                 );
             }
 
-            // 3. 放大镜（含下方坐标条，一体钳制到光标所在显示器，不跨屏）
+            // 3. 放大镜与坐标条整体钳制到光标所在显示器，坐标条随上下翻转保持在远离鼠标的一侧
             float mx = (float)_currentMousePos.X,
                 my = (float)_currentMousePos.Y;
             GetActiveMonitorDip(mx, my, out float ml, out float mt, out float mr, out float mb);
@@ -620,21 +622,24 @@ public sealed partial class RegionCaptureWindow : WindowEx
         int halfCount = MagnifierPixelCount / 2;
         int magSize = MagnifierPixelCount * MagnifierPixelSize;
         const int offset = 10;
-        // 放大镜 + 下方坐标条是一体组合，钳制按整体高度算
-        const int coordGap = 4,
-            coordH = 22;
-        int totalH = magSize + coordGap + coordH;
+        // 先按放大镜 + 坐标条的整体高度定位，再按上下方向排列两者
+        int totalH = magSize + MagnifierCoordGap + MagnifierCoordHeight;
 
         float destX = mx + offset;
-        float destY = my + offset;
+        float groupY = my + offset;
+        bool showAbove = groupY + totalH > monBottom;
         if (destX + magSize > monRight)
             destX = mx - offset - magSize;
-        if (destY + totalH > monBottom)
-            destY = my - offset - totalH;
+        if (showAbove)
+            groupY = my - offset - totalH;
         if (destX < monLeft)
             destX = monLeft;
-        if (destY < monTop)
-            destY = monTop;
+        if (groupY < monTop)
+            groupY = monTop;
+
+        // 坐标条始终放在远离鼠标的一侧：向下展开时在像素图下方，向上翻转时在像素图上方
+        float destY = groupY + (showAbove ? MagnifierCoordHeight + MagnifierCoordGap : 0);
+        float coordY = showAbove ? groupY : destY + magSize + MagnifierCoordGap;
 
         // 源矩形整数对齐，让 NearestNeighbor 真正锐利（不再糊）
         int srcX = (int)Math.Floor(mx * _scale) - halfCount;
@@ -674,8 +679,8 @@ public sealed partial class RegionCaptureWindow : WindowEx
         ds.FillRectangle(new Rect(cx - ps / 2, destY, ps, cy - ps / 2 - destY), cc);
         ds.FillRectangle(new Rect(cx - ps / 2, cy + ps / 2, ps, destY + magSize - cy - ps / 2), cc);
 
-        // 坐标条：放大镜正下方，文字居中，同款黑底样式
-        DrawCoordStrip(ds, coordText, destX, destY + magSize + coordGap, magSize);
+        // 坐标条随展开方向换边，文字居中，同款黑底样式
+        DrawCoordStrip(ds, coordText, destX, coordY, magSize);
     }
 
     /// <summary>坐标条：宽与放大镜对齐，文本水平居中，黑底白字圆角。</summary>
@@ -700,11 +705,12 @@ public sealed partial class RegionCaptureWindow : WindowEx
                 text,
                 fmt,
                 width,
-                22
+                MagnifierCoordHeight
             );
-            float textY = y + (22 - (float)layout.LayoutBounds.Height) / 2;
-            ds.FillRoundedRectangle(new Rect(x, y, width, 22), 3, 3, Color.FromArgb(200, 0, 0, 0));
-            ds.DrawRoundedRectangle(new Rect(x, y, width, 22), 3, 3, Color.FromArgb(200, 128, 128, 128), 1);
+            float textY = y + (MagnifierCoordHeight - (float)layout.LayoutBounds.Height) / 2;
+            var stripRect = new Rect(x, y, width, MagnifierCoordHeight);
+            ds.FillRoundedRectangle(stripRect, 3, 3, Color.FromArgb(200, 0, 0, 0));
+            ds.DrawRoundedRectangle(stripRect, 3, 3, Color.FromArgb(200, 128, 128, 128), 1);
             ds.DrawTextLayout(layout, new Vector2(x, textY), Colors.White);
         }
         catch { }
