@@ -101,17 +101,16 @@ public sealed partial class WelcomeWindow : WindowEx
             ? Lang.Starshot_WelcomeDbDescInstaller
             : Lang.Starshot_WelcomeDbDescPortable;
 
-    private void Grid_Loaded(object sender, RoutedEventArgs e)
+    private async void Grid_Loaded(object sender, RoutedEventArgs e)
     {
         try
         {
+            // 该 WinRT 调用跨套间列集时会同步泵回本线程 DispatcherQueue 消息，
+            // 在 XAML 事件处理器内同步调用会命中 XAML 重入保护直接 FailFast，故挪到线程池
             // 只查 API 可用性：真截一张的实测判定有误判风险，API 检测是确定性结论
-            DxgiSupported = GraphicsCaptureSession.IsSupported()
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-            DxgiNotSupported = DxgiSupported is Visibility.Visible
-                ? Visibility.Collapsed
-                : Visibility.Visible;
+            bool supported = await Task.Run(() => GraphicsCaptureSession.IsSupported());
+            DxgiSupported = supported ? Visibility.Visible : Visibility.Collapsed;
+            DxgiNotSupported = supported ? Visibility.Collapsed : Visibility.Visible;
         }
         catch
         {
