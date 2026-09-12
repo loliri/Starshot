@@ -81,6 +81,7 @@ public sealed partial class RegionCaptureWindow : WindowEx
     // 不通过 WM_SETCURSOR、不注入鼠标输入，也不改动 WinUI 后续的光标管理。
     private bool _cursorBootstrapPending;
     private bool _cursorBootstrapApplied;
+    private POINT? _cursorBootstrapOrigin; // 独立于每帧更新的预览坐标，使用屏幕物理坐标
 
     // 单例：选区完成信号（替代 Closed），ScreenCaptureService await 它；窗口不 Close 只 Hide
     public TaskCompletionSource<bool> Completion { get; private set; }
@@ -206,6 +207,7 @@ public sealed partial class RegionCaptureWindow : WindowEx
         _pressedOnHover = false;
         _cursorBootstrapPending = false;
         _cursorBootstrapApplied = false;
+        _cursorBootstrapOrigin = null;
         if (User32.GetCursorPos(out var initCursor))
         {
             _currentMousePos = new Point(
@@ -465,14 +467,20 @@ public sealed partial class RegionCaptureWindow : WindowEx
             _lockedW = (float)_swapChain.Size.Width;
             _lockedH = (float)_swapChain.Size.Height;
             _sizeLocked = true;
-            if (User32.GetCursorPos(out var initCursor))
-            {
-                _currentMousePos = new Point(
-                    (initCursor.x - _vx) / _scale,
-                    (initCursor.y - _vy) / _scale
-                );
-            }
             _ = Task.Run(DetectWindows);
+        }
+
+        // 不依赖 PointerMoved 的缓存位置：窗口复用/激活时的指针事件可能仍带旧坐标。
+        // 每帧在绘制前读取真实屏幕位置；屏外预绘时也用目标虚拟屏幕原点转换，
+        // 不能用当前屏外 HWND 的 ScreenToClient，否则会把 -32000 偏移带进预览。
+        if (User32.GetCursorPos(out var cursorPosition))
+        {
+            _currentMousePos = new Point(
+                (cursorPosition.x - _vx) / _scale,
+                (cursorPosition.y - _vy) / _scale
+            );
+            if (!_isMouseDown)
+                UpdateHover(_currentMousePos);
         }
 
         using (var ds = _swapChain.CreateDrawingSession(Colors.Transparent))
@@ -771,11 +779,19 @@ public sealed partial class RegionCaptureWindow : WindowEx
     private void Canvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         var pos = e.GetCurrentPoint(Canvas).Position;
-        if (pos != _currentMousePos && _cursorBootstrapPending)
+        if (_cursorBootstrapPending && User32.GetCursorPos(out var cursorPosition))
         {
-            // 同坐标的生成事件不结束桥接；坐标变化后保留原有 ProtectedCursor 接管。
-            _cursorBootstrapPending = false;
-            Serilog.Log.Debug("Region cursor bootstrap handed off after pointer movement");
+            // 预览每帧同步坐标，不能再拿它当“上一次输入位置”。
+            // 对比本会话显示时的物理坐标，也避免激活时的旧事件坐标提前结束桥接。
+            if (
+                _cursorBootstrapOrigin is POINT origin
+                && (cursorPosition.x != origin.x || cursorPosition.y != origin.y)
+            )
+            {
+                _cursorBootstrapPending = false;
+                Serilog.Log.Debug("Region cursor bootstrap handed off after pointer movement");
+            }
+            _cursorBootstrapOrigin ??= cursorPosition;
         }
         _currentMousePos = pos;
 
@@ -927,6 +943,9 @@ public sealed partial class RegionCaptureWindow : WindowEx
             User32.SetWindowPosFlags.SWP_NOZORDER
         );
         Activate();
+        _cursorBootstrapOrigin = User32.GetCursorPos(out var cursorPosition)
+            ? cursorPosition
+            : null;
         _cursorBootstrapPending = true;
         ApplyBootstrapCursor();
     }
