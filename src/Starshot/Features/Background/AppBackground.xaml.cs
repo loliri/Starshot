@@ -64,12 +64,21 @@ public sealed partial class AppBackground : UserControl
     }
 
     // ===== 视频 =====
+    private const int MediaOpenTimeoutMs = 5000;
+    private const int FirstFrameTimeoutMs = 2000;
+    private const int MediaPlayerMaxRetries = 2;
+
     private MediaPlayer? _mediaPlayer;
-    private int _mediaPlayerRetryCount; // 管线卡死重建次数，首帧到则清零
+    private string? _currentVideoFile;
+    private int _mediaPlayerRetryCount;
+    private bool _mediaOpened;
+    private bool _videoFramePresented;
     private CanvasRenderTarget? _videoSurface;
     private CanvasImageSource? _videoImageSource;
     private readonly SemaphoreSlim _videoSemaphore = new(1, 1);
     private bool _videoAccentExtracted; // 视频首帧取色标志（取一次，避免每帧取导致强调色乱跳）
+    private bool _windowHidden;
+    private bool _sessionLocked;
 
     public AppBackground()
     {
@@ -99,6 +108,15 @@ public sealed partial class AppBackground : UserControl
     /// </summary>
     private void OnWindowStateChanged(object _, MainWindowStateChangedMessage m)
     {
+        if (m.Hide)
+        {
+            _windowHidden = true;
+        }
+        else if (m.Activate)
+        {
+            _windowHidden = false;
+        }
+
         if (_mediaPlayer is null)
         {
             return;
@@ -110,12 +128,29 @@ public sealed partial class AppBackground : UserControl
             {
                 _mediaPlayer.Pause();
             }
-            else if (m.Activate && state is not MediaPlaybackState.Playing)
+            else if (m.Activate && !_sessionLocked)
             {
-                _mediaPlayer.Play();
+                if (!_mediaOpened)
+                {
+                    _ = WatchMediaOpenAsync(_mediaPlayer);
+                }
+                else
+                {
+                    if (state is not MediaPlaybackState.Playing)
+                    {
+                        _mediaPlayer.Play();
+                    }
+                    if (!_videoFramePresented)
+                    {
+                        _ = WatchFirstFrameAsync(_mediaPlayer);
+                    }
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Change video playback for window state failed");
+        }
     }
 
     private bool _pausedBySessionLocked;
@@ -128,6 +163,10 @@ public sealed partial class AppBackground : UserControl
     {
         try
         {
+            if (sessionLock)
+            {
+                _sessionLocked = true;
+            }
             if (
                 _mediaPlayer?.PlaybackSession?.PlaybackState
                 is MediaPlaybackState.Playing
@@ -137,24 +176,46 @@ public sealed partial class AppBackground : UserControl
             }
             _mediaPlayer?.Pause();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Pause video wallpaper failed");
+        }
     }
 
     public void PlayVideo(bool sessionUnlock = false)
     {
         try
         {
-            if (!sessionUnlock)
+            bool pausedBySessionLock = _pausedBySessionLocked;
+            if (sessionUnlock)
             {
-                _mediaPlayer?.Play();
-            }
-            else if (_pausedBySessionLocked)
-            {
+                _sessionLocked = false;
                 _pausedBySessionLocked = false;
-                _mediaPlayer?.Play();
+            }
+            bool shouldResume =
+                !sessionUnlock
+                || pausedBySessionLock
+                || (_mediaOpened && !_videoFramePresented);
+            if (shouldResume && !_windowHidden && !_sessionLocked && _mediaPlayer is not null)
+            {
+                if (!_mediaOpened)
+                {
+                    _ = WatchMediaOpenAsync(_mediaPlayer);
+                }
+                else
+                {
+                    _mediaPlayer.Play();
+                    if (!_videoFramePresented)
+                    {
+                        _ = WatchFirstFrameAsync(_mediaPlayer);
+                    }
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Resume video wallpaper failed");
+        }
     }
 
     public async Task UpdateBackgroundAsync()
@@ -217,17 +278,25 @@ public sealed partial class AppBackground : UserControl
                 var placeholder = PickRandomImageFromFolder(Path.GetDirectoryName(file));
                 if (placeholder is not null)
                 {
-                    await ChangeBackgroundImageAsync(placeholder, ct);
-                }
-                else
-                {
-                    BackgroundImageSource = null;
+                    try
+                    {
+                        await ChangeBackgroundImageAsync(placeholder, ct);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        // 占位图损坏或解码器不支持时不能阻断视频启动；保留当前背景直到首帧成功提交
+                        _logger.LogWarning(ex, "Video placeholder failed {File}", placeholder);
+                    }
                 }
                 // 占位加载尾段是否观察 token 取决于取色开关（开关开时 ExtractAccentAsync 内会主动抛）；
                 // 关闭时尾段无 token-aware await，取消未必抛出，放行会把已取消会话的 MediaPlayer 启起来
                 // 叠在新会话上（双视频同屏 + _lastFile 被旧值覆盖），此处强制拦截兜底
                 ct.ThrowIfCancellationRequested();
-                StartMediaPlayer(file);
+                StartMediaPlayer(file, resetRetryCount: true);
             }
             else
             {
@@ -537,136 +606,328 @@ public sealed partial class AppBackground : UserControl
         }
     }
 
-    private void StartMediaPlayer(string file)
+    private void StartMediaPlayer(string file, bool resetRetryCount)
     {
-        _logger.LogDebug("StartMediaPlayer {File}", file);
-        _mediaPlayer = new MediaPlayer
+        if (resetRetryCount)
+        {
+            _mediaPlayerRetryCount = 0;
+        }
+
+        _logger.LogDebug(
+            "StartMediaPlayer file={File} retry={Retry}",
+            file,
+            _mediaPlayerRetryCount
+        );
+        _currentVideoFile = file;
+        _mediaOpened = false;
+        _videoFramePresented = false;
+        _videoAccentExtracted = false;
+
+        var player = new MediaPlayer
         {
             IsLoopingEnabled = true,
             IsMuted = true,
-            Source = MediaSource.CreateFromUri(new Uri(file)),
         };
-        _mediaPlayer.CommandManager.IsEnabled = false;
-        _mediaPlayer.SystemMediaTransportControls.IsEnabled = false;
-        _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
-        _mediaPlayer.MediaFailed += (_, a) =>
-            _logger.LogError(a.ExtendedErrorCode, "MediaPlayer failed");
-        _mediaPlayer.MediaOpened += MediaPlayer_MediaOpened;
-        _videoAccentExtracted = false; // 新视频重置取色标志
-        // 不在此 Play：等 MediaOpened（Source 解析完成、NaturalVideoWidth/Height 可用）再进 frame server + Play，
-        // 规避启动期 MF 管线（demux/decode/首帧）未就绪时 VideoFrameAvailable 间歇不触发的竞争
+        player.CommandManager.IsEnabled = false;
+        player.SystemMediaTransportControls.IsEnabled = false;
+        player.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
+        player.MediaFailed += MediaPlayer_MediaFailed;
+        player.MediaOpened += MediaPlayer_MediaOpened;
+        _mediaPlayer = player;
+
+        try
+        {
+            // 事件全部订阅完成后再设置 Source，避免本地文件快速打开/失败时漏掉状态事件
+            player.Source = MediaSource.CreateFromUri(new Uri(file));
+            _ = WatchMediaOpenAsync(player);
+        }
+        catch (Exception ex)
+        {
+            RetryOrKeepPlaceholder(player, "source setup", ex);
+        }
+    }
+
+    private async Task WatchMediaOpenAsync(MediaPlayer player)
+    {
+        await Task.Delay(MediaOpenTimeoutMs).ConfigureAwait(false);
+        if (
+            DispatcherQueue is null
+            || !DispatcherQueue.TryEnqueue(() =>
+            {
+                if (
+                    _mediaPlayer == player
+                    && !_mediaOpened
+                    && !_windowHidden
+                    && !_sessionLocked
+                )
+                {
+                    RetryOrKeepPlaceholder(player, "MediaOpened timeout");
+                }
+            })
+        )
+        {
+            _logger.LogWarning("MediaOpened watchdog could not enqueue");
+        }
+    }
+
+    private async Task WatchFirstFrameAsync(MediaPlayer player)
+    {
+        await Task.Delay(FirstFrameTimeoutMs).ConfigureAwait(false);
+        if (
+            DispatcherQueue is null
+            || !DispatcherQueue.TryEnqueue(() =>
+            {
+                if (
+                    _mediaPlayer == player
+                    && !_videoFramePresented
+                    && !_windowHidden
+                    && !_sessionLocked
+                )
+                {
+                    RetryOrKeepPlaceholder(player, "first frame timeout");
+                }
+            })
+        )
+        {
+            _logger.LogWarning("First-frame watchdog could not enqueue");
+        }
     }
 
     private void MediaPlayer_MediaOpened(MediaPlayer sender, object args)
     {
-        _logger.LogDebug("MediaOpened, enter frame server + Play");
-        sender.IsVideoFrameServerEnabled = true;
-        sender.Play();
-        // MediaOpened 后 2s 仍无首帧 = 管线卡死。重建最多 2 次；仍卡则放弃视频、回退随机图片（不黑屏）。
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(2000);
+        bool queued =
             DispatcherQueue?.TryEnqueue(() =>
             {
-                if (_mediaPlayer != sender || _videoImageSource is not null)
-                    return; // 已切到别的视频 / 首帧已到
-                if (_mediaPlayerRetryCount < 2)
+                if (_mediaPlayer != sender)
                 {
-                    _mediaPlayerRetryCount++;
-                    _logger.LogWarning(
-                        "No first frame 2s after MediaOpened, rebuild MediaPlayer (retry {Retry})",
-                        _mediaPlayerRetryCount
-                    );
-                    var f = _lastFile;
-                    if (f is not null)
+                    return;
+                }
+
+                try
+                {
+                    _mediaOpened = true;
+                    sender.IsVideoFrameServerEnabled = true;
+                    if (!_windowHidden && !_sessionLocked)
                     {
-                        DisposeVideoResource();
-                        StartMediaPlayer(f);
+                        _logger.LogDebug("MediaOpened, enter frame server + Play");
+                        sender.Play();
+                        _ = WatchFirstFrameAsync(sender);
+                    }
+                    else
+                    {
+                        _logger.LogDebug(
+                            "MediaOpened while paused hidden={Hidden} sessionLocked={SessionLocked}",
+                            _windowHidden,
+                            _sessionLocked
+                        );
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    // 占位图已在显示（进入视频分支时加载），保持不动不黑屏；不清 _lastFile 避免同进程反复重试同一卡死视频
-                    _logger.LogWarning(
-                        "Video still stuck after 2 rebuilds, keeping placeholder image"
-                    );
-                    DisposeVideoResource();
+                    RetryOrKeepPlaceholder(sender, "MediaOpened handler", ex);
                 }
-            });
-        });
+            }) ?? false;
+        if (!queued)
+        {
+            _logger.LogWarning("MediaOpened could not enqueue to UI dispatcher");
+        }
+    }
+
+    private void MediaPlayer_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
+    {
+        QueueVideoFailure(sender, "MediaFailed", args.ExtendedErrorCode);
+    }
+
+    private void QueueVideoFailure(MediaPlayer sender, string phase, Exception? exception = null)
+    {
+        if (
+            DispatcherQueue is null
+            || !DispatcherQueue.TryEnqueue(() => RetryOrKeepPlaceholder(sender, phase, exception))
+        )
+        {
+            _logger.LogError(exception, "Video failure could not enqueue phase={Phase}", phase);
+        }
+    }
+
+    private void RetryOrKeepPlaceholder(
+        MediaPlayer sender,
+        string phase,
+        Exception? exception = null
+    )
+    {
+        if (_mediaPlayer != sender)
+        {
+            return;
+        }
+
+        string? file = _currentVideoFile;
+        if (_mediaPlayerRetryCount < MediaPlayerMaxRetries && file is not null)
+        {
+            _mediaPlayerRetryCount++;
+            _logger.LogWarning(
+                exception,
+                "Video initialization failed phase={Phase}; rebuild MediaPlayer retry={Retry}/{MaxRetries}",
+                phase,
+                _mediaPlayerRetryCount,
+                MediaPlayerMaxRetries
+            );
+            DisposeVideoResource();
+            StartMediaPlayer(file, resetRetryCount: false);
+        }
+        else
+        {
+            _logger.LogWarning(
+                exception,
+                "Video initialization failed phase={Phase}; retries exhausted, keeping placeholder image",
+                phase
+            );
+            DisposeVideoResource();
+        }
     }
 
     private void MediaPlayer_VideoFrameAvailable(MediaPlayer sender, object args)
     {
-        if (_videoSemaphore.CurrentCount == 0)
+        if (_mediaPlayer != sender || !_videoSemaphore.Wait(0))
         {
             return;
         }
-        _videoSemaphore.Wait();
-        DispatcherQueue?.TryEnqueue(() =>
+
+        bool queued;
+        try
         {
-            try
+            queued = DispatcherQueue?.TryEnqueue(() =>
             {
-                if (_videoSurface is null || _videoImageSource is null)
+                CanvasRenderTarget? pendingSurface = null;
+                try
                 {
-                    _videoSurface?.Dispose();
+                    // Dispose/rebuild 后旧播放器可能仍有已排队的帧回调，不能再触碰新会话的共享 surface
+                    if (_mediaPlayer != sender)
+                    {
+                        return;
+                    }
+
                     int w = (int)sender.PlaybackSession.NaturalVideoWidth;
                     int h = (int)sender.PlaybackSession.NaturalVideoHeight;
-                    _videoSurface = new CanvasRenderTarget(
-                        CanvasDevice.GetSharedDevice(),
-                        w,
-                        h,
-                        96
-                    );
-                    _videoImageSource = new CanvasImageSource(
-                        CanvasDevice.GetSharedDevice(),
-                        w,
-                        h,
-                        96
-                    );
-                    BackgroundImageSource = _videoImageSource;
-                    _mediaPlayerRetryCount = 0;
-                    ReportNowPlaying(_lastFile);
-                    _logger.LogDebug("VideoFrameAvailable first frame {W}x{H}", w, h);
-                }
-                sender.CopyFrameToVideoSurface(_videoSurface);
-                using var ds = _videoImageSource.CreateDrawingSession(Colors.Transparent);
-                ds.DrawImage(_videoSurface);
-                // 视频首帧取一次色（自动取色开时）。不每帧取，否则强调色随帧乱跳。
-                if (!_videoAccentExtracted && AppConfig.EnableAccentFromWallpaper)
-                {
-                    _videoAccentExtracted = true;
-                    try
+                    if (w <= 0 || h <= 0)
                     {
-                        var color = AccentColorHelper.GetAccentColor(
-                            _videoSurface.GetPixelBytes(),
-                            (int)_videoSurface.SizeInPixels.Width,
-                            (int)_videoSurface.SizeInPixels.Height
+                        throw new InvalidOperationException($"Invalid video frame size {w}x{h}.");
+                    }
+
+                    bool needsNewSurface =
+                        _videoSurface is null
+                        || _videoImageSource is null
+                        || (int)_videoSurface.SizeInPixels.Width != w
+                        || (int)_videoSurface.SizeInPixels.Height != h;
+                    CanvasRenderTarget surface;
+                    CanvasImageSource imageSource;
+                    if (needsNewSurface)
+                    {
+                        pendingSurface = new CanvasRenderTarget(
+                            CanvasDevice.GetSharedDevice(),
+                            w,
+                            h,
+                            96
                         );
-                        if (color is not null)
+                        surface = pendingSurface;
+                        imageSource = new CanvasImageSource(
+                            CanvasDevice.GetSharedDevice(),
+                            w,
+                            h,
+                            96
+                        );
+                    }
+                    else
+                    {
+                        surface = _videoSurface!;
+                        imageSource = _videoImageSource!;
+                    }
+
+                    // 只有 Copy + Draw 都成功，才发布新 surface 并用它替换占位图
+                    sender.CopyFrameToVideoSurface(surface);
+                    using (var ds = imageSource.CreateDrawingSession(Colors.Transparent))
+                    {
+                        ds.DrawImage(surface);
+                    }
+
+                    if (needsNewSurface)
+                    {
+                        _videoSurface?.Dispose();
+                        _videoSurface = surface;
+                        _videoImageSource = imageSource;
+                        pendingSurface = null;
+                    }
+                    BackgroundImageSource = imageSource;
+
+                    if (!_videoFramePresented)
+                    {
+                        _videoFramePresented = true;
+                        _mediaPlayerRetryCount = 0;
+                        ReportNowPlaying(_currentVideoFile);
+                        _logger.LogDebug("Video first frame presented {W}x{H}", w, h);
+                    }
+
+                    // 视频首个成功呈现帧取一次色（自动取色开时），避免强调色随帧乱跳
+                    if (!_videoAccentExtracted && AppConfig.EnableAccentFromWallpaper)
+                    {
+                        _videoAccentExtracted = true;
+                        try
                         {
-                            AccentColorHelper.ChangeAppAccentColor(color);
-                            // 同图片壁纸：只应用不存储，不污染手动色
+                            var color = AccentColorHelper.GetAccentColor(
+                                surface.GetPixelBytes(),
+                                (int)surface.SizeInPixels.Width,
+                                (int)surface.SizeInPixels.Height
+                            );
+                            if (color is not null)
+                            {
+                                AccentColorHelper.ChangeAppAccentColor(color);
+                                // 同图片壁纸：只应用不存储，不污染手动色
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Accent from video first frame");
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Accent from video first frame");
-                    }
                 }
-            }
-            catch { }
-            finally
-            {
-                _videoSemaphore.Release();
-            }
-        });
+                catch (Exception ex)
+                {
+                    // 不把空画布发布为成功首帧；看门狗仍会在超时后重建播放器
+                    _logger.LogWarning(ex, "Video frame copy/draw failed");
+                }
+                finally
+                {
+                    pendingSurface?.Dispose();
+                    _videoSemaphore.Release();
+                }
+            }) ?? false;
+        }
+        catch (Exception ex)
+        {
+            queued = false;
+            _logger.LogWarning(ex, "Enqueue video frame failed");
+        }
+        if (!queued)
+        {
+            _videoSemaphore.Release();
+            _logger.LogWarning("Video frame could not enqueue to UI dispatcher");
+        }
     }
 
     private void DisposeVideoResource()
     {
-        _mediaPlayer?.Dispose();
+        // 先使 sender 身份失效，让已排进 DispatcherQueue 的旧帧回调只负责释放信号量后退出
+        var player = _mediaPlayer;
         _mediaPlayer = null;
+        _currentVideoFile = null;
+        _mediaOpened = false;
+        _videoFramePresented = false;
+        if (player is not null)
+        {
+            player.VideoFrameAvailable -= MediaPlayer_VideoFrameAvailable;
+            player.MediaFailed -= MediaPlayer_MediaFailed;
+            player.MediaOpened -= MediaPlayer_MediaOpened;
+            player.Dispose();
+        }
         _videoSurface?.Dispose();
         _videoSurface = null;
         _videoImageSource = null;
