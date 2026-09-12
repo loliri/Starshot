@@ -120,7 +120,7 @@ HDR screenshots can simultaneously produce an Ultra HDR JPEG (SDR base image + H
 
 #### Region Screenshot HDR Trade-off
 
-The region screenshot overlay **intentionally** tone-maps HDR frames to SDR for display — because WinUI's `CanvasControl` uses an SDR swap chain, and raw scRGB floating-point output would appear discolored or darkened. **The saved file is full HDR**, untouched; highlight compression during selection only affects the preview, never the output.
+The region screenshot overlay tone-maps HDR frames to SDR for display (a full-screen FP16 frame isn't worth the cost for a selection preview). **The saved file is full HDR**; highlight compression during selection only affects the preview, never the output.
 
 ### Three Screenshot Modes
 
@@ -249,6 +249,7 @@ Output formats: SDR JPG / SDR PNG / AVIF / JPEG XL / Ultra HDR JPG, quality defa
   - **Specific Video**: Loops muted; auto-pauses when the main window is hidden.
   - **Random from Folder**: Picks a random image or video from a folder on each launch; an optional "Prefer video" sub-toggle prefers videos when on.
   - Lost wallpaper sources are auto-detected, with config cleanup and fallback to no wallpaper + toast notification.
+  - Fill mode crops with **top-left** alignment (`UniformToFill`): a narrow (portrait) wallpaper in a wide window shows the upper portion.
 - **Accent Color**:
   - **Auto-extract from wallpaper** (on by default): Samples the wallpaper's dominant color as the app accent color (HSV saturation boost). For videos, only the first frame is sampled to avoid color flickering.
   - **Custom Color**: Manual color picker overrides auto-extraction.
@@ -276,11 +277,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 
 ## Known Limitations
 
-- The region screenshot overlay displays HDR frames as SDR (WinUI CanvasControl uses an SDR swap chain); saved files are unaffected.
 - HDR JPEG XL output does not embed content light level metadata (the codec wrapper does not expose the API); some browsers may dim highlights as a result. AVIF and PNGv3 embed it and are not affected.
-- Custom wallpapers use `UniformToFill` to cover the window, but WinUI's crop is not centered — it is currently **top-left** aligned. For example, a narrow (portrait) wallpaper in a wide window will only show the upper portion (cropped from the top rather than centered).
-- When the region screenshot overlay first opens, the cursor remains the default system shape. **You need to move the mouse once** for the crosshair cursor to appear (WinUI `ProtectedCursor` does not take immediate effect on a stationary pointer already over the element — moving once triggers a pointer event, after which it works normally).
-- When hovering certain windows in region capture, the coordinate box may show negative values (e.g. `-11,-11`). This is the window extended frame bounds reported by Windows DWM (including off-screen shadow/border); Starshot reads it as-is — the off-screen part is invisible and does not affect the screenshot.
 - Video wallpaper may fail to initialize on startup due to MF media pipeline contention (intermittent, not fully resolved); during load a random image from the video's directory is shown as a placeholder, and kept if the video gets stuck — no black screen.
 
 ## Architecture
@@ -323,19 +320,19 @@ Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `ap
 
 ### Tech Stack
 
-| Layer          | Technology                                                           |
-| -------------- | -------------------------------------------------------------------- |
-| UI Framework   | WinUI 3 (Windows App SDK 1.8)                                        |
-| Runtime        | .NET 10                                                              |
-| Graphics       | Win2D 1.3 (D3D11 interop, HDR tone mapping, histogram effects)       |
-| Codecs         | Starward.Codec NuGet (libavif / libjxl / Ultra HDR P/Invoke wrapper) |
-| Data Storage   | config.sjson (System.Text.Json)                                      |
-| Logging        | Serilog                                                              |
-| System Tray    | H.NotifyIcon.WinUI                                                   |
-| Thumbnails     | Custom CachedImage (ImageEx async loading + thumbnail cache)         |
-| Region Overlay | Win2D CanvasControl (frozen-frame rendering + selection drawing)     |
-| Clipboard      | Win32 native API (OpenClipboard / SetClipboardData)                  |
-| Launcher       | Native C++ (v145 toolset, static CRT)                                |
+| Layer          | Technology                                                              |
+| -------------- | ----------------------------------------------------------------------- |
+| UI Framework   | WinUI 3 (Windows App SDK 1.8)                                           |
+| Runtime        | .NET 10                                                                 |
+| Graphics       | Win2D 1.3 (D3D11 interop, HDR tone mapping, histogram effects)          |
+| Codecs         | Starward.Codec NuGet (libavif / libjxl / Ultra HDR P/Invoke wrapper)    |
+| Data Storage   | config.sjson (System.Text.Json)                                         |
+| Logging        | Serilog                                                                 |
+| System Tray    | H.NotifyIcon.WinUI                                                      |
+| Thumbnails     | Custom CachedImage (ImageEx async loading + thumbnail cache)            |
+| Region Overlay | Win2D CanvasSwapChainPanel (frozen-frame rendering + selection drawing) |
+| Clipboard      | Win32 native API (OpenClipboard / SetClipboardData)                     |
+| Launcher       | Native C++ (v145 toolset, static CRT)                                   |
 
 ### Re-entry Protection
 
@@ -410,6 +407,13 @@ Contributions welcome:
 Thanks to every user for the feedback and support!
 
 ## FAQ
+
+<details>
+<summary><b>Region capture coordinate box shows negative values (e.g. -11,-11) when hovering certain windows</b></summary>
+
+Windows DWM reports window bounds as extended frame bounds including off-screen shadow/border; the negative values come from the reserved edges a maximized window extends beyond the screen. Starshot reads and displays them as-is — the off-screen part is invisible anyway, and the screenshot result is unaffected.
+
+</details>
 
 <details>
 <summary><b>Screenshot library (home page) images show incorrect / garbled colors</b></summary>
