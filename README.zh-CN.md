@@ -38,7 +38,7 @@ Starshot 使用 [Windows Graphics Capture](https://learn.microsoft.com/windows/u
 - 🔤 **文字识别（OCR）**——照片应用同款 OneOCR 引擎，查看器内拖选复制，全局快捷键一键取字
 - 🗂️ **多格式支持**——AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG，含批量转换工具
 - 🖥️ **多显示器**——区域截图可跨屏框选，直接组合截取横跨多屏的图像
-- 🔄 **自动检查更新**——内置更新检查，发现新版可直接差量更新
+- 🔄 **自动检查更新**——后台定时检查，发现新版推送系统通知，点击直接打开更新窗口，可差量更新
 
 <div align="center">
 <table>
@@ -318,6 +318,7 @@ C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Sta
 ### 托盘与后台启动
 
 - `--hide` 自启时不创建 MainWindow，全局热键注册到 SystemTrayWindow 的 hwnd（托盘窗口作为常驻宿主）
+- 更新检查与遥测同样挂在常驻生命周期上：启动后 30~60 秒首查，之后每 5 小时一次，失败 10 分钟后重试；新版本优先发系统通知（可留在通知中心），通知不可用时回退托盘气泡
 - H.NotifyIcon.WinUI 的 TaskbarIcon 依赖 Window 的一次 Show 触发 `Loaded` 才注册图标；初始化时套 `WS_EX_LAYERED + alpha=0` 让窗口透明地完成这次 Show，避免 `--hide` 自启时可见闪烁
 - C++ 启动器用 `argv[1..]` 重新拼接透传命令
 

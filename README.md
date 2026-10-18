@@ -36,7 +36,7 @@ Starshot captures game window content with [Windows Graphics Capture](https://le
 - 🔤 **Text Recognition (OCR)** — Same OneOCR engine as the Windows Photos app; drag-select and copy in the viewer, or grab text with a global shortcut
 - 🗂️ **Multi-format Support** — AVIF / JPEG XL / PNGv3 / Ultra HDR JPEG / PNG, including a batch conversion tool.
 - 🖥️ **Multi-Monitor** — Region screenshots can span across monitors, composing captures that cross screen boundaries.
-- 🔄 **Auto Update Check** — Built-in update check; delta updates on new releases.
+- 🔄 **Auto Update Check** — Checks in the background; new releases trigger a system notification that opens the update window when clicked, with delta updates.
 
 <div align="center">
 <table>
@@ -316,6 +316,7 @@ Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `ap
 ### Tray & Background Startup
 
 - `--hide`: When auto-starting, MainWindow is not created. Global hotkeys are registered against SystemTrayWindow's hwnd (the tray window serves as the persistent host).
+- The update check and telemetry share the same resident lifetime: first check 30–60 seconds after launch, then every 5 hours, retrying 10 minutes after a failure. New versions are announced with a system notification (persists in Notification Center), falling back to a tray balloon when notifications are unavailable.
 - H.NotifyIcon.WinUI's TaskbarIcon requires one Window.Show to trigger `Loaded` before the icon registers. During initialization, `WS_EX_LAYERED + alpha=0` makes the window complete this show transparently, avoiding visible flash on `--hide` auto-start.
 - The C++ launcher re-joins `argv[1..]` to pass through command-line arguments.
 
