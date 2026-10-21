@@ -1081,4 +1081,7 @@
   <data name="AppearanceSetting_HideInfoWindowFromCaptureDesc" xml:space="preserve">
     <value>Sets WDA_EXCLUDEFROMCAPTURE, keeping the info window out of screen captures.</value>
   </data>
+  <data name="AppearanceSetting_ShowScreenshotInfoWindow" xml:space="preserve">
+    <value>Show screenshot info window</value>
+  </data>
 </root>

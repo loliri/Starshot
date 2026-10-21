@@ -582,6 +582,12 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    public static bool ShowScreenshotInfoWindow
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
     /// <summary>
     /// 全屏时静默截图通知：开=截图弹浮窗前检测独占全屏（SHQueryUserNotificationState），
     /// 全屏中不弹（浮窗会把游戏最小化到桌面），平时照常弹。

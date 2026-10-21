@@ -159,6 +159,22 @@
 
       <!--  信息浮窗  -->
       <StackPanel Spacing="6">
+        <ToggleSwitch
+          IsOn="{x:Bind ShowScreenshotInfoWindow, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
+          OnContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
+        />
+        <ToggleSwitch
+          IsOn="{x:Bind MuteNotificationInFullscreen, Mode=TwoWay}"
+          OffContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
+          OnContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
+        />
+        <TextBlock
+          FontSize="12"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreenDesc}"
+          TextWrapping="Wrap"
+        />
         <TextBlock FontSize="20" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDuration}" />
         <StackPanel Orientation="Horizontal" Spacing="8">
           <NumberBox

@@ -2891,6 +2891,12 @@
             }
         }
 
+        public static string AppearanceSetting_ShowScreenshotInfoWindow {
+            get {
+                return ResourceManager.GetString("AppearanceSetting_ShowScreenshotInfoWindow", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Info window duration 的本地化字符串。
         /// </summary>

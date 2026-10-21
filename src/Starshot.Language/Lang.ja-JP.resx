@@ -1081,4 +1081,7 @@
   <data name="AppearanceSetting_HideInfoWindowFromCaptureDesc" xml:space="preserve">
     <value>WDA_EXCLUDEFROMCAPTURE を設定し、情報ウィンドウが画面キャプチャに写り込まないようにします。</value>
   </data>
+  <data name="AppearanceSetting_ShowScreenshotInfoWindow" xml:space="preserve">
+    <value>スクリーンショット情報ウィンドウを表示</value>
+  </data>
 </root>

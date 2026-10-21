@@ -107,6 +107,21 @@ public sealed partial class AppearanceSetting : PageBase
         }
     } = AppConfig.EnableAccentFromWallpaper;
 
+    public bool ShowScreenshotInfoWindow
+    {
+        get => AppConfig.ShowScreenshotInfoWindow;
+        set => AppConfig.ShowScreenshotInfoWindow = value;
+    }
+
+    /// <summary>
+    /// 全屏时静默截图通知：开=检测独占全屏，全屏中不弹浮窗；关（默认）=照弹且不检测。
+    /// </summary>
+    public bool MuteNotificationInFullscreen
+    {
+        get => AppConfig.MuteNotificationInFullscreen;
+        set => AppConfig.MuteNotificationInFullscreen = value;
+    }
+
     /// <summary>信息浮窗完成态停留时长（毫秒）</summary>
     public double InfoWindowDuration
     {
