@@ -37,14 +37,12 @@ internal class ScreenCaptureService
     private RegionCaptureWindow? _regionWindow;
 
     /// <summary>
-    /// 浮窗总开关关闭时不显示；全屏静默关闭（默认）时直接显示；
+    /// 全屏静默关闭（默认）时直接显示；
     /// 开=弹窗前查会话状态，D3D 独占全屏运行中不显示（浮窗会把游戏最小化到桌面），其余照常。
     /// 查询失败按可显示处理——检测不可用不误伤正常弹窗。
     /// </summary>
     private static bool ShouldShowInfoWindow()
     {
-        if (!AppConfig.ShowScreenshotInfoWindow)
-            return false;
         if (!AppConfig.MuteNotificationInFullscreen)
             return true;
         return Shell32.SHQueryUserNotificationState(out var state).Failed
