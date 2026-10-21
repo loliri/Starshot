@@ -146,7 +146,7 @@
           OnContent="{x:Bind lang:Lang.ScreenshotSetting_ShowScreenshotInfoWindow}"
         />
         <StackPanel Spacing="12" Visibility="{x:Bind InfoWindowOptionsVisibility}">
-          <TextBlock Margin="0,12,0,0" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDuration}" />
+          <TextBlock Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDuration}" />
           <StackPanel Orientation="Horizontal" Spacing="8">
             <NumberBox
               Width="150"
@@ -170,7 +170,6 @@
             TextWrapping="Wrap"
           />
           <ToggleSwitch
-            Margin="0,12,0,0"
             IsOn="{x:Bind MuteNotificationInFullscreen, Mode=TwoWay}"
             OffContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
             OnContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
@@ -182,7 +181,6 @@
             TextWrapping="Wrap"
           />
           <ToggleSwitch
-            Margin="0,12,0,0"
             IsOn="{x:Bind HideInfoWindowFromCapture, Mode=TwoWay}"
             OffContent="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCapture}"
             OnContent="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCapture}"
