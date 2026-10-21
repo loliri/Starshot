@@ -13,6 +13,65 @@ namespace Starshot.Features.Setting;
 
 public sealed partial class ScreenshotSetting : PageBase
 {
+    /// <summary>
+    /// 截图信息浮窗总开关：开（默认）=正常显示；关=后续截图不弹浮窗，已显示的浮窗按原倒计时消失。
+    /// </summary>
+    public bool ShowScreenshotInfoWindow
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.ShowScreenshotInfoWindow = value;
+                OnPropertyChanged(nameof(InfoWindowOptionsVisibility));
+            }
+        }
+    } = AppConfig.ShowScreenshotInfoWindow;
+
+    public Visibility InfoWindowOptionsVisibility =>
+        ShowScreenshotInfoWindow ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>
+    /// 全屏时静默截图通知：开=检测独占全屏，全屏中不弹浮窗；关（默认）=照弹且不检测。
+    /// </summary>
+    public bool MuteNotificationInFullscreen
+    {
+        get => AppConfig.MuteNotificationInFullscreen;
+        set => AppConfig.MuteNotificationInFullscreen = value;
+    }
+
+    /// <summary>信息浮窗完成态停留时长（毫秒）</summary>
+    public double InfoWindowDuration
+    {
+        get;
+        set
+        {
+            if (!double.IsFinite(value))
+            {
+                return;
+            }
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.InfoWindowDuration = (int)Math.Round(value);
+            }
+        }
+    } = AppConfig.InfoWindowDuration;
+
+    /// <summary>WDA_EXCLUDEFROMCAPTURE</summary>
+    public bool HideInfoWindowFromCapture
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.HideInfoWindowFromCapture = value;
+                ScreenCaptureService.RefreshInfoWindowCaptureAffinity();
+            }
+        }
+    } = AppConfig.HideInfoWindowFromCapture;
+
     public int ScreenshotSDRFormat
     {
         get;
