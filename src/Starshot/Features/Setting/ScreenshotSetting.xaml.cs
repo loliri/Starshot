@@ -14,7 +14,7 @@ namespace Starshot.Features.Setting;
 public sealed partial class ScreenshotSetting : PageBase
 {
     /// <summary>
-    /// 截图信息浮窗总开关：开（默认）=正常显示；关=后续截图不弹浮窗，已显示的浮窗按原倒计时消失。
+    /// 截图信息浮窗总开关：开（默认）=正常显示；关=立即隐藏已有浮窗，后续截图不再弹出。
     /// </summary>
     public bool ShowScreenshotInfoWindow
     {
@@ -24,6 +24,8 @@ public sealed partial class ScreenshotSetting : PageBase
             if (SetProperty(ref field, value))
             {
                 AppConfig.ShowScreenshotInfoWindow = value;
+                if (!value)
+                    ScreenCaptureService.HideInfoWindow();
                 OnPropertyChanged(nameof(InfoWindowOptionsVisibility));
             }
         }

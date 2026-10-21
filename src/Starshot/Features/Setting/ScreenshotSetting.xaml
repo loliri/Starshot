@@ -139,11 +139,11 @@
 
       <!--  信息浮窗  -->
       <StackPanel Spacing="12">
-        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindow}" />
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.ScreenshotSetting_InfoWindow}" />
         <ToggleSwitch
           IsOn="{x:Bind ShowScreenshotInfoWindow, Mode=TwoWay}"
-          OffContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
-          OnContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
+          OffContent="{x:Bind lang:Lang.ScreenshotSetting_ShowScreenshotInfoWindow}"
+          OnContent="{x:Bind lang:Lang.ScreenshotSetting_ShowScreenshotInfoWindow}"
         />
         <StackPanel Spacing="12" Visibility="{x:Bind InfoWindowOptionsVisibility}">
           <TextBlock Margin="0,12,0,0" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDuration}" />

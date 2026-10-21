@@ -63,6 +63,9 @@ internal class ScreenCaptureService
         Instance.CaptureInternal();
     }
 
+    /// <summary>隐藏已有信息浮窗，保留任务计数和完成处理。</summary>
+    public static void HideInfoWindow() => _instance?._infoWindow?.AppWindow.Hide();
+
     /// <summary>
     /// 设置页切换「信息浮窗对屏幕捕获隐身」后，让已存在的浮窗立即应用新状态
     /// </summary>

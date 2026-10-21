@@ -2891,15 +2891,15 @@
             }
         }
 
-        public static string AppearanceSetting_InfoWindow {
+        public static string ScreenshotSetting_InfoWindow {
             get {
-                return ResourceManager.GetString("AppearanceSetting_InfoWindow", resourceCulture);
+                return ResourceManager.GetString("ScreenshotSetting_InfoWindow", resourceCulture);
             }
         }
 
-        public static string AppearanceSetting_ShowScreenshotInfoWindow {
+        public static string ScreenshotSetting_ShowScreenshotInfoWindow {
             get {
-                return ResourceManager.GetString("AppearanceSetting_ShowScreenshotInfoWindow", resourceCulture);
+                return ResourceManager.GetString("ScreenshotSetting_ShowScreenshotInfoWindow", resourceCulture);
             }
         }
 

@@ -583,7 +583,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 截图信息浮窗总开关：开（默认）=正常显示；关=后续截图不弹浮窗，已显示的浮窗按原倒计时消失。
+    /// 截图信息浮窗总开关：开（默认）=正常显示；关=立即隐藏已有浮窗，后续截图不再弹出。
     /// </summary>
     public static bool ShowScreenshotInfoWindow
     {

@@ -1081,10 +1081,10 @@
   <data name="AppearanceSetting_HideInfoWindowFromCaptureDesc" xml:space="preserve">
     <value>设置 WDA_EXCLUDEFROMCAPTURE，让信息浮窗不出现在屏幕捕获画面中。</value>
   </data>
-  <data name="AppearanceSetting_ShowScreenshotInfoWindow" xml:space="preserve">
+  <data name="ScreenshotSetting_ShowScreenshotInfoWindow" xml:space="preserve">
     <value>显示截图信息浮窗</value>
   </data>
-  <data name="AppearanceSetting_InfoWindow" xml:space="preserve">
+  <data name="ScreenshotSetting_InfoWindow" xml:space="preserve">
     <value>截图信息浮窗</value>
   </data>
 </root>
