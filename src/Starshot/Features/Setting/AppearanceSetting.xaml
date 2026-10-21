@@ -165,7 +165,6 @@
           OffContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
           OnContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
         />
-        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindow}" />
         <ToggleSwitch
           Margin="0,12,0,0"
           IsOn="{x:Bind MuteNotificationInFullscreen, Mode=TwoWay}"
