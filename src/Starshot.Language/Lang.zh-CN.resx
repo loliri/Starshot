@@ -1084,4 +1084,7 @@
   <data name="AppearanceSetting_ShowScreenshotInfoWindow" xml:space="preserve">
     <value>显示截图信息浮窗</value>
   </data>
+  <data name="AppearanceSetting_InfoWindow" xml:space="preserve">
+    <value>截图信息浮窗</value>
+  </data>
 </root>

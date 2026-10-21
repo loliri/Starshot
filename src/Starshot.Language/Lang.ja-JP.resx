@@ -1084,4 +1084,7 @@
   <data name="AppearanceSetting_ShowScreenshotInfoWindow" xml:space="preserve">
     <value>スクリーンショット情報ウィンドウを表示</value>
   </data>
+  <data name="AppearanceSetting_InfoWindow" xml:space="preserve">
+    <value>スクリーンショット情報ウィンドウ</value>
+  </data>
 </root>

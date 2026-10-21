@@ -158,13 +158,16 @@
       </StackPanel>
 
       <!--  信息浮窗  -->
-      <StackPanel Spacing="6">
+      <StackPanel Spacing="12">
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindow}" />
         <ToggleSwitch
           IsOn="{x:Bind ShowScreenshotInfoWindow, Mode=TwoWay}"
           OffContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
           OnContent="{x:Bind lang:Lang.AppearanceSetting_ShowScreenshotInfoWindow}"
         />
+        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindow}" />
         <ToggleSwitch
+          Margin="0,12,0,0"
           IsOn="{x:Bind MuteNotificationInFullscreen, Mode=TwoWay}"
           OffContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
           OnContent="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreen}"
@@ -175,7 +178,7 @@
           Text="{x:Bind lang:Lang.Starshot_MuteNotificationInFullscreenDesc}"
           TextWrapping="Wrap"
         />
-        <TextBlock FontSize="20" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDuration}" />
+        <TextBlock Margin="0,12,0,0" Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDuration}" />
         <StackPanel Orientation="Horizontal" Spacing="8">
           <NumberBox
             Width="150"

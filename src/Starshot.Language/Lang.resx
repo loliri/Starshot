@@ -1084,4 +1084,7 @@
   <data name="AppearanceSetting_ShowScreenshotInfoWindow" xml:space="preserve">
     <value>Show screenshot info window</value>
   </data>
+  <data name="AppearanceSetting_InfoWindow" xml:space="preserve">
+    <value>Screenshot info window</value>
+  </data>
 </root>

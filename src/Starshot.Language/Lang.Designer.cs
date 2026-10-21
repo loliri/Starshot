@@ -2891,6 +2891,12 @@
             }
         }
 
+        public static string AppearanceSetting_InfoWindow {
+            get {
+                return ResourceManager.GetString("AppearanceSetting_InfoWindow", resourceCulture);
+            }
+        }
+
         public static string AppearanceSetting_ShowScreenshotInfoWindow {
             get {
                 return ResourceManager.GetString("AppearanceSetting_ShowScreenshotInfoWindow", resourceCulture);
