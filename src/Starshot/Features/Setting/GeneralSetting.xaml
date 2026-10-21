@@ -328,7 +328,6 @@
           OnContent="{x:Bind lang:Lang.Starshot_HighPriorityProcess}"
         />
       </StackPanel>
-
     </StackPanel>
   </ScrollViewer>
 </sf:PageBase>

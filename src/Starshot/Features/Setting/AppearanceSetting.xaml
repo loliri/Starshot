@@ -156,7 +156,6 @@
           </Button.Flyout>
         </Button>
       </StackPanel>
-
     </StackPanel>
   </ScrollViewer>
 </sf:PageBase>
