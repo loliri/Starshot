@@ -112,9 +112,19 @@ public sealed partial class AppearanceSetting : PageBase
     /// </summary>
     public bool ShowScreenshotInfoWindow
     {
-        get => AppConfig.ShowScreenshotInfoWindow;
-        set => AppConfig.ShowScreenshotInfoWindow = value;
-    }
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.ShowScreenshotInfoWindow = value;
+                OnPropertyChanged(nameof(InfoWindowOptionsVisibility));
+            }
+        }
+    } = AppConfig.ShowScreenshotInfoWindow;
+
+    public Visibility InfoWindowOptionsVisibility =>
+        ShowScreenshotInfoWindow ? Visibility.Visible : Visibility.Collapsed;
 
     /// <summary>
     /// 全屏时静默截图通知：开=检测独占全屏，全屏中不弹浮窗；关（默认）=照弹且不检测。
