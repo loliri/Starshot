@@ -194,26 +194,26 @@
               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
               Text="ms"
             />
-            </StackPanel>
-      </StackPanel>
-        <TextBlock
-          FontSize="12"
-          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-          Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDurationDesc}"
-          TextWrapping="Wrap"
-        />
-        <ToggleSwitch
-          Margin="0,12,0,0"
-          IsOn="{x:Bind HideInfoWindowFromCapture, Mode=TwoWay}"
-          OffContent="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCapture}"
-          OnContent="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCapture}"
-        />
-        <TextBlock
-          FontSize="12"
-          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-          Text="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCaptureDesc}"
-          TextWrapping="Wrap"
-        />
+          </StackPanel>
+          <TextBlock
+            FontSize="12"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{x:Bind lang:Lang.AppearanceSetting_InfoWindowDurationDesc}"
+            TextWrapping="Wrap"
+          />
+          <ToggleSwitch
+            Margin="0,12,0,0"
+            IsOn="{x:Bind HideInfoWindowFromCapture, Mode=TwoWay}"
+            OffContent="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCapture}"
+            OnContent="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCapture}"
+          />
+          <TextBlock
+            FontSize="12"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{x:Bind lang:Lang.AppearanceSetting_HideInfoWindowFromCaptureDesc}"
+            TextWrapping="Wrap"
+          />
+        </StackPanel>
       </StackPanel>
     </StackPanel>
   </ScrollViewer>
