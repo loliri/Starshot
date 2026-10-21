@@ -582,6 +582,9 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 截图信息浮窗总开关：开（默认）=正常显示；关=后续截图不弹浮窗，已显示的浮窗按原倒计时消失。
+    /// </summary>
     public static bool ShowScreenshotInfoWindow
     {
         get => GetValue(true);
