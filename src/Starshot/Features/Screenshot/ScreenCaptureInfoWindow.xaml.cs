@@ -626,6 +626,24 @@ public sealed partial class ScreenCaptureInfoWindow : WindowEx
         StartHideAnimation();
         await Task.Delay(600, cancellationToken);
         AppWindow?.Hide();
+        ResetCounters();
+    }
+
+    /// <summary>
+    /// 设置页关闭总开关时立即隐藏。未完成的任务不清计数——其完成回调仍会走
+    /// DisplayWindow → HideWindowAsync，由那条路径统一清理。
+    /// </summary>
+    public void HideFromSetting()
+    {
+        AppWindow.Hide();
+        if (_finishedImageCount >= _captureImageCount)
+        {
+            ResetCounters();
+        }
+    }
+
+    private void ResetCounters()
+    {
         _logger.LogInformation(
             "InfoWindow counters reset (was total={Total}, finished={Finished})",
             _captureImageCount,
