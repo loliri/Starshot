@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -23,6 +22,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Starshot.Features.Codec;
 using Starshot.Features.Setting;
+using Starshot.Frameworks;
 using Starshot.Helpers;
 using Starshot.Language;
 using Starward.Codec.ICC;
@@ -50,13 +50,43 @@ public sealed partial class ImageViewWindow : Window
 
     private readonly ILogger<ImageViewWindow> _logger = AppConfig.GetLogger<ImageViewWindow>();
 
+    /// <summary>最近一次正常态（非最大化/最小化/全屏）的位置大小，物理像素</summary>
+    private RectInt32 _placement;
+
+    /// <summary>窗口几何是否已初始化：无记录时留到显示时按父窗口所在屏居中 1200×676</summary>
+    private bool _hasPlacement;
+
+    private bool _placementMaximized;
+
+    /// <summary>恢复几何期间为 true：WM_GETMINMAXINFO 不限制最小尺寸（见 WindowSubclassProc 内注释）</summary>
+    private bool _restoringPlacement;
+
+    /// <summary>待首次激活后再摆一次的几何（跨缩放比显示器时修正尺寸），物理像素</summary>
+    private RectInt32? _pendingPlacement;
+
+    private Microsoft.UI.Dispatching.DispatcherQueueTimer? _placementTimer;
+
+    /// <summary>已进入关闭流程：不再响应 Changed，避免窗口销毁期间重启定时器</summary>
+    private bool _closing;
+
+    /// <summary>进入全屏前是否最大化：退出全屏会换成新 presenter，需按此恢复</summary>
+    private bool _maximizedBeforeFullScreen;
+
     public ImageViewWindow()
     {
         InitializeComponent();
         SystemBackdrop = new MicaBackdrop();
         WindowHandle = (IntPtr)AppWindow.Id.Value;
+        // 不继承 WindowEx：subclass 自行挂载，须在 RestorePlacement 之前
+        // （ApplyPlacement 触发的 WM_GETMINMAXINFO 要走恢复期屏蔽，见 WindowSubclassProc）
+        _windowSubclassProc = new(WindowSubclassProc);
+        ComCtl32.SetWindowSubclass(WindowHandle, _windowSubclassProc, 1001, IntPtr.Zero);
         InitializeWindow();
+        RestorePlacement();
         InitializeResource();
+        Activated += ImageViewWindow_Activated;
+        AppWindow.Changed += AppWindow_Changed;
+        AppWindow.Closing += AppWindow_Closing;
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(
             this,
             (_, _) => this.Bindings.Update()
@@ -74,17 +104,42 @@ public sealed partial class ImageViewWindow : Window
         ApplyMinimumSize(UIScale);
     }
 
-    /// <summary>
-    /// 最小尺寸，单位实际大小。经典 4K 显示器 1.5 倍缩放为 1000x600。
-    /// 换到不同 DPI 的屏幕时要按新缩放重新应用（presenter 不会自动换算）。
-    /// </summary>
+    /// <summary>最小尺寸，单位实际大小。经典 4K 显示器 1.5 倍缩放为 1000x600。</summary>
+    private const int MinWidthLogical = 667;
+
+    private const int MinHeightLogical = 400;
+
     private void ApplyMinimumSize(double scale)
     {
         if (AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            presenter.PreferredMinimumWidth = (int)(667 * scale);
-            presenter.PreferredMinimumHeight = (int)(400 * scale);
+            presenter.PreferredMinimumWidth = (int)(MinWidthLogical * scale);
+            presenter.PreferredMinimumHeight = (int)(MinHeightLogical * scale);
         }
+    }
+
+    /// <summary>
+    /// 恢复期间不限制最小尺寸：窗口在创建时可能还挂在另一块缩放不同的屏上，
+    /// 此时 presenter 最小尺寸按那块屏算，会把跨屏恢复的小尺寸窗口强行撑大
+    /// （与 MainWindow 的 WM_GETMINMAXINFO 处理同构）。
+    /// 本窗口不继承 WindowEx，subclass 由构造函数自行挂载。
+    /// </summary>
+    private readonly ComCtl32.SUBCLASSPROC _windowSubclassProc;
+
+    private IntPtr WindowSubclassProc(
+        HWND hWnd,
+        uint uMsg,
+        IntPtr wParam,
+        IntPtr lParam,
+        nuint uIdSubclass,
+        IntPtr dwRefData
+    )
+    {
+        if (uMsg == (uint)User32.WindowMessage.WM_GETMINMAXINFO && _restoringPlacement)
+        {
+            return IntPtr.Zero;
+        }
+        return ComCtl32.DefSubclassProc(hWnd, uMsg, wParam, lParam);
     }
 
     private void RootGrid_Loaded(object sender, RoutedEventArgs e)
@@ -890,6 +945,7 @@ public sealed partial class ImageViewWindow : Window
     {
         if (_lastUIScale != sender.RasterizationScale)
         {
+            // 换到不同 DPI 的屏幕时要按新缩放重新应用最小尺寸（presenter 不会自动换算）
             ApplyMinimumSize(sender.RasterizationScale);
             DrawImage();
             _lastUIScale = sender.RasterizationScale;
@@ -1355,6 +1411,188 @@ public sealed partial class ImageViewWindow : Window
     #endregion
 
 
+    #region Window Placement
+
+    // 与 MainWindow.xaml.cs(195-305) 同一套机制：物理像素记录 + 500ms 防抖 + 关闭时落盘。
+    // 几何序列化/校正已抽到 WindowPlacement；改防抖策略或保存时机时两处需同步调整。
+
+    /// <summary>
+    /// 恢复上次关窗时的位置/大小/最大化状态。没有记录（首次打开）或记录损坏时留到
+    /// <see cref="ShowWindowWithPlacement"/> 里按父窗口所在屏居中 1200×676，不再默认最大化。
+    /// 记录是物理像素，不做 DIP 换算；跨不同缩放比的显示器时首次激活再摆一次。
+    /// </summary>
+    private void RestorePlacement()
+    {
+        if (
+            !WindowPlacement.TryParse(
+                AppConfig.ImageViewWindowPlacement,
+                out RectInt32 rect,
+                out bool maximized
+            )
+        )
+        {
+            // 无记录：几何留到 ShowWindowWithPlacement 按父窗口所在屏居中 1200×676 时初始化
+            return;
+        }
+        _placement = WindowPlacement.EnsureVisible(rect);
+        _placementMaximized = maximized;
+        _hasPlacement = true;
+        // 保持到首次激活：窗口先建在默认屏上，最小尺寸按那块屏算，会顶大跨屏恢复的小窗口
+        _restoringPlacement = true;
+        _pendingPlacement = _placement;
+        ApplyPlacement(_placement);
+    }
+
+    /// <summary>摆到目标几何：先按当前 DPI 补足最小尺寸（避免 SetWindowPos 被 WM_GETMINMAXINFO 顶大后溢出屏幕），
+    /// 再夹到最近显示器的工作区内。</summary>
+    private void ApplyPlacement(RectInt32 rect)
+    {
+        if (rect.Width <= 0 || rect.Height <= 0)
+        {
+            return;
+        }
+        int minWidth = (int)(MinWidthLogical * UIScale);
+        int minHeight = (int)(MinHeightLogical * UIScale);
+        RectInt32 target = new(
+            rect.X,
+            rect.Y,
+            Math.Max(rect.Width, minWidth),
+            Math.Max(rect.Height, minHeight)
+        );
+        AppWindow.MoveAndResize(WindowPlacement.EnsureVisible(target));
+    }
+
+    /// <summary>按记住的状态显示：上次是最大化则最大化打开，否则按记住的正常态矩形显示。</summary>
+    private void ShowWindowWithPlacement(Microsoft.UI.WindowId parentWindowId)
+    {
+        if (!_hasPlacement)
+        {
+            DisplayArea area = DisplayArea.GetFromWindowId(
+                parentWindowId,
+                DisplayAreaFallback.Nearest
+            );
+            WindowPlacement.CenterInScreen(AppWindow, area, 1200, 676);
+            _placement = new RectInt32(
+                AppWindow.Position.X,
+                AppWindow.Position.Y,
+                AppWindow.Size.Width,
+                AppWindow.Size.Height
+            );
+            _hasPlacement = true;
+        }
+        User32.ShowWindow(
+            WindowHandle,
+            _placementMaximized
+                ? ShowWindowCommand.SW_SHOWMAXIMIZED
+                : ShowWindowCommand.SW_SHOWNORMAL
+        );
+    }
+
+    private void ImageViewWindow_Activated(object sender, WindowActivatedEventArgs e)
+    {
+        Activated -= ImageViewWindow_Activated;
+        _restoringPlacement = false;
+        if (_pendingPlacement is not RectInt32 pending)
+        {
+            return;
+        }
+        _pendingPlacement = null;
+        // 最大化态已由 SW_SHOWMAXIMIZED 显示，此时 MoveAndResize 会破坏最大化状态，故不动窗口；
+        // 正常态则在窗口落到目标显示器（DPI 已切换）后重摆一次，才能还原精确的物理尺寸
+        if (!_placementMaximized)
+        {
+            ApplyPlacement(pending);
+        }
+    }
+
+    private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        if (
+            _closing || (!args.DidPositionChange && !args.DidSizeChange && !args.DidPresenterChange)
+        )
+        {
+            return;
+        }
+        // 拖动/缩放途中 Changed 触发很密，防抖 500ms，避免每帧写一次 config
+        _placementTimer ??= CreatePlacementTimer();
+        _placementTimer.Stop();
+        _placementTimer.Start();
+    }
+
+    private Microsoft.UI.Dispatching.DispatcherQueueTimer CreatePlacementTimer()
+    {
+        Microsoft.UI.Dispatching.DispatcherQueueTimer timer = this.DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(500);
+        timer.IsRepeating = false;
+        timer.Tick += (_, _) => SavePlacement();
+        return timer;
+    }
+
+    private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        PrepareClose();
+    }
+
+    /// <summary>关闭收尾：停防抖、落盘几何。Closing 与程序化关闭共用，重复调用无副作用。</summary>
+    private void PrepareClose()
+    {
+        _closing = true;
+        _placementTimer?.Stop();
+        SavePlacement();
+    }
+
+    /// <summary>
+    /// 程序化关闭：WinAppSDK 下 Close() 不保证触发 AppWindow.Closing，
+    /// 所以自定义关闭按钮 / Esc 走这里，先自行落盘再关。
+    /// </summary>
+    private void CloseWindow()
+    {
+        PrepareClose();
+        Close();
+    }
+
+    /// <summary>
+    /// 记录当前几何：最大化时保留进入最大化前的位置（此时 AppWindow.Position/Size 是最大化后的矩形），
+    /// 最小化/全屏时不写（尺寸不可信）。只在值变化时落盘，SetValue 内部会跳过重复值。
+    /// </summary>
+    private void SavePlacement()
+    {
+        // 防抖定时器可能在窗口销毁后才 tick，此时 AppWindow 已失效；
+        // 状态保存是辅助逻辑，抛异常不能影响关窗
+        try
+        {
+            if (AppWindow.Presenter is not OverlappedPresenter presenter)
+            {
+                return;
+            }
+            switch (presenter.State)
+            {
+                case OverlappedPresenterState.Minimized:
+                    return;
+                case OverlappedPresenterState.Maximized:
+                    _placementMaximized = true;
+                    break;
+                default:
+                    _placement = new RectInt32(
+                        AppWindow.Position.X,
+                        AppWindow.Position.Y,
+                        AppWindow.Size.Width,
+                        AppWindow.Size.Height
+                    );
+                    _placementMaximized = false;
+                    break;
+            }
+            AppConfig.ImageViewWindowPlacement = WindowPlacement.Format(
+                _placement,
+                _placementMaximized
+            );
+        }
+        catch { }
+    }
+
+    #endregion
+
+
     #region Operation
 
 
@@ -1367,13 +1605,9 @@ public sealed partial class ImageViewWindow : Window
     {
         try
         {
-            var parentWindow = AppWindow.GetFromWindowId(windowId);
-            PointInt32 point = parentWindow.Position;
-            SizeInt32 size = parentWindow.Size;
             CurrentScreenshot = screenshotItem;
             ScreenshotCollection = collection;
-            AppWindow.MoveAndResize(new RectInt32(point.X, point.Y, size.Width, size.Height));
-            User32.ShowWindow(WindowHandle, ShowWindowCommand.SW_SHOWMAXIMIZED);
+            ShowWindowWithPlacement(windowId);
             await Task.Delay(1);
             await LoadItemAsync(screenshotItem);
             if (autoOcr)
@@ -1422,9 +1656,7 @@ public sealed partial class ImageViewWindow : Window
                 ScreenshotCollection ??= new();
                 ScreenshotCollection.Insert(0, CurrentScreenshot);
             }
-            DisplayArea area = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Nearest);
-            CenterInScreen(area, 1200, 676);
-            User32.ShowWindow(WindowHandle, ShowWindowCommand.SW_SHOWMAXIMIZED);
+            ShowWindowWithPlacement(windowId);
             await Task.Delay(1);
             await LoadImageAsync(CurrentScreenshot.FilePath);
             if (autoOcr)
@@ -1443,11 +1675,7 @@ public sealed partial class ImageViewWindow : Window
         try
         {
             StackPanel_NoImage.Visibility = Visibility.Visible;
-            var parentWindow = AppWindow.GetFromWindowId(windowId);
-            PointInt32 point = parentWindow.Position;
-            SizeInt32 size = parentWindow.Size;
-            AppWindow.MoveAndResize(new RectInt32(point.X, point.Y, size.Width, size.Height));
-            User32.ShowWindow(WindowHandle, ShowWindowCommand.SW_SHOWMAXIMIZED);
+            ShowWindowWithPlacement(windowId);
         }
         catch (Exception ex)
         {
@@ -1741,7 +1969,7 @@ public sealed partial class ImageViewWindow : Window
     {
         try
         {
-            Close();
+            CloseWindow();
         }
         catch { }
     }
@@ -1750,8 +1978,10 @@ public sealed partial class ImageViewWindow : Window
     {
         try
         {
-            if (AppWindow.Presenter is OverlappedPresenter)
+            if (AppWindow.Presenter is OverlappedPresenter overlappedPresenter)
             {
+                _maximizedBeforeFullScreen =
+                    overlappedPresenter.State is OverlappedPresenterState.Maximized;
                 AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
                 RowDefinition_0.Height = new GridLength(0);
                 RowDefinition_2.Height = new GridLength(0);
@@ -1762,7 +1992,15 @@ public sealed partial class ImageViewWindow : Window
             else
             {
                 AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-                // 换回 Overlapped 是新 presenter，置顶状态按开关重新应用
+                // 换回 Overlapped 是新 presenter：先摆回记住的几何，再按进入全屏前的状态恢复最大化/置顶
+                ApplyPlacement(_placement);
+                if (
+                    _maximizedBeforeFullScreen
+                    && AppWindow.Presenter is OverlappedPresenter presenter
+                )
+                {
+                    presenter.Maximize();
+                }
                 SetAlwaysOnTop(ToggleButton_AlwaysOnTop.IsChecked is true);
                 RowDefinition_0.Height = new GridLength(48);
                 RowDefinition_2.Height = new GridLength(0, GridUnitType.Auto);
@@ -2102,7 +2340,7 @@ public sealed partial class ImageViewWindow : Window
                 e.Handled = true;
                 return;
             }
-            Close();
+            CloseWindow();
         }
         else if (e.Key is VirtualKey.Left or VirtualKey.Up)
         {
@@ -2356,26 +2594,6 @@ public sealed partial class ImageViewWindow : Window
     {
         return (value + 1).ToString();
     }
-
-    public void CenterInScreen(DisplayArea displayArea, int width, int height)
-    {
-        nint monitor = Win32Interop.GetMonitorFromDisplayId(displayArea.DisplayId);
-        GetDpiForMonitor(monitor, 0, out uint dpiX, out uint dpiY);
-        double scale = dpiX / 96.0;
-        int w = (int)(width * scale);
-        int h = (int)(height * scale);
-        int x = displayArea.WorkArea.X + (displayArea.WorkArea.Width - w) / 2;
-        int y = displayArea.WorkArea.Y + (displayArea.WorkArea.Height - h) / 2;
-        AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
-    }
-
-    [LibraryImport("Shcore.dll")]
-    private static partial int GetDpiForMonitor(
-        nint hmonitor,
-        int dpiType,
-        out uint dpiX,
-        out uint dpiY
-    );
 
     #endregion
 

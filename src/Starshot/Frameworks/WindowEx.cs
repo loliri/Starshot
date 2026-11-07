@@ -103,12 +103,17 @@ public abstract partial class WindowEx : Window
         DisplayArea display =
             DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest)
             ?? DisplayArea.Primary;
-        double scale = UIScale;
-        int w = (int)((width * scale) ?? AppWindow.Size.Width);
-        int h = (int)((height * scale) ?? AppWindow.Size.Height);
-        int x = display.WorkArea.X + (display.WorkArea.Width - w) / 2;
-        int y = display.WorkArea.Y + (display.WorkArea.Height - h) / 2;
-        AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
+        CenterInScreen(display, width, height);
+    }
+
+    /// <summary>居中到指定显示器（DPI 换算见 <see cref="WindowPlacement.CenterInScreen"/>）。</summary>
+    public virtual void CenterInScreen(
+        DisplayArea displayArea,
+        int? width = null,
+        int? height = null
+    )
+    {
+        WindowPlacement.CenterInScreen(AppWindow, displayArea, width, height);
     }
 
     public void SetIcon(string? iconPath = null)

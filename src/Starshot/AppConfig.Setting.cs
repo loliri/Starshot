@@ -386,6 +386,17 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 图片查看窗口位置与大小：“x,y,width,height,maximized”，单位为物理像素，空=首次打开用默认尺寸（1200×676，居中）。
+    /// 所有查看器实例共用一份，由 <see cref="Features.Screenshot.ImageViewWindow"/> 在移动/缩放/关闭时写入；
+    /// 恢复时夹到最近显示器的工作区内，不再默认最大化。
+    /// </summary>
+    public static string? ImageViewWindowPlacement
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 每次启动把进程提升为高优先级（应用自设，与启动方式无关）。关=跟随系统默认（Normal）。
     /// </summary>
     public static bool HighPriorityProcess

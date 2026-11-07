@@ -1,5 +1,7 @@
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 
@@ -10,7 +12,7 @@ namespace Starshot.Frameworks;
 /// <see cref="DisplayArea"/> 用的都是物理像素，和 Win32 的 <c>SetWindowPlacement</c> 语义一致；
 /// 不做 DIP 换算，否则多显示器缩放比不同时（如 150% + 100%）会用错缩放因子而错位。
 /// </summary>
-internal static class WindowPlacement
+internal static partial class WindowPlacement
 {
     /// <summary>
     /// 解析 “x,y,width,height,maximized”（物理像素），非法/缺字段返回 false（调用方保持系统默认）。
@@ -72,6 +74,36 @@ internal static class WindowPlacement
             CultureInfo.InvariantCulture,
             $"{rect.X},{rect.Y},{rect.Width},{rect.Height},{(maximized ? 1 : 0)}"
         );
+
+    /// <summary>
+    /// 居中到指定显示器：尺寸按该显示器的 DPI 换算成物理像素。跨缩放比显示器时
+    /// 窗口自身的 DPI 还是源屏的，必须取目标显示器的 DPI 才算得准；
+    /// 宽/高为 null 或非正数时保持当前物理尺寸。
+    /// </summary>
+    public static void CenterInScreen(
+        AppWindow appWindow,
+        DisplayArea displayArea,
+        int? width = null,
+        int? height = null
+    )
+    {
+        nint monitor = Win32Interop.GetMonitorFromDisplayId(displayArea.DisplayId);
+        GetDpiForMonitor(monitor, 0, out uint dpiX, out uint _);
+        double scale = dpiX / 96.0;
+        int w = width is > 0 ? (int)(width * scale) : appWindow.Size.Width;
+        int h = height is > 0 ? (int)(height * scale) : appWindow.Size.Height;
+        int x = displayArea.WorkArea.X + (displayArea.WorkArea.Width - w) / 2;
+        int y = displayArea.WorkArea.Y + (displayArea.WorkArea.Height - h) / 2;
+        appWindow.MoveAndResize(new RectInt32(x, y, w, h));
+    }
+
+    [LibraryImport("Shcore.dll")]
+    private static partial int GetDpiForMonitor(
+        nint hmonitor,
+        int dpiType,
+        out uint dpiX,
+        out uint dpiY
+    );
 
     /// <summary>
     /// 夹到最近显示器的工作区内：拔掉副屏、分辨率/缩放变小后，窗口不会整个留在屏幕外。
