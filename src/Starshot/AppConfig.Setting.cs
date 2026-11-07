@@ -437,7 +437,9 @@ public static partial class AppConfig
         }
     }
 
-    /// <summary>日志目录的曾用路径历史（旧值在改目录时进入，最多 5 条，新的在顶）</summary>
+    /// <summary>
+    /// 日志目录的曾用路径历史（旧值在改目录时进入，最多 5 条，新的在顶）
+    /// </summary>
     public static List<string> LogFolderHistory
     {
         get => GetListValue();
@@ -500,7 +502,9 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-    /// <summary>截图目录的曾用路径历史（旧值在改目录时进入，最多 5 条，新的在顶）</summary>
+    /// <summary>
+    /// 截图目录的曾用路径历史（旧值在改目录时进入，最多 5 条，新的在顶）
+    /// </summary>
     public static List<string> ScreenshotFolderHistory
     {
         get => GetListValue();

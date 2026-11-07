@@ -15,10 +15,14 @@ using Windows.Media.Ocr;
 
 namespace Starshot.Helpers;
 
-/// <summary>识别词：文本 + 原图坐标矩形</summary>
+/// <summary>
+/// 识别词：文本 + 原图坐标矩形
+/// </summary>
 public sealed record OcrWord(string Text, Rect Rect);
 
-/// <summary>识别行：整行文本 + 原图坐标矩形 + 词级明细</summary>
+/// <summary>
+/// 识别行：整行文本 + 原图坐标矩形 + 词级明细
+/// </summary>
 public sealed record OcrLine(string Text, Rect Rect, List<OcrWord> Words);
 
 /// <summary>
@@ -38,7 +42,9 @@ public static class OcrHelper
 
     private static string ModelPath => Path.Combine(AppContext.BaseDirectory, "oneocr.onemodel");
 
-    /// <summary>oneocr 两个文件是否已落地 exe 旁（只查文件，不触发初始化）。</summary>
+    /// <summary>
+    /// oneocr 两个文件是否已落地 exe 旁（只查文件，不触发初始化）。
+    /// </summary>
     public static bool IsOneOcrReady => File.Exists(DllPath) && File.Exists(ModelPath);
 
     /// <summary>
@@ -395,7 +401,9 @@ public static class OcrHelper
         );
     }
 
-    /// <summary>oneocr 的包围盒是四角点 quad（含倾斜文字），折算成轴对齐 Rect。</summary>
+    /// <summary>
+    /// oneocr 的包围盒是四角点 quad（含倾斜文字），折算成轴对齐 Rect。
+    /// </summary>
     private static Rect QuadToRect(in OneOcrNative.RawBBox box)
     {
         double left = Math.Min(Math.Min(box.X1, box.X2), Math.Min(box.X3, box.X4));
@@ -439,7 +447,9 @@ public static class OcrHelper
         );
     }
 
-    /// <summary>GPU 缩小绘制到新 target（SoftwareBitmap 自身无缩放转换 API）。</summary>
+    /// <summary>
+    /// GPU 缩小绘制到新 target（SoftwareBitmap 自身无缩放转换 API）。
+    /// </summary>
     private static CanvasRenderTarget DownscaleToBgra8(CanvasRenderTarget source, double scale)
     {
         uint w = Math.Max(1, (uint)Math.Round(source.SizeInPixels.Width * scale));

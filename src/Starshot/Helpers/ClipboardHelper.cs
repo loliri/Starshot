@@ -228,7 +228,9 @@ internal static class ClipboardHelper
         return null;
     }
 
-    /// <summary>CF_DIB（32bpp BI_RGB，本 app 的写法）→ PNG 内存流；其他位深/压缩一律放弃返回 null</summary>
+    /// <summary>
+    /// CF_DIB（32bpp BI_RGB，本 app 的写法）→ PNG 内存流；其他位深/压缩一律放弃返回 null
+    /// </summary>
     private static async Task<InMemoryRandomAccessStream?> DibToPngStreamAsync(byte[] dib)
     {
         if (dib.Length < 40)

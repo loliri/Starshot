@@ -63,7 +63,9 @@ internal class ScreenCaptureService
         Instance.CaptureInternal();
     }
 
-    /// <summary>隐藏已有信息浮窗并清理计数（与自动关闭走同一套清理）。</summary>
+    /// <summary>
+    /// 隐藏已有信息浮窗并清理计数（与自动关闭走同一套清理）。
+    /// </summary>
     public static void HideInfoWindow() => _instance?._infoWindow?.HideFromSetting();
 
     /// <summary>
@@ -946,7 +948,9 @@ internal class ScreenCaptureService
         return ok;
     }
 
-    /// <summary>SDR 位图 → B8G8R8A8（仅通道顺序转换，无 tonemap）</summary>
+    /// <summary>
+    /// SDR 位图 → B8G8R8A8（仅通道顺序转换，无 tonemap）
+    /// </summary>
     private static CanvasRenderTarget ConvertToBgra(CanvasBitmap src)
     {
         uint w = src.SizeInPixels.Width;

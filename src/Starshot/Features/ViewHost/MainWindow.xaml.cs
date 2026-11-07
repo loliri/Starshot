@@ -25,17 +25,23 @@ public sealed partial class MainWindow : WindowEx
 {
     public bool ForceExit;
 
-    /// <summary>最近一次正常态（非最大化/最小化）的位置大小，物理像素</summary>
+    /// <summary>
+    /// 最近一次正常态（非最大化/最小化）的位置大小，物理像素
+    /// </summary>
     private RectInt32 _placement;
 
     private bool _placementMaximized;
 
     private DispatcherQueueTimer? _placementTimer;
 
-    /// <summary>恢复几何期间为 true：WM_GETMINMAXINFO 不限制最小尺寸（见该方法内注释）</summary>
+    /// <summary>
+    /// 恢复几何期间为 true：WM_GETMINMAXINFO 不限制最小尺寸（见该方法内注释）
+    /// </summary>
     private bool _restoringPlacement;
 
-    /// <summary>待首次激活后再摆一次的几何（跨缩放比显示器时修正尺寸），物理像素</summary>
+    /// <summary>
+    /// 待首次激活后再摆一次的几何（跨缩放比显示器时修正尺寸），物理像素
+    /// </summary>
     private RectInt32? _pendingPlacement;
 
     private SystemBackdropHelper? _backdropHelper;

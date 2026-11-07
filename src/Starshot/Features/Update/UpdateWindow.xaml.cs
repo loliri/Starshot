@@ -20,7 +20,9 @@ public sealed partial class UpdateWindow : WindowEx
     private ReleaseInfo? _release;
     private CancellationTokenSource? _cts;
 
-    /// <summary>安装版线已拉起更新器、窗口即将随 App.Current.Exit 关闭——退出不是用户取消</summary>
+    /// <summary>
+    /// 安装版线已拉起更新器、窗口即将随 App.Current.Exit 关闭——退出不是用户取消
+    /// </summary>
     private bool _launchingUpdater;
     private bool _userClosed;
 

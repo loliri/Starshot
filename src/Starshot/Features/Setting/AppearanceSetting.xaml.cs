@@ -325,7 +325,9 @@ public sealed partial class AppearanceSetting : PageBase
         catch { }
     }
 
-    /// <summary>explorer 打开并选中指定文件。</summary>
+    /// <summary>
+    /// explorer 打开并选中指定文件。
+    /// </summary>
     private static void SelectInExplorer(string filePath)
     {
         Process.Start(

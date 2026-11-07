@@ -15,14 +15,18 @@ namespace Starshot.Features.Update;
 /// </summary>
 internal static class StartupUpdateCheck
 {
-    /// <summary>与心跳一致的首次延迟（随机区间，避免所有用户在同一时刻打接口）</summary>
+    /// <summary>
+    /// 与心跳一致的首次延迟（随机区间，避免所有用户在同一时刻打接口）
+    /// </summary>
     private const int InitialDelayMinSeconds = 30;
 
     private const int InitialDelayMaxSeconds = 60;
 
     private const int IntervalHours = 5;
 
-    /// <summary>失败后的重试间隔：5 小时对一次临时网络故障来说太长</summary>
+    /// <summary>
+    /// 失败后的重试间隔：5 小时对一次临时网络故障来说太长
+    /// </summary>
     private const int RetryDelayMinutes = 10;
 
     private static ReleaseInfo? _pendingRelease;
@@ -89,7 +93,9 @@ internal static class StartupUpdateCheck
         }
     }
 
-    /// <summary>失败 → 10 分钟后重试；成功/跳过 → 恢复 5 小时节奏</summary>
+    /// <summary>
+    /// 失败 → 10 分钟后重试；成功/跳过 → 恢复 5 小时节奏
+    /// </summary>
     private static void ApplyInterval(bool retry)
     {
 #if !DEBUG

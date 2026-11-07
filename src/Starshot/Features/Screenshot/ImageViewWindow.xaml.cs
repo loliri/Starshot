@@ -50,26 +50,38 @@ public sealed partial class ImageViewWindow : Window
 
     private readonly ILogger<ImageViewWindow> _logger = AppConfig.GetLogger<ImageViewWindow>();
 
-    /// <summary>最近一次正常态（非最大化/最小化/全屏）的位置大小，物理像素</summary>
+    /// <summary>
+    /// 最近一次正常态（非最大化/最小化/全屏）的位置大小，物理像素
+    /// </summary>
     private RectInt32 _placement;
 
-    /// <summary>窗口几何是否已初始化：无记录时留到显示时按父窗口所在屏居中 1200×676</summary>
+    /// <summary>
+    /// 窗口几何是否已初始化：无记录时留到显示时按父窗口所在屏居中 1200×676
+    /// </summary>
     private bool _hasPlacement;
 
     private bool _placementMaximized;
 
-    /// <summary>恢复几何期间为 true：WM_GETMINMAXINFO 不限制最小尺寸（见 WindowSubclassProc 内注释）</summary>
+    /// <summary>
+    /// 恢复几何期间为 true：WM_GETMINMAXINFO 不限制最小尺寸（见 WindowSubclassProc 内注释）
+    /// </summary>
     private bool _restoringPlacement;
 
-    /// <summary>待首次激活后再摆一次的几何（跨缩放比显示器时修正尺寸），物理像素</summary>
+    /// <summary>
+    /// 待首次激活后再摆一次的几何（跨缩放比显示器时修正尺寸），物理像素
+    /// </summary>
     private RectInt32? _pendingPlacement;
 
     private Microsoft.UI.Dispatching.DispatcherQueueTimer? _placementTimer;
 
-    /// <summary>已进入关闭流程：不再响应 Changed，避免窗口销毁期间重启定时器</summary>
+    /// <summary>
+    /// 已进入关闭流程：不再响应 Changed，避免窗口销毁期间重启定时器
+    /// </summary>
     private bool _closing;
 
-    /// <summary>进入全屏前是否最大化：退出全屏会换成新 presenter，需按此恢复</summary>
+    /// <summary>
+    /// 进入全屏前是否最大化：退出全屏会换成新 presenter，需按此恢复
+    /// </summary>
     private bool _maximizedBeforeFullScreen;
 
     public ImageViewWindow()
@@ -104,7 +116,9 @@ public sealed partial class ImageViewWindow : Window
         ApplyMinimumSize(UIScale);
     }
 
-    /// <summary>最小尺寸，单位实际大小。经典 4K 显示器 1.5 倍缩放为 1000x600。</summary>
+    /// <summary>
+    /// 最小尺寸，单位实际大小。经典 4K 显示器 1.5 倍缩放为 1000x600。
+    /// </summary>
     private const int MinWidthLogical = 667;
 
     private const int MinHeightLogical = 400;
@@ -1462,7 +1476,9 @@ public sealed partial class ImageViewWindow : Window
         AppWindow.MoveAndResize(WindowPlacement.EnsureVisible(target));
     }
 
-    /// <summary>按记住的状态显示：上次是最大化则最大化打开，否则按记住的正常态矩形显示。</summary>
+    /// <summary>
+    /// 按记住的状态显示：上次是最大化则最大化打开，否则按记住的正常态矩形显示。
+    /// </summary>
     private void ShowWindowWithPlacement(Microsoft.UI.WindowId parentWindowId)
     {
         if (!_hasPlacement)
@@ -1533,7 +1549,9 @@ public sealed partial class ImageViewWindow : Window
         PrepareClose();
     }
 
-    /// <summary>关闭收尾：停防抖、落盘几何。Closing 与程序化关闭共用，重复调用无副作用。</summary>
+    /// <summary>
+    /// 关闭收尾：停防抖、落盘几何。Closing 与程序化关闭共用，重复调用无副作用。
+    /// </summary>
     private void PrepareClose()
     {
         _closing = true;
@@ -2379,7 +2397,9 @@ public sealed partial class ImageViewWindow : Window
         await RunOcrAsync();
     }
 
-    /// <summary>图库/剪贴板右键「识别文字」入口复用：打开查看器加载完直接进入 OCR。</summary>
+    /// <summary>
+    /// 图库/剪贴板右键「识别文字」入口复用：打开查看器加载完直接进入 OCR。
+    /// </summary>
     private async Task RunOcrAsync()
     {
         if (_sourceBitmap is null)

@@ -171,7 +171,9 @@ public sealed partial class SystemTrayWindow : WindowEx
         catch { }
     }
 
-    /// <summary>当前通知的点击动作（气泡本身不带载荷，靠这里记住点开该做什么）</summary>
+    /// <summary>
+    /// 当前通知的点击动作（气泡本身不带载荷，靠这里记住点开该做什么）
+    /// </summary>
     private Action? _notificationClick;
 
     private void TrayIcon_MouseEventReceived(

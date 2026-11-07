@@ -24,19 +24,27 @@ public sealed partial class ClipboardPage : PageBase
 {
     private readonly ILogger<ClipboardPage> _logger = AppConfig.GetLogger<ClipboardPage>();
 
-    /// <summary>剪贴板历史项（平铺，无分组）</summary>
+    /// <summary>
+    /// 剪贴板历史项（平铺，无分组）
+    /// </summary>
     public ObservableCollection<ScreenshotItem> Items { get; } = new();
 
-    /// <summary>剪贴板有变化、待刷新（回前台时据此补刷）</summary>
+    /// <summary>
+    /// 剪贴板有变化、待刷新（回前台时据此补刷）
+    /// </summary>
     private bool _clipboardDirty;
 
-    /// <summary>ContentChanged 节流：500ms 内只在最后一次变化后增量同步一次</summary>
+    /// <summary>
+    /// ContentChanged 节流：500ms 内只在最后一次变化后增量同步一次
+    /// </summary>
     private readonly DispatcherTimer _clipboardTimer = new()
     {
         Interval = TimeSpan.FromMilliseconds(500),
     };
 
-    /// <summary>UI 线程 DispatcherQueue（OnLoaded 捕获；ContentChanged 可能在后台线程触发，用字段不碰 Page 属性）</summary>
+    /// <summary>
+    /// UI 线程 DispatcherQueue（OnLoaded 捕获；ContentChanged 可能在后台线程触发，用字段不碰 Page 属性）
+    /// </summary>
     private Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcherQueue;
 
     public ClipboardPage()
@@ -95,7 +103,9 @@ public sealed partial class ClipboardPage : PageBase
         set => SetProperty(ref field, value);
     }
 
-    /// <summary>全量刷新：清空 + 重读全部历史。OnLoaded / 刷新按钮 / 切 tab 触发。</summary>
+    /// <summary>
+    /// 全量刷新：清空 + 重读全部历史。OnLoaded / 刷新按钮 / 切 tab 触发。
+    /// </summary>
     private async Task RefreshClipboard()
     {
         try
@@ -141,7 +151,9 @@ public sealed partial class ClipboardPage : PageBase
         }
     }
 
-    /// <summary>控制空状态 UI：没开 / 开了没图片 / 有图片</summary>
+    /// <summary>
+    /// 控制空状态 UI：没开 / 开了没图片 / 有图片
+    /// </summary>
     private void UpdateEmptyState(bool historyEnabled)
     {
         bool hasItems = Items.Count > 0;
@@ -336,7 +348,9 @@ public sealed partial class ClipboardPage : PageBase
         );
     }
 
-    /// <summary>每个剪贴板项都挂这个专用菜单：信息 / 打开 / 识别文字 / 重新复制 / 删除</summary>
+    /// <summary>
+    /// 每个剪贴板项都挂这个专用菜单：信息 / 打开 / 识别文字 / 重新复制 / 删除
+    /// </summary>
     private void Grid_ImageItem_DataContextChanged(
         FrameworkElement sender,
         DataContextChangedEventArgs args
@@ -457,7 +471,9 @@ public sealed partial class ClipboardPage : PageBase
         }
     }
 
-    /// <summary>重新复制：把该历史项提升为当前剪贴板内容（专用 API）</summary>
+    /// <summary>
+    /// 重新复制：把该历史项提升为当前剪贴板内容（专用 API）
+    /// </summary>
     private void RecopyClipboardItem(ClipboardHistoryItem hist)
     {
         try
@@ -471,7 +487,9 @@ public sealed partial class ClipboardPage : PageBase
         }
     }
 
-    /// <summary>从剪贴板历史删除该项，并定向从列表移除</summary>
+    /// <summary>
+    /// 从剪贴板历史删除该项，并定向从列表移除
+    /// </summary>
     private void DeleteClipboardItem(ClipboardHistoryItem hist)
     {
         try
@@ -495,7 +513,9 @@ public sealed partial class ClipboardPage : PageBase
         _ = RefreshAllAsync();
     }
 
-    /// <summary>全量刷新 + 当前卡更新，必须串行：并行会让卡片比对跑在历史重读前，小图被误判重复展示</summary>
+    /// <summary>
+    /// 全量刷新 + 当前卡更新，必须串行：并行会让卡片比对跑在历史重读前，小图被误判重复展示
+    /// </summary>
     private async Task RefreshAllAsync()
     {
         await RefreshClipboard();
@@ -567,7 +587,9 @@ public sealed partial class ClipboardPage : PageBase
         Border_CurrentClipboard.Visibility = Visibility.Collapsed;
     }
 
-    /// <summary>当前剪贴板图像是否与历史第一条图像逐像素一致（尺寸 + Bgra8 字节比较）</summary>
+    /// <summary>
+    /// 当前剪贴板图像是否与历史第一条图像逐像素一致（尺寸 + Bgra8 字节比较）
+    /// </summary>
     private async Task<bool> IsSameAsFirstHistoryItem(RandomAccessStreamReference current)
     {
         try

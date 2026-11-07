@@ -34,13 +34,19 @@ public partial class ScreenshotItem : ObservableObject
 
     public string TimeMonthDay { get; set; }
 
-    /// <summary>剪贴板历史项本体（重新复制走 Clipboard.SetHistoryItemAsContent，专用 API）</summary>
+    /// <summary>
+    /// 剪贴板历史项本体（重新复制走 Clipboard.SetHistoryItemAsContent，专用 API）
+    /// </summary>
     public ClipboardHistoryItem? HistoryItem { get; set; }
 
-    /// <summary>剪贴板历史项的图片流引用（缓存首张缩略图用；点击预览/信息复用，避免反复 GetBitmapAsync）</summary>
+    /// <summary>
+    /// 剪贴板历史项的图片流引用（缓存首张缩略图用；点击预览/信息复用，避免反复 GetBitmapAsync）
+    /// </summary>
     public RandomAccessStreamReference? ClipboardStream { get; set; }
 
-    /// <summary>剪贴板项缩略图（BitmapImage）。文件项不用（走 FilePath 优化），故为 null。</summary>
+    /// <summary>
+    /// 剪贴板项缩略图（BitmapImage）。文件项不用（走 FilePath 优化），故为 null。
+    /// </summary>
     public ImageSource? ThumbImage
     {
         get;
@@ -67,7 +73,9 @@ public partial class ScreenshotItem : ObservableObject
         TimeMonthDay = CreationTime.ToString("yyyy-MM-dd");
     }
 
-    /// <summary>剪贴板历史图片项（无文件；存历史项本体 + 缓存流引用）</summary>
+    /// <summary>
+    /// 剪贴板历史图片项（无文件；存历史项本体 + 缓存流引用）
+    /// </summary>
     public static ScreenshotItem FromClipboard(
         ClipboardHistoryItem hist,
         RandomAccessStreamReference stream

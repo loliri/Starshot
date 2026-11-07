@@ -28,10 +28,14 @@ public static class TelemetryService
 
     private const int InitialDelayMaxSeconds = 60;
 
-    /// <summary>进程内轮询间隔（与更新检查同节奏）</summary>
+    /// <summary>
+    /// 进程内轮询间隔（与更新检查同节奏）
+    /// </summary>
     private const int IntervalHours = 5;
 
-    /// <summary>发送失败后的重试间隔：5 小时对一次临时网络故障来说太长</summary>
+    /// <summary>
+    /// 发送失败后的重试间隔：5 小时对一次临时网络故障来说太长
+    /// </summary>
     private const int RetryDelayMinutes = 10;
 
     private static readonly HttpClient _http = CreateClient();
@@ -46,7 +50,9 @@ public static class TelemetryService
 
     private static int _busy;
 
-    /// <summary>UI 线程队列（Start 里赋值；Debug 构建不启动调度，保持 null 时 RunOnUiThread 直接在当前线程执行）</summary>
+    /// <summary>
+    /// UI 线程队列（Start 里赋值；Debug 构建不启动调度，保持 null 时 RunOnUiThread 直接在当前线程执行）
+    /// </summary>
     private static DispatcherQueue? _dispatcher;
 
     /// <summary>
@@ -128,7 +134,9 @@ public static class TelemetryService
         ApplyInterval(success);
     }
 
-    /// <summary>失败 → 10 分钟后重试；成功 → 恢复 5 小时节奏</summary>
+    /// <summary>
+    /// 失败 → 10 分钟后重试；成功 → 恢复 5 小时节奏
+    /// </summary>
     private static void ApplyInterval(bool success)
     {
 #if !DEBUG

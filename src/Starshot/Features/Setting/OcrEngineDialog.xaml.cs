@@ -48,7 +48,9 @@ public sealed partial class OcrEngineDialog : ContentDialog
         }
     }
 
-    /// <summary>未就绪且不在获取中（红字 + 获取按钮面板的显隐）。</summary>
+    /// <summary>
+    /// 未就绪且不在获取中（红字 + 获取按钮面板的显隐）。
+    /// </summary>
     public bool IsNotReady => !IsReady && !IsBusy;
 
     public bool IsBusy
@@ -83,7 +85,9 @@ public sealed partial class OcrEngineDialog : ContentDialog
         }
     }
 
-    /// <summary>取消按钮仅对 CDN 下载（可取消）显示；本机 File.Copy 不可取消。</summary>
+    /// <summary>
+    /// 取消按钮仅对 CDN 下载（可取消）显示；本机 File.Copy 不可取消。
+    /// </summary>
     public bool ShowCancel => IsBusy && !IsIndeterminate;
 
     public string ProgressText

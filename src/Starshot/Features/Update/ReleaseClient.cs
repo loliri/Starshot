@@ -17,7 +17,9 @@ public sealed class ReleaseInfo
 {
     public SemVersion Version { get; init; } = new(0, 0, 0);
 
-    /// <summary>原始 tag_name（如 0.3.1-Preview）。zip 里 app-{TagName}/ 目录名用它，不能用去后缀的 Version。</summary>
+    /// <summary>
+    /// 原始 tag_name（如 0.3.1-Preview）。zip 里 app-{TagName}/ 目录名用它，不能用去后缀的 Version。
+    /// </summary>
     public string TagName { get; init; } = "";
     public string ZipUrl { get; init; } = "";
     public string Notes { get; init; } = "";

@@ -43,7 +43,9 @@ public sealed partial class ScreenshotSetting : PageBase
         set => AppConfig.MuteNotificationInFullscreen = value;
     }
 
-    /// <summary>信息浮窗完成态停留时长（毫秒）</summary>
+    /// <summary>
+    /// 信息浮窗完成态停留时长（毫秒）
+    /// </summary>
     public double InfoWindowDuration
     {
         get;
@@ -60,7 +62,9 @@ public sealed partial class ScreenshotSetting : PageBase
         }
     } = AppConfig.InfoWindowDuration;
 
-    /// <summary>WDA_EXCLUDEFROMCAPTURE</summary>
+    /// <summary>
+    /// WDA_EXCLUDEFROMCAPTURE
+    /// </summary>
     public bool HideInfoWindowFromCapture
     {
         get;
@@ -212,7 +216,9 @@ public sealed partial class ScreenshotSetting : PageBase
         }
     } = AppConfig.SdrWhiteLevelOverride > 0;
 
-    /// <summary>SDR 白基准输入框值（nit）。仅自定义开启时写入配置；未覆写时默认 250。</summary>
+    /// <summary>
+    /// SDR 白基准输入框值（nit）。仅自定义开启时写入配置；未覆写时默认 250。
+    /// </summary>
     public double SdrWhiteLevelValue
     {
         get;

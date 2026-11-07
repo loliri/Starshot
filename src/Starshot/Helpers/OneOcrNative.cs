@@ -5,10 +5,14 @@ namespace Starshot.Helpers;
 
 internal static class OneOcrNative
 {
-    /// <summary>oneocr.onemodel 的解密密钥</summary>
+    /// <summary>
+    /// oneocr.onemodel 的解密密钥
+    /// </summary>
     internal const string ModelKey = "kj)TGtrK>f]b[Piow.gU+nC@s\"\"\"\"\"\"4";
 
-    /// <summary>输入图像（packed，字段布局须与 dll 期望逐字节一致）。</summary>
+    /// <summary>
+    /// 输入图像（packed，字段布局须与 dll 期望逐字节一致）。
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct RawImage
     {
@@ -20,7 +24,9 @@ internal static class OneOcrNative
         public long DataPtr; // RGBA 数据指针
     }
 
-    /// <summary>文字包围盒四角点：(x1,y1) 左上 → (x2,y2) 右上 → (x3,y3) 右下 → (x4,y4) 左下。</summary>
+    /// <summary>
+    /// 文字包围盒四角点：(x1,y1) 左上 → (x2,y2) 右上 → (x3,y3) 右下 → (x4,y4) 左下。
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     internal struct RawBBox
     {

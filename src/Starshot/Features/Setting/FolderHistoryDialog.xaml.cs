@@ -10,7 +10,9 @@ using Windows.System;
 
 namespace Starshot.Features.Setting;
 
-/// <summary>历史条目：路径 + 目录是否存在（不存在时隐藏「打开」）</summary>
+/// <summary>
+/// 历史条目：路径 + 目录是否存在（不存在时隐藏「打开」）
+/// </summary>
 public sealed class FolderHistoryItem
 {
     public string Path { get; set; } = "";

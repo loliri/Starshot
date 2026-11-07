@@ -58,7 +58,9 @@ internal static class AppIconHelper
         }
     }
 
-    /// <summary>System.Drawing.Icon → BitmapImage（PNG 内存流中转），失败返回 null。</summary>
+    /// <summary>
+    /// System.Drawing.Icon → BitmapImage（PNG 内存流中转），失败返回 null。
+    /// </summary>
     public static BitmapImage? ToBitmapImage(System.Drawing.Icon icon)
     {
         try

@@ -64,7 +64,9 @@ public sealed partial class AppBackground : UserControl
     /// </summary>
     public static string? CurrentWallpaperFileName { get; private set; }
 
-    /// <summary>广播当前壁纸文件名变更（设置页 NowPlaying 跟随）。file 传 null = 清空。</summary>
+    /// <summary>
+    /// 广播当前壁纸文件名变更（设置页 NowPlaying 跟随）。file 传 null = 清空。
+    /// </summary>
     private static void ReportNowPlaying(string? file)
     {
         CurrentWallpaperFileName = file is null ? null : Path.GetFileName(file);

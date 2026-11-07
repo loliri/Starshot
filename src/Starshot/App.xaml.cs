@@ -136,8 +136,7 @@ public partial class App : Application
     {
         return e.Kind is ExtendedActivationKind.CommandLineLaunch
             && e.Data is ICommandLineActivatedEventArgs { Operation.Arguments: string args }
-            && args
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            && args.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Contains("--hide", StringComparer.OrdinalIgnoreCase);
     }
 

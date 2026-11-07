@@ -306,7 +306,9 @@ public sealed partial class GeneralSetting : PageBase
     private bool? AutoStartRealState =>
         PriorityStart ? GetTaskRealState() : GetRegistryAutoStartRealState();
 
-    /// <summary>开机自启当前状态文案（启用 / 禁用 / 未定义）</summary>
+    /// <summary>
+    /// 开机自启当前状态文案（启用 / 禁用 / 未定义）
+    /// </summary>
     public string AutoStartStatusText =>
         AutoStartRealState switch
         {
@@ -330,7 +332,9 @@ public sealed partial class GeneralSetting : PageBase
                 App.Current.Resources["TextFillColorPrimaryBrush"],
         };
 
-    /// <summary>三个自启开关任一变动后刷新状态文案与配色</summary>
+    /// <summary>
+    /// 三个自启开关任一变动后刷新状态文案与配色
+    /// </summary>
     private void NotifyAutoStartStatusChanged()
     {
         OnPropertyChanged(nameof(AutoStartStatusText));
@@ -384,7 +388,9 @@ public sealed partial class GeneralSetting : PageBase
 
     public Visibility DevModeVisibility => DevMode ? Visibility.Visible : Visibility.Collapsed;
 
-    /// <summary>启动首页：0=截图库，1=剪贴板；下次启动生效</summary>
+    /// <summary>
+    /// 启动首页：0=截图库，1=剪贴板；下次启动生效
+    /// </summary>
     public int StartPage
     {
         get;

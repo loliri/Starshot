@@ -47,7 +47,9 @@ public static partial class AppConfig
         return 250f;
     }
 
-    /// <summary>日志文件名：Starshot_{版本}_{yyMMdd}.log。AppVersion 已设用缓存，否则读 assembly 兜底（启动早期崩溃时 AppVersion 还没赋值）。</summary>
+    /// <summary>
+    /// 日志文件名：Starshot_{版本}_{yyMMdd}.log。AppVersion 已设用缓存，否则读 assembly 兜底（启动早期崩溃时 AppVersion 还没赋值）。
+    /// </summary>
     internal static string BuildLogFileName()
     {
         string ver = !string.IsNullOrEmpty(AppVersion)

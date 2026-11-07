@@ -95,7 +95,9 @@ public sealed partial class StorageSetting : PageBase
         }
     } = AppConfig.ScreenshotFileNameTitleMaxLength;
 
-    /// <summary>按文件夹分类截图开关：输入框随开关显隐</summary>
+    /// <summary>
+    /// 按文件夹分类截图开关：输入框随开关显隐
+    /// </summary>
     public bool ScreenshotSubfolderEnabled
     {
         get;
@@ -623,7 +625,9 @@ public sealed partial class StorageSetting : PageBase
         set => SetProperty(ref field, value);
     } = "—";
 
-    /// <summary>OCR 引擎文件（exe 旁 oneocr.dll + oneocr.onemodel）大小，仅展示，不参与任何清理逻辑</summary>
+    /// <summary>
+    /// OCR 引擎文件（exe 旁 oneocr.dll + oneocr.onemodel）大小，仅展示，不参与任何清理逻辑
+    /// </summary>
     public string OcrEngineSize
     {
         get;

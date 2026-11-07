@@ -707,7 +707,9 @@ public sealed partial class RegionCaptureWindow : WindowEx
         DrawCoordStrip(ds, coordText, destX, coordY, magSize);
     }
 
-    /// <summary>坐标条：宽与放大镜对齐，文本水平居中，黑底白字圆角。</summary>
+    /// <summary>
+    /// 坐标条：宽与放大镜对齐，文本水平居中，黑底白字圆角。
+    /// </summary>
     private void DrawCoordStrip(CanvasDrawingSession ds, string text, float x, float y, float width)
     {
         try
@@ -933,7 +935,9 @@ public sealed partial class RegionCaptureWindow : WindowEx
         Completion?.TrySetResult(IsConfirmed);
     }
 
-    /// <summary>移回虚拟屏幕原位（SetCapture 后第 2 个 tick 调：新帧已合成，移回瞬间不闪旧内容）。</summary>
+    /// <summary>
+    /// 移回虚拟屏幕原位（SetCapture 后第 2 个 tick 调：新帧已合成，移回瞬间不闪旧内容）。
+    /// </summary>
     private void MoveOnscreen()
     {
         int vx = User32.GetSystemMetrics((User32.SystemMetric)76);

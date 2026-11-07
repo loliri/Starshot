@@ -106,7 +106,9 @@ public abstract partial class WindowEx : Window
         CenterInScreen(display, width, height);
     }
 
-    /// <summary>居中到指定显示器（DPI 换算见 <see cref="WindowPlacement.CenterInScreen"/>）。</summary>
+    /// <summary>
+    /// 居中到指定显示器（DPI 换算见 <see cref="WindowPlacement.CenterInScreen"/>）。
+    /// </summary>
     public virtual void CenterInScreen(
         DisplayArea displayArea,
         int? width = null,
