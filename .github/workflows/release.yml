@@ -1,5 +1,5 @@
 name: Release
-run-name: "${{ inputs.prerelease && 'Preview' || 'Stable' }}${{ inputs.version && format(' {0}', inputs.version) || '' }}${{ inputs.version && !inputs.prerelease && inputs.draft && ' draft' || '' }}${{ inputs.prerelease && inputs.version && ' auto-gen' || '' }}"
+run-name: "${{ inputs.prerelease && 'Preview' || 'Stable' }}${{ inputs.version && format(' {0}', inputs.version) || '' }}${{ inputs.version && !inputs.prerelease && inputs.draft && ' draft' || '' }}${{ inputs.prerelease && inputs.version && ' auto-gen' || '' }}${{ inputs.build_only && ' build-only' || '' }}"
 
 on:
   workflow_dispatch:
@@ -19,6 +19,11 @@ on:
         required: false
       launcher_updated:
         description: "Launcher changed"
+        type: boolean
+        required: false
+        default: false
+      build_only:
+        description: "Build only (no publish: skip CDN upload, tag and Release)"
         type: boolean
         required: false
         default: false
@@ -331,7 +336,10 @@ jobs:
           if (-not $ok) { Write-Error "kachina-builder download failed"; exit 1 }
           ./kachina-builder.exe --help | Select-Object -First 1
 
+      # 仅构建模式：本步骤全部依赖 R2 读取（成品缓存 / 源图 insqr.png），整体跳过；
+      # 之后的安装器打包不带品牌参数（-t / --icon）
       - name: Prepare branding assets
+        if: ${{ !inputs.build_only }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -389,6 +397,8 @@ jobs:
           $vl = "${{ needs.resolve-version.outputs.vl }}"
           $isPre = "${{ inputs.prerelease }}" -eq "true"
           $cdn = "https://starshot-release.cialo.site"
+          # 仅构建模式：不从 R2 / CDN 读取任何数据（无差分基线、无品牌素材）
+          $buildOnly = "${{ inputs.build_only }}" -eq "true"
           Add-Type -AssemblyName System.IO.Compression.FileSystem
 
           foreach ($arch in @("x64", "arm64")) {
@@ -441,34 +451,42 @@ jobs:
             [System.IO.File]::WriteAllText("$PWD/$configFile", ($config | ConvertTo-Json -Depth 5), [System.Text.UTF8Encoding]::new($false))
             # 品牌参数：--icon exe 图标（ico）+ -t 安装器左侧图片（仅支持 webp，本地实测 -m 是 metadata 不是图片——README 过时）；
             # 更新器与离线包必须同参数，否则自更新时界面风格跳变
-            ./kachina-builder.exe pack -c $configFile -o "Starshot.Update-$arch.exe" -t installer.webp --icon installer.ico
+            # 仅构建模式：品牌素材步骤已跳过，不带品牌参数（使用 builder 默认外观）
+            $brandArgs = @()
+            if (-not $buildOnly) { $brandArgs = @("-t", "installer.webp", "--icon", "installer.ico") }
+            ./kachina-builder.exe pack -c $configFile -o "Starshot.Update-$arch.exe" @brandArgs
             if (!(Test-Path "Starshot.Update-$arch.exe")) { Write-Error "updater build failed ($arch)"; exit 1 }
 
             # 差分基线：拉上一版同渠道原始目录 zip 解压。zip 打包时不含包裹目录，解压后即原始平铺目录。
             # preview 渠道基线不存在 = 上轮 stable 收敛时删过（preview 安装包内容已被 stable 复写）
             # → 回退拉 stable 基线，与本渠道安装包当前内容（stable）正好配套
             $diffArgs = @()
-            try {
-              Invoke-WebRequest "$cdn/kachina/asset/$baselineName" -OutFile "baseline-$arch.zip"
-              Expand-Archive "baseline-$arch.zip" -DestinationPath "baseline-$arch" -Force
-              if (Test-Path "baseline-$arch") { $diffArgs = @("-d", (Resolve-Path "baseline-$arch").Path) }
-            } catch {
-              if ($isPre) {
-                Write-Host "preview baseline missing (stable collapsed it), falling back to stable baseline"
-                try {
-                  Invoke-WebRequest "$cdn/kachina/asset/baseline-win-$arch.zip" -OutFile "baseline-$arch.zip"
-                  Expand-Archive "baseline-$arch.zip" -DestinationPath "baseline-$arch" -Force
-                  if (Test-Path "baseline-$arch") { $diffArgs = @("-d", (Resolve-Path "baseline-$arch").Path) }
-                } catch {
-                  Write-Host "No stable baseline either ($arch), building full-only package"
+            if ($buildOnly) {
+              # 仅构建模式：不读 CDN，直接走"无基线 = 纯全量"路径
+              Write-Host "build_only: skip baseline download ($arch), building full-only package"
+            } else {
+              try {
+                Invoke-WebRequest "$cdn/kachina/asset/$baselineName" -OutFile "baseline-$arch.zip"
+                Expand-Archive "baseline-$arch.zip" -DestinationPath "baseline-$arch" -Force
+                if (Test-Path "baseline-$arch") { $diffArgs = @("-d", (Resolve-Path "baseline-$arch").Path) }
+              } catch {
+                if ($isPre) {
+                  Write-Host "preview baseline missing (stable collapsed it), falling back to stable baseline"
+                  try {
+                    Invoke-WebRequest "$cdn/kachina/asset/baseline-win-$arch.zip" -OutFile "baseline-$arch.zip"
+                    Expand-Archive "baseline-$arch.zip" -DestinationPath "baseline-$arch" -Force
+                    if (Test-Path "baseline-$arch") { $diffArgs = @("-d", (Resolve-Path "baseline-$arch").Path) }
+                  } catch {
+                    Write-Host "No stable baseline either ($arch), building full-only package"
+                  }
+                } else {
+                  Write-Host "No baseline yet ($arch), building full-only package"
                 }
-              } else {
-                Write-Host "No baseline yet ($arch), building full-only package"
               }
             }
 
             ./kachina-builder.exe gen -j 8 -i $flat -m "kachina-metadata-$arch.json" -o "kachina-hashed-$arch" -r loliri/Starshot -t $vl -u "Starshot.Update-$arch.exe" @diffArgs
-            ./kachina-builder.exe pack -c $configFile -m "kachina-metadata-$arch.json" -d "kachina-hashed-$arch" -t installer.webp --icon installer.ico -o "$sourceName"
+            ./kachina-builder.exe pack -c $configFile -m "kachina-metadata-$arch.json" -d "kachina-hashed-$arch" @brandArgs -o "$sourceName"
             if (!(Test-Path "$sourceName")) { Write-Error "full package build failed ($arch)"; exit 1 }
 
             # 分发用纯在线安装器 Starshot-installer：与更新器同体（零 app 内嵌，安装时 HTTP 206 对 CDN
@@ -503,6 +521,8 @@ jobs:
 
   upload-cdn:
     needs: [resolve-version, build, portable, kachina]
+    # 仅构建模式：不上传 CDN、不改根 manifest、不清理旧版本
+    if: ${{ !inputs.build_only }}
     runs-on: ubuntu-latest
     env:
       AWS_DEFAULT_REGION: auto
@@ -748,6 +768,8 @@ jobs:
 
   release:
     needs: [resolve-version, portable, kachina]
+    # 仅构建模式：不创建 tag、不创建 GitHub Release（构建产物仍保留为本次运行的 artifact）
+    if: ${{ !inputs.build_only }}
     runs-on: windows-2025-vs2026
     steps:
       - name: Download portable artifacts
