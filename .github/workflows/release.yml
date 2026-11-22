@@ -323,18 +323,16 @@ jobs:
           merge-multiple: true
 
       - name: Setup kachina-builder
+        uses: actions/download-artifact@v8
+        with:
+          name: artifact
+          path: .
+          run-id: 44997403153
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check kachina-builder
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # CDN 网关间歇 504，带退避重试（与 HDiffPatch 下载同因）
-          $ok = $false
-          foreach ($i in 1..3) {
-            try { Invoke-WebRequest "https://github.com/loliri/kachina-installer/releases/download/1.0.0/kachina-builder.exe" -OutFile kachina-builder.exe -ErrorAction Stop; $ok = $true; break }
-            catch { Write-Host "download attempt $i failed: $($_.Exception.Message)"; if ($i -lt 3) { Start-Sleep -Seconds (10 * $i) } }
-          }
-          if (-not $ok) { Write-Error "kachina-builder download failed"; exit 1 }
-          ./kachina-builder.exe --help | Select-Object -First 1
+        run: ./kachina-builder.exe --help | Select-Object -First 1
 
       # 仅构建模式：本步骤全部依赖 R2 读取（成品缓存 / 源图 insqr.png），整体跳过；
       # 之后的安装器打包不带品牌参数（-t / --icon）
