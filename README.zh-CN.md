@@ -507,9 +507,19 @@ Windows 10 的 WGC 不支持 HDR 像素格式捕获，系统合成器只能提�
 
 </details>
 
+## 隐私政策
+
+您在使用本软件过程中获取和产生的全部数据，均仅保存在您的个人设备上。为统计产品使用情况，我们仅会使用随机生成的匿名统计标识，不会收集任何个人隐私信息。如果您不希望发送这些内容，可以通过防火墙或 hosts 文件进行拦截，或者自行从源代码构建该程序。
+
+## 代码签名策略
+
+由 [SignPath.io](https://about.signpath.io) 提供免费代码签名，证书由 [SignPath Foundation](https://signpath.org) 签发。
+
+<img alt="signpath foundation" height="72px" src="https://github.com/user-attachments/assets/052c654a-13fa-4e7a-8f1d-9f57c83f438b" />
+
 ## 致谢
 
-- [Starward](https://github.com/Scighost/Starward) — 截图核心、编解码引擎、窗口框架均源自 Starward，由 [@Scighost](https://github.com/Scighost) 开发
+- [Starward](https://github.com/Scighost/Starward) — 截图核心、编解码引擎、窗口框架参考
 - [ShareX](https://github.com/ShareX/ShareX) — 区域截图覆盖层的窗口检测和交互设计参考
 - [kachina-installer](https://github.com/YuehaiTeam/kachina-installer) — 安装版线的安装器与更新器（在线安装、文件级差分、逐文件校验）
 

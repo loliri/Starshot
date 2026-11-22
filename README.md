@@ -505,11 +505,21 @@ The info toast shown after a screenshot has `WDA_EXCLUDEFROMCAPTURE` set (hidden
 
 </details>
 
+## Privacy Policy
+
+All data acquired and generated during your use of this software is stored exclusively on your personal device. For usage analytics purposes, we only use a randomly generated anonymous statistical identifier, and we do not collect any personal or private information. If you do not want them to be sent, you can block it in your firewall or hosts file, or build the program from source.
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+<img alt="signpath foundation" height="72px" src="https://github.com/user-attachments/assets/052c654a-13fa-4e7a-8f1d-9f57c83f438b" />
+
 ## Acknowledgments
 
-- [Starward](https://github.com/Scighost/Starward) — Screenshot core, codec engine, and window framework all originate from Starward, developed by [@Scighost](https://github.com/Scighost).
-- [ShareX](https://github.com/ShareX/ShareX) — Reference for the region screenshot overlay's window detection and interaction design.
-- [kachina-installer](https://github.com/YuehaiTeam/kachina-installer) — Installer and updater powering the installer line (online install, per-file delta, per-file verification).
+- [Starward](https://github.com/Scighost/Starward) — Screenshot core, codec engine, and window framework reference
+- [ShareX](https://github.com/ShareX/ShareX) — Reference for the region screenshot overlay's window detection and interaction design
+- [kachina-installer](https://github.com/YuehaiTeam/kachina-installer) — Installer and updater powering the installer line (online install, per-file delta, per-file verification)
 
 **And all the third-party libraries**:
 
