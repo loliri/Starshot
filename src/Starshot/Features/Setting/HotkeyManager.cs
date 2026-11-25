@@ -1,7 +1,5 @@
 using System;
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
-using Starshot.Features.Screenshot;
 using Starshot.Helpers;
 using Vanara.PInvoke;
 
@@ -41,23 +39,11 @@ internal static class HotkeyManager
             User32.VK.VK_O
         );
 
-    /// <summary>
-    /// 热键宿主 HWND：专用 message-only 窗口，不随 WinUI 窗口重建而失效。
-    /// 保留参数只为兼容现有调用点；热键不再绑到传入的窗口句柄。
-    /// </summary>
-    public static nint RegisteredHwnd => HotkeyHostWindow.Handle;
+    private static nint _registeredHwnd;
 
-    public static void InitializeHotkey(nint hwnd = 0)
+    public static void InitializeHotkey(nint hwnd)
     {
-        // 首次访问触发 HotkeyHostWindow 在 UI 线程创建（本方法只从 UI 线程调用）
-        nint hostHwnd = HotkeyHostWindow.Handle;
-        AppConfig
-            .GetLogger("HotkeyManager")
-            .LogInformation(
-                "InitializeHotkey: host hwnd={Hwnd}, source window={SourceHwnd}",
-                hostHwnd,
-                hwnd
-            );
+        _registeredHwnd = hwnd;
         try
         {
             foreach (
@@ -178,8 +164,9 @@ internal static class HotkeyManager
             {
                 return Win32Error.ERROR_SUCCESS;
             }
+            // RegisterHotKey 的结果只能看返回值：成功时 GetLastError 是上一次调用残留的值，没有意义
             bool registered = User32.RegisterHotKey(
-                HotkeyHostWindow.Handle,
+                _registeredHwnd,
                 id,
                 modifiers | User32.HotKeyModifiers.MOD_NOREPEAT,
                 (uint)key
@@ -193,17 +180,6 @@ internal static class HotkeyManager
             info.Key = key;
             info.IsRegistered = registered;
             info.Error = error;
-            AppConfig
-                .GetLogger("HotkeyManager")
-                .LogInformation(
-                    "RegisterHotkey id={Id} key={Modifiers}+{Key} registered={Registered} err={Error} hwnd={Hwnd}",
-                    id,
-                    (uint)modifiers,
-                    (uint)key,
-                    registered,
-                    (uint)error,
-                    HotkeyHostWindow.Handle
-                );
             return error;
         }
         else
@@ -214,7 +190,7 @@ internal static class HotkeyManager
 
     public static Win32Error UnregisterHotkey(int id)
     {
-        bool ok = User32.UnregisterHotKey(HotkeyHostWindow.Handle, id);
+        bool ok = User32.UnregisterHotKey(_registeredHwnd, id);
         Win32Error error = ok ? Win32Error.ERROR_SUCCESS : Kernel32.GetLastError();
         if (GetHotkeyInfo(id) is HotkeyInfo info)
         {
@@ -226,7 +202,7 @@ internal static class HotkeyManager
 
     public static Win32Error DeleteHotkey(int id)
     {
-        bool ok = User32.UnregisterHotKey(HotkeyHostWindow.Handle, id);
+        bool ok = User32.UnregisterHotKey(_registeredHwnd, id);
         Win32Error error = ok ? Win32Error.ERROR_SUCCESS : Kernel32.GetLastError();
         if (GetHotkeyInfo(id) is HotkeyInfo info)
         {
@@ -237,29 +213,6 @@ internal static class HotkeyManager
             AppConfig.SetValue("0", info.ConfigSetting);
         }
         return error;
-    }
-
-    /// <summary>
-    /// 由 HotkeyHostWindow 的 WndProc 调用，把 WM_HOTKEY 分发到对应截图动作。
-    /// message-only 窗口创建在 UI 线程，本方法本就运行在 UI 线程，直接调用即可。
-    /// </summary>
-    public static void DispatchHotkey(int id)
-    {
-        switch (id)
-        {
-            case 44445:
-                ScreenCaptureService.Capture();
-                break;
-            case 44446:
-                ScreenCaptureService.CaptureRegion();
-                break;
-            case 44447:
-                ScreenCaptureService.CaptureRegionCopyOnly();
-                break;
-            case 44448:
-                ScreenCaptureService.CaptureRegionOcrCopy();
-                break;
-        }
     }
 
     public static void InitializeHotkeyInput(HotkeyInput hotkeyInput)
