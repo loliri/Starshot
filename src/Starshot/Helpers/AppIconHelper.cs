@@ -21,7 +21,14 @@ internal static class AppIconHelper
         {
             nint hInstance = Kernel32.GetModuleHandle(null).DangerousGetHandle();
             nint hIcon = User32.LoadIcon(hInstance, "#32512").DangerousGetHandle();
-            return hIcon == 0 ? null : System.Drawing.Icon.FromHandle(hIcon);
+            if (hIcon == 0)
+                return null;
+            // LoadIcon 从 exe 资源加载的是系统共享 HICON，调用方不得销毁；
+            // 而 System.Drawing.Icon.FromHandle 包装出的 Icon 在 Dispose 时会 DestroyIcon。
+            // 调用方（如 MainWindow.LoadPaneLogo 的 using var）销毁后会连带毁掉托盘图标的
+            // 同一句柄，表现为托盘图标变透明。CopyIcon 生成独占副本后再交给 Icon 包装。
+            nint copy = User32.CopyIcon(hIcon).DangerousGetHandle();
+            return copy == 0 ? null : System.Drawing.Icon.FromHandle(copy);
         }
         catch
         {

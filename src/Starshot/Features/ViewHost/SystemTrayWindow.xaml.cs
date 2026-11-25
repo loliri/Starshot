@@ -18,15 +18,6 @@ namespace Starshot.Features.ViewHost;
 [INotifyPropertyChanged]
 public sealed partial class SystemTrayWindow : WindowEx
 {
-    // 与 HotkeyManager 的 id 对齐：--hide 启动时 MainWindow 不创建，热键由本窗口接管
-    private const int HOTKEY_CAPTURE = 44445;
-
-    private const int HOTKEY_REGION = 44446;
-
-    private const int HOTKEY_REGION_COPY = 44447;
-
-    private const int HOTKEY_REGION_OCR = 44448;
-
     public SystemTrayWindow()
     {
         this.InitializeComponent();
@@ -34,9 +25,10 @@ public sealed partial class SystemTrayWindow : WindowEx
         SetTrayIcon();
         // 气泡的点击回调只能走 MessageWindow：TaskbarIcon 上的 TrayBalloonTipClicked 在 WinUI 下不生成公开事件
         trayIcon.TrayIcon.MessageWindow.MouseEventReceived += TrayIcon_MouseEventReceived;
-        // 托盘窗口生命周期 = App 生命周期；--hide 启动时它是唯一窗口，必须由它注册热键。
+        // 托盘窗口生命周期 = App 生命周期；--hide 启动时它是唯一窗口，必须由它触发热键初始化。
         // 延迟到 DispatcherQueue 下一轮：非隐藏启动时等 MainWindow Loaded 设好 InAppToast.MainWindow，
         // 这样注册失败（被占用）时 toast 才能弹出来；MainWindow 已先注册时 IsRegistered 守卫会跳过。
+        // 热键宿主是独立的 message-only 窗口，与这里传入的 WindowHandle 无关（参数为兼容保留）。
         DispatcherQueue
             .GetForCurrentThread()
             .TryEnqueue(() =>
@@ -56,35 +48,9 @@ public sealed partial class SystemTrayWindow : WindowEx
         );
     }
 
-    protected override nint WindowSubclassProc(
-        HWND hWnd,
-        uint uMsg,
-        nint wParam,
-        nint lParam,
-        nuint uIdSubclass,
-        nint dwRefData
-    )
-    {
-        if (uMsg == (uint)User32.WindowMessage.WM_HOTKEY)
-        {
-            switch ((int)wParam)
-            {
-                case HOTKEY_CAPTURE:
-                    ScreenCaptureService.Capture();
-                    break;
-                case HOTKEY_REGION:
-                    ScreenCaptureService.CaptureRegion();
-                    break;
-                case HOTKEY_REGION_COPY:
-                    ScreenCaptureService.CaptureRegionCopyOnly();
-                    break;
-                case HOTKEY_REGION_OCR:
-                    ScreenCaptureService.CaptureRegionOcrCopy();
-                    break;
-            }
-        }
-        return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
-    }
+    // 全局热键改由 HotkeyHostWindow（独立 message-only 窗口）接收，
+    // 不再依赖本窗口的 HWND——WinUI 窗口会在会话恢复/Show-Hide 时重建 HWND，
+    // 绑在其上的热键消息会投递到失效旧句柄，导致热键/托盘图标同时失效。
 
     private unsafe void InitializeWindow()
     {
