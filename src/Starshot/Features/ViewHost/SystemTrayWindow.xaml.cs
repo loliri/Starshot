@@ -21,8 +21,9 @@ public sealed partial class SystemTrayWindow : WindowEx
     public SystemTrayWindow()
     {
         this.InitializeComponent();
-        InitializeWindow();
+        // H.NotifyIcon 在 Loaded 时注册图标，先设置图标以免首次注册使用空句柄。
         SetTrayIcon();
+        InitializeWindow();
         // 气泡的点击回调只能走 MessageWindow：TaskbarIcon 上的 TrayBalloonTipClicked 在 WinUI 下不生成公开事件
         trayIcon.TrayIcon.MessageWindow.MouseEventReceived += TrayIcon_MouseEventReceived;
         // 托盘窗口生命周期 = App 生命周期；--hide 启动时它是唯一窗口，必须由它触发热键初始化。
@@ -47,10 +48,6 @@ public sealed partial class SystemTrayWindow : WindowEx
             (_, _) => this.Bindings.Update()
         );
     }
-
-    // 全局热键改由 HotkeyHostWindow（独立 message-only 窗口）接收，
-    // 不再依赖本窗口的 HWND——WinUI 窗口会在会话恢复/Show-Hide 时重建 HWND，
-    // 绑在其上的热键消息会投递到失效旧句柄，导致热键/托盘图标同时失效。
 
     private unsafe void InitializeWindow()
     {

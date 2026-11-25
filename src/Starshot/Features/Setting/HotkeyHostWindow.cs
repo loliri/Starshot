@@ -6,15 +6,8 @@ using Vanara.PInvoke;
 namespace Starshot.Features.Setting;
 
 /// <summary>
-/// 全局热键的专用宿主窗口：一个 message-only 窗口（HWND_MESSAGE）。
-///
-/// 为什么要独立窗口：WinUI 的 AppWindow HWND（含托盘窗口）在其生命周期内会被系统重建
-/// （Show/Hide、WS_EX_LAYERED 切换、睡眠/休眠恢复、会话切换都会触发）。RegisterHotKey
-/// 绑定的 HWND 一旦失效，系统仍把 WM_HOTKEY 投递到旧句柄，窗口再也收不到——表现为
-/// 热键失效、托盘图标透明、点图标无响应（消息全部投给已失效的原窗口）。
-///
-/// message-only 窗口由本类自行创建，生命周期只跟进程绑定，不随任何 WinUI 窗口重建，
-/// 且它创建在 UI 线程上，WM_HOTKEY 天然在 UI 线程分发，截图流程的线程要求也满足。
+/// 全局热键由进程常驻的 message-only 窗口（HWND_MESSAGE）接收，
+/// 并在 UI 线程分发截图命令。
 /// </summary>
 internal sealed class HotkeyHostWindow
 {
