@@ -164,20 +164,21 @@ internal static class HotkeyManager
             {
                 return Win32Error.ERROR_SUCCESS;
             }
-            User32.RegisterHotKey(
+            // RegisterHotKey 的结果只能看返回值：成功时 GetLastError 是上一次调用残留的值，没有意义
+            bool registered = User32.RegisterHotKey(
                 _registeredHwnd,
                 id,
                 modifiers | User32.HotKeyModifiers.MOD_NOREPEAT,
                 (uint)key
             );
-            Win32Error error = Kernel32.GetLastError();
-            if (error.Succeeded && (info.Modifiers != modifiers || info.Key != key))
+            Win32Error error = registered ? Win32Error.ERROR_SUCCESS : Kernel32.GetLastError();
+            if (registered && (info.Modifiers != modifiers || info.Key != key))
             {
                 AppConfig.SetValue($"{(uint)modifiers}+{(uint)key}", info.ConfigSetting);
             }
             info.Modifiers = modifiers;
             info.Key = key;
-            info.IsRegistered = error.Succeeded;
+            info.IsRegistered = registered;
             info.Error = error;
             return error;
         }
@@ -189,8 +190,8 @@ internal static class HotkeyManager
 
     public static Win32Error UnregisterHotkey(int id)
     {
-        User32.UnregisterHotKey(_registeredHwnd, id);
-        Win32Error error = Kernel32.GetLastError();
+        bool ok = User32.UnregisterHotKey(_registeredHwnd, id);
+        Win32Error error = ok ? Win32Error.ERROR_SUCCESS : Kernel32.GetLastError();
         if (GetHotkeyInfo(id) is HotkeyInfo info)
         {
             info.IsRegistered = false;
@@ -201,8 +202,8 @@ internal static class HotkeyManager
 
     public static Win32Error DeleteHotkey(int id)
     {
-        User32.UnregisterHotKey(_registeredHwnd, id);
-        Win32Error error = Kernel32.GetLastError();
+        bool ok = User32.UnregisterHotKey(_registeredHwnd, id);
+        Win32Error error = ok ? Win32Error.ERROR_SUCCESS : Kernel32.GetLastError();
         if (GetHotkeyInfo(id) is HotkeyInfo info)
         {
             info.Modifiers = 0;

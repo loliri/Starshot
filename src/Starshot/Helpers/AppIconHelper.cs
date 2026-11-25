@@ -20,8 +20,12 @@ internal static class AppIconHelper
         try
         {
             nint hInstance = Kernel32.GetModuleHandle(null).DangerousGetHandle();
-            nint hIcon = User32.LoadIcon(hInstance, "#32512").DangerousGetHandle();
-            return hIcon == 0 ? null : System.Drawing.Icon.FromHandle(hIcon);
+            using var handle = User32.LoadIcon(hInstance, "#32512");
+            if (handle.IsInvalid)
+                return null;
+            // FromHandle 借用 HICON，Clone 让返回的 Icon 自己持有图标句柄。
+            using var icon = System.Drawing.Icon.FromHandle(handle.DangerousGetHandle());
+            return (System.Drawing.Icon)icon.Clone();
         }
         catch
         {

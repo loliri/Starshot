@@ -30,8 +30,9 @@ public sealed partial class SystemTrayWindow : WindowEx
     public SystemTrayWindow()
     {
         this.InitializeComponent();
-        InitializeWindow();
+        // H.NotifyIcon 在 Loaded 时注册图标，先设置图标以免首次注册使用空句柄。
         SetTrayIcon();
+        InitializeWindow();
         // 气泡的点击回调只能走 MessageWindow：TaskbarIcon 上的 TrayBalloonTipClicked 在 WinUI 下不生成公开事件
         trayIcon.TrayIcon.MessageWindow.MouseEventReceived += TrayIcon_MouseEventReceived;
         // 托盘窗口生命周期 = App 生命周期；--hide 启动时它是唯一窗口，必须由它注册热键。
