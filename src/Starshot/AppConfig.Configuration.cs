@@ -89,7 +89,7 @@ public static partial class AppConfig
 #endif
 
         // 先用默认 LogFolder 算 CacheFolder/LogFile：欢迎页选壁纸要拷 bg/，
-        // 而 config 在欢迎页之后才初始化，读不到用户配置的 LogFolder
+        // 而设置要到欢迎页之后才初始化，读不到用户配置的 LogFolder
         string logFolder = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Starshot"
@@ -105,17 +105,21 @@ public static partial class AppConfig
             UserDataFolder = localAppData;
         }
 
-        // 首次启动（配置文件不存在）弹欢迎页；用户关掉不完成则退出
+        // 未初始化（首次启动，或旧版升级后存储里还没有标记）弹欢迎页；用户关掉不完成则退出
         WelcomeWindow? welcome = null;
-        if (!File.Exists(ConfigFilePath))
+        if (!SettingsInitialized)
         {
-            welcome = new Features.ViewHost.WelcomeWindow();
-            if (!await welcome.WaitAsync())
+            // 旧版配置文件还在：一次性迁移进当前存储，不进欢迎页
+            if (!MigrateLegacyConfigFile())
             {
-                Environment.Exit(0);
+                welcome = new Features.ViewHost.WelcomeWindow();
+                if (!await welcome.WaitAsync())
+                {
+                    Environment.Exit(0);
+                }
             }
-            // 落盘首启判定文件：全默认不改设置的用户 config.sjson 也会生成，不再重复弹欢迎页
-            EnsureConfigFile();
+            // 落初始化标记：全默认不改设置的用户也落，不再重复弹欢迎页
+            MarkSettingsInitialized();
         }
 
         // 高优先级运行开关：开了每次启动自提升（对自身 SetPriorityClass 无需权限，任何启动方式都生效）；关=系统默认

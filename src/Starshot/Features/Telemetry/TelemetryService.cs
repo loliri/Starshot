@@ -243,20 +243,13 @@ public static class TelemetryService
         if (IsValidInstallId(id))
             return id;
         string generated = Guid.NewGuid().ToString("N");
-        // SetValue 先改内存缓存再写盘，写盘异常被吞掉，回读属性看不出失败；回读文件才能确认真的落盘
+        // SetValue 先改内存缓存，写入异常被吞掉，回读属性看不出失败；回读存储才能确认真的落盘
         bool saved = RunOnUiThread(() =>
         {
             AppConfig.TelemetryInstallId = generated;
-            try
-            {
-                return File.Exists(AppConfig.ConfigFilePath)
-                    && File.ReadAllText(AppConfig.ConfigFilePath)
-                        .Contains(generated, StringComparison.Ordinal);
-            }
-            catch
-            {
-                return false;
-            }
+            return AppConfig.ReadSettingBack(nameof(AppConfig.TelemetryInstallId))
+                    is string persisted
+                && persisted == generated;
         });
         if (!saved)
         {
@@ -473,7 +466,7 @@ public static class TelemetryService
     ];
 
     /// <summary>
-    /// 配置读写一律回到 UI 线程执行，与现有设置写入同一条线程，不引入并发写 config.sjson。
+    /// 配置读写一律回到 UI 线程执行，与现有设置写入同一条线程，不引入并发写设置存储。
     /// 已在 UI 线程时直接执行；UI 线程不可用（退出中）时返回默认值。
     /// </summary>
     private static T RunOnUiThread<T>(Func<T> func)

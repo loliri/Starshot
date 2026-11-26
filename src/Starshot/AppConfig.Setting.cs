@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using Microsoft.Win32.TaskScheduler;
 
 namespace Starshot;
@@ -539,8 +539,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 用户配置的截图库文件夹列表（JSON 数组），供库浏览。
-    /// 兼容读旧版三种形态（原生数组 / 双重序列化文本 / 分号串），读到的旧值在下次保存时自动转为原生数组
+    /// 用户配置的截图库文件夹列表，供库浏览。
     /// </summary>
     public static List<string> ExtraScreenshotFolders
     {
@@ -744,95 +743,39 @@ public static partial class AppConfig
     #region Setting Method
 
 
-    // 值放宽为 object：普通键是 string，数组键（ExtraScreenshotFolders）是 List<string> 原生存取，
-    // 读文件时统一解析为 JsonElement 占位（字符串/数组都原样保留，写回时原生输出，无嵌套转义）
+    // 内存表示统一为 string / int / bool / List<string>；落盘形态由存储后端决定
+    // （Debug 写 config.sjson，Release 写注册表，见 AppConfig.Store.cs）
     private static Dictionary<string, object?>? _settingCache;
 
     /// <summary>
-    /// 当前配置文件路径（导出/备份直接拷此文件）。
+    /// 设置是否已初始化：Debug 看配置文件是否存在，Release 看注册表里有没有 ConfigVersion 标记。
+    /// 为 false 即首次启动或旧版升级：CheckEnviromentAsync 先尝试迁移旧配置，迁移不了才弹欢迎页，
+    /// 走完后 MarkSettingsInitialized。
     /// </summary>
-    public static string ConfigFilePath => Path.Combine(UserDataFolder, "config.sjson");
+    public static bool SettingsInitialized => StoreIsInitialized;
+
+    /// <summary>
+    /// 落初始化标记（全默认不改设置的用户也落，避免重复弹欢迎页）
+    /// </summary>
+    public static void MarkSettingsInitialized()
+    {
+        InitializeSettingProvider();
+        StoreMarkInitialized();
+    }
 
     private static void InitializeSettingProvider()
     {
         if (_settingCache is not null)
+        {
             return;
-        _settingCache = [];
+        }
         try
         {
-            if (File.Exists(ConfigFilePath))
-            {
-                var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
-                    File.ReadAllText(ConfigFilePath)
-                );
-                if (dict is not null)
-                {
-                    foreach (var (k, v) in dict)
-                    {
-                        _settingCache[k] = v;
-                    }
-                }
-                NormalizeLegacyListValue();
-            }
+            _settingCache = StoreLoadAll();
         }
-        catch { }
-    }
-
-    /// <summary>
-    /// 旧形态数组值一次性修复（仅 Initialize 时检测）：双重序列化文本 / 分号串 → List<string>，
-    /// 修好立即落盘——文件当场升级为原生数组，此后每次启动此函数直接 miss 退出，零成本
-    /// </summary>
-    private static void NormalizeLegacyListValue()
-    {
-        const string key = nameof(ExtraScreenshotFolders);
-        if (
-            _settingCache!.TryGetValue(key, out object? value)
-            && value is JsonElement { ValueKind: JsonValueKind.String } je
-        )
+        catch
         {
-            string? raw = je.GetString();
-            List<string>? list = null;
-            try
-            {
-                list = JsonSerializer.Deserialize<List<string>>(raw!);
-            }
-            catch (JsonException) { }
-            list ??= raw
-                ?.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .ToList();
-            if (list is not null)
-            {
-                _settingCache[key] = list;
-                SaveConfigFile();
-            }
-        }
-    }
-
-    /// <summary>
-    /// 全量写回 config.sjson。temp + Move 原子替换，防写一半崩溃损坏整档。
-    /// </summary>
-    private static void SaveConfigFile()
-    {
-        string tmp = ConfigFilePath + ".tmp";
-        File.WriteAllText(
-            tmp,
-            JsonSerializer.Serialize(
-                _settingCache,
-                new JsonSerializerOptions { WriteIndented = true }
-            )
-        );
-        File.Move(tmp, ConfigFilePath, overwrite: true);
-    }
-
-    /// <summary>
-    /// 确保配置文件存在（首启流程的判定文件；全默认不改设置的用户也生成，避免重复弹欢迎页）。
-    /// </summary>
-    public static void EnsureConfigFile()
-    {
-        InitializeSettingProvider();
-        if (!File.Exists(ConfigFilePath))
-        {
-            SaveConfigFile();
+            _settingCache = [];
         }
     }
 
@@ -841,33 +784,42 @@ public static partial class AppConfig
         [CallerMemberName] string? key = null
     )
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            return defaultValue;
-        }
-        if (string.IsNullOrWhiteSpace(UserDataFolder))
+        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(UserDataFolder))
         {
             return defaultValue;
         }
         InitializeSettingProvider();
-        if (_settingCache?.TryGetValue(key, out object? value) ?? false)
+        return _settingCache!.TryGetValue(key, out object? value)
+            ? ConvertValue(value, defaultValue)
+            : defaultValue;
+    }
+
+    /// <summary>
+    /// 内存值 → 属性类型：类型已一致直接用；字符串走类型转换器；其余（如手改注册表造成的类型错位）尽力转换。
+    /// 任何转换失败都回默认值。
+    /// </summary>
+    private static T? ConvertValue<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T
+    >(object? value, T? defaultValue)
+    {
+        if (value is null)
         {
-            string? raw = value switch
-            {
-                string s => s,
-                JsonElement { ValueKind: JsonValueKind.String } je => je.GetString(),
-                _ => null,
-            };
-            try
-            {
-                return ConvertFromString(raw, defaultValue);
-            }
-            catch
-            {
-                return defaultValue;
-            }
+            return defaultValue;
         }
-        return defaultValue;
+        if (value is T typed)
+        {
+            return typed;
+        }
+        try
+        {
+            return value is string text
+                ? ConvertFromString(text, defaultValue)
+                : (T?)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return defaultValue;
+        }
     }
 
     private static T? ConvertFromString<
@@ -888,34 +840,42 @@ public static partial class AppConfig
 
     public static void SetValue<T>(T? value, [CallerMemberName] string? key = null)
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            return;
-        }
-        if (string.IsNullOrWhiteSpace(UserDataFolder))
+        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(UserDataFolder))
         {
             return;
         }
         InitializeSettingProvider();
         try
         {
-            string? val = value?.ToString();
-            if (
-                _settingCache!.TryGetValue(key, out object? cacheValue)
-                && AsString(cacheValue) == val
-            )
+            // 只认 string / int / bool，其余类型按字符串存（与旧实现一致）
+            object? stored = value is string or int or bool ? (object?)value : value?.ToString();
+            if (_settingCache!.TryGetValue(key, out object? cached) && Equals(cached, stored))
             {
                 return;
             }
-            _settingCache[key] = val;
-            SaveConfigFile();
+            WriteSetting(key, stored);
         }
         catch { }
     }
 
     /// <summary>
-    /// 数组键专用存取：值在文件里是原生 JSON 数组（无嵌套转义）。
-    /// 旧形态（双重序列化文本 / 分号串）在 Initialize 时已归一化为 List，此主路径不做兼容判断
+    /// 写入（或 value 为 null 时删除）一个设置：先更新内存缓存，再交给存储后端
+    /// </summary>
+    private static void WriteSetting(string key, object? value)
+    {
+        if (value is null)
+        {
+            _settingCache!.Remove(key);
+        }
+        else
+        {
+            _settingCache![key] = value;
+        }
+        StoreWrite(key, value);
+    }
+
+    /// <summary>
+    /// 列表键专用存取（三个文件夹历史 / 额外截图文件夹）。
     /// </summary>
     public static List<string> GetListValue([CallerMemberName] string? key = null)
     {
@@ -924,17 +884,9 @@ public static partial class AppConfig
             return [];
         }
         InitializeSettingProvider();
-        if (_settingCache?.TryGetValue(key, out object? value) ?? false)
-        {
-            return value switch
-            {
-                List<string> list => list,
-                JsonElement { ValueKind: JsonValueKind.Array } je => je.Deserialize<List<string>>()
-                    ?? [],
-                _ => [],
-            };
-        }
-        return [];
+        return _settingCache!.TryGetValue(key, out object? value) && value is List<string> list
+            ? list
+            : [];
     }
 
     public static void SetListValue(List<string> value, [CallerMemberName] string? key = null)
@@ -946,70 +898,57 @@ public static partial class AppConfig
         InitializeSettingProvider();
         try
         {
-            _settingCache![key] = value;
-            SaveConfigFile();
+            WriteSetting(key, value);
         }
         catch { }
-    }
-
-    private static string? AsString(object? value)
-    {
-        return value switch
-        {
-            string s => s,
-            JsonElement { ValueKind: JsonValueKind.String } je => je.GetString(),
-            _ => null,
-        };
     }
 
     public static void DeleteAllSettings()
     {
         try
         {
-            _settingCache = [];
-            SaveConfigFile();
+            InitializeSettingProvider();
+            _settingCache!.Clear();
+            StoreDeleteAll();
         }
         catch { }
     }
 
     /// <summary>
-    /// 导入配置：读 JSON 文件 → 校验为合法配置字典（键非空、值为字符串或字符串数组）→ 整档替换并写盘。
-    /// 返回 false = 文件不存在/不是合法 JSON/结构不符（调用方提示无效，原配置不动）。
+    /// 绕过内存缓存，直接从存储回读一个值（内存表示，不存在为 null）。
+    /// SetValue 先改内存缓存、写入异常被吞掉，回读属性看不出失败；回读存储才能确认真的落盘。
     /// </summary>
-    public static bool ImportConfigFile(string path)
+    internal static object? ReadSettingBack(string key) => StoreReadBack(key);
+
+    /// <summary>
+    /// 导出全部设置到文件（Debug 为 JSON，Release 为 .reg）。写文件在后台线程执行，失败抛异常。
+    /// </summary>
+    public static async System.Threading.Tasks.Task ExportSettingsAsync(string path)
     {
-        try
-        {
-            if (!File.Exists(path))
-                return false;
-            var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
-                File.ReadAllText(path)
-            );
-            if (
-                dict is null
-                || dict.Any(kv => string.IsNullOrWhiteSpace(kv.Key) || !IsValidValue(kv.Value))
-            )
-                return false;
-            _settingCache = dict.ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
-            SaveConfigFile();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        InitializeSettingProvider();
+        // 先在调用线程把缓存序列化成文本（快照），写文件放后台线程
+        string content = StoreExportText();
+        await System.Threading.Tasks.Task.Run(() => StoreWriteFile(path, content));
     }
 
-    private static bool IsValidValue(JsonElement value)
+    /// <summary>
+    /// 解析设置文件（可在后台线程调用）。返回 null = 文件不存在或不是合法的设置文件，原设置不动。
+    /// 校验只保证文件能完整解析，不校验个别键合法性（未知键忽略、值按默认转换容错）。
+    /// </summary>
+    public static Dictionary<string, object?>? ReadSettingsFile(string path) => StoreReadFile(path);
+
+    /// <summary>
+    /// 整档替换当前设置并写入存储（ReadSettingsFile 成功后在 UI 线程调用，与其它设置写入同一条线程）。
+    /// </summary>
+    public static void ApplySettings(Dictionary<string, object?> settings)
     {
-        return value.ValueKind switch
+        InitializeSettingProvider();
+        _settingCache!.Clear();
+        StoreDeleteAll();
+        foreach (var (name, value) in settings)
         {
-            JsonValueKind.String => true,
-            JsonValueKind.Array => value
-                .EnumerateArray()
-                .All(e => e.ValueKind == JsonValueKind.String),
-            _ => false,
-        };
+            WriteSetting(name, value);
+        }
     }
 
     public static void ClearCache()

@@ -461,6 +461,19 @@ public sealed partial class StorageSetting : PageBase
             "backup"
         );
 
+    // 设置文件的类型随构建变：Debug 构建设置存在 JSON 配置文件里，Release 构建存在注册表里（导出为 .reg）
+    private static readonly (string Name, string Extension)[] SettingsFileFilters =
+#if DEBUG
+    [
+        ("Starshot Settings", ".sjson"),
+        ("JSON", ".json"),
+    ];
+#else
+    [
+        ("Registration Entries", ".reg"),
+    ];
+#endif
+
     private void RefreshLastBackup()
     {
         try
@@ -472,7 +485,7 @@ public sealed partial class StorageSetting : PageBase
                 return;
             }
             var last = Directory
-                .GetFiles(dir, "config_*.sjson")
+                .GetFiles(dir, "config_*" + AppConfig.SettingsBackupExtension)
                 .OrderByDescending(File.GetLastWriteTime)
                 .FirstOrDefault();
             if (last is null)
@@ -496,9 +509,9 @@ public sealed partial class StorageSetting : PageBase
             Directory.CreateDirectory(ConfigBackupFolder);
             string file = Path.Combine(
                 ConfigBackupFolder,
-                $"config_{DateTime.Now:yyyyMMdd_HHmmss}.sjson"
+                $"config_{DateTime.Now:yyyyMMdd_HHmmss}{AppConfig.SettingsBackupExtension}"
             );
-            await Task.Run(() => File.Copy(AppConfig.ConfigFilePath, file, overwrite: true));
+            await AppConfig.ExportSettingsAsync(file);
             RefreshLastBackup();
             _ = RefreshStatsAsync();
             InAppToast.MainWindow?.Success(Lang.Starshot_BackupSuccess);
@@ -511,21 +524,22 @@ public sealed partial class StorageSetting : PageBase
     }
 
     /// <summary>
-    /// 导出配置：config.sjson 副本存到用户选的位置（.json 扩展，便于识别与编辑）。
+    /// 导出设置：全部设置写成一个文件存到用户选的位置（Debug 为 .json，Release 为 .reg，双击即可导入注册表）。
     /// </summary>
     [RelayCommand]
     private async Task ExportConfig()
     {
         try
         {
+            string extension = AppConfig.SettingsExportExtension;
             string? path = await FileDialogHelper.OpenSaveFileDialogAsync(
                 this.XamlRoot,
-                $"Starshot_config_{DateTime.Now:yyyyMMdd_HHmmss}.json",
-                ("JSON", ".json")
+                $"Starshot_config_{DateTime.Now:yyyyMMdd_HHmmss}{extension}",
+                SettingsFileFilters[^1]
             );
             if (string.IsNullOrWhiteSpace(path))
                 return;
-            await Task.Run(() => File.Copy(AppConfig.ConfigFilePath, path, overwrite: true));
+            await AppConfig.ExportSettingsAsync(path);
             InAppToast.MainWindow?.Success(Lang.Starshot_ExportSuccess);
         }
         catch (Exception ex)
@@ -536,8 +550,8 @@ public sealed partial class StorageSetting : PageBase
     }
 
     /// <summary>
-    /// 导入配置：选 JSON 文件 → 校验为合法配置字典 → 覆盖 config.sjson + 清缓存重载。
-    /// 校验只保证结构与值类型，不校验个别键合法性（未知键忽略、值按默认转换容错）。
+    /// 导入设置：选设置文件 → 后台解析（解析不了则原设置不动）→ 整档替换。
+    /// 校验只保证文件能完整解析，不校验个别键合法性（未知键忽略、值按默认转换容错）。
     /// </summary>
     [RelayCommand]
     private async Task ImportConfig()
@@ -546,19 +560,18 @@ public sealed partial class StorageSetting : PageBase
         {
             string? path = await FileDialogHelper.PickSingleFileAsync(
                 this.XamlRoot,
-                new[] { ("JSON", ".json"), ("Starshot Settings", ".sjson") }
+                SettingsFileFilters
             );
             if (string.IsNullOrWhiteSpace(path))
                 return;
-            bool ok = await Task.Run(() => AppConfig.ImportConfigFile(path));
-            if (ok)
-            {
-                InAppToast.MainWindow?.Success(Lang.Starshot_ImportSuccess);
-            }
-            else
+            var settings = await Task.Run(() => AppConfig.ReadSettingsFile(path));
+            if (settings is null)
             {
                 InAppToast.MainWindow?.Warning(null, Lang.Starshot_ImportInvalid, 5000);
+                return;
             }
+            AppConfig.ApplySettings(settings);
+            InAppToast.MainWindow?.Success(Lang.Starshot_ImportSuccess);
         }
         catch (Exception ex)
         {

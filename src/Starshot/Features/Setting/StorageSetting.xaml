@@ -168,7 +168,7 @@
         </StackPanel>
       </StackPanel>
 
-      <!--  备份与恢复：备份固定写 LocalAppData；导出/导入走 JSON 文件  -->
+      <!--  备份与恢复：备份固定写 LocalAppData；导出/导入走设置文件（Debug 为 JSON，Release 为 .reg）  -->
       <StackPanel Spacing="8">
         <TextBlock FontSize="20" Text="{x:Bind lang:Lang.Starshot_BackupRestore}" />
         <Grid ColumnSpacing="0">
