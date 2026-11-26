@@ -251,7 +251,10 @@ public sealed partial class ScreenshotPage : PageBase
                         }
                         else
                         {
-                            var newGroup = new ScreenshotItemGroup(item.TimeMonthDay, [item]);
+                            var newGroup = new ScreenshotItemGroup(
+                                item.TimeMonthDay,
+                                (List<ScreenshotItem>)[item]
+                            );
                             ScreenshotGroups.Insert(0, newGroup);
                         }
                         UpdateSelectCountText();
