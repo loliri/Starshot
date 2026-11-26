@@ -223,7 +223,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 上一张 / 下一张（方向键、鼠标滚轮、底部缩略图条）
 - 拖入文件直接打开
 - **编辑面板**：HDR / SDR / Auto 显示模式切换、SDR 亮度滑块（100–500 nit）、图像与显示器信息
-- **格式互转（导出）**：HDR 显示模式 → AVIF / JPEG XL；SDR 显示模式 + HDR 源 → SDR JPEG / Ultra HDR JPEG / SDR PNG（均为所见即所得的色调映射输出）；SDR 源 → PNG / AVIF / JPEG XL
+- **格式互转**：HDR 显示模式 → AVIF / JPEG XL；SDR 显示模式 + HDR 源 → SDR JPEG / Ultra HDR JPEG / SDR PNG（均为所见即所得的色调映射输出）；SDR 源 → PNG / AVIF / JPEG XL
 - **色彩管理**：读取显示器 ICC profile 与 AdvancedColorInfo
 - **文字识别**：见下节
 
@@ -287,6 +287,7 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 - 应用通知需要向注册表注册应用身份，由于卸载器是外部维护，卸载时不会自动清理。残留项：
   - `HKCU\Software\Classes\AppUserModelId\Starshot`（含 `DisplayName`、`IconUri`、`CustomActivator`），以及小图标缓存 `%LOCALAPPDATA%\Microsoft\WindowsAppSDK\Starshot.png`
   - `HKCU\Software\Classes\CLSID\{CustomActivator 的值}\LocalServer32`
+  - `HKCU\Software\Starshot`
 
 ## 架构
 
@@ -302,7 +303,6 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
 
 根目录/（便携版）
   Starshot.exe            ← C++ 启动器（读 version.ini 决定启哪个 app 目录）
-  config.sjson            ← 配置文件（JSON，首次启动生成）
   version.ini             ← 版本号（仅 CI/CD release 有，本地构建无）
   app-{version}/          ← 主程序目录（CI/CD release 版本化，本地构建为 app/）
     Starshot.exe          ← 主程序
@@ -310,7 +310,6 @@ HDR 截图可同时保存一份 Ultra HDR JPEG（SDR 基图 + HDR gain map），
     avifenc.exe 等        ← 编解码工具（来自 Starward.Codec NuGet）
 
 %LOCALAPPDATA%/Starshot/ （共用，可自定义其中部分内容存储位置）
-  config.sjson            ← 配置文件（仅安装版有）
   log/                    ← 日志
   bg/                     ← 壁纸
   thumb/                  ← 缩略图缓存
@@ -336,7 +335,7 @@ C++ 原生程序（~400KB）。读 `version.ini` 决定启动 `app-{version}/Sta
 | 运行时         | .NET 10                                                            |
 | 图形           | Win2D 1.3（D3D11 互操作、HDR 色调映射、直方图效果）                |
 | 编解码         | Starward.Codec NuGet（libavif / libjxl / Ultra HDR P/Invoke 封装） |
-| 数据存储       | config.sjson（System.Text.Json）                                   |
+| 数据存储       | Microsoft.Win32.Registry                                           |
 | 日志           | Serilog                                                            |
 | 托盘           | H.NotifyIcon.WinUI                                                 |
 | 缩略图         | 自定义 CachedImage（ImageEx 异步加载 + 缩略图缓存）                |

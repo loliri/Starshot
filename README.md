@@ -285,6 +285,7 @@ Displays the logo + tagline on startup. Delays 700ms then fades out over 400ms. 
 - App notifications require registering the app identity in the registry. The uninstaller is maintained externally, so these entries are not removed on uninstall. Leftovers:
   - `HKCU\Software\Classes\AppUserModelId\Starshot` (containing `DisplayName`, `IconUri`, `CustomActivator`), plus the small icon cache `%LOCALAPPDATA%\Microsoft\WindowsAppSDK\Starshot.png`
   - `HKCU\Software\Classes\CLSID\{value of CustomActivator}\LocalServer32`
+  - `HKCU\Software\Starshot`
 
 ## Architecture
 
@@ -300,7 +301,6 @@ InstalledDir/ (installer)
 
 Root/ (portable)
   Starshot.exe            ← C++ launcher (reads version.ini to decide which app dir to launch)
-  config.sjson            ← Configuration file (JSON, generated on first launch)
   version.ini             ← Version number (CI/CD release only; absent in local builds)
   app-{version}/          ← Main program directory (versioned for CI/CD release, app/ for local builds)
     Starshot.exe          ← Main program
@@ -308,7 +308,6 @@ Root/ (portable)
     avifenc.exe etc.      ← Codec tools (from Starward.Codec NuGet)
 
 %LOCALAPPDATA%/Starshot/  (shared)
-  config.sjson            ← Configuration file (installer line only)
   log/                    ← Logs
   bg/                     ← Wallpapers
   thumb/                  ← Thumbnail cache
@@ -334,7 +333,7 @@ Native C++ program (~400KB). Reads `version.ini` to decide whether to launch `ap
 | Runtime        | .NET 10                                                                 |
 | Graphics       | Win2D 1.3 (D3D11 interop, HDR tone mapping, histogram effects)          |
 | Codecs         | Starward.Codec NuGet (libavif / libjxl / Ultra HDR P/Invoke wrapper)    |
-| Data Storage   | config.sjson (System.Text.Json)                                         |
+| Data Storage   | Microsoft.Win32.Registry                                                |
 | Logging        | Serilog                                                                 |
 | System Tray    | H.NotifyIcon.WinUI                                                      |
 | Thumbnails     | Custom CachedImage (ImageEx async loading + thumbnail cache)            |
