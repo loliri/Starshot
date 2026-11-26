@@ -43,6 +43,8 @@ jobs:
     outputs:
       v: ${{ steps.ver.outputs.v }}
       vl: ${{ steps.ver.outputs.vl }}
+      fv: ${{ steps.ver.outputs.fv }}
+      iv: ${{ steps.ver.outputs.iv }}
     steps:
       - name: Resolve version
         id: ver
@@ -89,8 +91,12 @@ jobs:
           }
           $v = $input
           $vl = $v.ToLowerInvariant()
+          $fv = "$(($v -split '[-+]')[0]).$env:GITHUB_RUN_NUMBER"
+          $iv = if ($isPre) { "$v+$($env:GITHUB_SHA.Substring(0, 7))" } else { $v }
           "v=$v" >> $env:GITHUB_OUTPUT
           "vl=$vl" >> $env:GITHUB_OUTPUT
+          "fv=$fv" >> $env:GITHUB_OUTPUT
+          "iv=$iv" >> $env:GITHUB_OUTPUT
 
   build:
     needs: resolve-version
@@ -114,7 +120,7 @@ jobs:
         run: msbuild src/Starshot.Launcher/Starshot.Launcher.vcxproj -p:Configuration=Release -p:Platform=${{ matrix.platform }}
 
       - name: Publish main app
-        run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=${{ matrix.platform }} -r win-${{ matrix.platform }} -p:Version=${{ needs.resolve-version.outputs.v }}
+        run: dotnet publish src/Starshot/Starshot.csproj -c Release -p:Platform=${{ matrix.platform }} -r win-${{ matrix.platform }} -p:Version=${{ needs.resolve-version.outputs.v }} -p:FileVersion=${{ needs.resolve-version.outputs.fv }} -p:InformationalVersion=${{ needs.resolve-version.outputs.iv }}
 
       - name: Remove unuse
         run: |
